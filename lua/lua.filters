@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lua\contrib\yaml\README.md" />
+    <None Include="lua\contrib\yaml\yaml.lua" />
+    <None Include="lua\src\assembly\change-engineer-tent-no-deselect.lua" />
+    <None Include="lua\src\assembly\change-free-trader-post.lua" />
+    <None Include="lua\src\assembly\change-increase-path-update-tick-rate.lua" />
+    <None Include="lua\src\assembly\change-moat-visibility.lua" />
+    <None Include="lua\src\assembly\change-responsive-gates.lua" />
+    <None Include="lua\src\assembly\change-spearmen-run.lua" />
+    <None Include="lua\src\assembly\fix-ai-demolishing-inaccessible-buildings.lua" />
+    <None Include="lua\src\assembly\fix-ai-ox-tether-spam.lua" />
+    <None Include="lua\src\assembly\fix-ai-tower-engine-replenishment.lua" />
+    <None Include="lua\src\assembly\fix-ai-wood-buying.lua" />
+    <None Include="lua\src\assembly\fix-baker-disappear-bug.lua" />
+    <None Include="lua\src\assembly\fix-fletcher-bug.lua" />
+    <None Include="lua\src\assembly\fix-ladderclimb.lua" />
+    <None Include="lua\src\binaries\debuginfoprinter.lua" />
+    <None Include="lua\src\binaries\DEBUGSCREENPRINTER.dll" />
+    <None Include="lua\src\console\forceRaiseLand.lua" />
+    <None Include="lua\src\console\gamemode.lua" />
+    <None Include="lua\src\console\inspectState.lua" />
+    <None Include="lua\src\console\pauseAfter.lua" />
+    <None Include="lua\src\menu\_example.lua" />
+    <None Include="lua\src\menu\mainmenu.lua" />
+    <None Include="lua\src\menu\skirmish.lua" />
+    <None Include="lua\src\assembly.lua" />
+    <None Include="lua\src\console.lua" />
+    <None Include="lua\src\menu.lua" />
+    <None Include="lua\api.lua" />
+    <None Include="lua\core.lua" />
+    <None Include="lua\examples.lua" />
+    <None Include="lua\structures.lua" />
+    <None Include="lua\utils.lua" />
+  </ItemGroup>
+</Project>

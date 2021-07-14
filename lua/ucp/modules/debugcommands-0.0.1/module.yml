@@ -1,0 +1,32 @@
+# The name of your module
+name: debugcommands
+# The version of your module
+version: 0.0.1   
+# The date of this version
+date: 2021      
+# The author
+author: gynt
+# Tags to categorize a module in a list
+tags: [feature, commands]
+# Or maybe better, a category (Code-modification, Resources/map, Resources/gfx, ...)
+category: [Code/feature]
+# The url
+url: https://github.com/gynt/debugcommands
+# What version this module is written in (if we change stuff in the future, versioning is handy)
+module-format: 1.0.0
+# Maybe the provided dlls do not work on something else than windows
+platform: [windows]
+# Maybe the functions don't work on another version of SHC
+game: [SHC@1.41]
+# A description of what the module does
+description: Provides several commands for the game that are useful for debugging
+# What module this module provides (usually the same as name I guess, but maybe one module contains multiple features)
+provides: [debugcommands]
+# What modules this module is incompatible with
+conflicts: []
+# What configurations from other modules this is incompatible with
+conflicts-config: []
+# What other modules this module depends on: ucp is a special module
+depends: [ucp>=2.15.0, lua_api>=1.0.0, commands>=0.0.1]
+# A module (for example a map pack (Christmas calendar)) could require certain AIC or features from other modules to be configured in a certain way
+depends-config: []

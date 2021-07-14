@@ -1,0 +1,13 @@
+LIBRARY
+EXPORTS
+_BinkClose@4 = __BinkClose@4										@15
+_BinkCopyToBuffer@28 = __BinkCopyToBuffer@28						@17
+_BinkDDSurfaceType@4 = __BinkDDSurfaceType@4						@18
+_BinkDoFrame@4 = __BinkDoFrame@4									@20
+_BinkNextFrame@4 = __BinkNextFrame@4								@33
+_BinkOpen@8 = __BinkOpen@8											@34
+_BinkOpenMiles@4 = __BinkOpenMiles@4								@36
+_BinkPause@8 = __BinkPause@8										@39
+_BinkSetSoundSystem@8 = __BinkSetSoundSystem@8						@51
+_BinkSetVolume@12 = __BinkSetVolume@12								@54
+_BinkWait@4 = __BinkWait@4											@55

@@ -1,0 +1,6 @@
+
+local writeCode = core.writeCode
+local scanForAOB = core.scanForAOB
+
+-- 0x004EC86C
+writeCode(scanForAOB("8B CB C7 05 ? ? ? ? FF FF FF FF E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 5F 5E 89 2D ? ? ? ? 89 2D ? ? ? ? 5D 5B 83 C4 64 C3") + 36, {0x15})
