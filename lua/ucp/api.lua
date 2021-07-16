@@ -50,12 +50,23 @@ hooks = require('hooks')
 ---Note: not yet declared as local because it is convenient to access in the console
 config = (function()
   local f, message = io.open(CONFIG_FILE)
-  if not f then error(message) end
+  if not f then 
+	print("Could not read ucp-config.yml. Reason: " .. message)
+	print("Treating ucp-config.yml as empty file")
+	return {modules={}}
+  end
   local data = f:read("*all")
   f:close()
   
   return yaml.eval(data)
 end)()
+
+
+---Early bail out of UCP
+if config.active == false then
+	print("UCP3 is set to inactive. To activate UCP3, change 'active' to true in your user config.")
+	return nil
+end
 
 
 ---Table to hold all the module loaders
