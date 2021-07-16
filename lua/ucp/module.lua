@@ -1,6 +1,17 @@
 
 ---@module module
 
+---@class module
+Module = {}
+
+---When a module is enabled on start up, this function is run.
+---@param userConfig table table of user configuration parameters for this module
+---@param config table table of all user configuration parameters
+function Module:enable(userConfig, config) end
+---When a module is disabled, this function is run.
+function Module:disable(userConfig, config) end
+
+
 ---This function generates a function that can be used by a module to require its own files.
 ---The base directory of the module is automatically prepended to the file path
 ---
