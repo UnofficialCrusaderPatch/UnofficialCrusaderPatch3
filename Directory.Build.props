@@ -1,0 +1,21 @@
+<Project>
+	<!-- https://github.com/Microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions -->
+	<!-- https://github.com/japj/CppWithNuGetPackageReference -->
+	<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019 -->
+  <PropertyGroup>
+	<EnableCentralPackageVersions>true</EnableCentralPackageVersions>
+    <TargetFramework>native</TargetFramework>
+	<RestoreAdditionalProjectSources>
+		<!-- for lua -->
+      https://api.nuget.org/v3/index.json; 			
+		<!-- for RPS -->
+      https://nuget.pkg.github.com/gynt/index.json; 
+    </RestoreAdditionalProjectSources>
+	<_NuGetTargetFallbackMoniker>$(_NuGetTargetFallbackMoniker);native,Version=v0.0</_NuGetTargetFallbackMoniker>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RPS" Version="1.1.0"/>
+    <PackageReference Include="lua" Version="5.4.3"/>
+  </ItemGroup>
+</Project>
