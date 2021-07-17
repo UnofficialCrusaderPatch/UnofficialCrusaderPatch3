@@ -109,7 +109,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
