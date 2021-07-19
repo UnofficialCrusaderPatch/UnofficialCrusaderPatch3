@@ -25,7 +25,7 @@ jobs:
 
     - name: Add NuGet source
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget sources add -name "gynt-packages" -Source https://nuget.pkg.github.com/gynt/index.json -StorePasswordInClearText -Username gynt -Password {{ secrets.UCP3_READ_PACKAGES }}
+      run: nuget sources add -name "gynt-packages" -Source https://nuget.pkg.github.com/gynt/index.json -StorePasswordInClearText -Username gynt -Password "{{ secrets.UCP3_READ_PACKAGES }}"
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
