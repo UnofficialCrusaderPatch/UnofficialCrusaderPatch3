@@ -23,9 +23,13 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
+    - name: Add NuGet source
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget sources add -name "gynt-packages" -Source https://nuget.pkg.github.com/gynt/index.json -StorePasswordInClearText -Username gynt -Password {{ secrets.UCP3_READ_PACKAGES }}
+
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}} -username "{{ secrets.UCP3_READ_PACKAGES }}" -password "{{ secrets.UCP3_READ_PACKAGES }}"
+      run: msbuild /t:restore /p:Configuration=${{env.BUILD_CONFIGURATION}}
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
