@@ -1,6 +1,0 @@
-[submodule "debugcommands"]
-	path = lua/ucp/modules/debugcommands-0.0.1
-	url = https://github.com/gynt/ucp3-debugcommands
-[submodule "debuginfo"]
-	path = lua/ucp/modules/debuginfo-0.0.1
-	url = https://github.com/gynt/ucp3-debuginfo
