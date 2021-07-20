@@ -30,7 +30,7 @@ jobs:
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # run: msbuild /t:restore /p:Configuration=${{env.BUILD_CONFIGURATION}}
-      run: nuget restore -Source gynt-packages
+      run: nuget restore
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
