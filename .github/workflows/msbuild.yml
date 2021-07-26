@@ -48,7 +48,7 @@ jobs:
         mkdir ucp-package\ucp
         
         # Copy the dll files, rename dll.dll to binkw32_ucp.dll
-        $dllfiles = Get-ChildItem ${{env.BUILD_CONFIGURATION}}\*.dll
+        $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
         Copy-Item $dllfiles -Destination ucp-package\ -Recurse
         Rename-Item -Path ucp-package\dll.dll -NewName "binkw32_ucp.dll"
         
@@ -78,7 +78,7 @@ jobs:
           if($hasVCXProj) {
             pushd $module.FullName
             nuget restore
-            msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}}
+            msbuild /m /p:Configuration=$env:BUILD_CONFIGURATION
             popd
           }
           
@@ -88,7 +88,7 @@ jobs:
             $moduleFiles = $node.Node.file
             foreach($moduleFile in $moduleFiles) {
               # To allow specification of $(Configuration) in "src" in module.files, we substitute it with the right value here
-              $srcFile = $moduleFile.src.Replace("`$(Configuration)", "${{ env.BUILD_CONFIGURATION }}")
+              $srcFile = $moduleFile.src.Replace("`$(Configuration)", "$env:BUILD_CONFIGURATION")
               
               # Copy the file, can include wildcards
               Copy-Item ($module.FullName + "\" + $srcFile) -Destination $moduleDir -Recurse
@@ -98,14 +98,13 @@ jobs:
             Copy-Item ($module.FullName + "\module.yml") -Destination $moduleDir -Recurse
           }
         }
-    - name: Generate UCP3 artifact name
+    - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
       run: |
-        $sha = "${{ env.GITHUB_SHA }}"
-        $shashort = $sha.SubString(0, 10)
-        echo "SHA=$shashort" >> $GITHUB_ENV
+        $name = "$env:GITHUB_SHA".SubString(0, 10)
+        echo "NAME=$name" >> $GITHUB_ENV
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
       with:
-        name: UCP3-snapshot-${{ env.SHA }}
+        name: UCP3-snapshot-${{ env.NAME }}
         path: ucp-package/*
