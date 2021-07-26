@@ -13,7 +13,7 @@ jobs:
       matrix:
         build_configuration: [Debug, Release]
     env:
-        BUILD_CONFIGURATION: "{{ matrix.build_configuration }}"
+        BUILD_CONFIGURATION: ${{ matrix.build_configuration }}
     steps:
     - uses: actions/checkout@v2
       with:
