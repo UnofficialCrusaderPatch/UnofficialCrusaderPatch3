@@ -6,15 +6,14 @@ env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: .
 
-  # Configuration type to build.
-  # You can convert this to a build matrix if you need coverage of multiple configuration types.
-  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: Release
-
 jobs:
   build:
     runs-on: windows-latest
-
+    strategy:
+      matrix:
+        build_configuration: [Debug, Release]
+    env:
+        BUILD_CONFIGURATION: "{{ matrix.build_configuration }}"
     steps:
     - uses: actions/checkout@v2
       with:
@@ -31,7 +30,6 @@ jobs:
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # run: msbuild /t:restore /p:Configuration=${{env.BUILD_CONFIGURATION}}
       run: nuget restore
 
     - name: Build UCP3
@@ -44,20 +42,20 @@ jobs:
       shell: pwsh
       run: |
         # Create the right folders
-        mkdir ucp-package
-        mkdir ucp-package\ucp
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package"
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"
         
         # Copy the dll files, rename dll.dll to binkw32_ucp.dll
         $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
         Copy-Item $dllfiles -Destination ucp-package\ -Recurse
-        Rename-Item -Path ucp-package\dll.dll -NewName "binkw32_ucp.dll"
+        Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\dll.dll" -NewName "binkw32_ucp.dll"
         
         # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
-        Copy-Item installer\rename-dlls.bat ucp-package\install.bat
+        Copy-Item installer\rename-dlls.bat "$env:BUILD_CONFIGURATION\ucp-package\install.bat"
         
         # Copy all content/ucp files ucp-package/ucp, except the modules folder
         $mainfiles = Get-ChildItem content\ucp | Where({$_.Name -ne "modules"})  | foreach{$_.FullName}
-        Copy-Item $mainfiles -Destination ucp-package\ucp -Recurse
+        Copy-Item $mainfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\ucp" -Recurse
         
         ### Build each module if required, and then package the module by copying the right files
         # List of modules
@@ -65,8 +63,8 @@ jobs:
         foreach($module in $modules) {
           
           # Create the module directory in the ucp-package\ucp\modules folder
-          New-Item -Path "ucp-package\ucp\modules\" -Name $module.Name -ItemType "directory"
-          $moduleDir = "ucp-package\ucp\modules\" + $module.Name + "\"
+          New-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\ucp\modules\" -Name $module.Name -ItemType "directory"
+          $moduleDir = "$env:BUILD_CONFIGURATION\ucp-package\ucp\modules\" + $module.Name + "\"
           
           # If the module uses C++ we have to build it first
           $hasVCXProj = Test-Path -Path ($module.FullName + "\*.vcxproj")
@@ -102,10 +100,10 @@ jobs:
       shell: pwsh
       run: |
         $name = "$env:GITHUB_SHA".SubString(0, 10)
-        echo $name
-        echo "NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        $type = "$env:BUILD_CONFIGURATION".SubString(0, 1)
+        echo "NAME=UCP3-snapshot-$type-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
       with:
-        name: UCP3-snapshot-${{ env.NAME }}
+        name: ${{ env.NAME }}
         path: ucp-package/*
