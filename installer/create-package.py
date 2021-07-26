@@ -3,15 +3,15 @@ import pathlib
 import subprocess
 
 subprocess.run(["msbuild",
-				  "-p:Configuration=Release",
-				  "UCP3.sln"]).check_returncode()
+                "-p:Configuration=Release",
+                "UCP3.sln"]).check_returncode()
 
 if pathlib.Path("ucp-package").is_dir():
 	shutil.rmtree(pathlib.Path("ucp-package"))
 	
 pathlib.Path("ucp-package").mkdir()
 	
-src = pathlib.Path("lua") / "ucp"
+src = pathlib.Path("content") / "ucp"
 dst = pathlib.Path("ucp-package") / "ucp"
 dst.mkdir()
 
@@ -49,9 +49,4 @@ for m in src_modules.glob("*"):
 		shutil.copytree(m / "ucp-module", dst / m.relative_to(src))
 	else:
 		shutil.copytree(m, dst / m.relative_to(src))
-		
-#all_files_except_modules_directory = [f for f in src.rglob("*") if not f.parent.startswith(str(src / "modules"))]
-
-# except the files in modules if there is a ucp-module directory ucp/modules/example-module-0.0.1/ucp-module
-# if so, only copy the contents of ucp-module
 
