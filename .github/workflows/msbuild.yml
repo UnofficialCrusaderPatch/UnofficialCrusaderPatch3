@@ -106,4 +106,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.NAME }}
-        path: ucp-package/*
+        path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
