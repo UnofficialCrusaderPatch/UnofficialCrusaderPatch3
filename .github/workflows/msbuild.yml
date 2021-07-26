@@ -47,7 +47,7 @@ jobs:
         
         # Copy the dll files, rename dll.dll to binkw32_ucp.dll
         $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
-        Copy-Item $dllfiles -Destination ucp-package\ -Recurse
+        Copy-Item $dllfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
         Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\dll.dll" -NewName "binkw32_ucp.dll"
         
         # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
