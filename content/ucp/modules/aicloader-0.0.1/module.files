@@ -1,0 +1,6 @@
+<module>
+  <files>
+    <file src="*.lua" target="." />
+    <file src="resources\vanilla.json" target="vanilla.json" />
+  </files>
+</module>
