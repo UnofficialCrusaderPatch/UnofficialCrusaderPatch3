@@ -174,6 +174,12 @@ function  ModuleLoader:load()
     
     local data = handle:read("*all")
     handle:close()
+    
+    if data:len() == 0 then
+      -- print("WARNING: the module.yml file of " .. self.moduleName .. " is empty")
+      return nil
+    end
+    
     local y = yaml.eval(data)
     
     if not y.depends then return nil end
