@@ -92,8 +92,8 @@ jobs:
               Copy-Item ($module.FullName + "\" + $srcFile) -Destination $moduleDir -Recurse
             }
           } else {
-            Copy-Item ($module.FullName + "\*.lua") -Destination $moduleDir -Recurse
-            Copy-Item ($module.FullName + "\module.yml") -Destination $moduleDir -Recurse
+            # TODO: avoid this wildcard. Include .lua .yml and ... only?
+            Copy-Item ($module.FullName + "\*") -Destination $moduleDir -Recurse
           }
         }
     - name: Generate a snapshot UCP3 artifact name
