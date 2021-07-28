@@ -5,6 +5,8 @@
 #include "CompiledLua.h"
 #endif
 
+std::string UCP_DIR = "ucp/";
+
 void Core::initialize() {
 
 	initializeConsole();
@@ -33,7 +35,20 @@ void Core::initialize() {
 	CompiledModules::registerProxyFunctions();
 	CompiledModules::runCompiledModule("ucp/api.lua");
 #else
-	RPS_runBootstrapFile("ucp/api.lua");
+
+	/**
+	 * Allow UCP_DIR configuration via the command line.
+	 *
+	 */
+	std::string ENV_UCP_DIR = std::getenv("UCP_DIR");
+	if (!ENV_UCP_DIR.empty()) {
+		UCP_DIR = ENV_UCP_DIR;
+		if (UCP_DIR.back() != '\\' && UCP_DIR.back() != '/') {
+			UCP_DIR = UCP_DIR + "/";
+		}
+	}
+
+	RPS_runBootstrapFile(UCP_DIR + "api.lua");
 #endif
 	
 	consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);

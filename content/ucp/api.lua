@@ -14,8 +14,11 @@ BASEDIR = "ucp"
 UCP_DIR = os.getenv("UCP_DIR")
 
 if UCP_DIR then
-  print("Setting UCP_DIR to " .. UCP_DIR)
-  BASEDIR = UCP_DIR .. "/" .. "ucp"
+  if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
+	UCP_DIR = UCP_DIR + "\\"
+  end
+  print("Setting BASEDIR to " .. UCP_DIR)
+  BASEDIR = UCP_DIR
 end
 
 
