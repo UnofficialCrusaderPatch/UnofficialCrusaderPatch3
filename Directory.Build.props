@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RPS" Version="1.1.0"/>
+    <PackageReference Include="RPS" Version="1.1.1"/>
     <PackageReference Include="lua" Version="5.4.3"/>
   </ItemGroup>
 </Project>
