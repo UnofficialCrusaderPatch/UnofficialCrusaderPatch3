@@ -16,7 +16,7 @@ local writeCode = core.writeCode
 local allocate = core.allocate
 local getCurrentGameMode = data.common.getCurrentGameMode
 local copyMemory = core.copyMemory
-local createLuaFunctionWrapper = core.createLuaFunctionWrapper
+local createLuaFunctionWrapper = utils.createLuaFunctionWrapper
 local SOUND_EFFECT = data.common.SOUND_EFFECT
 
 local menu = {}
@@ -111,8 +111,8 @@ end
 
 menu.onInit = function ()
 --math.randomseed(os.time())
-	exposeCode("menuSkirmishChoiceClick", SCANS["MENU_SKIRMISH_CHOICE_CLICK_CALLBACK"], 1, 0, menu)
-	exposeCode("reorderRoundTable", refreshRoundTableFn, 1, 1, menu)
+	menu.menuSkirmishChoiceClick = exposeCode(SCANS["MENU_SKIRMISH_CHOICE_CLICK_CALLBACK"], 1, 0)
+	menu.reorderRoundTable = exposeCode( refreshRoundTableFn, 1, 1)
 	-- Find some nasty code
 	detourCode(menu.forcePlayerIntoSlotInSkirmish, scanForAOB("83 3D ? ? ? ? 63 75 ? 57 EB ? 8B 0D ? ? ? ? 51"), 7)
 	writeCode(scanForAOB("83 FE FF 74 ? 3B F3 74 ? 83 C0 01"), {0x39, 0xD8, 0x90})
@@ -126,7 +126,7 @@ menu.onInit = function ()
 	writeInteger(skirmishMenuUIElementArrayPointer+8, 0x00000220) -- y
 	writeInteger(skirmishMenuUIElementArrayPointer+12, 0x000000B4) -- width (auto calculated)
 	writeInteger(skirmishMenuUIElementArrayPointer+16, 0x000000B4) -- height (auto calculated)
-	writeInteger(skirmishMenuUIElementArrayPointer+20, createLuaFunctionWrapper("randomSkirmishMap", menu)) -- click function reference
+	writeInteger(skirmishMenuUIElementArrayPointer+20, createLuaFunctionWrapper(menu.randomSkirmishMap)) -- click function reference
 	writeInteger(skirmishMenuUIElementArrayPointer+24, 0x00000002) -- fn parameter
 	writeInteger(skirmishMenuUIElementArrayPointer+28, 0x0042AE90) -- menu item render function
 	writeInteger(skirmishMenuUIElementArrayPointer+32, 0x40000202) -- (2bytes) unknown 1 -- (2bytes) button graphic
@@ -148,7 +148,7 @@ menu.onInit = function ()
 	writeInteger(skirmishMenuUIElementArrayPointer+88, 0x000001A0) -- y
 	writeInteger(skirmishMenuUIElementArrayPointer+92, 0x000000B4) -- width (auto calculated)
 	writeInteger(skirmishMenuUIElementArrayPointer+96, 0x000000B4) -- height (auto calculated)
-	writeInteger(skirmishMenuUIElementArrayPointer+100, createLuaFunctionWrapper("playerSlotChange", menu)) -- click function reference
+	writeInteger(skirmishMenuUIElementArrayPointer+100, createLuaFunctionWrapper(menu.randomSkirmishMap)) -- click function reference
 	writeInteger(skirmishMenuUIElementArrayPointer+104, 0x00000002) -- fn parameter
 	writeInteger(skirmishMenuUIElementArrayPointer+108, 0x0042AE90) -- menu item render function
 	writeInteger(skirmishMenuUIElementArrayPointer+112, 0x4000023F) -- (2bytes) unknown 1 -- (2bytes) button graphic
@@ -182,7 +182,7 @@ menu.onInit = function ()
 	writeInteger(roundTableUIElementArrayPointer+8, 0x00000140) -- y
 	writeInteger(roundTableUIElementArrayPointer+12, 0x000000B4) -- width (auto calculated)
 	writeInteger(roundTableUIElementArrayPointer+16, 0x000000B4) -- height (auto calculated)
-	writeInteger(roundTableUIElementArrayPointer+20, createLuaFunctionWrapper("randomTeams", menu)) -- click function reference
+	writeInteger(roundTableUIElementArrayPointer+20, createLuaFunctionWrapper(menu.randomTeams)) -- click function reference
 	writeInteger(roundTableUIElementArrayPointer+24, 0x00000002) -- fn parameter
 	writeInteger(roundTableUIElementArrayPointer+28, 0x0042AE90) -- menu item render function
 	writeInteger(roundTableUIElementArrayPointer+32, 0x40000202) -- (2bytes) unknown 1 -- (2bytes) button graphic

@@ -18,9 +18,15 @@ exports.switchToMenu_hook = function (this, menuID, param_2)
   
   if menus[menuID] then
     if not menus[menuID].initialized then
-      menus[menuID].onInit()
+      local status, result = pcall(menus[menuID].onInit)
+      if status ~= true then
+        error(result)
+      end
     else
-      menus[menuID].onShow()
+      local status, result = pcall(menus[menuID].onShow)
+      if status ~= true then
+        error(result)
+      end
     end
   end
   

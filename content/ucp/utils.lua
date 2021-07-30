@@ -4,17 +4,13 @@ local namespace = {}
 core = require('core')
 
 -- Creates a new memory allocation and returns its address.
-function namespace.createLuaFunctionWrapper(callback, env)
+function namespace.createLuaFunctionWrapper(callback)
 	newMemoryAllocation = core.allocate(6)
 	core.writeInteger(newMemoryAllocation, 0x90909090) -- we will yoink this
 	core.writeByte(newMemoryAllocation+4, 0x90)
 	core.writeByte(newMemoryAllocation+5, 0xC3)
   
-  if env then
-    core.detourCode(callback, newMemoryAllocation, 5, env)
-  else
     core.detourCode(callback, newMemoryAllocation, 5)
-  end
 	
 	return newMemoryAllocation
 end
