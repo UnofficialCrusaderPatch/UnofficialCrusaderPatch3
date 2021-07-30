@@ -15,7 +15,7 @@ Development for the new UCP DLL Injection approach.
 10. All files will be prepared in Release\ucp-package. The files from this folder can be directly copied to the game directory.
 
 ## Running the game
-Copying the files to the game directory will work.
+Copying the files to the game directory will work. Run `install.bat` to backup the game's binkw32.dll and overwrite `binkw32.dll` with `binkw32_ucp.dll`.
 
 ### More customized method
 Create a file in your game folder called `launcher.bat` with the following contents:
