@@ -26,8 +26,10 @@ SET UCP_CONFIG=ucp-config.yml
 "Stronghold Crusader.exe"
 exit
 ```
-You can customize UCP_DIR to point to your Release\ucp-package folder.
+You can customize UCP_DIR to point to your git version tracked `content\ucp` folder.
 To start the game with these preferences, run launcher.bat (you can setup dxwnd to use launcher.bat too).
 
 ## Recommended tools
 IntelliJ IDEA (any will do) with the EmmyLUA plugin.
+Create a new project (any interpreter will do, e.g. PyCharm) in any directory on your pc.
+Add `content\ucp` as a content root.
