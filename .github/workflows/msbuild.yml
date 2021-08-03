@@ -57,6 +57,9 @@ jobs:
         $mainfiles = Get-ChildItem content\ucp | Where({$_.Name -ne "modules"})  | foreach{$_.FullName}
         Copy-Item $mainfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\ucp" -Recurse
         
+        # Copy the legacy ucp.cfg
+        Copy-Item installer\ucp.cfg "$env:BUILD_CONFIGURATION\ucp-package\ucp.cfg"
+        
         ### Build each module if required, and then package the module by copying the right files
         # List of modules
         $modules = Get-ChildItem -Directory content\ucp\modules
