@@ -106,6 +106,31 @@ jobs:
         Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
         Import-Module powershell-yaml
         
+        # Function to convert a options.yml definition to a simplified ucp-config.yml style format
+        function Convert-ConfigFile {
+            param (
+                [hashtable]$Table
+            )
+            if($Table.ContainsKey("default")) {
+                # We reached a terminal node
+                return $Table.default
+            } else 
+            {
+                # We did not reach a terminal node, continue looking for terminals, collect them
+                $nht = [ordered]@{}
+                foreach($key in $Table.keys) {
+                    if($Table[$key] -is [System.Collections.IDictionary]) {
+                        # This might be a good terminal node candidate.
+                        $nht[$key] = Convert-ConfigFile -Table $Table[$key]
+                    } else 
+                    {
+                        $nht[$key] = $Table[$key]
+                    }
+                }
+                return $nht
+            }
+        }
+        
         $defaults = [ordered]@{"modules"=[ordered]@{}}
         
         $modules = Get-ChildItem -Directory content\ucp\modules
@@ -126,10 +151,7 @@ jobs:
                 
                 $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
                 $y = ConvertFrom-Yaml $f
-                foreach($key in $y.keys) {
-                    $defaults.modules[$name].options[$key] = $y[$key].default
-                }
-                
+                $defaults.modules[$name].options = Convert-ConfigFile -Table $y                
             }
         }
         

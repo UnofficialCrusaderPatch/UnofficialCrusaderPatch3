@@ -7,3 +7,12 @@ change_healer:
 change_ai_buywood:
   default: true
   type: boolean
+change_fire_cooldown:
+  active:
+    default: false
+    type: boolean
+  value:
+    default: 2000
+    type: range
+    start: 0
+    end: 32767
