@@ -67,7 +67,7 @@ end
 ---@private
 local function modulePrintFunction(moduleName)
   return function(...)
-    print(moduleName .. ": ", ...)
+    print("[" .. moduleName .. "]: ", ...)
   end
 end
 
@@ -108,23 +108,23 @@ local ModuleLoader = {}
 ---@param moduleVersion string the version of the module in 0.0.0 format
 ---@param moduleOptions table a table of moduleOptions
 ---@return ModuleLoader
-  function ModuleLoader:new(moduleName, moduleVersion, moduleOptions)
-    local o = setmetatable({
-      moduleName = moduleName,
-      moduleVersion = moduleVersion,
-      modulePath = BASEDIR .. "/modules/" .. moduleName .. "-" .. moduleVersion,
-      moduleOptions = moduleOptions,
-    }, self)
-    -- TODO _G is evil, restrict functions that are given to a module
-    o.env = createModuleEnvironment(o.moduleName, o.modulePath, true, _G)
-    self.__index = self
-    return o
-  end
+function ModuleLoader:new(moduleName, moduleVersion, moduleOptions)
+  local o = setmetatable({
+    moduleName = moduleName,
+    moduleVersion = moduleVersion,
+    modulePath = BASEDIR .. "/modules/" .. moduleName .. "-" .. moduleVersion,
+    moduleOptions = moduleOptions,
+  }, self)
+  -- TODO _G is evil, restrict functions that are given to a module
+  o.env = createModuleEnvironment(o.moduleName, o.modulePath, true, _G)
+  self.__index = self
+  return o
+end
 
 ---Load the init.lua file for this module.
 ---
 ---@return table the module API, as defined by the `init.lua` file of this module.
-function  ModuleLoader:load()
+function ModuleLoader:load()
     
     local init_file_path = self.modulePath .. "/init.lua"    
     

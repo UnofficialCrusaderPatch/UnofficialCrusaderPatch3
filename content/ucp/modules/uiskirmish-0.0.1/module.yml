@@ -1,1 +1,3 @@
+name: uiskirmish
+version: 0.0.1
 depends: [ui>=0.0.1]

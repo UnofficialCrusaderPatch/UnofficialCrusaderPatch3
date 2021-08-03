@@ -96,6 +96,42 @@ jobs:
             Copy-Item ($module.FullName + "\*") -Destination $moduleDir -Recurse
           }
         }
+    - name: Generate a default config
+      shell: pwsh
+      run: |
+        Install-Module powershell-yaml -Scope CurrentUser
+        Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+        Import-Module powershell-yaml
+        
+        $defaults = [ordered]@{"modules"=[ordered]@{}}
+        
+        $modules = Get-ChildItem -Directory content\ucp\modules
+        
+        foreach($module in $modules) {
+            $i = Get-Content -Path ($module.FullName + "\module.yml") -Raw
+            $iy = ConvertFrom-Yaml $i
+            
+            $name = $iy.name
+            $version = $iy.version
+            
+            $defaults.modules[$name] = [ordered]@{}
+            $defaults.modules[$name].active = $true
+            $defaults.modules[$name].version = $version
+            
+            if(Test-Path -Path ($module.FullName + "\options.yml")) {
+                $defaults.modules[$name].options = [ordered]@{}
+                
+                $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
+                $y = ConvertFrom-Yaml $f
+                foreach($key in $y.keys) {
+                    $defaults.modules[$name].options[$key] = $y[$key].default
+                }
+                
+            }
+        }
+        
+        $o = ConvertTo-Yaml $defaults
+        Set-Content -Path "$env:BUILD_CONFIGURATION\ucp-package\ucp-config-defaults.yml" -Value $o
     - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
       run: |

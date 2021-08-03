@@ -1,3 +1,4 @@
 # The name of your module
 name: aicloader
+version: 0.0.1
 depends: [commands>=0.0.1]

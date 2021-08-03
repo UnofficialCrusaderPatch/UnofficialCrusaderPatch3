@@ -1,0 +1,9 @@
+change_moat_visibility:
+  default: true
+  type: boolean
+change_healer:
+  default: false
+  type: boolean
+change_ai_buywood:
+  default: true
+  type: boolean

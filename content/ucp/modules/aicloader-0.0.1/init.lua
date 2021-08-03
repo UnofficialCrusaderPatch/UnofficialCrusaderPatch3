@@ -68,21 +68,18 @@ end
 -- You can consider this a forward declaration
 local namespace = {}
 
-local registerCommand = modules.commands.registerCommand
-local displayChatText = modules.commands.displayChatText
-
 -- functions you want to expose to the outside world
 namespace = {
     enable = function(self)
-        registerCommand("setAICValue", self.onCommandSetAICValue)
-        registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
+        modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
+        modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
     end,
     disable = function(self)
     end,
     onCommandSetAICValue = function(command)
         local aiType, fieldName, value = command:match("^/setAICValue ([A-Za-z0-9_]+) ([A-Za-z0-9_]+) ([A-Za-z0-9_]+)$")
         if aiType == nil or fieldName == nil or value == nil then
-            displayChatText(
+            modules.commands.displayChatText(
                 "invalid command: " .. command .. " usage: " .. 
                 "/setAICValue [aiType: 1-16 or AI character type] [field name] [value]"
             )
@@ -93,7 +90,7 @@ namespace = {
     onCommandloadAICsFromFile = function(command)
         local path = command:match("^/loadAICsFromFile ([A-Za-z0-9_ /.:-]+)$")
         if path == nil then
-            displayChatText(
+            modules.commands.displayChatText(
                 "invalid command: " .. command .. " usage: " .. 
                 "/loadAICsFromFile [path]"
             )

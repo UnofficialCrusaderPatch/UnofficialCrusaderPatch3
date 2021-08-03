@@ -74,4 +74,24 @@ function table.dump(o)
    end
 end
 
+---Overwrite all key-value pairs that are in o2 and in o with values from o2. Recurse if type table
+function table.update(o, o2)
+    local t = {}
+
+    for k, v in pairs(o) do
+        local v2 = o2[k]
+        if o2[k] ~= nil then
+            if type(v) == "table" or type(v2) == "table" then
+                t[k] = table.update(v, v2)
+            else
+                t[k] = v2
+            end
+        else
+            t[k] = v
+        end
+    end
+
+    return t
+end
+
 return namespace
