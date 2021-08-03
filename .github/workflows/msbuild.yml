@@ -99,7 +99,7 @@ jobs:
     - name: Generate a default config
       shell: pwsh
       run: |
-        Install-Module powershell-yaml -Scope CurrentUser
+        Install-Module powershell-yaml -Scope CurrentUser -Force
         Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
         Import-Module powershell-yaml
         
