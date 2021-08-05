@@ -27,4 +27,7 @@ function namespace.playSFXAtLocation(x, y, soundID)
     namespace.playSFXAtLocation_internal(namespace.SCANS["SFX_ADDRESS_ARRAY"], x, y, soundID)
 end
 
+namespace.enable = function(self, config)  end
+namespace.disable = function(self, config)  end
+
 return namespace

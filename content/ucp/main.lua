@@ -107,7 +107,7 @@ end
 ---Modules can depend on each other, so any dependencies should be loaded first.
 ---TODO: implement a check for module version conflicts.
 
-local loadOrder = {}
+local moduleLoadOrder = {}
 
 local modDependencies = {}
 for m, modLoader in pairs(modLoaders) do
@@ -115,23 +115,24 @@ for m, modLoader in pairs(modLoaders) do
     local deps = modLoader:dependencies()
     if deps then
         for k, dep in pairs(deps) do
-            table.insert(modDependencies[m], dep.module)
+            table.insert(modDependencies[m], dep.name)
         end
     end
 end
 
 for k, mods in pairs(extensions.DependencySolver:new(modDependencies):solve()) do
     for l, m in pairs(mods) do
-        table.insert(loadOrder, m)
+        table.insert(moduleLoadOrder, m)
     end
 end
 
 --- Update the default config with values from the user config
 local final_config = table.update(default_config, config)
+final_config.plugins = final_config.plugins or {}
 
 ---Load modules
 ---Iterate over all entries in the config => modules entry of the ucp-config file
-for k, m in pairs(loadOrder) do
+for k, m in pairs(moduleLoadOrder) do
     local c = final_config.modules[m]
     if c.active then
         --- load the init.lua file of the module
@@ -142,16 +143,89 @@ for k, m in pairs(loadOrder) do
 end
 
 ---Enable modules in the right order
-for k, m in pairs(loadOrder) do
+for k, m in pairs(moduleLoadOrder) do
     -- call the enable() function of the module
-    if modLoaders[m] == nil then
-        print("[api]: WARNING: Some modules are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
+    if modLoaders[m] == nil or modLoaders[m].handle == nil then
+        -- print("[api]: WARNING: Some modules are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
     else
         if m ~= "lua_api" then
             print("[api]: enabling module: " .. m)
-            modLoaders[m]:enableModule(final_config.modules[m])
+            modLoaders[m]:enableModule(final_config.modules[m].options)
         end
     end
 end
 
 
+---Dynamic plugin discovery
+pluginFolders = table.pack(ucp.internal.listDirectories(BASEDIR .. "/plugins"))
+
+---@type table<string, PluginLoader>
+pluginLoaders = {}
+plugins = {}
+
+--- Create a pluginloader for all plugins we can find
+for k, pluginFolder in ipairs(pluginFolders) do
+    local pluginVersion = pluginFolder:match("(-[0-9\\.]+)$"):sub(2)
+    local pluginName = pluginFolder:sub(1, string.len(pluginFolder)-(string.len(pluginVersion)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
+    print("[api]: Creating plugin loader for plugin: " .. pluginName .. " version: " .. pluginVersion)
+    pluginLoaders[pluginName] = extensions.PluginLoader:create(pluginName, pluginVersion)
+    pluginLoaders[pluginName]:verifyVersion()
+end
+
+local ignorantPluginLoadOrder = {}
+local pluginDependencies = {}
+
+for m, pluginLoader in pairs(pluginLoaders) do
+    pluginDependencies[m] = {}
+    local deps = pluginLoader:dependencies()
+    if deps then
+        for k, dep in pairs(deps) do
+            table.insert(pluginDependencies[m], dep.name)
+        end
+    end
+end
+
+for k, mods in pairs(extensions.DependencySolver:new(pluginDependencies):solve()) do
+    for l, m in pairs(mods) do
+        table.insert(ignorantPluginLoadOrder, m)
+    end
+end
+
+---Remove the modules we have loaded from the list
+local pluginLoadOrder = {}
+for k, pluginName in pairs(ignorantPluginLoadOrder) do
+    if modLoaders[pluginName] == nil then
+        ---It is a plugin, schedule it to be loaded
+        table.insert(pluginLoadOrder, pluginName)
+    else
+        if modLoaders[pluginName].handle == nil then
+            print("[api]: module '" .. pluginName .. "' is required for a plugin but it is not active.")
+        end
+    end
+end
+
+
+---Load plugins
+---Iterate over all entries in the config => plugins entry of the ucp-config file
+for k, m in pairs(pluginLoadOrder) do
+    local c = final_config.plugins[m]
+    if c and c.active then
+        --- load the init.lua file of the plugin
+        print("[api]: loading plugin: " .. m .. " version: " .. c.version)
+        pluginLoaders[m]:load()
+        plugins[m] = pluginLoaders[m].handle
+    end
+end
+
+---Enable plugins in the right order
+for k, m in pairs(pluginLoadOrder) do
+    -- call the enable() function of the plugin
+    if pluginLoaders[m] == nil or pluginLoaders[m].handle == nil then
+        -- print("[api]: WARNING: Some plugins are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
+    else
+        if m ~= "lua_api" then
+            print("[api]: enabling plugin: " .. m)
+            pluginLoaders[m]:enablePlugin(final_config.plugins[m].options)
+        end
+    end
+end

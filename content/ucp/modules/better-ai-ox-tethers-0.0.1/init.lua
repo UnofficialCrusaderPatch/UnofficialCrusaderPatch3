@@ -157,6 +157,7 @@ ns.aiRequiresExtraOxtethers_hooked = function(this, playerID)
 end
 
 ns.enable = function(self, config)
+    self.config = config
     ns.aiRequiresExtraOxtethers_original = core.hookCode(ns.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
     ns.oxTetherParameters = config.oxTetherParameters
 end

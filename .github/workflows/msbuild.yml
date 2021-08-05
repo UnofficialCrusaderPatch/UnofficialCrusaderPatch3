@@ -131,7 +131,7 @@ jobs:
             }
         }
         
-        $defaults = [ordered]@{"modules"=[ordered]@{}}
+        $defaults = [ordered]@{"modules"=[ordered]@{};"plugins"=[ordered]@{}}
         
         $modules = Get-ChildItem -Directory content\ucp\modules
         
@@ -152,6 +152,28 @@ jobs:
                 $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
                 $y = ConvertFrom-Yaml $f
                 $defaults.modules[$name].options = Convert-ConfigFile -Table $y                
+            }
+        }
+        
+        $plugins = Get-ChildItem -Directory content\ucp\plugins
+        
+        foreach($plugin in $plugins) {
+            $i = Get-Content -Path ($plugin.FullName + "\definition.yml") -Raw
+            $iy = ConvertFrom-Yaml $i
+            
+            $name = $iy.name
+            $version = $iy.version
+            
+            $defaults.plugins[$name] = [ordered]@{}
+            $defaults.plugins[$name].active = $true
+            $defaults.plugins[$name].version = $version
+            
+            if(Test-Path -Path ($plugin.FullName + "\options.yml")) {
+                $defaults.plugins[$name].options = [ordered]@{}
+                
+                $f = Get-Content -Path ($plugin.FullName + "\options.yml") -Raw
+                $y = ConvertFrom-Yaml $f
+                $defaults.plugins[$name].options = Convert-ConfigFile -Table $y                
             }
         }
         

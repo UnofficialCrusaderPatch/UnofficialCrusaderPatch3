@@ -82,13 +82,36 @@ function BaseLoader:dependencies()
     for k, v in pairs(y.depends) do
         m, eq, version = v:match("([a-zA-Z0-9-_]+)([<>=]+)([0-9\\.]+)")
         table.insert(deps, {
-            module = m,
+            name = m,
             equality = eq,
             version = version
         })
     end
 
     return deps
+end
+
+function BaseLoader:verifyVersion()
+    local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
+    if not handle then
+        error("cannot verify version, cannot open definition.yml")
+    end
+
+    local data = handle:read("*all")
+    handle:close()
+
+    if data:len() == 0 then
+        -- print("WARNING: the module.yml file of " .. self.name .. " is empty")
+        error("cannot verify version, empty definition.yml")
+    end
+
+    local y = yaml.eval(data)
+
+    if y.version ~= self.version then
+        error("Version mismatch between assumed version: " .. self.version .. " and defined version: " .. y.version)
+    end
+
+    return true
 end
 
 ---@class ModuleLoader

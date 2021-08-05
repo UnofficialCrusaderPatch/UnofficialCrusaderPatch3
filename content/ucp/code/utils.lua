@@ -98,4 +98,29 @@ function table.update(o, o2)
     return t
 end
 
+function table.find(t1, target)
+    for k, v in pairs(t1) do
+        if v == target then
+            return k
+        end
+    end
+    return nil
+end
+
+function table.keys(t)
+    local keys = {}
+    for k, v in pairs(t) do
+        table.insert(keys, k)
+    end
+    return keys
+end
+
+function table.values(t)
+    local values = {}
+    for k, v in pairs(t) do
+        table.insert(values, v)
+    end
+    return values
+end
+
 return namespace

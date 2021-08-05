@@ -11,13 +11,14 @@ std::string UCP_DIR = "ucp/";
 int luaListDirectories(lua_State* L) {
 	std::string path = luaL_checkstring(L, 1);
 	if (path.empty()) return luaL_error(L, ("Invalid path: " + path).c_str());
+	if(path.find("..") != std::string::npos) return luaL_error(L, ("Illegal path: " + path).c_str());
 
 	int count = 0;
 
 	try {
 		for (const auto& entry : std::filesystem::directory_iterator(path)) {
 			if (entry.is_directory()) {
-				lua_pushstring(L, entry.path().string().c_str());
+				lua_pushstring(L, entry.path().lexically_relative(std::filesystem::current_path()).string().c_str());
 				count += 1;
 			}
 		}

@@ -58,7 +58,7 @@ return {
     ["TANNER_BRUSH_DOWN"] = 0x3a,
     ["FLETCHER_FLETCH"] = 0x3b,
     ["GHOST"] = 0x3c,
-    ["UNKNOWN_0x3D"] = 0x3d,
+    ["OIL_BOILING"] = 0x3d,
     ["STIR"] = 0x3e,
     ["FIREPLACE"] = 0x3f,
     ["ARROW_BOUNCE"] = 0x40,
