@@ -1,7 +1,7 @@
 
 ---@module module
 
----@class module
+---@class Module
 Module = {}
 
 ---When a module is enabled on start up, this function is run.
@@ -31,18 +31,17 @@ local function moduleRequireFunction(path, env)
       
       local is_lua = sanitized_file:match("([.]lua)$")
       local is_dll = sanitized_file:match("([.]dll)$")
-      
-      local sanitized_file_name = sanitized_file
-      if is_lua or is_dll then
-        sanitized_file_name = sanitized_file:sub(1, -5) -- remove the extension part
-      end
-      
-      
-      -- TODO: I think these files will run in a global env, test that.
+
       if is_dll then
+        local sanitized_file_name = sanitized_file
+        if is_lua or is_dll then
+          sanitized_file_name = sanitized_file:sub(1, -5) -- remove the extension part
+        end
+        -- TODO: This will run in a global env, test that.
         return assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
       elseif is_lua then
       else
+        ---Assume a lua file
         full_path = full_path .. ".lua"
       end
       
