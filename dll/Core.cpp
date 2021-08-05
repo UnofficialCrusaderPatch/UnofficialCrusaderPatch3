@@ -1,4 +1,5 @@
 #include <string>
+#include <filesystem>
 #include "Core.h"
 
 #ifdef COMPILED_MODULES
@@ -6,6 +7,38 @@
 #endif
 
 std::string UCP_DIR = "ucp/";
+
+int luaListDirectories(lua_State* L) {
+	std::string path = luaL_checkstring(L, 1);
+	if (path.empty()) return luaL_error(L, ("Invalid path: " + path).c_str());
+
+	int count = 0;
+
+	try {
+		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+			if (entry.is_directory()) {
+				lua_pushstring(L, entry.path().string().c_str());
+				count += 1;
+			}
+		}
+	}
+	catch (std::filesystem::filesystem_error e) {
+		return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
+	}
+		
+	return count;
+}
+
+void addUtilityFunctions(lua_State* L) {
+	// Put the 'ucp.internal' on the stack
+	lua_getglobal(L, "ucp"); // [ucp]
+	lua_getfield(L, -1, "internal"); // [ucp, internal]
+
+	lua_pushcfunction(L, luaListDirectories); // [ucp, internal, luaListDirectories]
+	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
+
+	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
+}
 
 void Core::initialize() {
 
@@ -26,14 +59,19 @@ void Core::initialize() {
 
 	lua_newtable(RPS_getLuaState());
 	RPS_initializeLuaAPI("");
-	// The namespace is left on the stack. Set the namespace to the 'internal' field in our table.
+	// The namespace is left on the stack. 
+
+	// Set the namespace to the 'internal' field in our table.
 	lua_setfield(RPS_getLuaState(), -2, "internal");
 	// Our table is left on the stack. Put the table in the global 'ucp' variable.
 	lua_setglobal(RPS_getLuaState(), "ucp");
 
+	addUtilityFunctions(RPS_getLuaState());
+
+
 #ifdef COMPILED_MODULES
 	CompiledModules::registerProxyFunctions();
-	CompiledModules::runCompiledModule("ucp/api.lua");
+	CompiledModules::runCompiledModule("ucp/main.lua");
 #else
 
 	/**
@@ -48,7 +86,7 @@ void Core::initialize() {
 		}
 	}
 
-	RPS_runBootstrapFile(UCP_DIR + "api.lua");
+	RPS_runBootstrapFile(UCP_DIR + "main.lua");
 #endif
 	
 	consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);

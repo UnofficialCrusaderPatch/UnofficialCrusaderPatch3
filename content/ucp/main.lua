@@ -86,12 +86,12 @@ end
 
 
 ---Table to hold all the modules
----@type Table<string, Module>
--- not declared as local because it should persist
+---@type table<string, Module>
+--- not declared as local because it should persist
 modules = {}
 
 ---Table to hold all the module loaders
----@type Table<string, ModuleLoader>
+---@type table<string, ModuleLoader>
 ---Note: not declared as local because it should persist
 modLoaders = {}
 
