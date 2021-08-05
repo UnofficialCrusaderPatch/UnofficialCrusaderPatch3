@@ -46,7 +46,7 @@ data.common = require('data.common')
 data.structures = require('data.structures')
 yaml = require('ext.yaml.yaml')
 json = require('ext.json.json')
-mod = require('module')
+extensions = require('extensions')
 sha = require("ext.pure_lua_SHA.sha2")
 hooks = require('hooks')
 
@@ -98,7 +98,7 @@ modLoaders = {}
 --- Create a modloader for all modules we know of (via default config)
 for k, v in pairs(default_config.modules) do
     print("[api]: Creating module loader for module: " .. k .. " version: " .. v.version)
-    modLoaders[k] = mod.ModuleLoader:new(k, v.version, v.options)
+    modLoaders[k] = extensions.ModuleLoader:create(k, v.version)
 end
 
 ---Determine the appropriate loading order
@@ -120,7 +120,7 @@ for m, modLoader in pairs(modLoaders) do
     end
 end
 
-for k, mods in pairs(mod.DependencySolver:new(modDependencies):solve()) do
+for k, mods in pairs(extensions.DependencySolver:new(modDependencies):solve()) do
     for l, m in pairs(mods) do
         table.insert(loadOrder, m)
     end

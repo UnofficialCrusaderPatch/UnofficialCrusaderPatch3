@@ -7,7 +7,7 @@
 ---@param path string path to the base folder of a module
 ---@param env table when the module requires other modules, this is the environment to evaluate these in
 ---@return function
-local function moduleRequireFunction(path, env)
+local function restrictedRequireFunction(path, env, allow_binary)
     return function(file)
         if type(file) ~= "string" then
             error("'file' parameter is not a string")
@@ -24,19 +24,25 @@ local function moduleRequireFunction(path, env)
         end
         local full_path = path .. "/" .. sanitized_file
 
-        local is_lua = sanitized_file:match("([.]lua)$")
-        local is_dll = sanitized_file:match("([.]dll)$")
+        local has_lua_extension = sanitized_file:match("([.]lua)$")
+        local has_dll_extension = sanitized_file:match("([.]dll)$")
 
-        if is_dll then
-            local sanitized_file_name = sanitized_file
-            if is_lua or is_dll then
-                sanitized_file_name = sanitized_file:sub(1, -5) -- remove the extension part
+        if has_dll_extension then
+            if allow_binary then
+                local sanitized_file_name = sanitized_file
+                if has_lua_extension or has_dll_extension then
+                    sanitized_file_name = sanitized_file:sub(1, -5) -- remove the extension part
+                else
+
+                end
+                -- TODO: This will run in a global env, test that.
+                return assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
             end
-            -- TODO: This will run in a global env, test that.
-            return assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
-        elseif is_lua then
+            error("binary files are not allowed: " .. full_path)
+        elseif has_lua_extension then
         else
             ---Assume a lua file
+            ---TODO: Add cascade logic to load dlls if no .lua file exists with the name?
             full_path = full_path .. ".lua"
         end
 
@@ -59,7 +65,7 @@ end
 ---@param moduleName string the name of the module
 ---@see print
 ---@private
-local function modulePrintFunction(moduleName)
+local function prefixedPrintFunction(moduleName)
     return function(...)
         print("[" .. moduleName .. "]: ", ...)
     end
@@ -67,7 +73,7 @@ end
 
 ---This function creates the module environment in which module code is evaluated. It provides the environment with custom require and print functions
 ---@private
-local function createModuleEnvironment(name, path, forbidsGlobalAssignment, permittedFunctions)
+local function createRestrictedEnvironment(name, path, forbidsGlobalAssignment, permittedFunctions, allowBinary)
 
     local env = {}
 
@@ -77,8 +83,8 @@ local function createModuleEnvironment(name, path, forbidsGlobalAssignment, perm
         end
     end
 
-    env.print = modulePrintFunction(name)
-    env.require = moduleRequireFunction(path, env)
+    env.print = prefixedPrintFunction(name)
+    env.require = restrictedRequireFunction(path, env, allowBinary)
 
     if forbidsGlobalAssignment then
         env = setmetatable(env, {
@@ -92,5 +98,5 @@ local function createModuleEnvironment(name, path, forbidsGlobalAssignment, perm
 end
 
 return {
-    createModuleEnvironment = createModuleEnvironment
+    createRestrictedEnvironment = createRestrictedEnvironment
 }

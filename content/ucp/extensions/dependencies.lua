@@ -1,6 +1,6 @@
 
-local Set = require("module.utils").Set
-local sizeOfTable = require("module.utils").sizeOfTable
+local Set = require("extensions.utils").Set
+local sizeOfTable = require("extensions.utils").sizeOfTable
 
 ---Class to solve dependencies
 ---@class DependencySolver

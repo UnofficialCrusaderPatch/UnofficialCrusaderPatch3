@@ -83,7 +83,7 @@ jobs:
             popd
           }
           
-          # Copy the specified files, or *.lua and module.yml if no module.files file was found.
+          # Copy the specified files, or *.lua and definition.yml if no module.files file was found.
           if($hasFilesList) {
             $node = Select-Xml -XPath "/module/files" -Path ($module.FullName + "\module.files")
             $moduleFiles = $node.Node.file
@@ -136,7 +136,7 @@ jobs:
         $modules = Get-ChildItem -Directory content\ucp\modules
         
         foreach($module in $modules) {
-            $i = Get-Content -Path ($module.FullName + "\module.yml") -Raw
+            $i = Get-Content -Path ($module.FullName + "\definition.yml") -Raw
             $iy = ConvertFrom-Yaml $i
             
             $name = $iy.name
