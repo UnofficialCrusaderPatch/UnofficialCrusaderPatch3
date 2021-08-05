@@ -11,7 +11,7 @@ local replace_patterns = {
     {target = "([a-zA-Z0-9_]+) ([a-zA-Z0-9_]+)", replace = "%1%2"}
 }
 
-local convertCFG = function (data)
+local makeCFGLuaCompliant = function (data)
   if type(data) ~= "string" then error("'data' parameter is not of type string") end
 
   local result = data
@@ -29,7 +29,7 @@ local getCFG = function (filepath)
   local data = handle:read("*all")
   handle:close()
   
-  data = convertCFG(data)
+  data = makeCFGLuaCompliant(data)
   
   local result = {}
   local func, message = load(data, filepath, 't', result)
@@ -43,5 +43,4 @@ end
 
 return {
   getCFG = getCFG,
-  convertCFG = convertCFG,
 }
