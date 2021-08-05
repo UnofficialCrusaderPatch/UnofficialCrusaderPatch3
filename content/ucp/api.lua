@@ -37,6 +37,7 @@ end
 
 ---Indicates where to load UCP lua files from
 package.path = BASEDIR .. "/?.lua"
+package.path = package.path .. ";" .. BASEDIR .. "/?/init.lua"
 ---Load essential ucp lua code
 core = require('core')
 utils = require('utils')
