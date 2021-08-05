@@ -136,14 +136,6 @@ local function newAiRequiresExtraOxTethers(playerID)
     quarryID = namespace.findNextBuildingForPlayerAndType(0x00f98520, playerID, 0x14, quarryID)
   end
   
-  -- This does not work, because the AI will place minOxTethers right when it built the first quarry
-  --[[if oxtetherCount < oxTetherParameters.minOxTethers then
-    print("Player #" .. playerID .. ": has too few ox tethers overall (" .. oxtetherCount .. "), especially at quarry #" .. lowestOxTetherCountQuarryID)
-    core.writeInteger(0x0115e8cc + (0x39f4 * playerID), lowestOxTetherCountQuarryID)
-    return 1
-  end
-  --]]
-  
   print("Player #" .. playerID .. " heaviest loaded quarry is #" .. highestLoadQuarryID .. " (" .. highestLoad .. ")")
   
   if highestLoad > oxTetherParameters.tresholdStoneLoad then
