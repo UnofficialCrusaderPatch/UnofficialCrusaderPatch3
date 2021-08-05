@@ -1,16 +1,16 @@
-local namespace = {}
+local ns = {}
 
 -- playerID, buildingType, includeBool
-namespace.countBuildingsForPlayer = core.exposeCode(0x0040a9b0, 4, 1) -- ECX: 0xf98520
+ns.countBuildingsForPlayer = core.exposeCode(0x0040a9b0, 4, 1) -- ECX: 0xf98520
 
 -- playerID, buildingType
-namespace.findFirstBuildingIDForPlayerAndType = core.exposeCode( 0x0040aad0, 3, 1) -- ECX: 0x00f98520
+ns.findFirstBuildingIDForPlayerAndType = core.exposeCode( 0x0040aad0, 3, 1) -- ECX: 0x00f98520
 
 -- playerID, buildingType, previous buildingID
-namespace.findNextBuildingForPlayerAndType = core.exposeCode(0x0040ab30, 4, 1) -- ECX: 0x00f98520
+ns.findNextBuildingForPlayerAndType = core.exposeCode(0x0040ab30, 4, 1) -- ECX: 0x00f98520
 
 
-local oxTetherParameters = {
+ns.oxTetherParameters = {
   -- total max ox tethers for a player
   maxOxTethers = 100,
   -- total max ox tethers will be quarryCount * value
@@ -27,7 +27,7 @@ local oxTetherParameters = {
 }
 
 local function countLinkedOxTethers(playerID, quarryID)
-  local oxTetherID = namespace.findFirstBuildingIDForPlayerAndType(0x00f98520, playerID, 0x04)
+  local oxTetherID = ns.findFirstBuildingIDForPlayerAndType(0x00f98520, playerID, 0x04)
   
   if oxTetherID == 0 then return 0 end
   
@@ -40,15 +40,15 @@ local function countLinkedOxTethers(playerID, quarryID)
       count = count + 1
     end
   
-    oxTetherID = namespace.findNextBuildingForPlayerAndType(0x00f98520, playerID, 0x04, oxTetherID)
+    oxTetherID = ns.findNextBuildingForPlayerAndType(0x00f98520, playerID, 0x04, oxTetherID)
   end
   
   return count
 end
 
 local function newAiRequiresExtraOxTethers(playerID)
-  local quarryCount = namespace.countBuildingsForPlayer(0xf98520, playerID, 0x14, 0)
-  local oxtetherCount = namespace.countBuildingsForPlayer(0xf98520, playerID, 0x4, 0)
+  local quarryCount = ns.countBuildingsForPlayer(0xf98520, playerID, 0x14, 0)
+  local oxtetherCount = ns.countBuildingsForPlayer(0xf98520, playerID, 0x4, 0)
   
   print("Player #" .. playerID .. ": quarries = " .. quarryCount .. " ox tethers = " .. oxtetherCount)
   
@@ -56,12 +56,12 @@ local function newAiRequiresExtraOxTethers(playerID)
     print("Player #" .. playerID .. ": no ox tethers required")
     return 0 
   end
-  if oxtetherCount >= oxTetherParameters.maxOxTethers then 
+  if oxtetherCount >= ns.oxTetherParameters.maxOxTethers then
     print("Player #" .. playerID .. ": over or at the ox tether limit")
     return 0 
   end
-  if oxtetherCount >= (quarryCount * oxTetherParameters.dynamicMaxOxTethers) then 
-    print("Player #" .. playerID .. ": over or at the dynamic ox tethers limit: " .. (quarryCount * oxTetherParameters.dynamicMaxOxTethers))
+  if oxtetherCount >= (quarryCount * ns.oxTetherParameters.dynamicMaxOxTethers) then
+    print("Player #" .. playerID .. ": over or at the dynamic ox tethers limit: " .. (quarryCount * ns.oxTetherParameters.dynamicMaxOxTethers))
     return 0 
   end
   
@@ -69,12 +69,12 @@ local function newAiRequiresExtraOxTethers(playerID)
   core.writeInteger(0x0115e8cc + (0x39f4 * playerID), 0)
   
   local lowestOxTetherCountQuarryID = 0
-  local lowestOxTetherCount = oxTetherParameters.maxOxTethers
+  local lowestOxTetherCount = ns.oxTetherParameters.maxOxTethers
   
   local highestLoadQuarryID = 0
   local highestLoad = 0
   
-  local quarryID = namespace.findFirstBuildingIDForPlayerAndType(0x00f98520, playerID, 0x14)
+  local quarryID = ns.findFirstBuildingIDForPlayerAndType(0x00f98520, playerID, 0x14)
   
   if quarryID == 0 then return 0 end
   
@@ -105,12 +105,12 @@ local function newAiRequiresExtraOxTethers(playerID)
     
     local overMax = false
     
-    if linkedTetherCount >= oxTetherParameters.maximumOxTethersPerQuarry then
+    if linkedTetherCount >= ns.oxTetherParameters.maximumOxTethersPerQuarry then
       print("Player #" .. playerID .. ": has too many ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
       overMax = true
     end
     
-    if linkedTetherCount < oxTetherParameters.minimalOxTethersPerQuarry then
+    if linkedTetherCount < ns.oxTetherParameters.minimalOxTethersPerQuarry then
       print("Player #" .. playerID .. ": has too few ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
       core.writeInteger(0x0115e8cc + (0x39f4 * playerID), quarryID)
       return 1
@@ -133,12 +133,12 @@ local function newAiRequiresExtraOxTethers(playerID)
       highestLoadQuarryID = quarryID
     end
     
-    quarryID = namespace.findNextBuildingForPlayerAndType(0x00f98520, playerID, 0x14, quarryID)
+    quarryID = ns.findNextBuildingForPlayerAndType(0x00f98520, playerID, 0x14, quarryID)
   end
   
   print("Player #" .. playerID .. " heaviest loaded quarry is #" .. highestLoadQuarryID .. " (" .. highestLoad .. ")")
   
-  if highestLoad > oxTetherParameters.tresholdStoneLoad then
+  if highestLoad > ns.oxTetherParameters.tresholdStoneLoad then
     print("Player #" .. playerID .. ": has too heavy loaded quarry #" .. highestLoadQuarryID)
     core.writeInteger(0x0115e8cc + (0x39f4 * playerID), highestLoadQuarryID)
     return 1
@@ -148,17 +148,17 @@ local function newAiRequiresExtraOxTethers(playerID)
   return 0
 end
 
-namespace.aiRequiresExtraOxtethers_hooked = function(this, playerID)
+ns.aiRequiresExtraOxtethers_hooked = function(this, playerID)
   return newAiRequiresExtraOxTethers(playerID)
 end
 
-namespace.enable = function(self, config)
-  namespace.aiRequiresExtraOxtethers_original = core.hookCode(namespace.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
-  oxTetherParameters = config.oxTetherParameters
+ns.enable = function(self, config)
+  ns.aiRequiresExtraOxtethers_original = core.hookCode(ns.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
+  ns.oxTetherParameters = config.oxTetherParameters
 end
 
-namespace.disable = function(self)
+ns.disable = function(self)
 
 end
 
-return namespace
+return ns
