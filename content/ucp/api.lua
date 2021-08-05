@@ -150,7 +150,7 @@ for k, m in pairs(loadOrder) do
   else
     if m ~= "lua_api" then
       print("[api]: enabling module: " .. m)
-      modLoaders[m]:enableModule(config)
+      modLoaders[m]:enableModule(final_config.modules[m])
     end
   end
 end

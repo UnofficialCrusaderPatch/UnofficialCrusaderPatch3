@@ -1,0 +1,22 @@
+oxTetherParameters:
+  # total max ox tethers for a player
+  maxOxTethers:
+    default: 100
+    type: integer
+  # total max ox tethers will be quarryCount * value
+  dynamicMaxOxTethers:
+    default: 3
+    type: integer
+  # min ox tethers per quarry
+  minimalOxTethersPerQuarry:
+    default: 1
+    type: integer
+  # max ox tethers per quarry
+  maximumOxTethersPerQuarry:
+    default: 6
+    type: integer
+  # decision value for building an extra ox tether if a quarry needs it: stoneCount / tetherCount
+  # A full pile is 48 stones. The original game value is 20, limiting a quarry to three ox tethers.
+  tresholdStoneLoad:
+    default: 20
+    type: integer

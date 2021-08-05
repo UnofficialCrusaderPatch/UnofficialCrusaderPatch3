@@ -10,11 +10,6 @@ namespace.findFirstBuildingIDForPlayerAndType = core.exposeCode( 0x0040aad0, 3, 
 namespace.findNextBuildingForPlayerAndType = core.exposeCode(0x0040ab30, 4, 1) -- ECX: 0x00f98520
 
 
--- Stubs for now, this is the 'hacks' module anyway
-namespace.enable = function(self) end
-namespace.disable = function(self) end
-
-
 local oxTetherParameters = {
   -- total max ox tethers for a player
   maxOxTethers = 100,
@@ -165,6 +160,13 @@ namespace.aiRequiresExtraOxtethers_hooked = function(this, playerID)
   return newAiRequiresExtraOxTethers(playerID)
 end
 
-namespace.aiRequiresExtraOxtethers_original = core.hookCode(namespace.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
+namespace.enable = function(self, config)
+  namespace.aiRequiresExtraOxtethers_original = core.hookCode(namespace.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
+  oxTetherParameters = config.oxTetherParameters
+end
+
+namespace.disable = function(self)
+
+end
 
 return namespace
