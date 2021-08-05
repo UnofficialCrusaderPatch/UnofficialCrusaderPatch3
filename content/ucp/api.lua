@@ -13,11 +13,11 @@ BASEDIR = "ucp"
 UCP_DIR = os.getenv("UCP_DIR")
 
 if UCP_DIR then
-  if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
-	UCP_DIR = UCP_DIR + "\\"
-  end
-  print("[api]: Setting BASEDIR to " .. UCP_DIR)
-  BASEDIR = UCP_DIR
+    if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
+        UCP_DIR = UCP_DIR + "\\"
+    end
+    print("[api]: Setting BASEDIR to " .. UCP_DIR)
+    BASEDIR = UCP_DIR
 end
 
 ---File that contains the defaults
@@ -31,8 +31,8 @@ CONFIG_FILE = "ucp-config.yml"
 UCP_CONFIG = os.getenv("UCP_CONFIG")
 
 if UCP_CONFIG then
-  print("[api]: Setting UCP_CONFIG to " .. UCP_CONFIG)
-  CONFIG_FILE = UCP_CONFIG
+    print("[api]: Setting UCP_CONFIG to " .. UCP_CONFIG)
+    CONFIG_FILE = UCP_CONFIG
 end
 
 ---Indicates where to load UCP lua files from
@@ -51,36 +51,36 @@ hooks = require('hooks')
 
 ---Load the default config file
 default_config = (function()
-  local f, message = io.open(CONFIG_DEFAULTS_FILE)
-  if not f then
-	print("[api]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
-	return {modules={}}
-  end
-  local data = f:read("*all")
-  f:close()
+    local f, message = io.open(CONFIG_DEFAULTS_FILE)
+    if not f then
+        print("[api]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+        return { modules = {} }
+    end
+    local data = f:read("*all")
+    f:close()
 
-  return yaml.eval(data)
+    return yaml.eval(data)
 end)()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
 config = (function()
-  local f, message = io.open(CONFIG_FILE)
-  if not f then 
-	print("[api]: Could not read ucp-config.yml. Reason: " .. message)
-	print("[api]: Treating ucp-config.yml as empty file")
-	return {modules={}}
-  end
-  local data = f:read("*all")
-  f:close()
-  
-  return yaml.eval(data)
+    local f, message = io.open(CONFIG_FILE)
+    if not f then
+        print("[api]: Could not read ucp-config.yml. Reason: " .. message)
+        print("[api]: Treating ucp-config.yml as empty file")
+        return { modules = {} }
+    end
+    local data = f:read("*all")
+    f:close()
+
+    return yaml.eval(data)
 end)()
 
 ---Early bail out of UCP
 if config.active == false then
-	print("[api]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
-	return nil
+    print("[api]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
+    return nil
 end
 
 
@@ -96,8 +96,8 @@ modLoaders = {}
 
 --- Create a modloader for all modules we know of (via default config)
 for k, v in pairs(default_config.modules) do
-  print("[api]: Creating module loader for module: " .. k .. " version: " .. v.version)
-  modLoaders[k] = mod.ModuleLoader:new(k, v.version, v.options)
+    print("[api]: Creating module loader for module: " .. k .. " version: " .. v.version)
+    modLoaders[k] = mod.ModuleLoader:new(k, v.version, v.options)
 end
 
 ---Determine the appropriate loading order
@@ -110,49 +110,47 @@ local loadOrder = {}
 
 local modDependencies = {}
 for m, modLoader in pairs(modLoaders) do
-  modDependencies[m] = {}
-  local deps = modLoader:dependencies()
-  if deps then
-    for k, dep in pairs(deps) do
-      table.insert(modDependencies[m], dep.module)
+    modDependencies[m] = {}
+    local deps = modLoader:dependencies()
+    if deps then
+        for k, dep in pairs(deps) do
+            table.insert(modDependencies[m], dep.module)
+        end
     end
-  end
 end
 
 for k, mods in pairs(mod.DependencySolver:new(modDependencies):solve()) do
-  for l, m in pairs(mods) do
-    table.insert(loadOrder, m)
-  end
+    for l, m in pairs(mods) do
+        table.insert(loadOrder, m)
+    end
 end
 
 --- Update the default config with values from the user config
 local final_config = table.update(default_config, config)
 
-
-
 ---Load modules
 ---Iterate over all entries in the config => modules entry of the ucp-config file
 for k, m in pairs(loadOrder) do
-  local c = final_config.modules[m]
-  if c.active then
-    --- load the init.lua file of the module
-    print("[api]: loading module: " .. m .. " version: " .. c.version)
-    modLoaders[m]:load()
-    modules[m] = modLoaders[m].handle
-  end
+    local c = final_config.modules[m]
+    if c.active then
+        --- load the init.lua file of the module
+        print("[api]: loading module: " .. m .. " version: " .. c.version)
+        modLoaders[m]:load()
+        modules[m] = modLoaders[m].handle
+    end
 end
 
 ---Enable modules in the right order
 for k, m in pairs(loadOrder) do
-  -- call the enable() function of the module
-  if modLoaders[m] == nil then
-    print("[api]: WARNING: Some modules are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
-  else
-    if m ~= "lua_api" then
-      print("[api]: enabling module: " .. m)
-      modLoaders[m]:enableModule(final_config.modules[m])
+    -- call the enable() function of the module
+    if modLoaders[m] == nil then
+        print("[api]: WARNING: Some modules are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
+    else
+        if m ~= "lua_api" then
+            print("[api]: enabling module: " .. m)
+            modLoaders[m]:enableModule(final_config.modules[m])
+        end
     end
-  end
 end
 
 

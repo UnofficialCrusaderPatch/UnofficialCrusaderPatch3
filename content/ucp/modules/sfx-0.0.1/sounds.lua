@@ -1,4 +1,3 @@
-
 return {
     ["WOOD_CHOP"] = 0x2,
     ["WOOD_SAW"] = 0x3,
