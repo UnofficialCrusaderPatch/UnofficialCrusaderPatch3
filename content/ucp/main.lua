@@ -156,6 +156,11 @@ for k, m in pairs(moduleLoadOrder) do
 end
 
 
+---Freeze the modules
+modules = extensions.createRecursiveReadOnlyTable(modules)
+
+
+
 ---Dynamic plugin discovery
 pluginFolders = table.pack(ucp.internal.listDirectories(BASEDIR .. "/plugins"))
 

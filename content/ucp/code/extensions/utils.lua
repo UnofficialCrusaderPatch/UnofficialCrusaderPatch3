@@ -89,7 +89,7 @@ local ReadOnlyTable = {
                 return o[k]
             end,
             __newindex = function(self, k, v)
-                return error("setting values is not allowed: " .. k)
+                return error("setting values in this object is not allowed: " .. k)
             end
         })
     end
