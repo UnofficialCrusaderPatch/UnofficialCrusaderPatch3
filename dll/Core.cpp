@@ -79,15 +79,23 @@ void Core::initialize() {
 	 * Allow UCP_DIR configuration via the command line.
 	 *
 	 */
-	std::string ENV_UCP_DIR = std::getenv("UCP_DIR");
-	if (!ENV_UCP_DIR.empty()) {
-		UCP_DIR = ENV_UCP_DIR;
+	char * ENV_UCP_DIR = std::getenv("UCP_DIR");
+	if (ENV_UCP_DIR != NULL) {
+		UCP_DIR = std::string(ENV_UCP_DIR);
 		if (UCP_DIR.back() != '\\' && UCP_DIR.back() != '/') {
 			UCP_DIR = UCP_DIR + "/";
 		}
 	}
 
-	RPS_runBootstrapFile(UCP_DIR + "main.lua");
+	std::filesystem::path mainPath = std::filesystem::path(UCP_DIR + "main.lua");
+
+	if (!std::filesystem::exists(mainPath)) {
+		std::cout << "FATAL: Main file not found: " << UCP_DIR + "main.lua" << std::endl;
+	}
+	else {
+		RPS_runBootstrapFile(mainPath.string());
+	}
+	
 #endif
 	
 	consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);
