@@ -15,10 +15,12 @@ int luaListDirectories(lua_State* L) {
 
 	int count = 0;
 
+	std::filesystem::path targetPath = path;
+
 	try {
-		for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
 			if (entry.is_directory()) {
-				lua_pushstring(L, entry.path().lexically_relative(std::filesystem::current_path()).string().c_str());
+				lua_pushstring(L, entry.path().string().c_str());
 				count += 1;
 			}
 		}
