@@ -63,6 +63,21 @@ function namespace.intToHex(input)
     return string.format("%X", input)
 end
 
+namespace.bytesToAOBString = function(b)
+    local targetString = ""
+    for k, v in ipairs(b) do
+        if k > 0 then
+            targetString = targetString .. " "
+        end
+
+        if v < 16 then
+            targetString = targetString .. "0"
+        end
+        targetString = targetString .. string.format("%x", v)
+    end
+    return targetString
+end
+
 function table.dump(o)
     if type(o) == 'table' then
         local s = '{ '
