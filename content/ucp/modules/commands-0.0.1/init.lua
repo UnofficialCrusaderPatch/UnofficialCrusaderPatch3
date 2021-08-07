@@ -27,6 +27,8 @@ end
 local onCommand = function(registers)
     local chatMessage = core.readString(0x01a1f240)
 
+    if chatMessage:sub(1) ~= "/" then return registers end
+
     local handled = false
 
     for k, v in pairs(COMMAND_REGISTRY) do

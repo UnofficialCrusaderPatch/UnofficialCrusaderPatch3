@@ -1,13 +1,4 @@
-local bytesToAOBString = function(b)
-    local targetString = ""
-    for k, v in ipairs(b) do
-        if k > 0 then
-            targetString = targetString .. " "
-        end
-        targetString = targetString .. string.format("%x", v)
-    end
-    return targetString
-end
+local bytesToAOBString = utils.bytesToAOBString
 
 local scanForString = function(s)
     local targetBytes = table.pack(string.byte(s, 1, -1))
