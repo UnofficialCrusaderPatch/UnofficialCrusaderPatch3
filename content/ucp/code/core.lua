@@ -68,6 +68,13 @@ function core.writeBytes(address, value)
     return ucp.internal.writeBytes(address, value)
 end
 
+---Write string to memory at a specified address
+---@param address number the address of the memory to write the string to
+---@param value string a string to write
+function core.writeString(address, value)
+    return ucp.internal.writeString(address, value)
+end
+
 ---Allocate a piece of memory for data
 ---@param size number The size of the memory block
 ---@return number The address of the new memory block
@@ -117,6 +124,8 @@ end
 ---@param max number|nil The maximum address of the memory to stop searching
 ---@return number The first address of the memory where `target` matches, 0 if `target` could not be found.
 function core.scanForAOB(target, min, max)
+    if type(target) ~= "string" then error("invalid argument: " .. target) end
+    if target:len() < 2 then error("target AOB too short: " .. target) end
     if min == nil and max == nil then
         return ucp.internal.scanForAOB(target)
     elseif max == nil then
@@ -124,7 +133,6 @@ function core.scanForAOB(target, min, max)
     else
         return ucp.internal.scanForAOB(target, min, max)
     end
-
 end
 
 ---Search through the memory for an array of bytes expressed as a hex string (where `?` can be used as wildcards: "FF 00 ? AA").
