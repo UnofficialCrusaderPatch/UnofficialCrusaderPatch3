@@ -1,0 +1,7 @@
+# Example usage:
+#rat:
+#  0: 'ucp\plugins\myplugin\aiv1.aiv'
+#  1: ''
+#  2: ''
+#snake:
+#  5: ''
