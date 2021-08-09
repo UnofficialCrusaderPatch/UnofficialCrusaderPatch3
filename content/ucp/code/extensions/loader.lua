@@ -75,7 +75,7 @@ function BaseLoader:dependencies()
     local y = yaml.eval(data)
 
     if not y.depends then
-        return nil
+        return { }
     end
 
     local deps = {}
@@ -90,6 +90,27 @@ function BaseLoader:dependencies()
 
     return deps
 end
+
+
+---Read the demanded config
+function BaseLoader:config()
+    local handle, status, e = io.open(self.path .. "/config.yml", 'r')
+    if not handle then
+        return { }
+    end
+
+    local data = handle:read("*all")
+    handle:close()
+
+    if data:len() == 0 then
+        return { }
+    end
+
+    local y = yaml.eval(data)
+
+    return y
+end
+
 
 function BaseLoader:verifyVersion()
     local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
@@ -157,6 +178,7 @@ end
 function PluginLoader:disablePlugin(options)
     return self.handle:disable(options)
 end
+
 
 return {
     ModuleLoader = ModuleLoader,

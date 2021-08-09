@@ -16,7 +16,7 @@ if UCP_DIR then
     if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
         UCP_DIR = UCP_DIR + "\\"
     end
-    print("[api]: Setting BASEDIR to " .. UCP_DIR)
+    print("[main]: Setting BASEDIR to " .. UCP_DIR)
     BASEDIR = UCP_DIR
 end
 
@@ -31,7 +31,7 @@ CONFIG_FILE = "ucp-config.yml"
 UCP_CONFIG = os.getenv("UCP_CONFIG")
 
 if UCP_CONFIG then
-    print("[api]: Setting UCP_CONFIG to " .. UCP_CONFIG)
+    print("[main]: Setting UCP_CONFIG to " .. UCP_CONFIG)
     CONFIG_FILE = UCP_CONFIG
 end
 
@@ -50,17 +50,22 @@ extensions = require('extensions')
 sha = require("ext.pure_lua_SHA.sha2")
 hooks = require('hooks')
 
+
+---UCP3 Configuration
 ---Load the default config file
 default_config = (function()
     local f, message = io.open(CONFIG_DEFAULTS_FILE)
     if not f then
-        print("[api]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+        print("[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
         return { modules = {} }
     end
     local data = f:read("*all")
     f:close()
 
-    return yaml.eval(data)
+    local result = yaml.eval(data)
+    if not result.plugins then result.plugins = {} end
+    if not result.modules then result.modules = {} end
+    return result
 end)()
 
 ---Load the config file
@@ -68,169 +73,191 @@ end)()
 config = (function()
     local f, message = io.open(CONFIG_FILE)
     if not f then
-        print("[api]: Could not read ucp-config.yml. Reason: " .. message)
-        print("[api]: Treating ucp-config.yml as empty file")
-        return { modules = {} }
+        print("[main]: Could not read ucp-config.yml. Reason: " .. message)
+        print("[main]: Treating ucp-config.yml as empty file")
+        return { modules = {}, plugins = {} }
     end
     local data = f:read("*all")
     f:close()
 
-    return yaml.eval(data)
+    local result = yaml.eval(data)
+    if not result.plugins then result.plugins = {} end
+    if not result.modules then result.modules = {} end
+    return result
 end)()
 
 ---Early bail out of UCP
 if config.active == false then
-    print("[api]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
+    print("[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
     return nil
 end
 
+
+extensionsTable = {}
+extensionLoaders = {}
+
+local function loadExtensionsFromFolder(folder, cls)
+    ---Dynamic extensions discovery
+    local subFolders = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
+
+    --- Create a loader for all extensions we can find
+    for k, subFolder in ipairs(subFolders) do
+        local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
+        local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
+
+        print("[main]: Creating extension loader for: " .. name .. " version: " .. version)
+
+        if extensionLoaders[name] ~= nil then error("extension with name already exists: " .. name) end
+
+        extensionLoaders[name] = cls:create(name, version)
+        extensionLoaders[name]:verifyVersion()
+    end
+end
+
+loadExtensionsFromFolder("modules", extensions.ModuleLoader)
+loadExtensionsFromFolder("plugins", extensions.PluginLoader)
+
+
+extensionDependencies = {}
+for name, ext in pairs(extensionLoaders) do
+    extensionDependencies[name] = {}
+    local deps = ext:dependencies()
+    if deps then
+        for k, dep in pairs(deps) do
+            table.insert(extensionDependencies[name], dep.name)
+        end
+    end
+end
+
+extensionLoadOrder = {}
+for k, exts in pairs(extensions.DependencySolver:new(extensionDependencies):solve()) do
+    for l, ext in pairs(exts) do
+        table.insert(extensionLoadOrder, ext)
+    end
+end
+
+
+
+---Now we are ready to parse the configurations of each extension
+---Low level conflict checking should be done when setting the user config
+joinedDefaultConfig = {extensions = {}}
+for k, v in pairs(default_config.modules) do
+    joinedDefaultConfig.extensions[k] = v
+end
+for k, v in pairs(default_config.plugins) do
+    joinedDefaultConfig.extensions[k] = v
+end
+
+joinedConfig = {extensions = {}}
+for k, v in pairs(config.modules) do
+    joinedConfig.extensions[k] = v
+end
+for k, v in pairs(config.plugins) do
+    joinedConfig.extensions[k] = v
+end
+
+explicitlyActiveExtensions = {}
+for k, ext in pairs(extensionLoadOrder) do
+    if (joinedConfig.extensions[ext] and joinedConfig.extensions[ext].active == true) or
+            (joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true) then
+        table.insert(explicitlyActiveExtensions, ext)
+    end
+end
+
+necessaryDependencies = {}
+for k, ext in pairs(explicitlyActiveExtensions) do
+    for k2, dep in pairs(extensionDependencies[ext]) do
+        table.insert(necessaryDependencies, dep)
+    end
+end
+
+
+---Try to merge extension configurations with user 'config'
+
+function compareConfiguration(c1, c2, conflicts, path)
+    conflicts = conflicts or {}
+    path = path or "/root"
+    for k, v2 in pairs(c2) do
+        if c1[k] ~= nil then
+            ---k exists in c1 and c2, check if they clash
+            local v1 = c1[k]
+            if v1 ~= v2 then
+                if type(v1) == "table" and type(v2) == "table" then
+                    compareConfiguration(v1, v2, conflicts, path .. "/" .. k)
+                else
+                    table.insert(conflicts, {path = path .. "/" .. k, value1 = v1, value2 = v2})
+                end
+            end
+        end
+    end
+    return conflicts
+end
+
+function mergeConfiguration(c1, c2)
+    for k, v2 in pairs(c2) do
+        if c1[k] ~= nil then
+            ---k exists in c1 and c2, check if they clash
+            local v1 = c1[k]
+            if v1 ~= v2 then
+                if type(v1) == "table" and type(v2) == "table" then
+                    mergeConfiguration(v1, v2)
+                elseif type(v1) ~= type(v2) then
+                    error("incomparable types")
+                else
+                    c1[k] = v2
+                end
+            end
+        else
+            c1[k] = v2
+        end
+    end
+end
+
+configMaster = config
+configSlave = default_config
+
+allActiveExtensions = {}
+for k, ext in pairs(necessaryDependencies) do
+    table.insert(allActiveExtensions, ext)
+end
+for k, ext in pairs(explicitlyActiveExtensions) do
+    if not table.find(allActiveExtensions, ext) then
+       table.insert(allActiveExtensions, ext)
+    end
+end
+
+for k, dep in pairs(allActiveExtensions) do
+    local depConfig = extensionLoaders[dep]:config()
+    local conflicts = compareConfiguration(configMaster, depConfig)
+    if #conflicts > 0 then
+        local msg = "failed to merge configuration of user and: " .. dep .. ".\ndifferences: "
+        for k2, conflict in pairs(conflicts) do
+            msg = "\n\tpath: " .. conflict.path .. ", value 1" .. conflict.value1 .. ", " .. conflict.value2
+        end
+        error(msg)
+    end
+    mergeConfiguration(configMaster, depConfig)
+end
+
+---Lastly, to get a complete config, override the defaults, ignore differences or conflicts
+mergeConfiguration(default_config, config)
 
 ---Table to hold all the modules
 ---@type table<string, Module>
 --- not declared as local because it should persist
 modules = {}
-
----Table to hold all the module loaders
----@type table<string, ModuleLoader>
----Note: not declared as local because it should persist
-modLoaders = {}
-
---- Create a modloader for all modules we know of (via default config)
-for k, v in pairs(default_config.modules) do
-    print("[api]: Creating module loader for module: " .. k .. " version: " .. v.version)
-    modLoaders[k] = extensions.ModuleLoader:create(k, v.version)
-end
-
----Determine the appropriate loading order
-
----This code is responsible for determining the order in which to load modules.
----Modules can depend on each other, so any dependencies should be loaded first.
----TODO: implement a check for module version conflicts.
-
-local moduleLoadOrder = {}
-
-local modDependencies = {}
-for m, modLoader in pairs(modLoaders) do
-    modDependencies[m] = {}
-    local deps = modLoader:dependencies()
-    if deps then
-        for k, dep in pairs(deps) do
-            table.insert(modDependencies[m], dep.name)
-        end
-    end
-end
-
-for k, mods in pairs(extensions.DependencySolver:new(modDependencies):solve()) do
-    for l, m in pairs(mods) do
-        table.insert(moduleLoadOrder, m)
-    end
-end
-
---- Update the default config with values from the user config
-local final_config = table.update(default_config, config)
-final_config.plugins = final_config.plugins or {}
-
----Load modules
----Iterate over all entries in the config => modules entry of the ucp-config file
-for k, m in pairs(moduleLoadOrder) do
-    local c = final_config.modules[m]
-    if c.active then
-        --- load the init.lua file of the module
-        print("[api]: loading module: " .. m .. " version: " .. c.version)
-        modLoaders[m]:load()
-        modules[m] = modLoaders[m].handle
-    end
-end
-
----Enable modules in the right order
-for k, m in pairs(moduleLoadOrder) do
-    -- call the enable() function of the module
-    if modLoaders[m] == nil or modLoaders[m].handle == nil then
-        -- print("[api]: WARNING: Some modules are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
-    else
-        if m ~= "lua_api" then
-            print("[api]: enabling module: " .. m)
-            modLoaders[m]:enableModule(final_config.modules[m].options)
-        end
-    end
-end
-
-
----Freeze the modules
-modules = extensions.createRecursiveReadOnlyTable(modules)
-
-
-
----Dynamic plugin discovery
-pluginFolders = table.pack(ucp.internal.listDirectories(BASEDIR .. "/plugins"))
-
----@type table<string, PluginLoader>
-pluginLoaders = {}
 plugins = {}
 
---- Create a pluginloader for all plugins we can find
-for k, pluginFolder in ipairs(pluginFolders) do
-    local pluginVersion = pluginFolder:match("(-[0-9\\.]+)$"):sub(2)
-    local pluginName = pluginFolder:sub(1, string.len(pluginFolder)-(string.len(pluginVersion)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
-    print("[api]: Creating plugin loader for plugin: " .. pluginName .. " version: " .. pluginVersion)
-    pluginLoaders[pluginName] = extensions.PluginLoader:create(pluginName, pluginVersion)
-    pluginLoaders[pluginName]:verifyVersion()
-end
-
-local ignorantPluginLoadOrder = {}
-local pluginDependencies = {}
-
-for m, pluginLoader in pairs(pluginLoaders) do
-    pluginDependencies[m] = {}
-    local deps = pluginLoader:dependencies()
-    if deps then
-        for k, dep in pairs(deps) do
-            table.insert(pluginDependencies[m], dep.name)
-        end
-    end
-end
-
-for k, mods in pairs(extensions.DependencySolver:new(pluginDependencies):solve()) do
-    for l, m in pairs(mods) do
-        table.insert(ignorantPluginLoadOrder, m)
-    end
-end
-
----Remove the modules we have loaded from the list
-local pluginLoadOrder = {}
-for k, pluginName in pairs(ignorantPluginLoadOrder) do
-    if modLoaders[pluginName] == nil then
-        ---It is a plugin, schedule it to be loaded
-        table.insert(pluginLoadOrder, pluginName)
+for k, dep in pairs(allActiveExtensions) do
+    local dst = {}
+    if getmetatable(extensionLoaders[dep]) == extensions.ModuleLoader then
+        dst = modules
+    elseif getmetatable(extensionLoaders[dep]) == extensions.PluginLoader then
+        dst = plugins
     else
-        if modLoaders[pluginName].handle == nil then
-            print("[api]: module '" .. pluginName .. "' is required for a plugin but it is not active.")
-        end
+        error("unknown extension type for: " .. dep)
     end
-end
-
-
----Load plugins
----Iterate over all entries in the config => plugins entry of the ucp-config file
-for k, m in pairs(pluginLoadOrder) do
-    local c = final_config.plugins[m]
-    if c and c.active then
-        --- load the init.lua file of the plugin
-        print("[api]: loading plugin: " .. m .. " version: " .. c.version)
-        pluginLoaders[m]:load()
-        plugins[m] = pluginLoaders[m].handle
-    end
-end
-
----Enable plugins in the right order
-for k, m in pairs(pluginLoadOrder) do
-    -- call the enable() function of the plugin
-    if pluginLoaders[m] == nil or pluginLoaders[m].handle == nil then
-        -- print("[api]: WARNING: Some plugins are depending on '" .. m .. "' but it is not set to active. They will probably fail to run properly.")
-    else
-        if m ~= "lua_api" then
-            print("[api]: enabling plugin: " .. m)
-            pluginLoaders[m]:enablePlugin(final_config.plugins[m].options)
-        end
-    end
+    print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+    local handle = extensionLoaders[dep]:load()
+    dst[dep] = extensions.createRecursiveReadOnlyTable(handle)
 end
