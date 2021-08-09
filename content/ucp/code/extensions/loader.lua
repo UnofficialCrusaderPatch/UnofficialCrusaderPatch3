@@ -135,6 +135,16 @@ function BaseLoader:verifyVersion()
     return true
 end
 
+---Enable the extension
+function BaseLoader:enable(options)
+    return self.handle:enable(options)
+end
+
+---Disable the extension
+function BaseLoader:disable(options)
+    return self.handle:disable(options)
+end
+
 ---@class ModuleLoader
 local ModuleLoader = BaseLoader:new()
 
@@ -143,18 +153,6 @@ function ModuleLoader:create(name, version)
     ---TODO: _G is evil, restrict which functions are given to a module or plugin
     local env = createRestrictedEnvironment(name, path, true, _G, true)
     return ModuleLoader:new{name=name, version=version, path=path, env=env}
-end
-
----Enable the module
----@param options table a table of all the options of all modules
-function ModuleLoader:enableModule(options)
-    return self.handle:enable(options)
-end
-
----Disable the module
----@param options table a table of all the options of all modules
-function ModuleLoader:disableModule(options)
-    return self.handle:disable(options)
 end
 
 ---@class PluginLoader
@@ -166,19 +164,6 @@ function PluginLoader:create(name, version)
     local env = createRestrictedEnvironment(name, path, true, _G, false)
     return PluginLoader:new{name=name, version=version, path=path, env=env}
 end
-
----Enable the plugin
----@param options table a table of all the options of all plugin
-function PluginLoader:enablePlugin(options)
-    return self.handle:enable(options)
-end
-
----Disable the plugin
----@param options table a table of all the options of all plugin
-function PluginLoader:disablePlugin(options)
-    return self.handle:disable(options)
-end
-
 
 return {
     ModuleLoader = ModuleLoader,

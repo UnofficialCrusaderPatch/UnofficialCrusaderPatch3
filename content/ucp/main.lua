@@ -35,6 +35,7 @@ if UCP_CONFIG then
     CONFIG_FILE = UCP_CONFIG
 end
 
+
 ---Indicates where to load UCP lua files from
 package.path = BASEDIR .. "/code/?.lua"
 package.path = package.path .. ";" .. BASEDIR .. "/code/?/init.lua"
@@ -49,6 +50,14 @@ json = require('ext.json.json')
 extensions = require('extensions')
 sha = require("ext.pure_lua_SHA.sha2")
 hooks = require('hooks')
+
+
+
+---Table to hold all the modules
+---@type table<string, Module>
+--- not declared as local because it should persist
+modules = {}
+plugins = {}
 
 
 ---UCP3 Configuration
@@ -240,13 +249,9 @@ for k, dep in pairs(allActiveExtensions) do
 end
 
 ---Lastly, to get a complete config, override the defaults, ignore differences or conflicts
-mergeConfiguration(default_config, config)
+mergeConfiguration(default_config, configMaster)
+configFinal = configSlave
 
----Table to hold all the modules
----@type table<string, Module>
---- not declared as local because it should persist
-modules = {}
-plugins = {}
 
 for k, dep in pairs(allActiveExtensions) do
     local dst = {}
@@ -259,5 +264,19 @@ for k, dep in pairs(allActiveExtensions) do
     end
     print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
     local handle = extensionLoaders[dep]:load()
-    dst[dep] = extensions.createRecursiveReadOnlyTable(handle)
+    dst[dep] = handle
+end
+
+for k, dep in pairs(allActiveExtensions) do
+    local c = {}
+    if getmetatable(extensionLoaders[dep]) == extensions.ModuleLoader then
+        c = "modules"
+    elseif getmetatable(extensionLoaders[dep]) == extensions.PluginLoader then
+        c = "plugins"
+    else
+        error("unknown extension type for: " .. dep)
+    end
+    print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+    extensionLoaders[dep]:enable(configFinal[c][dep].options)
+    --createRecursiveReadOnlyTable?
 end
