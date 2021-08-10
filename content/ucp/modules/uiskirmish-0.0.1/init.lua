@@ -3,7 +3,7 @@ return {
         self.skirmish = require("skirmish.lua")
         self.skirmish.initialized = false
 
-        modules.ui.menus[20] = self.skirmish
+        modules.ui.getMenus()[20] = self.skirmish
     end
 
 

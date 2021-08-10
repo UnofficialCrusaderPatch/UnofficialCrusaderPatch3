@@ -45,6 +45,6 @@ exports.disable = function(self)
 
 end
 
-exports.menus = menus
+exports.getMenus = function(self) return menus end
 
 return exports
