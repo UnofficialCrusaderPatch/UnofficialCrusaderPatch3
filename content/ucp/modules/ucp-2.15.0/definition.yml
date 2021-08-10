@@ -1,3 +1,4 @@
 # The name of your module
 name: ucp
 version: 2.15.0
+default: true

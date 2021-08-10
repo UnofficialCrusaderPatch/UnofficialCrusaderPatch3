@@ -163,9 +163,13 @@ jobs:
             
             $name = $iy.name
             $version = $iy.version
+            $default_active = $iy.default
+            if($default_active -eq $null) {
+              $default_active = $false
+            }
             
             $defaults.plugins[$name] = [ordered]@{}
-            $defaults.plugins[$name].active = $true
+            $defaults.plugins[$name].active = $default_active
             $defaults.plugins[$name].version = $version
             
             if(Test-Path -Path ($plugin.FullName + "\options.yml")) {
