@@ -28,7 +28,7 @@ end
 ---
 ---@return table the module API, as defined by the `init.lua` file of this module.
 function BaseLoader:load()
-
+    if self.env == nil then error("no valid 'env' specified") end
     local init_file_path = self.path .. "/init.lua"
 
     local initCode, message = loadfile(init_file_path, 't', self.env)
@@ -145,14 +145,24 @@ function BaseLoader:disable(options)
     return self.handle:disable(options)
 end
 
+function BaseLoader:type()
+    return "BaseLoader"
+end
+
 ---@class ModuleLoader
 local ModuleLoader = BaseLoader:new()
 
 function ModuleLoader:create(name, version)
     local path = BASEDIR .. "/modules/" .. name .. "-" .. version
-    ---TODO: _G is evil, restrict which functions are given to a module or plugin
-    local env = createRestrictedEnvironment(name, path, true, _G, true)
-    return ModuleLoader:new{name=name, version=version, path=path, env=env}
+    return ModuleLoader:new{name=name, version=version, path=path, env=nil}
+end
+
+function ModuleLoader:createEnvironment(allowed)
+    self.env = createRestrictedEnvironment(self.name, self.path, true, allowed, true)
+end
+
+function ModuleLoader:type()
+    return "ModuleLoader"
 end
 
 ---@class PluginLoader
@@ -160,9 +170,15 @@ local PluginLoader = BaseLoader:new()
 
 function PluginLoader:create(name, version)
     local path = BASEDIR .. "/plugins/" .. name .. "-" .. version
-    ---TODO: _G is evil, restrict which functions are given to a module or plugin
-    local env = createRestrictedEnvironment(name, path, true, _G, false)
-    return PluginLoader:new{name=name, version=version, path=path, env=env}
+    return PluginLoader:new{name=name, version=version, path=path, env=nil}
+end
+
+function PluginLoader:createEnvironment(allowed)
+    self.env = createRestrictedEnvironment(self.name, self.path, true, allowed, false)
+end
+
+function PluginLoader:type()
+    return "PluginLoader"
 end
 
 return {

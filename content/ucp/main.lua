@@ -53,12 +53,6 @@ hooks = require('hooks')
 
 
 
----Table to hold all the modules
----@type table<string, Module>
---- not declared as local because it should persist
-modules = {}
-plugins = {}
-
 
 ---UCP3 Configuration
 ---Load the default config file
@@ -167,8 +161,11 @@ end
 
 explicitlyActiveExtensions = {}
 for k, ext in pairs(extensionLoadOrder) do
-    if (joinedConfig.extensions[ext] and joinedConfig.extensions[ext].active == true) or
-            (joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true) then
+    if joinedConfig.extensions[ext] then
+        if joinedConfig.extensions[ext].active == true then
+            table.insert(explicitlyActiveExtensions, ext)
+        end
+    elseif joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true then
         table.insert(explicitlyActiveExtensions, ext)
     end
 end
@@ -211,7 +208,7 @@ function mergeConfiguration(c1, c2)
                 if type(v1) == "table" and type(v2) == "table" then
                     mergeConfiguration(v1, v2)
                 elseif type(v1) ~= type(v2) then
-                    error("incomparable types")
+                    error("incompatible types")
                 else
                     c1[k] = v2
                 end
@@ -250,33 +247,55 @@ end
 
 ---Lastly, to get a complete config, override the defaults, ignore differences or conflicts
 mergeConfiguration(default_config, configMaster)
-configFinal = configSlave
+configFinal = default_config
 
+
+---Table to hold all the modules
+---@type table<string, Module>
+--- not declared as local because it should persist
+modules = {}
+plugins = {}
+
+
+---TODO: restrict module allowed functions table
+moduleEnv = _G
+pluginEnv = {
+    modules = modules,
+    plugins = plugins,
+    utils = utils,
+    table = table,
+    string = string,
+    type = type,
+    pairs = pairs,
+    ipairs = ipairs,
+}
 
 for k, dep in pairs(allActiveExtensions) do
-    local dst = {}
-    if getmetatable(extensionLoaders[dep]) == extensions.ModuleLoader then
-        dst = modules
-    elseif getmetatable(extensionLoaders[dep]) == extensions.PluginLoader then
-        dst = plugins
+    local t = extensionLoaders[dep]:type()
+    if t == "ModuleLoader" then
+        print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+        extensionLoaders[dep]:createEnvironment(moduleEnv)
+        modules[dep] = extensionLoaders[dep]:load(moduleEnv)
+    elseif t == "PluginLoader" then
+        print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+        extensionLoaders[dep]:createEnvironment(pluginEnv)
+        plugins[dep] = extensionLoaders[dep]:load(pluginEnv)
     else
         error("unknown extension type for: " .. dep)
     end
-    print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-    local handle = extensionLoaders[dep]:load()
-    dst[dep] = handle
 end
 
 for k, dep in pairs(allActiveExtensions) do
-    local c = {}
-    if getmetatable(extensionLoaders[dep]) == extensions.ModuleLoader then
-        c = "modules"
-    elseif getmetatable(extensionLoaders[dep]) == extensions.PluginLoader then
-        c = "plugins"
+    local t = extensionLoaders[dep]:type()
+    if t == "ModuleLoader" then
+        print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+        extensionLoaders[dep]:enable(configFinal.modules[dep].options)
+        modules[dep] = extensions.createRecursiveReadOnlyTable(modules[dep])
+    elseif t == "PluginLoader" then
+        print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
+        extensionLoaders[dep]:enable(configFinal.plugins[dep].options)
+        plugins[dep] = extensions.createRecursiveReadOnlyTable(plugins[dep])
     else
         error("unknown extension type for: " .. dep)
     end
-    print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-    extensionLoaders[dep]:enable(configFinal[c][dep].options)
-    --createRecursiveReadOnlyTable?
 end
