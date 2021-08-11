@@ -151,7 +151,9 @@ jobs:
                 
                 $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
                 $y = ConvertFrom-Yaml $f
-                $defaults.modules[$name].options = Convert-ConfigFile -Table $y                
+                if($y -ne $null) {
+                    $defaults.modules[$name].options = Convert-ConfigFile -Table $y           
+                } 
             }
         }
         
@@ -177,7 +179,9 @@ jobs:
                 
                 $f = Get-Content -Path ($plugin.FullName + "\options.yml") -Raw
                 $y = ConvertFrom-Yaml $f
-                $defaults.plugins[$name].options = Convert-ConfigFile -Table $y                
+                if($y -ne $null) {
+                    $defaults.plugins[$name].options = Convert-ConfigFile -Table $y                
+                }
             }
         }
         
