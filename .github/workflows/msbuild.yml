@@ -5,6 +5,9 @@ on: [push]
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: .
+  VERSION_MAJOR: 3
+  VERSION_MINOR: 0
+  VERSION_PATCH: 0
 
 jobs:
   build:
@@ -187,6 +190,19 @@ jobs:
         
         $o = ConvertTo-Yaml $defaults
         Set-Content -Path "$env:BUILD_CONFIGURATION\ucp-package\ucp-config-defaults.yml" -Value $o
+    - name: Generate a UCP3 version file
+      shell: pwsh
+      run: |
+        Import-Module powershell-yaml
+        $versionInfo = [ordered]@{
+            major = "$env:VERSION_MAJOR".ToInt32($null);
+            minor = "$env:VERSION_MINOR".ToInt32($null);
+            patch = "$env:VERSION_PATCH".ToInt32($null);
+            sha = "$env:GITHUB_SHA";
+            build = "$env:BUILD_CONFIGURATION";
+        }
+        $y = ConvertTo-Yaml $versionInfo
+        Set-Content -Path "$env:BUILD_CONFIGURATION\ucp-package\ucp-version.yml" -Value $y
     - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
       run: |

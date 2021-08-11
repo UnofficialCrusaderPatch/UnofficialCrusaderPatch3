@@ -46,6 +46,20 @@ end
 
 return {
     enable = function(self, config)
+        local f, message = io.open("ucp-version.yml")
+        if not f then
+          print("Could not read '" .. "ucp-version.yml" .. "'.yml. Reason: " .. message)
+          self.known_version_string = ""
+        else
+          local data = f:read("*all")
+          f:close()
+
+          self.known_version = yaml.eval(data)        
+          self.known_version_string = self.known_version.major  .. "." .. self.known_version.minor .. "." .. self.known_version.patch .. "-" .. self.known_version.sha:sub(1,5)
+        end
+        
+
+    
         self.custom_menu_version_space = core.allocate(64)
         local d = table.pack(string.byte("V1.%d", 1, -1))
         table.insert(d, 0)
@@ -73,7 +87,7 @@ return {
         core.writeCode(self.push_vf_address, { 0x68, table.unpack(utils.itob(self.custom_menu_version_space)) })
 
         local digest = computeVersionString()
-        self:setMenuVersion("V1.%d UCP " .. UCP_VERSION .. "(" .. digest:sub(1, 6) .. ")")
+        self:setMenuVersion("V1.%d UCP " .. self.known_version_string .. " (" .. digest:sub(1, 6) .. ")")
 
         registerHookCallback("afterInit", function()
             self.afterInited = true
