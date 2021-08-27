@@ -41,15 +41,16 @@ package.path = BASEDIR .. "/code/?.lua"
 package.path = package.path .. ";" .. BASEDIR .. "/code/?/init.lua"
 ---Load essential ucp lua code
 core = require('core')
+hooks = require('hooks')
 utils = require('utils')
 data = {}
 data.common = require('data.common')
 data.structures = require('data.structures')
+data.version = require('data.version')
 yaml = require('ext.yaml.yaml')
 json = require('ext.json.json')
 extensions = require('extensions')
 sha = require("ext.pure_lua_SHA.sha2")
-hooks = require('hooks')
 
 
 
@@ -94,6 +95,9 @@ if config.active == false then
     print("[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
     return nil
 end
+
+---Overwrite gamemenu version and store game version
+data.version.initialize(config)
 
 
 extensionsTable = {}
