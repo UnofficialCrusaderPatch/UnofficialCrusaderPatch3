@@ -60,19 +60,39 @@ local function writeFileName(ai, castle, fileName)
     print("overwritten AI '" .. ai .. "' castle #" .. castle .. " at " .. address .. "d with: " .. core.readString(address))
 end
 
+local REPLACEMENTS = {}
+
+local function replaceFileWith(ai, castle, newFileName)
+    if not ai:match("[a-z]+") then error("invalid ai argument: " .. ai) end
+    if type(castle) ~= "number" then
+        if tonumber(castle) == nil then
+            error("invalid castle argument: " .. castle)
+        end
+        castle = tonumber(castle)
+    end
+    if castle < 1 or castle > 8 then error("invalid castle argument: out of bounds [1-8]") end
+    print("Replacing: '" .. "aiv\\" .. ai .. castle .. ".aiv'" .. " with: " .. newFileName)
+    REPLACEMENTS["aiv\\" .. ai .. castle .. ".aiv"] = newFileName
+end
+
 return {
     enable = function(self, config)
-        if config == nil then return end
+        modules.files.registerOverrideFunction(function(fileName)
+            print("Processing AIV override for: " .. fileName)
+            if fileName:match("aiv\\.+.aiv$") then
+                if REPLACEMENTS[fileName] ~= nil then
+                    return REPLACEMENTS[fileName]
+                end
+            end
+            return nil
+        end)
 
         for ai, v in pairs(config) do
             for castle, fileName in pairs(v) do
-                writeFileName(ai, castle, fileName)
+                replaceFileWith(ai, castle, fileName)
             end
         end
 
-        core.detourCode(function(registers)
-            return registers
-        end, 0x004ecb39, 7)
     end,
     disable = function(self, config)
 
@@ -80,10 +100,7 @@ return {
 
     -- ReadOnlyTable is preventing this from being prettier (we cannot expose 'api' because it becomes frozen)
     setAIVFileForAI = function(ai, castle, fileName)
-        writeFileName(ai, castle, fileName)
+        replaceFileWith(ai, castle, fileName)
     end,
-    getAIVFileForAI = function(ai, castle)
-        return core.readString(getFileNameAddress(ai, castle))
-    end,
-    getFileNameAddress = getFileNameAddress
+
 }

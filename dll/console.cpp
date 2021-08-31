@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <io.h>
+#include <fcntl.h>
 
 #include "RuntimePatchingSystem.h"
 #include "console.h"
@@ -82,6 +84,19 @@ void initializeConsole() {
 	if (user_in == 0) {
 		std::cout << "Could not open user input.\n";
 	}
+
+	//if (::AllocConsole())
+	//{
+	//	int hCrt = ::_open_osfhandle((intptr_t) ::GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+	//	FILE* hf = ::_fdopen(hCrt, "w");
+	//	*stdout = *hf;
+	//	::setvbuf(stdout, NULL, _IONBF, 0);
+
+	//	hCrt = ::_open_osfhandle((intptr_t) ::GetStdHandle(STD_ERROR_HANDLE), _O_TEXT);
+	//	hf = ::_fdopen(hCrt, "w");
+	//	*stderr = *hf;
+	//	::setvbuf(stderr, NULL, _IONBF, 0);
+	//}
 }
 
 void teardownConsole() {

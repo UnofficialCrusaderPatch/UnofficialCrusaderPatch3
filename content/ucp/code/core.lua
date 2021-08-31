@@ -428,8 +428,20 @@ end
 ---@param patchSize number number of byte code bytes to overwrite
 ---@param code table code to be executed
 ---@param returnTo number|nil optional value indicating the address to return to after `code` has been executed. If omitted, the return location will be address + patchSize
+---@param original "before"|"after"|nil optional value indicating the overwritten bytes at `address` should be put before, or at the end of `code` before jumping back. Values: "before","after"
 ---@return number address of the new memory location where `code` lives.
-function core.insertCode(address, patchSize, code, returnTo)
+function core.insertCode(address, patchSize, code, returnTo, original)
+    if original then
+        local originalCode = core.readBytes(address, patchSize)
+        if original == "before" then
+            table.insert(code, 1, originalCode)
+        elseif original == "after" then
+            table.insert(code, originalCode)
+        else
+            error("Unknown argument 'original': " .. original)
+        end
+    end
+
     local nopArray = {}
     for i = 1, patchSize do
         table.insert(nopArray, 0x90)
