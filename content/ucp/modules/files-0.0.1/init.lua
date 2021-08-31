@@ -2,11 +2,11 @@
 local namespace = {}
 
 local overrides = require('overrides')
--- local maps = require('maps')
+local iteration = require('iteration')
 
 return {
     enable = function(self, config)
-        -- maps.enable(config)
+        iteration.enable(config)
         overrides.enable(config)
     end,
     disable = function(self, config)

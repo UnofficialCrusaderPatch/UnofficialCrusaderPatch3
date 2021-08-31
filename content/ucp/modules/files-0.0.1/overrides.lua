@@ -4,9 +4,7 @@ local FILE_OVERRIDE_FUNCTIONS = {}
 local FILENAME_DB = {}
 
 local function onOpenFile(file)
-    print("onOpenFile: " .. file)
     for k, func in pairs(FILE_OVERRIDE_FUNCTIONS) do
-        print("Processing file override function for: " .. file)
       local fresult = func(file)
       if fresult ~= nil then
         print("Overriding file: " .. fresult)
