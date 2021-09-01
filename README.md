@@ -2,7 +2,7 @@
 Development for the new UCP DLL Injection approach.
 
 ## Setting up the repo locally and building the project
-0. Make sure you have nuget installed. And create a access token with just read:packages rights via your GitHub settings if you do not have one. You need it at step 4.
+0. Make sure you have the nuget command line program installed. Also, create a access token with just read:packages rights via your GitHub settings if you do not have one. You need it at step 4.
 1. Clone the repo.
 2. Start the VS2019 dev console, and change directory into the repo directory.
 3. Start a powershell session in the dev console: `powershell.exe`
