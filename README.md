@@ -24,7 +24,6 @@ Create a file in your game folder called `launcher.bat` with the following conte
 ```cmd
 @echo off
 SET UCP_DIR=C:\..\..\..\
-SET UCP_CONFIG=ucp-config.yml
 "Stronghold Crusader.exe"
 exit
 ```
