@@ -11,7 +11,7 @@ Development for the new UCP DLL Injection approach.
 5. Run `nuget restore`. Lua and RPS should get installed.
 6. Set the BUILD_CONFIGURATION environment variable to "Release" if you want a Release build: `$env:BUILD_CONFIGURATION="Release"`
 7. Run `msbuild /p:Configuration=$env:BUILD_CONFIGURATION`.
-8. Run the powershell script that can be found in the Github Actions workflow file. Step "Prepare UCP3 package" (https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/blob/main/.github/workflows/msbuild.yml#L47)
+8. Run the powershell script that can be found in the Github Actions workflow file. Step "Prepare UCP3 package" (https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/blob/main/.github/workflows/msbuild.yml#L60)
 9. All files will be prepared in `$env:BUILD_CONFIGURATION\ucp-package` (e.g., Release\ucp-package). 
 10. Running the game: The files from this folder can be directly copied to the game directory.
 11. Running the game: Copy the games original to `binkw32_real.dll` and rename `binkw32_ucp.dll` to `binkw32.dll`. (install.bat does this for you)
