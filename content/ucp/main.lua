@@ -46,10 +46,10 @@ data = {}
 data.common = require('data.common')
 data.structures = require('data.structures')
 data.version = require('data.version')
-yaml = require('ext.yaml.yaml')
-json = require('ext.json.json')
+yaml = require('vendor.yaml.yaml')
+json = require('vendor.json.json')
 extensions = require('extensions')
-sha = require("ext.pure_lua_SHA.sha2")
+sha = require("vendor.pure_lua_SHA.sha2")
 hooks = require('hooks')
 
 
