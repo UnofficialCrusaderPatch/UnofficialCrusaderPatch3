@@ -1,0 +1,9 @@
+disable-game-maps:
+  type: boolean
+  default: false
+disable-user-maps: 
+  type: boolean
+  default: false
+disable-user-savs:
+  type: boolean
+  default: false
