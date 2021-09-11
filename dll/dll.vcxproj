@@ -176,6 +176,8 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="InternalData.h" />
     <ClInclude Include="LuaIO.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="internal-data-def.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binkw32-hijack.cpp" />
@@ -187,6 +189,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dll.rc" />
+    <ResourceCompile Include="internaldata.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
