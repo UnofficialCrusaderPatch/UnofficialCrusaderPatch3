@@ -1,12 +1,8 @@
 #include <string>
 #include <filesystem>
 #include "Core.h"
+#include "LuaIO.h"
 
-#ifdef COMPILED_MODULES
-#include "CompiledLua.h"
-#endif
-
-std::string UCP_DIR = "ucp/";
 
 int luaListDirectories(lua_State* L) {
 	std::string path = luaL_checkstring(L, 1);
@@ -43,6 +39,51 @@ void addUtilityFunctions(lua_State* L) {
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
 
+void addIOFunctions(lua_State* L) {
+	lua_pushglobaltable(L);
+	
+	lua_pushcfunction(L, LuaIO::luaLoadLibrary);
+	lua_setfield(L, -2, "loadLibrary");
+
+	lua_getfield(L, -1, "io");
+	lua_pushcfunction(L, LuaIO::luaIOCustomOpen);
+	lua_setfield(L, -2, "open");
+	lua_pop(L, 1); // Pop the io table
+
+	/**
+	 * The code below is also possible.
+	lua_pushcfunction(L, LuaIO::luaScopedRequire);
+	lua_setfield(L, -2, "require"); //Overriding the global require
+	
+	* But we can also do this: */
+	std::string pre = LuaIO::fetchInternalData("ucp/code/pre.lua");
+	if (luaL_loadbufferx(L, pre.c_str(), pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
+		std::cout << "ERROR in loading pre.lua" << lua_tostring(L, -1) << std::endl;
+		lua_pop(L, 1);
+	}
+	else {
+		if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+			std::cout << "ERROR in executing pre.lua: " << lua_tostring(L, -1) << std::endl;
+			lua_pop(L, 1);
+		};
+	}
+
+	lua_pop(L, 1); //Pop the global table
+}
+
+void addUCPInternalFunctions(lua_State* L) {
+	lua_newtable(L);
+	RPS_initializeLuaAPI("");
+	// The namespace is left on the stack. 
+
+	// Set the namespace to the 'internal' field in our table.
+	lua_setfield(L, -2, "internal");
+	// Our table is left on the stack. Put the table in the global 'ucp' variable.
+	lua_setglobal(L, "ucp");
+}
+
+
+
 void Core::initialize() {
 
 	initializeConsole();
@@ -54,27 +95,37 @@ void Core::initialize() {
 	//RPS_initializeLuaOpenBase();
 	RPS_initializeLuaOpenLibs();
 	// TODO: implement restrictions here? Or only in lua via lua sandboxes?
-	//luaL_requiref(RPS_getLuaState(), LUA_LOADLIBNAME, luaopen_package, true);
-	//luaL_requiref(RPS_getLuaState(), LUA_MATHLIBNAME, luaopen_math, true);
-	//luaL_requiref(RPS_getLuaState(), LUA_STRLIBNAME, luaopen_string, true);
-	//luaL_requiref(RPS_getLuaState(), LUA_TABLIBNAME, luaopen_table, true);
-	//luaL_requiref(RPS_getLuaState(), LUA_IOLIBNAME, luaopen_io, true);
+	//luaL_requiref(L(), LUA_LOADLIBNAME, luaopen_package, true);
+	//luaL_requiref(L(), LUA_MATHLIBNAME, luaopen_math, true);
+	//luaL_requiref(L(), LUA_STRLIBNAME, luaopen_string, true);
+	//luaL_requiref(L(), LUA_TABLIBNAME, luaopen_table, true);
+	//luaL_requiref(L(), LUA_IOLIBNAME, luaopen_io, true);
 
-	lua_newtable(RPS_getLuaState());
-	RPS_initializeLuaAPI("");
-	// The namespace is left on the stack. 
+	lua_State* L = RPS_getLuaState();
 
-	// Set the namespace to the 'internal' field in our table.
-	lua_setfield(RPS_getLuaState(), -2, "internal");
-	// Our table is left on the stack. Put the table in the global 'ucp' variable.
-	lua_setglobal(RPS_getLuaState(), "ucp");
-
-	addUtilityFunctions(RPS_getLuaState());
-
+	addUCPInternalFunctions(L);
+	addUtilityFunctions(L);
+	addIOFunctions(L);
 
 #ifdef COMPILED_MODULES
-	CompiledModules::registerProxyFunctions();
-	CompiledModules::runCompiledModule("ucp/main.lua");
+	this->UCP_DIR = "ucp/";
+
+	std::string code = LuaIO::fetchInternalData("ucp/main.lua");
+	if (code.empty()) {
+		std::cout << "ERROR: failed to load ucp/main.lua: " << "does not exist internally" << std::endl;
+	}
+	if (luaL_loadbufferx(L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+		std::string errorMsg = lua_tostring(L, -1);
+		lua_pop(L, 1);
+		std::cout << "ERROR: failed to load ucp/main.lua: " << errorMsg << std::endl;
+	}
+
+	// Don't expect return values
+	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+		std::string errorMsg = lua_tostring(L, -1);
+		lua_pop(L, 1);
+		std::cout << "ERROR: failed to run ucp/main.lua: " << errorMsg << std::endl;
+	}
 #else
 
 	/**
@@ -83,16 +134,15 @@ void Core::initialize() {
 	 */
 	char * ENV_UCP_DIR = std::getenv("UCP_DIR");
 	if (ENV_UCP_DIR != NULL) {
-		UCP_DIR = std::string(ENV_UCP_DIR);
-		if (UCP_DIR.back() != '\\' && UCP_DIR.back() != '/') {
-			UCP_DIR = UCP_DIR + "/";
-		}
+		std::filesystem::path path = std::filesystem::path(ENV_UCP_DIR);
+		if (!path.is_absolute()) path = std::filesystem::current_path() / path;
+		this->UCP_DIR = path;
 	}
 
-	std::filesystem::path mainPath = std::filesystem::path(UCP_DIR + "main.lua");
+	std::filesystem::path mainPath = this->UCP_DIR / "main.lua";
 
 	if (!std::filesystem::exists(mainPath)) {
-		std::cout << "FATAL: Main file not found: " << UCP_DIR + "main.lua" << std::endl;
+		std::cout << "FATAL: Main file not found: " << mainPath << std::endl;
 	}
 	else {
 		RPS_runBootstrapFile(mainPath.string());

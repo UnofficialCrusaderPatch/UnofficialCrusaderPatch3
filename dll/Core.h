@@ -9,6 +9,7 @@
 #include "framework.h"
 #include "RuntimePatchingSystem.h"
 #include "console.h"
+#include <filesystem>
 
 
 
@@ -34,5 +35,7 @@ public:
 	HANDLE consoleThread = 0;
 
 	void initialize();
+
+	std::filesystem::path UCP_DIR = "ucp/";
 
 };

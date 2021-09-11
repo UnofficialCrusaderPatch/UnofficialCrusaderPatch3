@@ -35,7 +35,6 @@ if UCP_CONFIG then
     CONFIG_FILE = UCP_CONFIG
 end
 
-
 ---Indicates where to load UCP lua files from
 package.path = BASEDIR .. "/code/?.lua"
 package.path = package.path .. ";" .. BASEDIR .. "/code/?/init.lua"
