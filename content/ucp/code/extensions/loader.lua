@@ -115,7 +115,7 @@ end
 function BaseLoader:verifyVersion()
     local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
     if not handle then
-        error("cannot verify version, cannot open definition.yml")
+        error("cannot verify version, cannot open definition.yml: " .. status)
     end
 
     local data = handle:read("*all")

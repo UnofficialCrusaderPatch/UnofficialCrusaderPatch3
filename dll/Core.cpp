@@ -4,36 +4,12 @@
 #include "LuaIO.h"
 
 
-int luaListDirectories(lua_State* L) {
-	std::string path = luaL_checkstring(L, 1);
-	if (path.empty()) return luaL_error(L, ("Invalid path: " + path).c_str());
-	if(path.find("..") != std::string::npos) return luaL_error(L, ("Illegal path: " + path).c_str());
-
-	int count = 0;
-
-	std::filesystem::path targetPath = path;
-
-	try {
-		for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
-			if (entry.is_directory()) {
-				lua_pushstring(L, entry.path().string().c_str());
-				count += 1;
-			}
-		}
-	}
-	catch (std::filesystem::filesystem_error e) {
-		return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
-	}
-		
-	return count;
-}
-
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
 	lua_getglobal(L, "ucp"); // [ucp]
 	lua_getfield(L, -1, "internal"); // [ucp, internal]
 
-	lua_pushcfunction(L, luaListDirectories); // [ucp, internal, luaListDirectories]
+	lua_pushcfunction(L, LuaIO::luaListDirectories); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
 
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
@@ -56,7 +32,7 @@ void addIOFunctions(lua_State* L) {
 	lua_setfield(L, -2, "require"); //Overriding the global require
 	
 	* But we can also do this: */
-	std::string pre = LuaIO::fetchInternalData("ucp/code/pre.lua");
+	std::string pre = LuaIO::readInternalFile("ucp/code/pre.lua");
 	if (luaL_loadbufferx(L, pre.c_str(), pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
 		std::cout << "ERROR in loading pre.lua" << lua_tostring(L, -1) << std::endl;
 		lua_pop(L, 1);
@@ -110,22 +86,25 @@ void Core::initialize() {
 #ifdef COMPILED_MODULES
 	this->UCP_DIR = "ucp/";
 
-	std::string code = LuaIO::fetchInternalData("ucp/main.lua");
+	std::string code = LuaIO::readInternalFile("ucp/main.lua");
 	if (code.empty()) {
 		std::cout << "ERROR: failed to load ucp/main.lua: " << "does not exist internally" << std::endl;
 	}
-	if (luaL_loadbufferx(L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
-		std::string errorMsg = lua_tostring(L, -1);
-		lua_pop(L, 1);
-		std::cout << "ERROR: failed to load ucp/main.lua: " << errorMsg << std::endl;
+	else {
+		if (luaL_loadbufferx(L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+			std::string errorMsg = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			std::cout << "ERROR: failed to load ucp/main.lua: " << errorMsg << std::endl;
+		}
+
+		// Don't expect return values
+		if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+			std::string errorMsg = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			std::cout << "ERROR: failed to run ucp/main.lua: " << errorMsg << std::endl;
+		}
 	}
 
-	// Don't expect return values
-	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-		std::string errorMsg = lua_tostring(L, -1);
-		lua_pop(L, 1);
-		std::cout << "ERROR: failed to run ucp/main.lua: " << errorMsg << std::endl;
-	}
 #else
 
 	/**

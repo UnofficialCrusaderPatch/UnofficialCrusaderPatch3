@@ -9,6 +9,9 @@
 
 #include <map>
 #include <string>
+#include "zip.h"
 namespace LuaIO {
-	extern const std::map<std::string, std::string> internalData;
+	extern zip_t* internalDataZip;
+	std::string readInternalFile(std::string path);
+	bool initInternalData();
 }

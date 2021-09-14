@@ -23,14 +23,6 @@
 
 namespace LuaIO {
 
-	std::string fetchInternalData(std::string path) {
-		std::map<std::string, std::string>::const_iterator it = internalData.find(path);
-		if (it == internalData.end()) {
-			return std::string();
-		}
-		return it->second;
-	}
-
 	//This function was taken from: https://stackoverflow.com/a/2072890
 	inline bool ends_with(std::string const& value, std::string const& ending)
 	{
@@ -59,6 +51,111 @@ namespace LuaIO {
 		
 		result = sanitizedPath.string();
 		return true;
+	}
+
+
+	// Only for filesystem files
+	int luaListFileSystemDirectories(lua_State* L) {
+		std::string rawPath = luaL_checkstring(L, 1);
+		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
+
+		std::string sanitizedPath;
+		if (!sanitizeRelativePath(rawPath, sanitizedPath)) {
+			lua_pushnil(L);
+			lua_pushstring(L, sanitizedPath.c_str()); //error message
+			return 2;
+		}
+
+		int count = 0;
+
+		std::filesystem::path targetPath = sanitizedPath;
+
+		try {
+			for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
+				if (entry.is_directory()) {
+					lua_pushstring(L, (entry.path().string() + "/").c_str());
+					count += 1;
+				}
+			}
+		}
+		catch (std::filesystem::filesystem_error e) {
+			return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
+		}
+
+		return count;
+	}
+
+	// For internal files
+	int luaInternalDirectoryIterator(lua_State* L) {
+		std::string rawPath = luaL_checkstring(L, 1);
+		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
+
+		//Not sure sanitization is necessary, because zip files cannot really handle weird path names anyway...
+		std::string sanitizedPath;
+		if (!sanitizeRelativePath(rawPath, sanitizedPath)) {
+			lua_pushnil(L);
+			lua_pushstring(L, sanitizedPath.c_str()); //error message
+			return 2;
+		}
+
+		if (!initInternalData()) {
+			return luaL_error(L, "could not initialize internal data");
+		}
+
+		int count = 0;
+
+		std::filesystem::path haystack = std::filesystem::path(rawPath);
+
+		int i, n = zip_entries_total(internalDataZip);
+		for (i = 0; i < n; ++i) {
+			zip_entry_openbyindex(internalDataZip, i);
+			{
+				const char* name = zip_entry_name(internalDataZip);
+				int isdir = zip_entry_isdir(internalDataZip);
+				// Only directories
+				if (isdir) {
+					// Only subdirectories of the directly requested path
+					std::filesystem::path needle = std::filesystem::path(name);
+					std::filesystem::path optionA = haystack.lexically_relative(needle);
+					if (optionA.string() == "..") {
+						lua_pushstring(L, name);
+						count += 1;
+					}
+				}
+				unsigned long long size = zip_entry_size(internalDataZip);
+				unsigned int crc32 = zip_entry_crc32(internalDataZip);
+			}
+			zip_entry_close(internalDataZip);
+		}
+
+		return count;
+	};
+
+
+	int luaListDirectories(lua_State* L) {
+		std::string rawPath = luaL_checkstring(L, 1);
+		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
+
+		std::string sanitizedPath;
+		if (!sanitizeRelativePath(rawPath, sanitizedPath)) {
+			lua_pushnil(L);
+			lua_pushstring(L, sanitizedPath.c_str()); //error message
+			return 2;
+		}
+
+		//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
+		std::replace(sanitizedPath.begin(), sanitizedPath.end(), '\\', '/');
+
+#ifdef COMPILED_MODULES
+		if (sanitizedPath.rfind("ucp/", 0) == 0) {
+			if (sanitizedPath.rfind("ucp/plugins/", 0) == 0) {
+				return luaListFileSystemDirectories(L);
+			}
+			return luaInternalDirectoryIterator(L);
+		}
+#endif
+
+		return luaListFileSystemDirectories(L);
 	}
 
 	int luaLoadLibrary(lua_State* L) {
@@ -195,9 +292,9 @@ namespace LuaIO {
 #ifdef COMPILED_MODULES
 		
 		std::string code;
-		std::string tryFile = fetchInternalData("ucp/" + codePath + ".lua");
+		std::string tryFile = readInternalFile("ucp/" + codePath + ".lua");
 		if (tryFile.empty()) {
-			std::string tryDirectory = fetchInternalData("ucp/" + codePath + "/init.lua");
+			std::string tryDirectory = readInternalFile("ucp/" + codePath + "/init.lua");
 			if (tryDirectory.empty()) {
 				return luaL_error(L, "file does not exist in internal data");
 			}
@@ -443,7 +540,8 @@ namespace LuaIO {
 					return luaL_error(L, "invalid mode for internal file");
 				}
 
-				std::string contents = fetchInternalData(sanitizedPath);
+				std::string contents = readInternalFile(sanitizedPath);
+
 				if (contents.empty()) {
 					lua_pushnil(L);
 					lua_pushstring(L, ("file does not exist internally: " + sanitizedPath).c_str());

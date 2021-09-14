@@ -27,7 +27,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        build_configuration: [Debug, Release]
+        build_configuration: [Debug, Release, DebugSecure, ReleaseSecure]
     env:
         BUILD_CONFIGURATION: ${{ matrix.build_configuration }}
     steps:
@@ -47,34 +47,20 @@ jobs:
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore
-
-    - name: Build UCP3
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
       
-    - name: Prepare UCP3 package
+    - name: Prepare UCP3 package folder structure
       shell: pwsh
       run: |
         # Create the right folders
         mkdir "$env:BUILD_CONFIGURATION\ucp-package"
-        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"
-        
-        # Copy the dll files, rename dll.dll to binkw32_ucp.dll
-        $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
-        Copy-Item $dllfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
-        Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\dll.dll" -NewName "binkw32_ucp.dll"
-        
-        # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
-        Copy-Item installer\rename-dlls.bat "$env:BUILD_CONFIGURATION\ucp-package\install.bat"
-        
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"       
+      
+    - name: Prepare UCP3 package extensions
+      shell: pwsh
+      run: |
         # Copy all content/ucp files ucp-package/ucp, except the modules folder
         $mainfiles = Get-ChildItem content\ucp | Where({$_.Name -ne "modules"})  | foreach{$_.FullName}
         Copy-Item $mainfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\ucp" -Recurse
-        
-        # Copy the legacy ucp.cfg
-        Copy-Item installer\ucp.cfg "$env:BUILD_CONFIGURATION\ucp-package\ucp.cfg"
         
         ### Build each module if required, and then package the module by copying the right files
         # List of modules
@@ -91,11 +77,20 @@ jobs:
           # If the module specifies a custom list of files to include, read that
           $hasFilesList = Test-Path -Path ($module.FullName + "\module.files")
           
+          # Modules that should be compiled do not inherit the Secure build configurations for now
+          $simpleBuildConfiguration="Release"
+          if($env:BUILD_CONFIGURATION=="DebugSecure") {
+            $simpleBuildConfiguration="Debug"
+          }
+          if($env:BUILD_CONFIGURATION=="ReleaseSecure") {
+            $simpleBuildConfiguration="Release"
+          }
+          
           # Build the module
           if($hasVCXProj) {
             pushd $module.FullName
             nuget restore
-            msbuild /m /p:Configuration=$env:BUILD_CONFIGURATION
+            msbuild /m /p:Configuration=$simpleBuildConfiguration
             popd
           }
           
@@ -105,7 +100,7 @@ jobs:
             $moduleFiles = $node.Node.file
             foreach($moduleFile in $moduleFiles) {
               # To allow specification of $(Configuration) in "src" in module.files, we substitute it with the right value here
-              $srcFile = $moduleFile.src.Replace("`$(Configuration)", "$env:BUILD_CONFIGURATION")
+              $srcFile = $moduleFile.src.Replace("`$(Configuration)", "$simpleBuildConfiguration")
               
               # Copy the file, can include wildcards
               Copy-Item ($module.FullName + "\" + $srcFile) -Destination $moduleDir -Recurse
@@ -115,6 +110,33 @@ jobs:
             Copy-Item ($module.FullName + "\*") -Destination $moduleDir -Recurse
           }
         }
+        
+    - name: Generate zip file of the package for secure versions
+      shell: pwsh
+      run: |
+        cd "$env:BUILD_CONFIGURATION\ucp-package\"
+        7z a -tzip -m0=Copy ..\..\internaldata.zip ucp       
+        
+    - name: Build UCP3
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Prepare UCP3 package dll files and cfg file
+      shell: pwsh
+      run: |
+        # Copy the dll files, rename dll.dll to binkw32_ucp.dll
+        $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
+        Copy-Item $dllfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
+        Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\dll.dll" -NewName "binkw32_ucp.dll"
+        
+        # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
+        Copy-Item installer\rename-dlls.bat "$env:BUILD_CONFIGURATION\ucp-package\install.bat"
+        
+        # Copy the legacy ucp.cfg
+        Copy-Item installer\ucp.cfg "$env:BUILD_CONFIGURATION\ucp-package\ucp.cfg"
+
     - name: Generate a default config
       shell: pwsh
       run: |

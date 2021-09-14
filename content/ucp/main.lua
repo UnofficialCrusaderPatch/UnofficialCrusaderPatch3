@@ -9,9 +9,12 @@ DEBUG = true
 BASEDIR = "ucp"
 
 ---Change the ucp working directory based on an environment variable
+---@deprecated UCP_DIR is now handled in the dll part
 ---@param UCP_DIR string path to the ucp directory
 UCP_DIR = os.getenv("UCP_DIR")
 
+---@deprecated UCP_DIR is now handled in the dll part
+--[[
 if UCP_DIR then
     if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
         UCP_DIR = UCP_DIR + "\\"
@@ -19,6 +22,7 @@ if UCP_DIR then
     print("[main]: Setting BASEDIR to " .. UCP_DIR)
     BASEDIR = UCP_DIR
 end
+--]]
 
 ---File that contains the defaults
 CONFIG_DEFAULTS_FILE = "ucp-config-defaults.yml"
@@ -108,6 +112,10 @@ local function loadExtensionsFromFolder(folder, cls)
 
     --- Create a loader for all extensions we can find
     for k, subFolder in ipairs(subFolders) do
+		if subFolder:sub(-1) == "/" then
+			subFolder = subFolder:sub(1, -2)
+		end
+		if subFolder:match("(-[0-9\\.]+)$") == nil then error("invalid extension folder name: " .. subFolder) end
         local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
         local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
 

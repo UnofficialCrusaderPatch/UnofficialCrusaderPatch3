@@ -9,11 +9,12 @@
 
 #include <string>
 #include "lua.hpp"
+#include "InternalData.h"
 
 namespace LuaIO {
 	int luaLoadLibrary(lua_State* L);
 	int luaScopedRequire(lua_State* L);
 	int luaIOCustomOpen(lua_State* L);
-	std::string fetchInternalData(std::string path);
+	int luaListDirectories(lua_State* L);
 
 }

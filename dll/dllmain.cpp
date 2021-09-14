@@ -21,12 +21,16 @@ __declspec(naked) void entryPointDetour() {
 	}
 }
 
+HMODULE hModule = 0;
+
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
 	{
+
+		hModule = hMod;
 
 #ifdef WAIT_BEFORE_HOOK
 		MessageBoxA(0, "ready?", "ready?", MB_OK);

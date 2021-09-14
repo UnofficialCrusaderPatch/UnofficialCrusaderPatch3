@@ -17,5 +17,6 @@
   <ItemGroup>
     <PackageReference Include="RPS" Version="1.1.3"/>
     <PackageReference Include="lua" Version="5.4.3"/>
+    <PackageReference Include="zip" Version="0.2.0"/>
   </ItemGroup>
 </Project>
