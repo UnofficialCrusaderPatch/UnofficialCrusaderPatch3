@@ -9,7 +9,7 @@ Development for the new UCP DLL Injection approach.
 git clone https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3
 cd UnofficialCrusaderPatch3
 ```
-3. Start a powershell session in the dev console`
+3. Start a powershell session in the dev console
 ```powershell
 powershell.exe
 ```
