@@ -36,7 +36,7 @@ All files will be prepared in `$env:BUILD_CONFIGURATION\ucp-package` (e.g., Rele
 To install the system, run `install.bat` to backup the game's `binkw32.dll` (to `binkw32_real.dll`) and overwrite `binkw32.dll` with `binkw32_ucp.dll`.
 
 ## Working on the lua part:
-Install a non-Secure build and modify the .lua files. Core functionality is found in the `ucp/code` directory. 
+[Download](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/actions) and install a non-Secure build. Core functionality is found in the `ucp/code` directory. Restart the game every time you modified the .lua files.
 
 ### Recommended tools
 IntelliJ IDEA (any will do) with the EmmyLUA plugin.
