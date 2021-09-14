@@ -79,10 +79,10 @@ jobs:
           
           # Modules that should be compiled do not inherit the Secure build configurations for now
           $simpleBuildConfiguration="Release"
-          if($env:BUILD_CONFIGURATION=="DebugSecure") {
+          if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
             $simpleBuildConfiguration="Debug"
           }
-          if($env:BUILD_CONFIGURATION=="ReleaseSecure") {
+          if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
             $simpleBuildConfiguration="Release"
           }
           
