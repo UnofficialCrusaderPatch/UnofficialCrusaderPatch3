@@ -99,10 +99,6 @@ if config.active == false then
     return nil
 end
 
----Overwrite game menu version and store game version details
-data.version.initialize(config)
-
-
 extensionsTable = {}
 extensionLoaders = {}
 
@@ -174,10 +170,14 @@ explicitlyActiveExtensions = {}
 for k, ext in pairs(extensionLoadOrder) do
     if joinedConfig.extensions[ext] then
         if joinedConfig.extensions[ext].active == true then
-            table.insert(explicitlyActiveExtensions, ext)
+            if data.version.verifyDependencies(ext, extensionLoaders) then
+				table.insert(explicitlyActiveExtensions, ext)
+			end
         end
     elseif joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true then
-        table.insert(explicitlyActiveExtensions, ext)
+        if data.version.verifyDependencies(ext, extensionLoaders) then
+            table.insert(explicitlyActiveExtensions, ext)
+        end
     end
 end
 
@@ -260,6 +260,8 @@ end
 mergeConfiguration(default_config, configMaster)
 configFinal = default_config
 
+---Overwrite game menu version and store game version details
+data.version.initialize(configFinal)
 
 ---Table to hold all the modules
 ---@type table<string, Module>

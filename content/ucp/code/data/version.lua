@@ -1,5 +1,12 @@
 local namespace = {}
 
+extensions = require('extensions')
+
+local versionToInt = function(versionString)
+    local result = versionString:gsub("%.", "")
+    return tonumber(result)
+end
+
 local scanForString = function(s)
     local targetBytes = table.pack(string.byte(s, 1, -1))
     local targetString = utils.bytesToAOBString(targetBytes)
@@ -83,8 +90,8 @@ namespace.initialize = function(config)
 
     core.writeCode(namespace.push_vf_address, { 0x68, table.unpack(utils.itob(namespace.custom_menu_version_space)) })
 
-    local digest = computeVersionString(config)
-    namespace.setMenuVersion("V1.%d UCP " .. namespace.known_version_string .. " (" .. digest:sub(1, 6) .. ")")
+    namespace.digest = computeVersionString(config)
+    namespace.setMenuVersion("V1.%d UCP " .. namespace.known_version_string .. " (" .. namespace.digest:sub(1, 6) .. ")")
 
     namespace.game_language = core.readInteger(core.scanForAOB("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
     namespace.afterGameInit = false
@@ -146,6 +153,65 @@ namespace.setMenuVersion = function(fstring)
         error("too long")
     end
     core.writeBytes(namespace.custom_menu_version_space, d)
+end
+
+namespace.getDigest = function()
+    return namespace.digest
+end
+
+-- Extension versioning logic
+namespace.verifyDependencies = function(extension, extensionLoaders)
+    local deps = extensionLoaders[extension]:dependencies()
+
+    if deps == nil then return end
+
+    for k, dep in pairs(deps) do
+        local dependencyVersionDemanded = versionToInt(dep.version)
+        local versionEqualityDemanded = dep.equality
+
+        if extensionLoaders[dep.name] == nil then 
+            print("[ERROR] Dependency not found: Extension " .. extension .. " requires module " .. dep.name) 
+            error("Dependency check failed for \"" .. extension .. "\"")
+            return false
+        end
+
+        local dependencyVersion = versionToInt(extensionLoaders[dep.name].version)
+
+        local versionConflict = true
+        if versionEqualityDemanded == "==" then
+            if dependencyVersion == dependencyVersionDemanded then
+                versionConflict = false
+            end
+        elseif versionEqualityDemanded == ">=" then
+            if dependencyVersion >= dependencyVersionDemanded then
+                versionConflict = false
+            end
+        elseif versionEqualityDemanded == "<=" then
+            if dependencyVersion <= dependencyVersionDemanded then
+                versionConflict = false
+            end
+        elseif versionEqualityDemanded == ">" then
+            if dependencyVersion > dependencyVersionDemanded then
+                versionConflict = false
+            end
+        elseif versionEqualityDemanded == "<" then
+            if dependencyVersion < dependencyVersionDemanded then
+                versionConflict = false
+            end
+        else
+            print("[ERROR] Version operator malformed inside definition.yml")
+            error("Dependency check failed for \"" .. extension .. "\"")
+            return false
+        end
+
+        if versionConflict then
+            print("[ERROR] Dependency version conflict for extension \"" .. extension .. "\": Demanded module \"" .. dep.name .. "\" version " .. versionEqualityDemanded .. " " .. dep.version .. ", found " .. extensionLoaders[dep.name].version)
+            error("Dependency check failed for \"" .. extension .. "\"")
+            return false
+        end
+
+        return true
+    end
 end
 
 return namespace
