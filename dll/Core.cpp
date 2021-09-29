@@ -12,6 +12,9 @@ void addUtilityFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaListDirectories); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
 
+	lua_pushcfunction(L, LuaIO::luaWideCharToMultiByte);
+	lua_setfield(L, -2, "WideCharToMultiByte");
+
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
 
