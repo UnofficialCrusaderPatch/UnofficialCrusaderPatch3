@@ -114,8 +114,12 @@ jobs:
     - name: Generate zip file of the package for secure versions
       shell: pwsh
       run: |
-        cd "$env:BUILD_CONFIGURATION\ucp-package\"
-        7z a -tzip -m0=Copy ..\..\internaldata.zip ucp       
+        if(($env:BUILD_CONFIGURATION -eq "DebugSecure") -or ($env:BUILD_CONFIGURATION -eq "ReleaseSecure")) {
+          cd "$env:BUILD_CONFIGURATION\ucp-package\"
+          # Zip all non-dll files and remove the original to avoid packing twice
+          7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -xr"!*.dll" -x"!ucp/plugins" -sdel
+        } else {
+        }
         
     - name: Build UCP3
       working-directory: ${{env.GITHUB_WORKSPACE}}
