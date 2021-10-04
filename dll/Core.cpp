@@ -68,23 +68,24 @@ void Core::initialize() {
 	initializeConsole();
 
 	RPS_initializeLua();
+	this->L = RPS_getLuaState();
+
 	RPS_initializeCodeHeap();
 	RPS_initializePrintRedirect();
 
 	//RPS_initializeLuaOpenBase();
 	RPS_initializeLuaOpenLibs();
 	// TODO: implement restrictions here? Or only in lua via lua sandboxes?
-	//luaL_requiref(L(), LUA_LOADLIBNAME, luaopen_package, true);
-	//luaL_requiref(L(), LUA_MATHLIBNAME, luaopen_math, true);
-	//luaL_requiref(L(), LUA_STRLIBNAME, luaopen_string, true);
-	//luaL_requiref(L(), LUA_TABLIBNAME, luaopen_table, true);
-	//luaL_requiref(L(), LUA_IOLIBNAME, luaopen_io, true);
+	//luaL_requiref(L, LUA_LOADLIBNAME, luaopen_package, true);
+	//luaL_requiref(L, LUA_MATHLIBNAME, luaopen_math, true);
+	//luaL_requiref(L, LUA_STRLIBNAME, luaopen_string, true);
+	//luaL_requiref(L, LUA_TABLIBNAME, luaopen_table, true);
+	//luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, true);
 
-	lua_State* L = RPS_getLuaState();
 
-	addUCPInternalFunctions(L);
-	addUtilityFunctions(L);
-	addIOFunctions(L);
+	addUCPInternalFunctions(this->L);
+	addUtilityFunctions(this->L);
+	addIOFunctions(this->L);
 
 #ifdef COMPILED_MODULES
 	this->UCP_DIR = "ucp/";
@@ -94,16 +95,16 @@ void Core::initialize() {
 		std::cout << "ERROR: failed to load ucp/main.lua: " << "does not exist internally" << std::endl;
 	}
 	else {
-		if (luaL_loadbufferx(L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
-			std::string errorMsg = lua_tostring(L, -1);
-			lua_pop(L, 1);
+		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+			std::string errorMsg = lua_tostring(this->L, -1);
+			lua_pop(this->L, 1);
 			std::cout << "ERROR: failed to load ucp/main.lua: " << errorMsg << std::endl;
 		}
 
 		// Don't expect return values
-		if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-			std::string errorMsg = lua_tostring(L, -1);
-			lua_pop(L, 1);
+		if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
+			std::string errorMsg = lua_tostring(this->L, -1);
+			lua_pop(this->L, 1);
 			std::cout << "ERROR: failed to run ucp/main.lua: " << errorMsg << std::endl;
 		}
 	}

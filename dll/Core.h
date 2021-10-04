@@ -38,4 +38,6 @@ public:
 
 	std::filesystem::path UCP_DIR = "ucp/";
 
+	lua_State* L = 0;
+
 };
