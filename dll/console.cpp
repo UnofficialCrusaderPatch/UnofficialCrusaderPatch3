@@ -15,6 +15,32 @@ FILE* console;
 FILE* errorFile;
 FILE* user_in;
 
+void executeLuaSnippet(std::string code) {
+	lua_State* L = RPS_getLuaState();
+	int before = lua_gettop(L);
+	int r = luaL_dostring(L, code.c_str());
+	if (r == LUA_OK) {
+		int after = lua_gettop(L);
+		if (after - before > 0) {
+			for (int i = before; i < after; i++) {  /* for each argument */
+				size_t l;
+				const char* s = luaL_tolstring(L, i, &l);  /* convert it to string */
+				if (i > 1)  /* not the first element? */
+					lua_writestring("\t", 1);  /* add a tab before it */
+				lua_writestring(s, l);  /* print it */
+				lua_pop(L, 1);  /* pop result */
+			}
+			lua_writeline();
+		}
+		lua_pop(L, after - before);
+	}
+	else {
+		std::string errormsg = lua_tostring(L, -1);
+		std::cout << "[RPS]: error in lua snippet: " << errormsg << std::endl;
+		lua_pop(L, 1); // pop off the error message;
+	}
+}
+
 void RunUserInputLoop()
 {
 	std::cout << std::endl << std::endl << "Welcome to the UCP. Type help to get started." << std::endl;
@@ -53,7 +79,7 @@ void RunUserInputLoop()
 			break;
 		}
 		else {
-			RPS_executeSnippet(uin);
+			executeLuaSnippet(uin);
 		}
 	}
 }
