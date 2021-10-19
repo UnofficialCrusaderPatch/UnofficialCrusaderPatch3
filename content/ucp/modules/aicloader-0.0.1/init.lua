@@ -70,9 +70,18 @@ local namespace = {}
 
 -- functions you want to expose to the outside world
 namespace = {
-    enable = function(self)
-        modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
-        modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
+    enable = function(self, config)
+        if modules.commands then
+            modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
+            modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
+        end
+
+        local fileName = config.aicFile
+        if fileName then
+            print("Overwritten AIC values from file: " .. fileName)
+            namespace.overwriteAICsFromFile(fileName)
+        end
+
     end,
     disable = function(self)
     end,

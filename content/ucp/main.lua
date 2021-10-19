@@ -55,8 +55,7 @@ extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
 hooks = require('hooks')
 
-
-
+data.version.initialize()
 
 ---UCP3 Configuration
 ---Load the default config file
@@ -171,12 +170,16 @@ for k, ext in pairs(extensionLoadOrder) do
     if joinedConfig.extensions[ext] then
         if joinedConfig.extensions[ext].active == true then
             if data.version.verifyDependencies(ext, extensionLoaders) then
-				table.insert(explicitlyActiveExtensions, ext)
+                if data.version.verifyGameDependency(ext, extensionLoaders) then
+                    table.insert(explicitlyActiveExtensions, ext)
+                end
 			end
         end
     elseif joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true then
         if data.version.verifyDependencies(ext, extensionLoaders) then
-            table.insert(explicitlyActiveExtensions, ext)
+            if data.version.verifyGameDependency(ext, extensionLoaders) then
+                table.insert(explicitlyActiveExtensions, ext)
+            end
         end
     end
 end
@@ -260,8 +263,8 @@ end
 mergeConfiguration(default_config, configMaster)
 configFinal = default_config
 
----Overwrite game menu version and store game version details
-data.version.initialize(configFinal)
+---Overwrite game menu version
+data.version.overwriteVersion(configFinal)
 
 ---Table to hold all the modules
 ---@type table<string, Module>
@@ -312,3 +315,5 @@ for k, dep in pairs(allActiveExtensions) do
         error("unknown extension type for: " .. dep)
     end
 end
+
+

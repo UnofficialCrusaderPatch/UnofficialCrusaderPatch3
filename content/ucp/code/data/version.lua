@@ -51,7 +51,7 @@ local computeVersionString = function(config)
     return digest
 end
 
-namespace.initialize = function(config)
+namespace.initialize = function()
     local f, message = io.open("ucp-version.yml")
     if not f then
         print("Could not read '" .. "ucp-version.yml" .. "'.yml. Reason: " .. message)
@@ -88,6 +88,10 @@ namespace.initialize = function(config)
 
     namespace.game_version = { ["major"] = 1, ["minor"] = core.readByte(vnumber_address + 1) }
 
+
+end
+
+namespace.overwriteVersion = function(config)
     core.writeCode(namespace.push_vf_address, { 0x68, table.unpack(utils.itob(namespace.custom_menu_version_space)) })
 
     namespace.digest = computeVersionString(config)
@@ -96,8 +100,8 @@ namespace.initialize = function(config)
     namespace.game_language = core.readInteger(core.scanForAOB("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
     namespace.afterGameInit = false
 
-    hooks.registerHookCallback("afterInit", function() 
-                                namespace.afterGameInit = true 
+    hooks.registerHookCallback("afterInit", function()
+                                namespace.afterGameInit = true
                                 end)
 end
 
@@ -159,6 +163,50 @@ namespace.getDigest = function()
     return namespace.digest
 end
 
+local COMPARATORS = {
+    ["<"] = function(a, b) return a < b end,
+    [">"] = function(a, b) return a > b end,
+    ["<="] = function(a, b) return a <= b end,
+    [">="] = function(a, b) return a >= b end,
+    ["=="] = function(a, b) return a == b end,
+}
+
+namespace.verifyGameDependency = function(ext, extensionLoaders)
+    local extension = extensionLoaders[ext]
+
+    if extension:type() ~= "ModuleLoader" then return true end
+
+    local isExtreme = namespace.isExtreme()
+    local versionString = namespace.getGameVersionMajor() .. "." .. namespace.getGameVersionMinor()
+    local gameName = "SHC"
+    if isExtreme then
+        gameName = gameName .. "E"
+    end
+
+    extension:loadDefinition()
+    if not extension.definition or not extension.definition.game then
+        error("cannot determine game dependency for: " .. ext)
+    end
+
+    for k, v in pairs(extension.definition.game) do
+        local name, eq, version = v:match("([a-zA-Z0-9-_]+)([<>=]+)([0-9\\.]+)")
+        if name == gameName then
+            local comp = COMPARATORS[eq]
+            if comp == nil then
+                error("illegal comparator: " .. comp)
+            end
+
+            if comp(versionString, version) then
+                return true
+            end
+        end
+    end
+
+    print("[ERROR] Dependency version conflict for extension \"" .. ext .. "\": does not work for game: \"" .. gameName .. "\" version " .. versionString)
+    error("Game dependency check failed for \"" .. ext .. "\"")
+    return false
+end
+
 -- Extension versioning logic
 namespace.verifyDependencies = function(extension, extensionLoaders)
     local deps = extensionLoaders[extension]:dependencies()
@@ -178,24 +226,9 @@ namespace.verifyDependencies = function(extension, extensionLoaders)
         local dependencyVersion = versionToInt(extensionLoaders[dep.name].version)
 
         local versionConflict = true
-        if versionEqualityDemanded == "==" then
-            if dependencyVersion == dependencyVersionDemanded then
-                versionConflict = false
-            end
-        elseif versionEqualityDemanded == ">=" then
-            if dependencyVersion >= dependencyVersionDemanded then
-                versionConflict = false
-            end
-        elseif versionEqualityDemanded == "<=" then
-            if dependencyVersion <= dependencyVersionDemanded then
-                versionConflict = false
-            end
-        elseif versionEqualityDemanded == ">" then
-            if dependencyVersion > dependencyVersionDemanded then
-                versionConflict = false
-            end
-        elseif versionEqualityDemanded == "<" then
-            if dependencyVersion < dependencyVersionDemanded then
+        local comp = COMPARATORS[versionEqualityDemanded]
+        if comp ~= nil then
+            if comp(dependencyVersion, dependencyVersionDemanded) == true then
                 versionConflict = false
             end
         else

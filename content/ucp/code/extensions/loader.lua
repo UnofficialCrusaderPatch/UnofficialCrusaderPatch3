@@ -19,6 +19,7 @@ function BaseLoader:new(obj)
         version = obj.version,
         path = obj.path,
         env = obj.env,
+        definition = nil,
     }, self)
     self.__index = self
     return o
@@ -55,12 +56,12 @@ function BaseLoader:unload()
     self.handle = nil
 end
 
+function BaseLoader:loadDefinition()
+    if self.definition ~= nil then return end
 
----Return the dependencies of this module by reading the module.yml file
----@return table an array of hash tables with the entries: name, equality, version
-function BaseLoader:dependencies()
     local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
     if not handle then
+        self.definition = false
         return nil
     end
 
@@ -69,18 +70,25 @@ function BaseLoader:dependencies()
 
     if data:len() == 0 then
         -- print("WARNING: the module.yml file of " .. self.name .. " is empty")
+        self.definition = false
         return nil
     end
 
-    local y = yaml.eval(data)
+    self.definition = yaml.eval(data)
+end
 
-    if not y.depends then
+---Return the dependencies of this module by reading the module.yml file
+---@return table an array of hash tables with the entries: name, equality, version
+function BaseLoader:dependencies()
+    self:loadDefinition()
+
+    if not self.definition or not self.definition.depends then
         return { }
     end
 
     local deps = {}
-    for k, v in pairs(y.depends) do
-        m, eq, version = v:match("([a-zA-Z0-9-_]+)([<>=]+)([0-9\\.]+)")
+    for k, v in pairs(self.definition.depends) do
+        local m, eq, version = v:match("([a-zA-Z0-9-_]+)([<>=]+)([0-9\\.]+)")
         table.insert(deps, {
             name = m,
             equality = eq,
@@ -113,23 +121,14 @@ end
 
 
 function BaseLoader:verifyVersion()
-    local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
-    if not handle then
-        error("cannot verify version, cannot open definition.yml: " .. status)
-    end
+    self:loadDefinition()
 
-    local data = handle:read("*all")
-    handle:close()
-
-    if data:len() == 0 then
-        -- print("WARNING: the module.yml file of " .. self.name .. " is empty")
+    if not self.definition then
         error("cannot verify version, empty definition.yml")
     end
 
-    local y = yaml.eval(data)
-
-    if y.version ~= self.version then
-        error("Version mismatch between assumed version: " .. self.version .. " and defined version: " .. y.version)
+    if self.definition.version ~= self.version then
+        error("Version mismatch between assumed version: " .. self.version .. " and defined version: " .. self.definition.version)
     end
 
     return true

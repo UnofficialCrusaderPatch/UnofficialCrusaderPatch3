@@ -2,3 +2,4 @@
 name: better-ai-ox-tethers
 version: 0.0.1
 author: gynt
+game: [SHC==1.41]
