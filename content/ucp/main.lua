@@ -12,6 +12,7 @@ BASEDIR = "ucp"
 ---@deprecated UCP_DIR is now handled in the dll part
 ---@param UCP_DIR string path to the ucp directory
 UCP_DIR = os.getenv("UCP_DIR")
+print("[main]: Using UCP_DIR: " .. UCP_DIR)
 
 ---@deprecated UCP_DIR is now handled in the dll part
 --[[
@@ -103,7 +104,12 @@ extensionLoaders = {}
 
 local function loadExtensionsFromFolder(folder, cls)
     ---Dynamic extensions discovery
-    local subFolders = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
+    local subFolders, err = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
+
+	if not subFolders then
+		print(subFolders)
+		error(err)
+	end
 
     --- Create a loader for all extensions we can find
     for k, subFolder in ipairs(subFolders) do

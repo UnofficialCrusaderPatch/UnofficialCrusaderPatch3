@@ -1,7 +1,12 @@
 #include <string>
 #include <filesystem>
+#include <sstream>
+#include <fstream>
 #include "Core.h"
 #include "LuaIO.h"
+
+#define LOGURU_WITH_STREAMS 1
+#include "loguru.cpp"
 
 
 void addUtilityFunctions(lua_State* L) {
@@ -61,40 +66,129 @@ void addUCPInternalFunctions(lua_State* L) {
 	lua_setglobal(L, "ucp");
 }
 
+void logToStdOut(void* user_data, const loguru::Message& message) {
+	std::cout << message.message << std::endl;
+}
+
+static int luaPrint(lua_State* L) {
+	std::stringstream output;
+
+	int n = lua_gettop(L);  /* number of arguments */
+	int i;
+	for (i = 1; i <= n; i++) {  /* for each argument */
+		size_t l;
+		const char* s = luaL_tolstring(L, i, &l);  /* convert it to string */
+		if (i > 1)  /* not the first element? */
+			output << "\t";
+		output << s;
+		lua_pop(L, 1);  /* pop result */
+	}
+	LOG_S(INFO) << output.str();
+	return 0;
+}
+
+static const struct luaL_Reg printlib[] = {
+  {"print", luaPrint},
+  {NULL, NULL} /* end of array */
+};
+
 void initializeLogger() {
+	// Put every log message in "everything.log":
+	loguru::add_file("ucp3.log", loguru::Truncate, loguru::Verbosity_MAX);
+
+	// Only log WARNING, ERROR and FATAL to "latest_readable.log":
+	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
+
+	loguru::add_callback("stdout", logToStdOut, NULL, loguru::Verbosity_MAX);
+
+	// Only show most relevant things on stderr:
+	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
+
 
 }
 
 void deinitializeLogger() {
-
+	loguru::shutdown();
 }
 
+int luaLog(lua_State* L) {
+	if (lua_gettop(L) < 2) {
+		return luaL_error(L, "invalid number of arguments, expected at least 2: log level, message, ...");
+	}
+	int logLevel = luaL_checkinteger(L, 1);
+
+	std::stringstream output;
+
+	int n = lua_gettop(L);  /* number of arguments */
+	int i;
+	const int start = 2;
+	for (i = start; i <= n; i++) {  /* for each argument */
+		size_t l;
+		const char* s = luaL_tolstring(L, i, &l);  /* convert it to string */
+		if (i > start)  /* not the first element? */
+			output << "\t";
+		output << s;
+		lua_pop(L, 1);  /* pop result */
+	}
+
+	VLOG_F(logLevel, output.str().c_str());
+
+	return 0;
+}
+
+void addLoggingFunctions(lua_State* L) {
+	lua_pushglobaltable(L);
+	luaL_setfuncs(L, printlib, 0);
+	lua_pop(L, 1);
+
+	// Put the 'ucp.internal' on the stack
+	lua_getglobal(L, "ucp"); // [ucp]
+	lua_getfield(L, -1, "internal"); // [ucp, internal]
+
+	lua_pushcfunction(L, luaLog); // [ucp, internal, luaListDirectories]
+	lua_setfield(L, -2, "log"); // [ucp, internal]
+
+	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
+}
 
 void Core::initialize() {
 
-
-	initializeConsole();
-
-
 	initializeLogger();
 
+#if defined(_DEBUG)
+	this->hasConsole = true;
+	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+	if (ENV_UCP_CONSOLE != NULL) {
+		if (std::string(ENV_UCP_CONSOLE) == "0") {
+			this->hasConsole = false;
+		}
+	}
+	if (this->hasConsole) {
+		initializeConsole();
+	}
+#elif !defined(COMPILED_MODULES)
+	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+	if (ENV_UCP_CONSOLE != NULL) {
+		if (std::string(ENV_UCP_CONSOLE) == "1") {
+			this->hasConsole = true;
+		}
+	}
+	if (this->hasConsole) {
+		initializeConsole();
+	}
+#endif
+		
 	RPS_initializeLua();
 	this->L = RPS_getLuaState();
 
 	RPS_initializeCodeHeap();
-	RPS_initializePrintRedirect();
-
-	//RPS_initializeLuaOpenBase();
+	
 	RPS_initializeLuaOpenLibs();
-	// TODO: implement restrictions here? Or only in lua via lua sandboxes?
-	//luaL_requiref(L, LUA_LOADLIBNAME, luaopen_package, true);
-	//luaL_requiref(L, LUA_MATHLIBNAME, luaopen_math, true);
-	//luaL_requiref(L, LUA_STRLIBNAME, luaopen_string, true);
-	//luaL_requiref(L, LUA_TABLIBNAME, luaopen_table, true);
-	//luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, true);
 
+	// Install the print redirect to logger
 
 	addUCPInternalFunctions(this->L);
+	addLoggingFunctions(this->L);
 	addUtilityFunctions(this->L);
 	addIOFunctions(this->L);
 
@@ -135,25 +229,56 @@ void Core::initialize() {
 
 	std::filesystem::path mainPath = this->UCP_DIR / "main.lua";
 
+	LOG_S(INFO) << "Running bootstrap file at: " << mainPath.string();
+
 	if (!std::filesystem::exists(mainPath)) {
-		std::cout << "FATAL: Main file not found: " << mainPath << std::endl;
+		LOG_S(FATAL) << "FATAL: Main file not found: " << mainPath << std::endl;
 	}
 	else {
-		RPS_runBootstrapFile(mainPath.string());
+		std::ifstream t(mainPath.string());
+		std::stringstream buffer;
+		buffer << t.rdbuf();
+		std::string code = buffer.str();
+		if (code.empty()) {
+			LOG_S(FATAL) << "Could not execute main.lua: empty file";
+			MessageBoxA(0, "Could not execute main.lua: empty file", "FATAL", MB_OK);
+		}
+		else {
+			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+				std::string errorMsg = lua_tostring(this->L, -1);
+				lua_pop(this->L, 1);
+				LOG_S(FATAL) << "Failed to load ucp/main.lua: " << errorMsg;
+				MessageBoxA(0, ("Could not execute main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+				
+			}
+
+			// Don't expect return values
+			if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
+				std::string errorMsg = lua_tostring(this->L, -1);
+				lua_pop(this->L, 1);
+				LOG_S(FATAL) << "Failed to run main.lua: " << errorMsg;
+				MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+			}
+
+			LOG_S(INFO) << "Finished running bootstrap file";
+		}
 	}
+
+	
 	
 #endif
 	
-	consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);
+	if (this->hasConsole) {
+		consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);
 
-	if (consoleThread == INVALID_HANDLE_VALUE) {
-		MessageBoxA(NULL, std::string("Could not start thread").c_str(), std::string("...").c_str(), MB_OK);
+		if (consoleThread == INVALID_HANDLE_VALUE) {
+			MessageBoxA(NULL, std::string("Could not start thread").c_str(), std::string("...").c_str(), MB_OK);
+		}
+		else if (consoleThread == 0) {
+			MessageBoxA(NULL, std::string("Could not start thread").c_str(), std::string("...").c_str(), MB_OK);
+		}
+		else {
+			CloseHandle(consoleThread);
+		}
 	}
-	else if (consoleThread == 0) {
-		MessageBoxA(NULL, std::string("Could not start thread").c_str(), std::string("...").c_str(), MB_OK);
-	}
-	else {
-		CloseHandle(consoleThread);
-	}
-
 }

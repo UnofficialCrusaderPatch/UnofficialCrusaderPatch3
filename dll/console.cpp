@@ -95,14 +95,6 @@ void initializeConsole() {
 		return;
 	}
 
-	//std::cout << "Allocated console.\n";
-
-	// reroute stdout and stderr
-	errorFile = freopen("ucp-3-stderr.log", "w", stderr);
-
-	if (errorFile == 0) {
-		std::cout << "Could not open error log file.\n";
-	}
 
 	// have user input possible
 	//user_input = GetStdHandle(STD_INPUT_HANDLE);

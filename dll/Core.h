@@ -40,4 +40,6 @@ public:
 
 	lua_State* L = 0;
 
+	bool hasConsole = false;
+
 };

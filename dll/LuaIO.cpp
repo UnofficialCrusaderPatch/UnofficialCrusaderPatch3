@@ -76,21 +76,14 @@ namespace LuaIO {
 	}
 
 
-	// Only for filesystem files
+	// Only for filesystem files: unchecked path!
 	int luaListFileSystemDirectories(lua_State* L) {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
-		std::string sanitizedPath;
-		if (!sanitizeRelativePath(rawPath, sanitizedPath)) {
-			lua_pushnil(L);
-			lua_pushstring(L, sanitizedPath.c_str()); //error message
-			return 2;
-		}
-
 		int count = 0;
 
-		std::filesystem::path targetPath = sanitizedPath;
+		std::filesystem::path targetPath = rawPath;
 
 		try {
 			for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
