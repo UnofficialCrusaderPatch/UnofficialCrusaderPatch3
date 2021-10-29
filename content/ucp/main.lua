@@ -56,6 +56,8 @@ extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
 hooks = require('hooks')
 
+require("logging")
+
 data.version.initialize()
 
 ---UCP3 Configuration
@@ -63,7 +65,8 @@ data.version.initialize()
 default_config = (function()
     local f, message = io.open(CONFIG_DEFAULTS_FILE)
     if not f then
-        print("[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+	    log(ERROR, "[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+        log(WARNING, "[main]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
         return { modules = {} }
     end
     local data = f:read("*all")
@@ -80,8 +83,8 @@ end)()
 config = (function()
     local f, message = io.open(CONFIG_FILE)
     if not f then
-        print("[main]: Could not read ucp-config.yml. Reason: " .. message)
-        print("[main]: Treating ucp-config.yml as empty file")
+        log(ERROR, "[main]: Could not read ucp-config.yml. Reason: " .. message)
+        log(WARNING, "[main]: Treating ucp-config.yml as empty file")
         return { modules = {}, plugins = {} }
     end
     local data = f:read("*all")
@@ -95,7 +98,7 @@ end)()
 
 ---Early bail out of UCP
 if config.active == false then
-    print("[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
+    log(WARNING, "[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
     return nil
 end
 
@@ -107,7 +110,7 @@ local function loadExtensionsFromFolder(folder, cls)
     local subFolders, err = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
 
 	if not subFolders then
-		print(subFolders)
+		log(ERROR, "no subfolders detected for path: " .. BASEDIR .. "/" .. folder)
 		error(err)
 	end
 
