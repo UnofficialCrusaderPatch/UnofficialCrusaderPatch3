@@ -248,6 +248,18 @@ jobs:
       run: |
         $name = "$env:GITHUB_SHA".SubString(0, 10)
         $type = "$env:BUILD_CONFIGURATION" #.SubString(0, 1)
+        if($env:BUILD_CONFIGURATION -eq "Debug") {
+          $type = "DevDebug"
+        }
+        if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
+          $type = "Debug"
+        }
+        if($env:BUILD_CONFIGURATION -eq "Release") {
+          $type = "DevRelease"
+        }
+        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
+          $type = "Release"
+        }
         echo "NAME=UCP3-snapshot-$type-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
