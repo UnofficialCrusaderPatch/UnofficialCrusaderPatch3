@@ -46,7 +46,14 @@ local function restrictedRequireFunction(path, env, allow_binary)
             full_path = full_path .. ".lua"
         end
 
-        local code, message = loadfile(full_path, 't', env)
+		local handle, err = io.open(full_path)
+		if not handle then
+			error(err)
+		end
+
+		local data = handle:read("*all")
+
+        local code, message = load(data, full_path, 't', env)
         if not code then
             error(message)
         end

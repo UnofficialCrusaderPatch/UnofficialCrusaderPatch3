@@ -168,14 +168,21 @@ namespace LuaIO {
 		//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
 		std::replace(sanitizedPath.begin(), sanitizedPath.end(), '\\', '/');
 
-#ifdef COMPILED_MODULES
+
 		if (sanitizedPath.rfind("ucp/", 0) == 0) {
+#ifdef COMPILED_MODULES
 			if (sanitizedPath.rfind("ucp/plugins/", 0) == 0) {
 				return luaListFileSystemDirectories(L);
 			}
 			return luaInternalDirectoryIterator(L);
-		}
+#else
+			lua_pushstring(L, (Core::getInstance().UCP_DIR / sanitizedPath.substr(4)).string().c_str());
+			lua_replace(L, 1); // Replace the path 
+			return luaListFileSystemDirectories(L);
 #endif
+
+		}
+
 
 		return luaListFileSystemDirectories(L);
 	}

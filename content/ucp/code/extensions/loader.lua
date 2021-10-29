@@ -32,7 +32,14 @@ function BaseLoader:load()
     if self.env == nil then error("no valid 'env' specified") end
     local init_file_path = self.path .. "/init.lua"
 
-    local initCode, message = loadfile(init_file_path, 't', self.env)
+	local handle, err = io.open(init_file_path)
+	if not handle then
+		error(err)
+	end
+
+	local initData = handle:read("*all")
+
+    local initCode, message = load(initData, init_file_path, 't', self.env)
     if not initCode then
         error(message)
     end

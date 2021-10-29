@@ -115,9 +115,10 @@ jobs:
       shell: pwsh
       run: |
         if(($env:BUILD_CONFIGURATION -eq "DebugSecure") -or ($env:BUILD_CONFIGURATION -eq "ReleaseSecure")) {
-          cd "$env:BUILD_CONFIGURATION\ucp-package\"
+          pushd "$env:BUILD_CONFIGURATION\ucp-package\"
           # Zip all non-dll files and remove the original to avoid packing twice
           7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -xr"!*.dll" -x"!ucp/plugins" -sdel
+          popd
         } else {
         }
         
