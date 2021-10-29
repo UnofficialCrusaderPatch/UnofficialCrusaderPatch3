@@ -103,8 +103,6 @@ void initializeLogger() {
 
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
-
-
 }
 
 void deinitializeLogger() {
@@ -197,20 +195,23 @@ void Core::initialize() {
 
 	std::string code = LuaIO::readInternalFile("ucp/main.lua");
 	if (code.empty()) {
-		std::cout << "ERROR: failed to load ucp/main.lua: " << "does not exist internally" << std::endl;
+		LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << "does not exist internally";
+		MessageBoxA(0, "ERROR: failed to load ucp/main.lua: does not exist internally", "FATAL", MB_OK);
 	}
 	else {
 		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
 			std::string errorMsg = lua_tostring(this->L, -1);
 			lua_pop(this->L, 1);
-			std::cout << "ERROR: failed to load ucp/main.lua: " << errorMsg << std::endl;
+			LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << errorMsg;
+			MessageBoxA(0, ("ERROR: failed to load ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
 		}
 
 		// Don't expect return values
 		if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
 			std::string errorMsg = lua_tostring(this->L, -1);
 			lua_pop(this->L, 1);
-			std::cout << "ERROR: failed to run ucp/main.lua: " << errorMsg << std::endl;
+			LOG_S(FATAL) << "ERROR: failed to run ucp/main.lua: " << errorMsg;
+			MessageBoxA(0, ("ERROR: failed to run ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
 		}
 	}
 
@@ -247,8 +248,8 @@ void Core::initialize() {
 			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
 				std::string errorMsg = lua_tostring(this->L, -1);
 				lua_pop(this->L, 1);
-				LOG_S(FATAL) << "Failed to load ucp/main.lua: " << errorMsg;
-				MessageBoxA(0, ("Could not execute main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+				LOG_S(FATAL) << "Failed to load main.lua: " << errorMsg;
+				MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
 				
 			}
 
