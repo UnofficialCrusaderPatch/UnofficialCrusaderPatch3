@@ -1,0 +1,3 @@
+[submodule "dll/vendor/loguru"]
+	path = dll/vendor/loguru
+	url = https://github.com/emilk/loguru

@@ -61,11 +61,22 @@ void addUCPInternalFunctions(lua_State* L) {
 	lua_setglobal(L, "ucp");
 }
 
+void initializeLogger() {
+
+}
+
+void deinitializeLogger() {
+
+}
 
 
 void Core::initialize() {
 
+
 	initializeConsole();
+
+
+	initializeLogger();
 
 	RPS_initializeLua();
 	this->L = RPS_getLuaState();
