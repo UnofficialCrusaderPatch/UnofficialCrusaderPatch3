@@ -63,31 +63,59 @@ namespace.initialize = function()
         namespace.known_version = yaml.eval(data)        
         namespace.known_version_string = namespace.known_version.major  .. "." .. namespace.known_version.minor .. "." .. namespace.known_version.patch .. "-" .. namespace.known_version.sha:sub(1,5)
     end
-    
-    namespace.custom_menu_version_space = core.allocate(64)
-    local d = table.pack(string.byte("V1.%d", 1, -1))
-    table.insert(d, 0)
-    core.writeBytes(namespace.custom_menu_version_space, d)
 
+	--- Scan memory for the original version string
     local vf = scanForString("V1.%d")
     if vf == nil then
         error()
     end
+	namespace.original_version_string = core.readString(vf)
+	
+	--- Allocate space for our new version string, put in the original string for now
+    namespace.custom_menu_version_space = core.allocate(64)
+    local d = table.pack(string.byte(namespace.original_version_string, 1, -1))
+    table.insert(d, 0)
+    core.writeBytes(namespace.custom_menu_version_space, d)
+
+	--- Create the search bytes to find the usage of this version string: push versionString
     local push_vf = { 0x68, table.unpack(utils.itob(vf)) }
-    if push_vf == nil then
-        error()
-    end
     namespace.push_vf_address = core.scanForAOB(utils.bytesToAOBString(push_vf))
+
     if namespace.push_vf_address == nil then
         error()
     end
-    local vnumber_address = core.scanForAOB("6A", namespace.push_vf_address - 20, namespace.push_vf_address)
+    
+	--- Find the minor version number by searching for: push number
+	local vnumber_address = core.scanForAOB("6A", namespace.push_vf_address - 20, namespace.push_vf_address)
     if vnumber_address == nil then
         error()
     end
 
-    namespace.game_version = { ["major"] = 1, ["minor"] = core.readByte(vnumber_address + 1) }
+	local minorVersion = core.readByte(vnumber_address + 1)
 
+	--- Translates V1.%d to e.g. V1.41
+	local oString = string.format(namespace.original_version_string, minorVersion)
+
+	local start, stop, maj, min, patch, extreme = oString:find("V([0-9]+)[.]([0-9]+)[.]([0-9]+)-(E)")
+	if not start then
+		start, stop, maj, min, extreme = oString:find("V([0-9]+)[.]([0-9]+)-(E)")
+		if not start then
+			start, stop, maj, min, patch = oString:find("V([0-9]+)[.]([0-9]+)[.]([0-9]+)")
+			if not start then
+				start, stop, maj, min = oString:find("V([0-9]+)[.]([0-9]+)")	
+				if not start then
+					error("Cannot parse game version: " .. oString)
+				end
+			end
+		end
+	end
+
+    namespace.game_version = { 
+		["major"] = maj, 
+		["minor"] = min,
+		["patch"] = patch,
+		["extreme"] = extreme,
+	}
 
 end
 
@@ -95,7 +123,7 @@ namespace.overwriteVersion = function(config)
     core.writeCode(namespace.push_vf_address, { 0x68, table.unpack(utils.itob(namespace.custom_menu_version_space)) })
 
     namespace.digest = computeVersionString(config)
-    namespace.setMenuVersion("V1.%d UCP " .. namespace.known_version_string .. " (" .. namespace.digest:sub(1, 6) .. ")")
+    namespace.setMenuVersion(namespace.original_version_string .. " UCP " .. namespace.known_version_string .. " (" .. namespace.digest:sub(1, 6) .. ")")
 
     namespace.game_language = core.readInteger(core.scanForAOB("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
     namespace.afterGameInit = false
@@ -136,7 +164,7 @@ end
 
 namespace.isExtreme = function()
     local res = scanForString("frontend_main_extreme.tgx")
-    return res ~= nil
+    return res ~= nil or namespace.game_version["extreme"] ~= nil
 end
 
 namespace.getGameVersionMajor = function()
@@ -202,8 +230,8 @@ namespace.verifyGameDependency = function(ext, extensionLoaders)
         end
     end
 
-    print("[ERROR] Dependency version conflict for extension \"" .. ext .. "\": does not work for game: \"" .. gameName .. "\" version " .. versionString)
-    error("Game dependency check failed for \"" .. ext .. "\"")
+    log(ERROR, "Dependency version conflict for extension \"" .. ext .. "\": does not work for game: \"" .. gameName .. "\" version " .. versionString)
+    -- error("Game dependency check failed for \"" .. ext .. "\"")
     return false
 end
 
