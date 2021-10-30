@@ -315,7 +315,8 @@ function core.calculateCodeSize(code)
             -- pass, strings are just labels, no data
             labels[v] = result
         elseif type(v) == "table" then
-            result = result + #v
+			local r, l = core.calculateCodeSize(v)
+            result = result + r
         end
     end
     return result, labels
@@ -402,7 +403,8 @@ function core.compile(code, baseAddress)
             end
 
         elseif type(v) == "table" then
-            for j, w in ipairs(v) do
+			local vc = core.compile(v, address)
+            for j, w in ipairs(vc) do
                 table.insert(result, w)
                 address = address + 1
             end
