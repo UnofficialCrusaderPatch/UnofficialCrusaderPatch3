@@ -12,7 +12,11 @@ BASEDIR = "ucp"
 ---@deprecated UCP_DIR is now handled in the dll part
 ---@param UCP_DIR string path to the ucp directory
 UCP_DIR = os.getenv("UCP_DIR")
-print("[main]: Using UCP_DIR: " .. UCP_DIR)
+if UCP_DIR then
+  print("[main]: Using UCP_DIR: " .. UCP_DIR)
+else 
+  print("[main]: Using the default UCP_DIR")
+end
 
 ---@deprecated UCP_DIR is now handled in the dll part
 --[[
