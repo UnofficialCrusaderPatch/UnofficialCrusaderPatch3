@@ -69,7 +69,7 @@ data.version.initialize()
 default_config = (function()
     local f, message = io.open(CONFIG_DEFAULTS_FILE)
     if not f then
-	    log(ERROR, "[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+	    log(WARNING, "[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
         log(WARNING, "[main]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
         return { modules = {} }
     end
@@ -87,7 +87,7 @@ end)()
 config = (function()
     local f, message = io.open(CONFIG_FILE)
     if not f then
-        log(ERROR, "[main]: Could not read ucp-config.yml. Reason: " .. message)
+        log(WARNING, "[main]: Could not read ucp-config.yml. Reason: " .. message)
         log(WARNING, "[main]: Treating ucp-config.yml as empty file")
         return { modules = {}, plugins = {} }
     end
