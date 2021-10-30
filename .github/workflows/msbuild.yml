@@ -186,7 +186,7 @@ jobs:
             $version = $iy.version
             
             $defaults.modules[$name] = [ordered]@{}
-            $defaults.modules[$name].active = $true
+            $defaults.modules[$name].active = $false
             $defaults.modules[$name].version = $version
             
             if(Test-Path -Path ($module.FullName + "\options.yml")) {
