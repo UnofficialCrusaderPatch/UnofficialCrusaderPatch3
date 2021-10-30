@@ -129,6 +129,11 @@ int luaLog(lua_State* L) {
 		lua_pop(L, 1);  /* pop result */
 	}
 
+	// If log is worse than warning
+	if (logLevel < loguru::Verbosity_WARNING) {
+		MessageBoxA(0, output.str().c_str(), "Error", MB_OK);
+	}
+
 	VLOG_F(logLevel, output.str().c_str());
 
 	return 0;
@@ -195,23 +200,23 @@ void Core::initialize() {
 
 	std::string code = LuaIO::readInternalFile("ucp/main.lua");
 	if (code.empty()) {
-		LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << "does not exist internally";
 		MessageBoxA(0, "ERROR: failed to load ucp/main.lua: does not exist internally", "FATAL", MB_OK);
+		LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << "does not exist internally";
 	}
 	else {
 		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
-			std::string errorMsg = lua_tostring(this->L, -1);
+			std::string errorMsg = std::string(lua_tostring(this->L, -1));
 			lua_pop(this->L, 1);
-			LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << errorMsg;
 			MessageBoxA(0, ("ERROR: failed to load ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+			LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << errorMsg;
 		}
 
 		// Don't expect return values
 		if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
-			std::string errorMsg = lua_tostring(this->L, -1);
+			std::string errorMsg = std::string(lua_tostring(this->L, -1));
 			lua_pop(this->L, 1);
-			LOG_S(FATAL) << "ERROR: failed to run ucp/main.lua: " << errorMsg;
 			MessageBoxA(0, ("ERROR: failed to run ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+			LOG_S(FATAL) << "ERROR: failed to run ucp/main.lua: " << errorMsg;
 		}
 	}
 
@@ -233,6 +238,7 @@ void Core::initialize() {
 	LOG_S(INFO) << "Running bootstrap file at: " << mainPath.string();
 
 	if (!std::filesystem::exists(mainPath)) {
+		MessageBoxA(0, ("Main file not found: " + mainPath.string()).c_str(), "FATAL", MB_OK);
 		LOG_S(FATAL) << "FATAL: Main file not found: " << mainPath << std::endl;
 	}
 	else {
@@ -241,24 +247,25 @@ void Core::initialize() {
 		buffer << t.rdbuf();
 		std::string code = buffer.str();
 		if (code.empty()) {
-			LOG_S(FATAL) << "Could not execute main.lua: empty file";
 			MessageBoxA(0, "Could not execute main.lua: empty file", "FATAL", MB_OK);
+			LOG_S(FATAL) << "Could not execute main.lua: empty file";
 		}
 		else {
 			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
-				std::string errorMsg = lua_tostring(this->L, -1);
+				std::string errorMsg = std::string(lua_tostring(this->L, -1));
 				lua_pop(this->L, 1);
-				LOG_S(FATAL) << "Failed to load main.lua: " << errorMsg;
 				MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+				LOG_S(FATAL) << "Failed to load main.lua: " << errorMsg;
+				
 				
 			}
 
 			// Don't expect return values
 			if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
-				std::string errorMsg = lua_tostring(this->L, -1);
+				std::string errorMsg = std::string(lua_tostring(this->L, -1));
 				lua_pop(this->L, 1);
-				LOG_S(FATAL) << "Failed to run main.lua: " << errorMsg;
 				MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+				LOG_S(FATAL) << "Failed to run main.lua: " << errorMsg;
 			}
 
 			LOG_S(INFO) << "Finished running bootstrap file";
