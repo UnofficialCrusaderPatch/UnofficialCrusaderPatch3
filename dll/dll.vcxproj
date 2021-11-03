@@ -192,6 +192,7 @@
     <ClInclude Include="LuaIO.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="internal-data-def.h" />
+    <ClInclude Include="tools.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binkw32-hijack.cpp" />
@@ -200,6 +201,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="InternalData.cpp" />
     <ClCompile Include="LuaIO.cpp" />
+    <ClCompile Include="tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

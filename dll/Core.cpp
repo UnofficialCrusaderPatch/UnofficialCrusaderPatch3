@@ -8,6 +8,9 @@
 #define LOGURU_WITH_STREAMS 1
 #include "loguru.cpp"
 
+#ifndef COMPILED_MODULES
+#include "fasm.h"
+#endif
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
@@ -19,6 +22,11 @@ void addUtilityFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaIO::luaWideCharToMultiByte);
 	lua_setfield(L, -2, "WideCharToMultiByte");
+
+#ifndef COMPILED_MODULES
+	lua_pushcfunction(L, luaAssemble);
+	lua_setfield(L, -2, "assemble");
+#endif
 
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
