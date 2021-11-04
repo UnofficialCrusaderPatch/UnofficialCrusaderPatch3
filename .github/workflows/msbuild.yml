@@ -111,13 +111,19 @@ jobs:
           }
         }
         
+    - name: Copy over FASM dll
+      shell: pwsh
+      run: |
+        Copy-Item "dll\vendor\fasm\source\dll\fasm.dll" -Destination "$env:BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\fasm.dll"
+        Copy-Item "dll\vendor\fasm\LICENSE.txt" -Destination "$env:BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\LICENSE.txt"
+        
     - name: Generate zip file of the package for secure versions
       shell: pwsh
       run: |
         if(($env:BUILD_CONFIGURATION -eq "DebugSecure") -or ($env:BUILD_CONFIGURATION -eq "ReleaseSecure")) {
           pushd "$env:BUILD_CONFIGURATION\ucp-package\"
-          # Zip all non-dll files and remove the original to avoid packing twice
-          7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -xr"!*.dll" -x"!ucp/plugins" -sdel
+          # Zip all files and remove the original to avoid packing twice
+          7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -x"!ucp/plugins" -sdel
           popd
         } else {
         }

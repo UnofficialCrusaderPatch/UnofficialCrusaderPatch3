@@ -64,10 +64,14 @@ namespace LuaIO {
 
 
 		std::filesystem::path sanitizedPath(rawPath);
-		sanitizedPath = sanitizedPath.lexically_normal(); // Remove "/../" and "/./"
 
 		if (!std::filesystem::path(sanitizedPath).is_relative()) {
 			result = "path has to be relative";
+			return false;
+		}
+
+		if (std::filesystem::relative(std::filesystem::current_path() / sanitizedPath, std::filesystem::current_path()).string().find("..") == 0) {
+			result = "path has remain in the game directory";
 			return false;
 		}
 		
@@ -152,30 +156,21 @@ namespace LuaIO {
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
 		std::string sanitizedPath;
-		if (!sanitizeRelativePath(rawPath, sanitizedPath)) {
+		bool isInternal;
+		if (!Core::getInstance().resolvePath(rawPath, sanitizedPath, isInternal)) {
 			lua_pushnil(L);
 			lua_pushstring(L, sanitizedPath.c_str()); //error message
 			return 2;
 		}
 
-		//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
-		std::replace(sanitizedPath.begin(), sanitizedPath.end(), '\\', '/');
-
-
-		if (sanitizedPath.rfind("ucp/", 0) == 0) {
-#ifdef COMPILED_MODULES
-			if (sanitizedPath.rfind("ucp/plugins/", 0) == 0) {
-				return luaListFileSystemDirectories(L);
-			}
+		if (isInternal) {
 			return luaInternalDirectoryIterator(L);
-#else
-			lua_pushstring(L, (Core::getInstance().UCP_DIR / sanitizedPath.substr(4)).string().c_str());
+		}
+		else {
+			lua_pushstring(L, sanitizedPath.c_str());
 			lua_replace(L, 1); // Replace the path 
 			return luaListFileSystemDirectories(L);
-#endif
-
 		}
-
 
 		return luaListFileSystemDirectories(L);
 	}
