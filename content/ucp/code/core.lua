@@ -467,4 +467,23 @@ function core.insertCode(address, patchSize, code, returnTo, original)
     return codeAddress
 end
 
+---Assembles the string script into assembly
+---To use variables inside the script, supply them via valueMapping. For example, if you want to use DAT_TileMap1 = 0x400000, as in: mov eax, DWORD[DAT_TileMap1], then specify valueMapping = {DAT_TileMap1 = 0x400000}
+---@param script string String script
+---@param valueMapping table A table of required variables at assembly time
+---@param origin number The location in memory to compile the script for (only relevant when using jumps and calls to outside of the script)
+function core.assemble(script, valueMapping, origin)
+  if not origin then origin = 0 end
+  if not valueMapping then valueMapping = {} end
+
+  for k, v in pairs(valueMapping) do
+    script = k .. " = " .. string.format("0x%X", v) .. "\n" .. script
+  end
+  
+  script = "org " .. string.format("0x%X", origin) .. "\n" .. script
+  script = "use32" .. "\n" .. script
+  
+  return table.pack(ucp.internal.assemble(script):byte(1, -1))
+end
+
 return core
