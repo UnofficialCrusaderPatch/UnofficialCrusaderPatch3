@@ -3,6 +3,10 @@
 #include "fasm.h"
 #include "windows.h"
 
+#include "Core.h"
+#include "MemoryModule.h"
+#include "InternalData.h"
+
 constexpr int FASM_BUFFER_SIZE = 1000 * 64;
 
 HMODULE fasm = 0;
@@ -90,18 +94,37 @@ DWORD FASMERR_SYMBOL_OUT_OF_SCOPE = -136;
 DWORD FASMERR_USER_ERROR = -140;
 DWORD FASMERR_ASSERTION_FAILED = -141;
 
+const char * fasmPath = "ucp/code/vendor/fasm/fasm.dll";
 
+//TODO: implement in memory dll opening
 int luaAssemble(lua_State* L) {
+
 	if (fasm == 0) {
-		fasm = LoadLibraryA("fasm.dll");
-		if (fasm == 0) {
-			return luaL_error(L, "could not find fasm dll");
+		std::string path;
+		bool isInternal;
+		if (!Core::getInstance().resolvePath(fasmPath, path, isInternal)) {
+			return luaL_error(L, "could not resolve fasm dll path");
 		}
-		FARPROC r = GetProcAddress(fasm, "fasm_Assemble");
-		if (r == 0) {
-			return luaL_error(L, "could not find function fasm_Assemble");
+
+		if (isInternal) {
+			FARPROC r = LuaIO::loadFunctionFromInternalDLL(fasmPath, "fasm_Assemble");
+			if (r == 0) {
+				return luaL_error(L, "could not find function fasm_Assemble or dll fasm");
+			}
+			fasm_Assemble = (func_Assemble) r;
 		}
-		fasm_Assemble = (func_Assemble) r;
+		else {
+			fasm = LoadLibraryA("fasm.dll");
+			if (fasm == 0) {
+				return luaL_error(L, "could not find fasm dll");
+			}
+			FARPROC r = GetProcAddress(fasm, "fasm_Assemble");
+			if (r == 0) {
+				return luaL_error(L, "could not find function fasm_Assemble");
+			}
+			fasm_Assemble = (func_Assemble)r;
+		}
+
 	}
 
 	DWORD result = fasm_Assemble((void*)luaL_checkstring(L, 1), buffer, FASM_BUFFER_SIZE, 100, NULL);

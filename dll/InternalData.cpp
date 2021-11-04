@@ -11,6 +11,9 @@
 #include "internal-data-def.h"
 #include "dllmain.h"
 
+#include "MemoryModule.h"
+
+
 namespace LuaIO {
 
 	const std::string ucp_code_pre = R"V0G0N(
@@ -125,6 +128,49 @@ end
 
 		return result;
 	};
+
+	std::map<std::string, HMEMORYMODULE> dllMap;
+
+	HMEMORYMODULE loadInternalDLL(std::string path) {
+		std::map<std::string, HMEMORYMODULE>::iterator it;
+
+		it = dllMap.find(path);
+		if (it != dllMap.end()) {
+			return it->second;
+		}
+
+		if (!initInternalData()) return 0;
+		unsigned char* buf = NULL;
+		size_t bufsize = 0;
+
+		if (zip_entry_open(internalDataZip, path.c_str()) != 0) {
+			return 0;
+		}
+
+		zip_entry_read(internalDataZip, (void**)& buf, &bufsize);
+		zip_entry_close(internalDataZip);
+
+		HMEMORYMODULE handle = MemoryLoadLibrary((void*) buf, (size_t) bufsize);
+		free(buf);
+
+		if (handle == NULL)
+		{
+			MessageBoxA(0, ("Cannot load dll from memory: " + path).c_str(), "ERROR", MB_OK);
+			return 0;
+		}
+
+		dllMap[path] = handle;
+		
+		return handle;
+	}
+
+	FARPROC loadFunctionFromInternalDLL(std::string dllPath, std::string functionName) {
+		HMEMORYMODULE handle = loadInternalDLL(dllPath);
+		if (handle == 0) return 0;
+
+		return MemoryGetProcAddress(handle, functionName.c_str());
+	}
+
 
 
 }

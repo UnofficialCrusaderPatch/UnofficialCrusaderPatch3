@@ -97,7 +97,7 @@
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,7 +118,7 @@
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,7 +143,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,7 +167,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -192,7 +192,8 @@
     <ClInclude Include="LuaIO.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="internal-data-def.h" />
-    <ClInclude Include="tools.h" />
+    <ClInclude Include="fasm.h" />
+    <ClInclude Include="vendor\MemoryModule\MemoryModule.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="binkw32-hijack.cpp" />
@@ -201,7 +202,8 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="InternalData.cpp" />
     <ClCompile Include="LuaIO.cpp" />
-    <ClCompile Include="tools.cpp" />
+    <ClCompile Include="fasm.cpp" />
+    <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

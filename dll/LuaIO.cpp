@@ -205,6 +205,38 @@ namespace LuaIO {
 			return 2;
 		}
 
+#ifdef COMPILED_MODULES
+		//if pointing to the ucp directory, use the UCP_DIR variable, "ucp/" is special
+		if (sanitizedPath.rfind("ucp/", 0) == 0) {
+
+			if ((sanitizedPath.rfind("ucp/plugins/", 0) == 0)) {
+				// Allowed, move on
+				return luaL_error(L, "plugins cannot contain dll files");
+			}
+			else {
+				// Read from memory: do routine and RETURN!
+
+				void* handle = (void*) loadInternalDLL(sanitizedPath);
+				if (handle == NULL) {
+					return luaL_error(L, ("Cannot load library: " + sanitizedPath).c_str());
+				}
+
+				lua_CFunction func = (lua_CFunction) loadFunctionFromInternalDLL(sanitizedPath, "luaopen_" + modName);
+				if (func == NULL) {
+					return luaL_error(L, ("Cannot find function: " + ("luaopen_" + modName)).c_str());
+				}
+
+				luaL_requiref(L, modName.c_str(), func, 0);
+			
+				return 1;
+			}
+
+		}
+		else {
+			return luaL_error(L, "Only allowed to open DLLs inside the ucp directory");
+		}
+#else
+
 		std::filesystem::path fullPath = Core::getInstance().UCP_DIR / sanitizedPath;
 		if (!std::filesystem::exists(fullPath)) {
 			lua_pushnil(L);
@@ -242,13 +274,15 @@ namespace LuaIO {
 			luaL_requiref(L, modName.c_str(), func, 0);
 			return 1; //Return the module.
 		}
-		else if(b - a == 2) {
+		else if (b - a == 2) {
 			// loadlib returned an error, just pass it back.
 			return 2;
 		}
 
 		//We should never end up here.
 		return luaL_error(L, "package.loadlib returned an unexpected result");
+#endif // COMPILED_MODULES			
+
 	}
 
 
@@ -527,73 +561,39 @@ namespace LuaIO {
 		return f;
 	}
 
-
 	int luaIOCustomOpen(lua_State* L) {
 		const std::string filename = luaL_checkstring(L, 1);
 		const std::string mode = luaL_optstring(L, 2, "r");
 
 		std::string sanitizedPath;
-		if (!sanitizeRelativePath(filename, sanitizedPath)) {
-			return luaL_error(L, sanitizedPath.c_str());
+		bool isInternal;
+
+		if (!Core::getInstance().resolvePath(filename, sanitizedPath, isInternal)) {
+			return luaL_error(L, ("Invalid path: " + sanitizedPath).c_str());
 		}
+		
+		if (isInternal) {
+			std::string contents = readInternalFile(sanitizedPath);
 
-		//Now we can assume sanitizedPath cannot escape the game directory.
-		//Let's assert that
-		if (std::filesystem::relative(std::filesystem::current_path() / sanitizedPath, std::filesystem::current_path()).string() != sanitizedPath) {
-			return luaL_error(L, "the path specified is not a proper relative path");
-		}
-
-		//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
-		std::replace(sanitizedPath.begin(), sanitizedPath.end(), '\\', '/');
-
-		//Make the path absolute
-		std::filesystem::path path;
-
-		//if pointing to the ucp directory, use the UCP_DIR variable, "ucp/" is special
-		if (sanitizedPath.rfind("ucp/", 0) == 0) {
-#ifdef COMPILED_MODULES
-			if ((sanitizedPath.rfind("ucp/plugins/", 0) == 0)) {
-				// Allowed, move on
+			if (contents.empty()) {
+				lua_pushnil(L);
+				lua_pushstring(L, ("file does not exist internally: " + sanitizedPath).c_str());
+				return 2;
 			}
-			else {
-				// Read from memory: do routine and RETURN!
 
-				if (mode != "r") {
-					return luaL_error(L, "invalid mode for internal file");
-				}
+			MemoryStream* p = newMemoryFile(L);
+			p->f = setMemoryFileContents(*p, contents);
 
-				std::string contents = readInternalFile(sanitizedPath);
-
-				if (contents.empty()) {
-					lua_pushnil(L);
-					lua_pushstring(L, ("file does not exist internally: " + sanitizedPath).c_str());
-					return 2;
-				}
-
-				MemoryStream* p = newMemoryFile(L);
-				p->f = setMemoryFileContents(*p, contents);
-
-				return (p->f == NULL) ? luaL_fileresult(L, 0, path.string().c_str()) : 1;
-			}
-#else
-
-#endif // COMPILED_MODULES			
-			path = Core::getInstance().UCP_DIR / sanitizedPath.substr(4); //substr to remove the ucp/ prefix, otherwise duplicate
-		}
-		else {
-
-			//TODO: when we need to prevent more file access restrictions, implement that here.
-			//starting point: https://stackoverflow.com/a/61125335
-
-			path = std::filesystem::current_path() / sanitizedPath;
-
+			return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
 		}
 
 		luaL_Stream* p = newfile(L);
 		const char* md = mode.c_str();  /* to traverse/check mode */
 		luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
 
-		p->f = fopen(path.string().c_str(), mode.c_str());
-		return (p->f == NULL) ? luaL_fileresult(L, 0, path.string().c_str()) : 1;
+		p->f = fopen(sanitizedPath.c_str(), mode.c_str());
+		return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+
 	}
+
 }

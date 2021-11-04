@@ -42,4 +42,7 @@ public:
 
 	bool hasConsole = false;
 
+	bool sanitizePath(const std::string& path, std::string& result);
+	bool resolvePath(const std::string& path, std::string& result, bool& isInternal);
+
 };

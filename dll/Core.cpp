@@ -8,9 +8,7 @@
 #define LOGURU_WITH_STREAMS 1
 #include "loguru.cpp"
 
-#ifndef COMPILED_MODULES
 #include "fasm.h"
-#endif
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
@@ -23,10 +21,8 @@ void addUtilityFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaWideCharToMultiByte);
 	lua_setfield(L, -2, "WideCharToMultiByte");
 
-#ifndef COMPILED_MODULES
 	lua_pushcfunction(L, luaAssemble);
 	lua_setfield(L, -2, "assemble");
-#endif
 
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
@@ -162,11 +158,79 @@ void addLoggingFunctions(lua_State* L) {
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
 
+bool Core::resolvePath(const std::string& path, std::string& result, bool& isInternal) {
+
+	isInternal = true;
+
+	if (!this->sanitizePath(path, result)) {
+		return false;
+	}
+
+	if (result.find("ucp/") == 0) {
+#ifdef COMPILED_MODULES
+		if (result.find("ucp/plugins/") == 0) {
+			result = (std::filesystem::current_path() / result).string();
+			isInternal = false;
+			return true;
+		}
+		isInternal = true;
+		return true;
+#else
+		result = (this->UCP_DIR / result.substr(4)).string();
+		isInternal = false;
+		return true;
+#endif
+	}
+
+	result = (std::filesystem::current_path() / result).string();
+	isInternal = false;
+	return true;
+}
+
+bool Core::sanitizePath(const std::string& path, std::string& result) {
+	std::string rawPath = path;
+
+	//Assert non empty path
+	if (rawPath.empty()) {
+		result = "invalid path";
+		return false;
+	}
+
+	std::filesystem::path sanitizedPath(rawPath);
+	sanitizedPath = sanitizedPath.lexically_normal(); // Remove "/../" and "/./"
+
+	if (!std::filesystem::path(sanitizedPath).is_relative()) {
+		result = "path has to be relative";
+		return false;
+	}
+
+	result = sanitizedPath.string();
+
+	//Now we can assume sanitizedPath cannot escape the game directory.
+//Let's assert that
+	std::filesystem::path a = std::filesystem::current_path();
+	std::filesystem::path b = a / result;
+	std::filesystem::path r = std::filesystem::relative(b, a);
+	if (r.string().find("..") == 0) {
+		result = "the path specified is not a proper relative path";
+		return false;
+	}
+
+	//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
+	std::replace(result.begin(), result.end(), '\\', '/');
+
+	return true;
+}
+
 void Core::initialize() {
 
 	initializeLogger();
 
-#if defined(_DEBUG)
+#if !defined(_DEBUG) && defined(COMPILED_MODULES)
+	// No Console
+	this->hasConsole = false;
+#else
+	// In principle yes, unless explicitly not
 	this->hasConsole = true;
 	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
 	if (ENV_UCP_CONSOLE != NULL) {
@@ -177,16 +241,16 @@ void Core::initialize() {
 	if (this->hasConsole) {
 		initializeConsole();
 	}
-#elif !defined(COMPILED_MODULES)
-	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
-	if (ENV_UCP_CONSOLE != NULL) {
-		if (std::string(ENV_UCP_CONSOLE) == "1") {
-			this->hasConsole = true;
-		}
-	}
-	if (this->hasConsole) {
-		initializeConsole();
-	}
+//#elif !defined(COMPILED_MODULES)
+//	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+//	if (ENV_UCP_CONSOLE != NULL) {
+//		if (std::string(ENV_UCP_CONSOLE) == "1") {
+//			this->hasConsole = true;
+//		}
+//	}
+//	if (this->hasConsole) {
+//		initializeConsole();
+//	}
 #endif
 		
 	RPS_initializeLua();
