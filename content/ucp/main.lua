@@ -197,6 +197,8 @@ for k, ext in pairs(extensionLoadOrder) do
     end
 end
 
+log(DEBUG, "explicitly active extensions:\n" .. json:encode_pretty(explicitlyActiveExtensions))
+
 necessaryDependencies = {}
 for k, ext in pairs(explicitlyActiveExtensions) do
     for k2, dep in pairs(extensionDependencies[ext]) do
@@ -204,6 +206,20 @@ for k, ext in pairs(explicitlyActiveExtensions) do
     end
 end
 
+i = 1
+while i <= #necessaryDependencies do
+	local ext = necessaryDependencies[i]
+	if ext then
+		for k, dep in pairs(extensionDependencies[ext]) do
+			if not table.find(necessaryDependencies, dep) then
+				table.insert(necessaryDependencies, dep)
+			end
+		end
+	end
+	i = i + 1
+end
+
+log(DEBUG, "required dependencies:\n" .. json:encode_pretty(necessaryDependencies))
 
 ---Try to merge extension configurations with user 'config'
 

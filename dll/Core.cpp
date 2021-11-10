@@ -96,9 +96,9 @@ static const struct luaL_Reg printlib[] = {
   {NULL, NULL} /* end of array */
 };
 
-void initializeLogger() {
+void initializeLogger(int logLevel) {
 	// Put every log message in "everything.log":
-	loguru::add_file("ucp3.log", loguru::Truncate, loguru::Verbosity_MAX);
+	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
 
 	// Only log WARNING, ERROR and FATAL to "latest_readable.log":
 	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
@@ -224,7 +224,17 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 
 void Core::initialize() {
 
-	initializeLogger();
+	int verbosity = 0;
+	char* ENV_UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
+	if (ENV_UCP_VERBOSITY == NULL) {
+		verbosity = 0;
+	}
+	else {
+		std::istringstream s(ENV_UCP_VERBOSITY);
+		s >> verbosity; // We don't care about errors at this point.
+	}
+
+	initializeLogger(verbosity);
 
 #if !defined(_DEBUG) && defined(COMPILED_MODULES)
 	// No Console
