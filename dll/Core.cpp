@@ -166,9 +166,9 @@ bool Core::resolvePath(const std::string& path, std::string& result, bool& isInt
 		return false;
 	}
 
-	if (result.find("ucp/") == 0 || (result.find("ucp") == 0 && result.size() == 3)) {
+	if (result.find("ucp/") == 0 || result == "ucp") {
 #ifdef COMPILED_MODULES
-		if (result.find("ucp/plugins/") == 0) {
+		if (result == "ucp/plugins" || result.find("ucp/plugins/") == 0) {
 			result = (std::filesystem::current_path() / result).string();
 			isInternal = false;
 			return true;
