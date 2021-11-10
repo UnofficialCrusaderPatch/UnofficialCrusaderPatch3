@@ -246,7 +246,7 @@ namespace.verifyDependencies = function(extension, extensionLoaders)
         local versionEqualityDemanded = dep.equality
 
         if extensionLoaders[dep.name] == nil then 
-            print("[ERROR] Dependency not found: Extension " .. extension .. " requires module " .. dep.name) 
+            log(ERROR, "Dependency not found: Extension " .. extension .. " requires module " .. dep.name) 
             error("Dependency check failed for \"" .. extension .. "\"")
             return false
         end
@@ -260,19 +260,20 @@ namespace.verifyDependencies = function(extension, extensionLoaders)
                 versionConflict = false
             end
         else
-            print("[ERROR] Version operator malformed inside definition.yml")
+            log(ERROR, "Version operator malformed inside definition.yml")
             error("Dependency check failed for \"" .. extension .. "\"")
             return false
         end
 
         if versionConflict then
-            print("[ERROR] Dependency version conflict for extension \"" .. extension .. "\": Demanded module \"" .. dep.name .. "\" version " .. versionEqualityDemanded .. " " .. dep.version .. ", found " .. extensionLoaders[dep.name].version)
+            log(ERROR, "Dependency version conflict for extension \"" .. extension .. "\": Demanded module \"" .. dep.name .. "\" version " .. versionEqualityDemanded .. " " .. dep.version .. ", found " .. extensionLoaders[dep.name].version)
             error("Dependency check failed for \"" .. extension .. "\"")
             return false
         end
 
-        return true
     end
+    
+	return true
 end
 
 return namespace
