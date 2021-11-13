@@ -7,6 +7,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll", "dll\dll.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "content", "content\content.vcxproj", "{19FE1A0C-2712-49B3-AC85-F34EDA552AAF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "binkw32", "binkw32\binkw32.vcxproj", "{5614DB83-0810-4660-850D-D80038C80364}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3627F8EC-99ED-400B-B151-B1B4239092CA} = {3627F8EC-99ED-400B-B151-B1B4239092CA}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -31,6 +36,14 @@ Global
 		{19FE1A0C-2712-49B3-AC85-F34EDA552AAF}.Release|x86.Build.0 = Release|Win32
 		{19FE1A0C-2712-49B3-AC85-F34EDA552AAF}.ReleaseSecure|x86.ActiveCfg = ReleaseSecure|Win32
 		{19FE1A0C-2712-49B3-AC85-F34EDA552AAF}.ReleaseSecure|x86.Build.0 = ReleaseSecure|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.Debug|x86.ActiveCfg = Debug|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.Debug|x86.Build.0 = Debug|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.DebugSecure|x86.ActiveCfg = Debug|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.DebugSecure|x86.Build.0 = Debug|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.Release|x86.ActiveCfg = Release|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.Release|x86.Build.0 = Release|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.ReleaseSecure|x86.ActiveCfg = Release|Win32
+		{5614DB83-0810-4660-850D-D80038C80364}.ReleaseSecure|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,12 +11,8 @@
 #include "framework.h"
 
 #include <mutex>
-#include <stdio.h>
-#include <iostream>
 
 #include "binkw32-hijack.h"
-#include "Core.h"
-
 
 static std::once_flag inited;
 

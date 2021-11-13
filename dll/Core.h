@@ -7,7 +7,7 @@
 #pragma once
 
 #include "framework.h"
-#include "RuntimePatchingSystem.h"
+#include "lua.hpp"
 #include "console.h"
 #include <filesystem>
 

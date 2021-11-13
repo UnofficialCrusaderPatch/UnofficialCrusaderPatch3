@@ -132,15 +132,26 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+      run: |
+        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Prepare UCP3 package dll files and cfg file
       shell: pwsh
       run: |
-        # Copy the dll files, rename dll.dll to binkw32_ucp.dll
+        # Copy the dll files, rename binkw32.dll to binkw32_ucp.dll
         $dllfiles = Get-ChildItem $env:BUILD_CONFIGURATION\*.dll
         Copy-Item $dllfiles -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
-        Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\dll.dll" -NewName "binkw32_ucp.dll"
+        
+        # binkw32.dll is in the Release or Debug folder.
+        if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
+          $binkw32dir = "Debug"
+        }
+        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
+          $binkw32dir = "Release"
+        }     
+        Copy-Item "$binkw32dir\binkw32.dll" -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
+        
+        Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewName "binkw32_ucp.dll"
         
         # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
         Copy-Item installer\rename-dlls.bat "$env:BUILD_CONFIGURATION\ucp-package\install.bat"

@@ -4,6 +4,7 @@
 #include <fstream>
 #include "Core.h"
 #include "LuaIO.h"
+#include "RuntimePatchingSystem.h"
 
 #define LOGURU_WITH_STREAMS 1
 #include "loguru.cpp"
