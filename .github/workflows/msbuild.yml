@@ -145,10 +145,11 @@ jobs:
         # binkw32.dll is in the Release or Debug folder.
         if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
           $binkw32dir = "Debug"
-        }
-        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
+        } elseif($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
           $binkw32dir = "Release"
-        }     
+        } else {
+          $binkw32dir = $env:BUILD_CONFIGURATION         
+        }        
         Copy-Item "$binkw32dir\binkw32.dll" -Destination "$env:BUILD_CONFIGURATION\ucp-package\" -Recurse
         
         Rename-Item -Path "$env:BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewName "binkw32_ucp.dll"
