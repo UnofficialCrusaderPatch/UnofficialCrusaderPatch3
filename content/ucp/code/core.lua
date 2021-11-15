@@ -486,4 +486,12 @@ function core.assemble(script, valueMapping, origin)
   return table.pack(ucp.internal.assemble(script):byte(1, -1))
 end
 
+---Assembles the string script into assembly and writes it to a new memory location
+function core.allocateAssembly(script, valueMapping)
+    local pass1 = core.assemble(script, valueMapping, 0)
+    local address = core.allocate(#pass1)
+    core.writeCode(address, core.assemble(script, valueMapping, address))
+    return address
+end
+
 return core

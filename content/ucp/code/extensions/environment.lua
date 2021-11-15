@@ -8,7 +8,11 @@
 ---@param env table when the module requires other modules, this is the environment to evaluate these in
 ---@return function
 local function restrictedRequireFunction(path, env, allow_binary)
+
+    local LOADED = {}
+
     return function(file)
+
         if type(file) ~= "string" then
             error("'file' parameter is not a string")
         end
@@ -22,12 +26,18 @@ local function restrictedRequireFunction(path, env, allow_binary)
         if sanitized_file:match("[.]+/") then
             error("illegal 'file': " .. file)
         end
-        local full_path = path .. "/" .. sanitized_file
+
+        if LOADED[sanitized_file] ~= nil then
+            return LOADED[sanitized_file]
+        end
+
+        log(DEBUG, "requiring file: " .. sanitized_file)
 
         local has_lua_extension = sanitized_file:match("([.]lua)$")
         local has_dll_extension = sanitized_file:match("([.]dll)$")
 
         if has_dll_extension then
+            local full_path = path .. "/" .. sanitized_file
             if allow_binary then
                 local sanitized_file_name = sanitized_file
                 if has_lua_extension or has_dll_extension then
@@ -36,24 +46,33 @@ local function restrictedRequireFunction(path, env, allow_binary)
 
                 end
                 -- TODO: This will run in a global env, test that.
-                return assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
+
+                local value = assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
+                LOADED[sanitized_file] = value
+                return value
             end
             error("binary files are not allowed: " .. full_path)
         elseif has_lua_extension then
+            error("deprecated: " .. sanitized_file)
         else
-            ---Assume a lua file
-            ---TODO: Add cascade logic to load dlls if no .lua file exists with the name?
-            full_path = full_path .. ".lua"
+
         end
 
+        local full_path = path .. "/" .. sanitized_file:gsub("[.]", "/") .. ".lua"
 		local handle, err = io.open(full_path)
+        local err2
 		if not handle then
-			error(err)
+
+            full_path = path .. "/" .. sanitized_file:gsub("[.]", "/") .. "/init.lua"
+            handle, err2 = io.open(full_path)
+            if not handle then
+                error(err .. "\n" .. err2)
+            end
 		end
 
 		local data = handle:read("*all")
 
-        local code, message = load(data, full_path, 't', env)
+        local code, message = load(data, full_path:sub(-25), 't', env)
         if not code then
             error(message)
         end
@@ -63,6 +82,8 @@ local function restrictedRequireFunction(path, env, allow_binary)
         if not status then
             error(value)
         end
+
+        LOADED[sanitized_file] = value
 
         return value
     end
