@@ -143,9 +143,12 @@ end
 ---@result number the address of target in memory
 function core.AOBScan(target, start, stop)
     local result
-    if start and stop then
+    if start == nil and stop ~= nil then
+        error("start value cannot be nil")
+    end
+    if stop ~= nil then
         result = core.scanForAOB(target, start, stop)
-    elseif start then
+    elseif start ~= nil then
         result = core.scanForAOB(target, start)
     else
         result = core.scanForAOB(target)
