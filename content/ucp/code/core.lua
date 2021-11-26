@@ -131,9 +131,9 @@ function core.scanForAOB(target, min, max)
     if type(target) ~= "string" then error("invalid argument: " .. target) end
     if target:len() < 2 then error("target AOB too short: " .. target) end
     if min == nil and max == nil then
-        return ucp.internal.scanForAOB(target)
+        return ucp.internal.scanForAOB(target, 0x400000, 0x7FFFFFFF)
     elseif max == nil then
-        return ucp.internal.scanForAOB(target, min)
+        return ucp.internal.scanForAOB(target, min, 0x7FFFFFFF)
     else
         return ucp.internal.scanForAOB(target, min, max)
     end
@@ -150,13 +150,13 @@ function core.AOBScan(target, start, stop)
     if start == nil and stop ~= nil then
         error("start value cannot be nil")
     end
-    if stop ~= nil then
-        result = core.scanForAOB(target, start, stop)
-    elseif start ~= nil then
-        result = core.scanForAOB(target, start)
-    else
-        result = core.scanForAOB(target)
+    
+    if start == nil and stop == nil then
+      -- Consider using the cache
+      return data.cache.AOB.retrieve(target)
     end
+    
+    result = core.scanForAOB(target, start, stop)
 
     if not result then
         error("AOB not found: " .. target)

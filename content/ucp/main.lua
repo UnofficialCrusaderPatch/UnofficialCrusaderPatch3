@@ -54,6 +54,7 @@ data = {}
 data.common = require('data.common')
 data.structures = require('data.structures')
 data.version = require('data.version')
+data.cache = require('data.cache')
 yaml = require('vendor.yaml.yaml')
 json = require('vendor.json.json')
 extensions = require('extensions')
@@ -63,6 +64,7 @@ hooks = require('hooks')
 require("logging")
 
 data.version.initialize()
+data.cache.AOB.loadFromFile()
 
 ---UCP3 Configuration
 ---Load the default config file
@@ -127,7 +129,7 @@ local function loadExtensionsFromFolder(folder, cls)
         local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
         local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
 
-        print("[main]: Creating extension loader for: " .. name .. " version: " .. version)
+        log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
 
         if extensionLoaders[name] ~= nil then error("extension with name already exists: " .. name) end
 
@@ -139,6 +141,7 @@ end
 loadExtensionsFromFolder("modules", extensions.ModuleLoader)
 loadExtensionsFromFolder("plugins", extensions.PluginLoader)
 
+log(INFO, "[main]: solving load order")
 
 extensionDependencies = {}
 for name, ext in pairs(extensionLoaders) do
@@ -178,6 +181,7 @@ for k, v in pairs(config.plugins) do
     joinedConfig.extensions[k] = v
 end
 
+log(INFO, "[main]: verifying extension dependencies")
 explicitlyActiveExtensions = {}
 for k, ext in pairs(extensionLoadOrder) do
     if joinedConfig.extensions[ext] then
@@ -197,7 +201,7 @@ for k, ext in pairs(extensionLoadOrder) do
     end
 end
 
-log(DEBUG, "explicitly active extensions:\n" .. json:encode_pretty(explicitlyActiveExtensions))
+log(DEBUG, "[main]: explicitly active extensions:\n" .. json:encode_pretty(explicitlyActiveExtensions))
 
 necessaryDependencies = {}
 for k, ext in pairs(explicitlyActiveExtensions) do
@@ -345,4 +349,4 @@ for k, dep in pairs(allActiveExtensions) do
     end
 end
 
-
+data.cache.AOB.dumpToFile()
