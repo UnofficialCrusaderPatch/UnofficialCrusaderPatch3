@@ -338,11 +338,11 @@ for k, dep in pairs(allActiveExtensions) do
     local t = extensionLoaders[dep]:type()
     if t == "ModuleLoader" then
         print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:enable(configFinal.modules[dep].options)
+        extensionLoaders[dep]:enable(configFinal.modules[dep].options or {})
         modules[dep] = extensions.createRecursiveReadOnlyTable(modules[dep])
     elseif t == "PluginLoader" then
         print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:enable(configFinal.plugins[dep].options)
+        extensionLoaders[dep]:enable(configFinal.plugins[dep].options or {})
         plugins[dep] = extensions.createRecursiveReadOnlyTable(plugins[dep])
     else
         error("unknown extension type for: " .. dep)
