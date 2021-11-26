@@ -78,8 +78,12 @@ end
 ---Allocate a piece of memory for data
 ---@param size number The size of the memory block
 ---@return number The address of the new memory block
-function core.allocate(size)
-    return ucp.internal.allocate(size)
+function core.allocate(size, zero)
+    if zero == nil or zero == true then 
+      return ucp.internal.allocate(size, true)
+    else
+      return ucp.internal.allocate(size)
+    end
 end
 
 ---Writes `code` to `address` in executable memory. If the memory has write-protection, this will be temporarily lifted.
