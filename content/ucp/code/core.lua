@@ -463,7 +463,7 @@ function core.insertCode(address, patchSize, code, returnTo, original)
 
     local codeSize = core.calculateCodeSize(code)
     local codeAddress = core.allocateCode(codeSize + 5)
-    code = core.compile(code, codeAddress)
+    -- This is not necessary because writeCode also compiles if necessary: code = core.compile(code, codeAddress)
 
     core.writeCode(codeAddress, code)
 
@@ -496,7 +496,7 @@ end
 ---Assembles the string script into assembly and writes it to a new memory location
 function core.allocateAssembly(script, valueMapping)
     local pass1 = core.assemble(script, valueMapping, 0)
-    local address = core.allocate(#pass1)
+    local address = core.allocateCode(#pass1)
     core.writeCode(address, core.assemble(script, valueMapping, address))
     return address
 end
