@@ -138,4 +138,14 @@ function table.values(t)
     return values
 end
 
+function inheritsMetaTable(obj, metaTable)
+    local needle = getmetatable(obj)
+    while needle ~= nil do
+        if needle == metaTable then
+            return true
+        end
+        needle = getmetatable(needle)
+    end
+end
+
 return namespace
