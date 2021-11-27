@@ -53,7 +53,8 @@ jobs:
       run: |
         # Create the right folders
         mkdir "$env:BUILD_CONFIGURATION\ucp-package"
-        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"       
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"    
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\gameseeds"
       
     - name: Prepare UCP3 package extensions
       shell: pwsh
