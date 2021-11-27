@@ -158,6 +158,9 @@ end
 
 ns.enable = function(self, config)
     self.config = config
+    
+    self.hookAddress = 0x004cb3a0 -- core.AOBScan("83 ec 08 55 8b 6c 24 10 56 57 6a 14 55 b9 ? ? ? ? e8 ? ? ? ? 6a 01 6a 04 33 ff 55 b9 ? ? ? ?")
+    
     ns.aiRequiresExtraOxtethers_original = core.hookCode(ns.aiRequiresExtraOxtethers_hooked, 0x004cb3a0, 2, 1, 8)
     ns.oxTetherParameters = config.oxTetherParameters
 end

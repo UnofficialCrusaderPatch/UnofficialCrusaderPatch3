@@ -1,6 +1,22 @@
 ai_access:
   enabled:
     default: false
+ai_addattack:
+  ai_addattack:
+    enabled:
+      default: false
+    value:
+      default: 5
+  ai_addattack_alt:
+    enabled:
+      default: false
+    value:
+      default: 0
+ai_attacklimit:
+  enabled:
+    default: false
+  value:
+    default: 200
 ai_assaultswitch:
   enabled:
     default: false
@@ -25,6 +41,11 @@ ai_fix_crusader_archers_pitch:
 ai_fix_laddermen_with_enclosed_keep:
   enabled:
     default: false
+ai_housing:
+  enabled:
+    default: false
+  value:
+    default: 0
 ai_nosleep:
   enabled:
     default: false
@@ -34,6 +55,11 @@ ai_rebuild:
 ai_recruitinterval:
   enabled:
     default: false
+ai_recruitstate_initialtimer:
+  enabled:
+    default: false
+  value:
+    default: 6
 ai_tethers:
   enabled:
     default: false
@@ -49,9 +75,19 @@ o_armory_marketplace_weapon_order_fix:
 o_change_siege_engine_spawn_position_catapult:
   enabled:
     default: false
+o_default_multiplayer_speed:
+  enabled:
+    default: false
+  value:
+    default: 40
 o_engineertent:
   enabled:
     default: false
+o_firecooldown:
+  enabled:
+    default: false
+  value:
+    default: 2000
 o_fix_baker_disappear:
   enabled:
     default: false
@@ -88,6 +124,11 @@ o_onlyai:
 o_override_identity_menu:
   enabled:
     default: false
+o_playercolor:
+  enabled:
+    default: false
+  value:
+    default: 1
 o_responsivegates:
   enabled:
     default: false
