@@ -213,8 +213,17 @@ jobs:
                 $defaults.modules[$name].options = [ordered]@{}
                 
                 $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
-                $y = ConvertFrom-Yaml $f
-                if($y -ne $null) {
+                $yus = ConvertFrom-Yaml $f
+                
+                if($yus -ne $null) {
+                    # Create an ordered dictionary
+                    $yk = $yus.keys | Sort
+                    $y = [ordered]@{}
+                    foreach($k in $yk) {
+                        $y[$k] = $yus[$k]
+                    }
+                    
+                    # Set the default values
                     $defaults.modules[$name].options = Convert-ConfigFile -Table $y           
                 } 
             }
