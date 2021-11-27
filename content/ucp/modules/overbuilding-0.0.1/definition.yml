@@ -1,2 +1,3 @@
 name: overbuilding
 version: 0.0.1
+game: [SHC==1.41, SHCE==1.41, SHCE==1.41.1]

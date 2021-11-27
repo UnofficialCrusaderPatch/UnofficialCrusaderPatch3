@@ -221,19 +221,19 @@ return {
             0xE9, function(address, index, labels)
                 local hook = {
                 
-                                0x8B, 0xC7, // mov eax, edi
-                                0x2D, new BinRefTo("namecolors", false), // sub eax, namecolors
-                                0x3C, 0x04, //cmp al, value
-                                0x75, 0x04, //  JNE SHORT 
-                                0xB0, (self.value*4) & 0xFF, //  MOV AL, value
-                                0xEB, 0x06, //  JMP SHORT
-                                0x3C, (self.value*4) & 0xFF, //  CMP AL, value
-                                0x75, 0x02, //  JNE SHORT
-                                0xB0, 0x04, //  MOV AL, 1
-                                0x8B, 0x80, // mov eax, [eax + namecolors]
-                                new BinRefTo("namecolors", false), 
-                                0x8B, 0x0C, 0x85, // mov ecx, [eax*4 + someoffset]
-                                new BinRefTo("someoffset", false)
+                                0x8B, 0xC7, -- mov eax, edi
+                                0x2D, itob(namecolors), -- sub eax, namecolors
+                                0x3C, 0x04, --cmp al, value
+                                0x75, 0x04, --  JNE SHORT
+                                0xB0, (self.value*4) & 0xFF, --  MOV AL, value
+                                0xEB, 0x06, --  JMP SHORT
+                                0x3C, (self.value*4) & 0xFF, --  CMP AL, value
+                                0x75, 0x02, --  JNE SHORT
+                                0xB0, 0x04, --  MOV AL, 1
+                                0x8B, 0x80, -- mov eax, [eax + namecolors]
+                                itob(namecolors),
+                                0x8B, 0x0C, 0x85, -- mov ecx, [eax*4 + someoffset]
+                                itob(someoffset),
                                     0xe9, relTo(self.o_playercolor_gameover_edit + 9, -4)
                 }
                 local hookSize = calculateCodeSize(hook)
@@ -248,19 +248,19 @@ return {
             0xE9, function(address, index, labels)
                 local hook = {
                 
-                                0x8B, 0xC7, // mov eax, edi
-                                0x2D, new BinRefTo("namecolors", false), // sub eax, namecolors
-                                0x3C, 0x04, //cmp al, value
-                                0x75, 0x04, //  JNE SHORT 
-                                0xB0, (self.value*4) & 0xFF, //  MOV AL, value
-                                0xEB, 0x06, //  JMP SHORT
-                                0x3C, (self.value*4) & 0xFF, //  CMP AL, value
-                                0x75, 0x02, //  JNE SHORT
-                                0xB0, 0x04, //  MOV AL, 1
-                                0x8B, 0x80, // mov eax, [eax + namecolors]
-                                new BinRefTo("namecolors", false), 
-                                0x8B, 0x0C, 0x85, // mov ecx, [eax*4 + someoffset]
-                                new BinRefTo("someoffset", false)
+                                0x8B, 0xC7, -- mov eax, edi
+                                0x2D, itob(namecolors), -- sub eax, namecolors
+                                0x3C, 0x04, --cmp al, value
+                                0x75, 0x04, --  JNE SHORT
+                                0xB0, (self.value*4) & 0xFF, --  MOV AL, value
+                                0xEB, 0x06, --  JMP SHORT
+                                0x3C, (self.value*4) & 0xFF, --  CMP AL, value
+                                0x75, 0x02, --  JNE SHORT
+                                0xB0, 0x04, --  MOV AL, 1
+                                0x8B, 0x80, -- mov eax, [eax + namecolors]
+                                itob(namecolors),
+                                0x8B, 0x0C, 0x85, -- mov ecx, [eax*4 + someoffset]
+                                itob(someoffset),
                                     0xe9, relTo(self.o_playercolor_gameover_edit + 9 + 0x1B + 9, -4)
                 }
                 local hookSize = calculateCodeSize(hook)
@@ -275,19 +275,19 @@ return {
             0xE9, function(address, index, labels)
                 local hook = {
                 
-                                0x8B, 0xC7, // mov eax, edi
-                                0x2D, new BinRefTo("namecolors", false), // sub eax, namecolors
-                                0x3C, 0x04, //cmp al, value
-                                0x75, 0x04, //  JNE SHORT 
-                                0xB0, (self.value*4) & 0xFF, //  MOV AL, value
-                                0xEB, 0x06, //  JMP SHORT
-                                0x3C, (self.value*4) & 0xFF, //  CMP AL, value
-                                0x75, 0x02, //  JNE SHORT
-                                0xB0, 0x04, //  MOV AL, 1
-                                0x8B, 0x80, // mov eax, [eax + namecolors]
-                                new BinRefTo("namecolors", false), 
-                                0x8B, 0x14, 0x85, // mov edx, [eax*4 + someoffset]
-                                new BinRefTo("someoffset", false)
+                                0x8B, 0xC7, -- mov eax, edi
+                                0x2D, itob(namecolors), -- sub eax, namecolors
+                                0x3C, 0x04, --cmp al, value
+                                0x75, 0x04, --  JNE SHORT
+                                0xB0, (self.value*4) & 0xFF, --  MOV AL, value
+                                0xEB, 0x06, --  JMP SHORT
+                                0x3C, (self.value*4) & 0xFF, --  CMP AL, value
+                                0x75, 0x02, --  JNE SHORT
+                                0xB0, 0x04, --  MOV AL, 1
+                                0x8B, 0x80, -- mov eax, [eax + namecolors]
+                                itob(namecolors),
+                                0x8B, 0x14, 0x85, -- mov edx, [eax*4 + someoffset]
+                                itob(someoffset),
                                     0xe9, relTo(self.o_playercolor_gameover_edit + 9 + 0x1B + 9 + 0x16 + 9, -4)
                 }
                 local hookSize = calculateCodeSize(hook)
@@ -302,19 +302,19 @@ return {
             0xE9, function(address, index, labels)
                 local hook = {
                 
-                                0x8B, 0xC7, // mov eax, edi
-                                0x2D, new BinRefTo("namecolors", false), // sub eax, namecolors
-                                0x3C, 0x04, //cmp al, value
-                                0x75, 0x04, //  JNE SHORT 
-                                0xB0, (self.value*4) & 0xFF, //  MOV AL, value
-                                0xEB, 0x06, //  JMP SHORT
-                                0x3C, (self.value*4) & 0xFF, //  CMP AL, value
-                                0x75, 0x02, //  JNE SHORT
-                                0xB0, 0x04, //  MOV AL, 1
-                                0x8B, 0x80, // mov eax, [eax + namecolors]
-                                new BinRefTo("namecolors", false), 
-                                0x8B, 0x14, 0x85, // mov edx, [eax*4 + someoffset]
-                                new BinRefTo("someoffset", false)
+                                0x8B, 0xC7, -- mov eax, edi
+                                0x2D, itob(namecolors), -- sub eax, namecolors
+                                0x3C, 0x04, --cmp al, value
+                                0x75, 0x04, --  JNE SHORT
+                                0xB0, (self.value*4) & 0xFF, --  MOV AL, value
+                                0xEB, 0x06, --  JMP SHORT
+                                0x3C, (self.value*4) & 0xFF, --  CMP AL, value
+                                0x75, 0x02, --  JNE SHORT
+                                0xB0, 0x04, --  MOV AL, 1
+                                0x8B, 0x80, -- mov eax, [eax + namecolors]
+                                itob(namecolors),
+                                0x8B, 0x14, 0x85, -- mov edx, [eax*4 + someoffset]
+                                itob(someoffset),
                                     0xe9, relTo(self.o_playercolor_gameover_edit + 9 + 0x1B + 9 + 0x16 + 9 + 0x20 + 9, -4)
                 }
                 local hookSize = calculateCodeSize(hook)

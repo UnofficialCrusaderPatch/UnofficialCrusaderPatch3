@@ -343,4 +343,4 @@ local AIPersonalityFieldTypes = {
     TargetChoice = "TargetingTypeEnum"
 }
 
-return AIPersonalityFieldsEnum, AIPersonalityFieldTypes
+return {enum=AIPersonalityFieldsEnum, types=AIPersonalityFieldTypes}

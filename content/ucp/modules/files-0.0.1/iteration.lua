@@ -14,6 +14,9 @@ local EXTRA_DIRS = {}
 ---@class IterationSession
 local IterationSession = { }
 
+---@type IterationSession
+local CURRENT_ITERATION_SESSION
+
 function IterationSession:new(this, target, struct)
     local o = {
         this = this,
@@ -74,8 +77,6 @@ function IterationSession:next(this, handle, struct)
 
 end
 
----@type IterationSession
-local CURRENT_ITERATION_SESSION
 
 local function FindFirstFileA_hook(this, target, struct)
     CURRENT_ITERATION_SESSION = IterationSession:new(this, target, struct)

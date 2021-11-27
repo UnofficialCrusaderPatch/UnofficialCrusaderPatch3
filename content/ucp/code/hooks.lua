@@ -1,7 +1,7 @@
-HOOKS = {}
+local HOOKS = {}
 HOOKS.afterInit = {}
 
-function registerHookCallback(hook, f)
+local function registerHookCallback(hook, f)
     if hook == "afterInit" then
         table.insert(HOOKS.afterInit, f)
     end
@@ -17,7 +17,7 @@ end
 ---This is right before the windows messages loop
 local afterInit = core.scanForAOB("e8 ? ? ? ? 39 1d ? ? ? ? 89 2d ? ? ? ? 89 1d ? ? ? ? 0f 85 ? ? ? ?")
 
-function onAfterInit(registers)
+local function onAfterInit(registers)
     print("")
     print("[hooks]: firing afterInit callbacks")
 
@@ -32,6 +32,5 @@ end
 core.detourCode(onAfterInit, afterInit + 5, 6)
 
 return {
-    HOOKS = HOOKS,
     registerHookCallback = registerHookCallback
 }

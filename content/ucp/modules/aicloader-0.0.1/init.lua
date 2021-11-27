@@ -4,9 +4,11 @@ local writeInteger = core.writeInteger
 local AICharacterName = require("characters")
 local FieldTypes = require("fieldtypes")
 
-local AIPersonalityFieldsEnum, AIPersonalityFieldTypes = require("personality")
+local personality = require("personality")
+local AIPersonalityFieldsEnum = personality.enum
+local AIPersonalityFieldTypes = personality.types
 
-local aicArrayBaseAddr = 0x023fc8e8
+local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d ? ? ? ? 83 3d ? ? ? ? 00 75 44 6a 08 b9 ? ? ? ? e8 ? ? ? ? 85 c0 74 34 8b c5 2b 05"))
 
 local booleanToInteger = function(value)
     if type(value) == "boolean" then
@@ -78,8 +80,10 @@ namespace = {
 
         local fileName = config.aicFile
         if fileName then
-            print("Overwritten AIC values from file: " .. fileName)
-            namespace.overwriteAICsFromFile(fileName)
+            hooks.registerHookCallback("afterInit", function()
+                print("Overwritten AIC values from file: " .. fileName)
+                namespace.overwriteAICsFromFile(fileName)
+            end)
         end
 
     end,
@@ -128,6 +132,7 @@ namespace = {
                 end
                 set = true
                 writeInteger(aicAddr + (4 * (fieldIndex - 1)), aicValue) -- lua is 1-based, therefore fieldIndex-1
+                --TODO: optimize by writing a longer array of bytes...
             end
         end
         if not set then
