@@ -48,11 +48,11 @@ return {
         FireBallista = 0x166
     },
     TargetingTypeEnum = {
-        Gold,
-        Balanced,
-        Closest,
-        Any,
-        Player
+        Gold = 0,
+        Balanced = 1,
+        Closest = 2,
+        Any = 3,
+        Player = 4,
     },
     UnitEnum = {
         None = 0x00,

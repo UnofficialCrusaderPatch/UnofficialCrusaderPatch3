@@ -52,7 +52,7 @@ local fieldValueToInteger = function(fieldName, stringValue)
     result = FieldTypes[fieldType][stringValue]
 
     if result == nil then
-        error("invalid field value: " .. stringValue)
+        error("invalid field value: " .. stringValue .. " for fieldName " .. fieldName)
     end
 
     return result
