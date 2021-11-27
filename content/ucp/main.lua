@@ -255,7 +255,7 @@ function mergeConfiguration(c1, c2)
                 if type(v1) == "table" and type(v2) == "table" then
                     mergeConfiguration(v1, v2)
                 elseif type(v1) ~= type(v2) then
-                    error("incompatible types")
+                    error("incompatible types in key: " .. k)
                 else
                     c1[k] = v2
                 end
