@@ -235,6 +235,17 @@ function core.IntegerLambda(f)
     return core.Lambda:new(f, 4)
 end
 
+function core.AssemblyLambda(script, valueMapping)
+    local s = core.assemble(script, valueMapping, 0)
+    return core.Lambda:new(function(address)
+        local s2 = core.assemble(script, valueMapping, address)
+        if #s2 ~= #s then
+            error("error in compilation of Assembly, differing sizes: " .. script:sub(-20))
+        end
+        return s2
+    end, #s)
+end
+
 ---Utility function to compute a distance between two addresses, offset by an offset
 ---@param from number
 ---@param to number
@@ -463,7 +474,7 @@ function core.insertCode(address, patchSize, code, returnTo, original)
 
     local codeSize = core.calculateCodeSize(code)
     local codeAddress = core.allocateCode(codeSize + 5)
-    -- This is not necessary because writeCode also compiles if necessary: code = core.compile(code, codeAddress)
+    -- code = core.compile(code, codeAddress) -- This is not necessary because writeCode also compiles if necessary: code = core.compile(code, codeAddress)
 
     core.writeCode(codeAddress, code)
 
