@@ -78,12 +78,15 @@ namespace = {
             modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
         end
 
-        local fileName = config.aicFile
-        if fileName then
+        if type(config.aicFiles) == "table" then
             hooks.registerHookCallback("afterInit", function()
-                print("Overwritten AIC values from file: " .. fileName)
-                namespace.overwriteAICsFromFile(fileName)
+                for i, fileName in pairs(config.aicFile) do
+                    print("Overwritten AIC values from file: " .. fileName)
+                    namespace.overwriteAICsFromFile(fileName)
+                end
             end)
+        else
+            error("aicFiles should be a yaml array")
         end
 
     end,
