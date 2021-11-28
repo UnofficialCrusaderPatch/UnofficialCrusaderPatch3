@@ -25,6 +25,8 @@ return {
         self.o_xtreme_bar1_edit = AOBScan("B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 53 B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? B9 ? ? ? ? E8 ? ? ? ? 53 B9 ? ? ? ? E8 ? ? ? ? B9")
         -- 4DA3E0 disable manabar clicks
         self.o_xtreme_bar2_edit = AOBScan("A1 ? ? ? ? 85 C0 74 12 83 F8 63 74 0D 83 3D ? ? ? ? 00 0F 85 F2 00 00 00 A1")
+        -- 486530 disable manabar network function
+        self.o_xtreme_bar3_edit = AOBScan("51 a1 ? ? ? ? 83 F8 01 C7 05 ? ? ? ? 08 00 00 00 75 40")
     end,
 
     enable = function(self, config)
@@ -38,6 +40,10 @@ return {
             0xC3
         }
         writeCode(self.o_xtreme_bar2_edit, code)
+        local code = {
+            0xC3
+        }
+        writeCode(self.o_xtreme_bar3_edit, code)
     end,
 
     disable = function(self, config)
