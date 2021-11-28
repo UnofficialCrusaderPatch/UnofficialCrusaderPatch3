@@ -81,7 +81,13 @@ function BaseLoader:loadDefinition()
         return nil
     end
 
-    self.definition = yaml.eval(data)
+    local result, err = yaml.eval(data)
+    if not result then
+        log(ERROR, "error trying to load definition.yml of: " .. self.path .. "\nreason: " .. err)
+        self.definition = {}
+    else
+        self.definition = result
+    end
 end
 
 ---Return the dependencies of this module by reading the module.yml file
@@ -121,7 +127,11 @@ function BaseLoader:config()
         return { }
     end
 
-    local y = yaml.eval(data)
+    local y, err = yaml.eval(data)
+
+    if not y then
+        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+    end
 
     return y
 end
@@ -134,8 +144,14 @@ function BaseLoader:verifyVersion()
         error("cannot verify version, empty definition.yml")
     end
 
+    if not self.definition.version then
+        error("Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
+    else
+        self.definition.version = self.definition.version:gsub(" ", "") -- remove whitespace
+    end
+
     if self.definition.version ~= self.version then
-        error("Version mismatch between assumed version: " .. self.version .. " and defined version: " .. self.definition.version)
+        error("Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
     end
 
     return true

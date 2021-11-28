@@ -1,7 +1,7 @@
 # Example usage:
 #rat:
-#  0: 'ucp\plugins\myplugin\aiv1.aiv'
-#  1: ''
+#  1: 'ucp\plugins\myplugin\aiv1.aiv'
 #  2: ''
+#  3: ''
 #snake:
 #  5: ''

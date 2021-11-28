@@ -1,4 +1,7 @@
 oxTetherParameters:
+  logBehaviour:
+    default: false
+    type: boolean
   # total max ox tethers for a player
   maxOxTethers:
     default: 100

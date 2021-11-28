@@ -78,8 +78,12 @@ end
 ---Allocate a piece of memory for data
 ---@param size number The size of the memory block
 ---@return number The address of the new memory block
-function core.allocate(size)
-    return ucp.internal.allocate(size)
+function core.allocate(size, zero)
+    if zero == nil or zero == true then 
+      return ucp.internal.allocate(size, true)
+    else
+      return ucp.internal.allocate(size)
+    end
 end
 
 ---Writes `code` to `address` in executable memory. If the memory has write-protection, this will be temporarily lifted.
@@ -127,9 +131,9 @@ function core.scanForAOB(target, min, max)
     if type(target) ~= "string" then error("invalid argument: " .. target) end
     if target:len() < 2 then error("target AOB too short: " .. target) end
     if min == nil and max == nil then
-        return ucp.internal.scanForAOB(target)
+        return ucp.internal.scanForAOB(target, 0x400000, 0x7FFFFFFF)
     elseif max == nil then
-        return ucp.internal.scanForAOB(target, min)
+        return ucp.internal.scanForAOB(target, min, 0x7FFFFFFF)
     else
         return ucp.internal.scanForAOB(target, min, max)
     end
@@ -146,13 +150,13 @@ function core.AOBScan(target, start, stop)
     if start == nil and stop ~= nil then
         error("start value cannot be nil")
     end
-    if stop ~= nil then
-        result = core.scanForAOB(target, start, stop)
-    elseif start ~= nil then
-        result = core.scanForAOB(target, start)
-    else
-        result = core.scanForAOB(target)
+    
+    if start == nil and stop == nil then
+      -- Consider using the cache
+      return data.cache.AOB.retrieve(target)
     end
+    
+    result = core.scanForAOB(target, start, stop)
 
     if not result then
         error("AOB not found: " .. target)
@@ -229,6 +233,17 @@ end
 ---A shorthand function for Lambda:new(f, 4)
 function core.IntegerLambda(f)
     return core.Lambda:new(f, 4)
+end
+
+function core.AssemblyLambda(script, valueMapping)
+    local s = core.assemble(script, valueMapping, 0)
+    return core.Lambda:new(function(address)
+        local s2 = core.assemble(script, valueMapping, address)
+        if #s2 ~= #s then
+            error("error in compilation of Assembly, differing sizes: " .. script:sub(-20))
+        end
+        return s2
+    end, #s)
 end
 
 ---Utility function to compute a distance between two addresses, offset by an offset
@@ -459,7 +474,7 @@ function core.insertCode(address, patchSize, code, returnTo, original)
 
     local codeSize = core.calculateCodeSize(code)
     local codeAddress = core.allocateCode(codeSize + 5)
-    code = core.compile(code, codeAddress)
+    -- code = core.compile(code, codeAddress) -- This is not necessary because writeCode also compiles if necessary: code = core.compile(code, codeAddress)
 
     core.writeCode(codeAddress, code)
 
@@ -492,7 +507,7 @@ end
 ---Assembles the string script into assembly and writes it to a new memory location
 function core.allocateAssembly(script, valueMapping)
     local pass1 = core.assemble(script, valueMapping, 0)
-    local address = core.allocate(#pass1)
+    local address = core.allocateCode(#pass1)
     core.writeCode(address, core.assemble(script, valueMapping, address))
     return address
 end

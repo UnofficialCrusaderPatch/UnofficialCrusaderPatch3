@@ -4,9 +4,11 @@ local writeInteger = core.writeInteger
 local AICharacterName = require("characters")
 local FieldTypes = require("fieldtypes")
 
-local AIPersonalityFieldsEnum, AIPersonalityFieldTypes = require("personality")
+local personality = require("personality")
+local AIPersonalityFieldsEnum = personality.enum
+local AIPersonalityFieldTypes = personality.types
 
-local aicArrayBaseAddr = 0x023fc8e8
+local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d ? ? ? ? 83 3d ? ? ? ? 00 75 44 6a 08 b9 ? ? ? ? e8 ? ? ? ? 85 c0 74 34 8b c5 2b 05"))
 
 local booleanToInteger = function(value)
     if type(value) == "boolean" then
@@ -50,7 +52,7 @@ local fieldValueToInteger = function(fieldName, stringValue)
     result = FieldTypes[fieldType][stringValue]
 
     if result == nil then
-        error("invalid field value: " .. stringValue)
+        error("invalid field value: " .. stringValue .. " for fieldName " .. fieldName)
     end
 
     return result
@@ -76,10 +78,19 @@ namespace = {
             modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
         end
 
-        local fileName = config.aicFile
-        if fileName then
-            print("Overwritten AIC values from file: " .. fileName)
-            namespace.overwriteAICsFromFile(fileName)
+        if config.aicFiles then
+            if type(config.aicFiles) == "table" then
+                hooks.registerHookCallback("afterInit", function()
+                    for i, fileName in pairs(config.aicFiles) do
+                        if fileName:len() > 0 then
+                            print("Overwritten AIC values from file: " .. fileName)
+                            namespace.overwriteAICsFromFile(fileName)
+                        end
+                    end
+                end)
+            else
+                error("aicFiles should be a yaml array")
+            end
         end
 
     end,
@@ -128,6 +139,7 @@ namespace = {
                 end
                 set = true
                 writeInteger(aicAddr + (4 * (fieldIndex - 1)), aicValue) -- lua is 1-based, therefore fieldIndex-1
+                --TODO: optimize by writing a longer array of bytes...
             end
         end
         if not set then

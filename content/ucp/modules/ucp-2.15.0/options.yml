@@ -1,18 +1,176 @@
-change_moat_visibility:
-  default: true
-  type: boolean
-change_healer:
-  default: false
-  type: boolean
-change_ai_buywood:
-  default: true
-  type: boolean
-change_fire_cooldown:
-  active:
+ai_access:
+  enabled:
     default: false
-    type: boolean
+ai_addattack:
+  ai_addattack:
+    enabled:
+      default: false
+    value:
+      default: 5
+  ai_addattack_alt:
+    enabled:
+      default: false
+    value:
+      default: 0
+ai_attacklimit:
+  enabled:
+    default: false
+  value:
+    default: 200
+ai_assaultswitch:
+  enabled:
+    default: false
+ai_attacktarget:
+  enabled:
+    default: false
+ai_attackwave:
+  enabled:
+    default: false
+ai_buywood:
+  enabled:
+    default: false
+ai_defense:
+  enabled:
+    default: false
+ai_demolish:
+  enabled:
+    default: false
+ai_fix_crusader_archers_pitch:
+  enabled:
+    default: false
+ai_fix_laddermen_with_enclosed_keep:
+  enabled:
+    default: false
+ai_housing:
+  enabled:
+    default: false
+  value:
+    default: 0
+ai_nosleep:
+  enabled:
+    default: false
+ai_rebuild:
+  enabled:
+    default: false
+ai_recruitinterval:
+  enabled:
+    default: false
+ai_recruitstate_initialtimer:
+  enabled:
+    default: false
+  value:
+    default: 6
+ai_tethers:
+  enabled:
+    default: false
+ai_towerengines:
+  enabled:
+    default: false
+fix_apple_orchard_build_size:
+  enabled:
+    default: false
+o_armory_marketplace_weapon_order_fix:
+  enabled:
+    default: false
+o_change_siege_engine_spawn_position_catapult:
+  enabled:
+    default: false
+o_default_multiplayer_speed:
+  enabled:
+    default: false
+  value:
+    default: 40
+o_engineertent:
+  enabled:
+    default: false
+o_firecooldown:
+  enabled:
+    default: false
   value:
     default: 2000
-    type: range
-    start: 0
-    end: 32767
+o_fix_baker_disappear:
+  enabled:
+    default: false
+o_fix_fletcher_bug:
+  enabled:
+    default: false
+o_fix_ladderclimb:
+  enabled:
+    default: false
+o_fix_moat_digging_unit_disappearing:
+  enabled:
+    default: false
+o_freetrader:
+  enabled:
+    default: false
+o_gamespeed:
+  enabled:
+    default: false
+o_healer:
+  enabled:
+    default: false
+o_increase_path_update_tick_rate:
+  enabled:
+    default: false
+o_keys:
+  enabled:
+    default: false
+o_moatvisibility:
+  enabled:
+    default: false
+o_onlyai:
+  enabled:
+    default: false
+o_override_identity_menu:
+  enabled:
+    default: false
+o_playercolor:
+  enabled:
+    default: false
+  value:
+    default: 1
+o_responsivegates:
+  enabled:
+    default: false
+o_restore_arabian_engineer_speech:
+  enabled:
+    default: false
+o_seed_modification_possibility_title:
+  enabled:
+    default: false
+o_shfy:
+  enabled:
+    default: false
+o_stop_player_keep_rotation:
+  enabled:
+    default: false
+o_xtreme:
+  enabled:
+    default: false
+u_arabwall:
+  enabled:
+    default: false
+u_arabxbow:
+  enabled:
+    default: false
+u_fireballistafix:
+  enabled:
+    default: false
+u_fix_applefarm_blocking:
+  enabled:
+    default: false
+u_fix_lord_animation_stuck_movement:
+  enabled:
+    default: false
+u_laddermen:
+  enabled:
+    default: false
+u_spearmen:
+  enabled:
+    default: false
+u_spearmen_run:
+  enabled:
+    default: false
+u_tanner_fix:
+  enabled:
+    default: false

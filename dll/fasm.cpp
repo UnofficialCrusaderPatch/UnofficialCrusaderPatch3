@@ -114,7 +114,10 @@ int luaAssemble(lua_State* L) {
 			fasm_Assemble = (func_Assemble) r;
 		}
 		else {
-			fasm = LoadLibraryA("fasm.dll");
+			fasm = LoadLibraryA(fasmPath);
+			if (fasm == 0) {
+				fasm = LoadLibraryA("fasm.dll");
+			}
 			if (fasm == 0) {
 				return luaL_error(L, "could not find fasm dll");
 			}

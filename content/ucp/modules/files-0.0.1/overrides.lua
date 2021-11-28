@@ -20,6 +20,9 @@ local function onOpenFile(file)
     return nil
 end
 
+local fileopen_use_address = core.AOBScan("E8 ? ? ? ? 83 c4 0c 83 f8 ff 89 86 08 0d 08 00 89 be c4 0b 00 00 75 07 5f 33 c0 5e c2 0c 00")
+local fileopen_address = core.readInteger(fileopen_use_address + 1) + fileopen_use_address + 5 -- turn into absolute address
+
 return {
     enable = function(config)
         core.detourCode(function(registers)
@@ -49,7 +52,7 @@ return {
                 core.writeInteger(registers.ESP + 4, FILENAME_DB[override])
             end
 
-        end, 0x005816c3, 6)
+        end, fileopen_address, 6)
     end,
     overrideFileWith = function(file, newFile)
         print("Registering override for: " .. file .. ": " .. newFile)

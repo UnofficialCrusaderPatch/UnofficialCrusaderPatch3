@@ -163,8 +163,9 @@ namespace.assertEnglishVersion = function()
 end
 
 namespace.isExtreme = function()
-    local res = scanForString("frontend_main_extreme.tgx")
-    return res ~= nil or namespace.game_version["extreme"] ~= nil
+    -- local res = scanForString("frontend_main_extreme.tgx")
+    -- return res ~= nil or namespace.game_version["extreme"] ~= nil
+    return namespace.game_version["extreme"] ~= nil
 end
 
 namespace.getGameVersionMajor = function()

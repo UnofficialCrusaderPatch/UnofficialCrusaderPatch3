@@ -53,7 +53,7 @@ jobs:
       run: |
         # Create the right folders
         mkdir "$env:BUILD_CONFIGURATION\ucp-package"
-        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"       
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\ucp"    
       
     - name: Prepare UCP3 package extensions
       shell: pwsh
@@ -159,6 +159,8 @@ jobs:
         
         # Copy the legacy ucp.cfg
         Copy-Item installer\ucp.cfg "$env:BUILD_CONFIGURATION\ucp-package\ucp.cfg"
+        
+        mkdir "$env:BUILD_CONFIGURATION\ucp-package\gameseeds"
 
     - name: Generate a default config
       shell: pwsh
@@ -211,8 +213,17 @@ jobs:
                 $defaults.modules[$name].options = [ordered]@{}
                 
                 $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
-                $y = ConvertFrom-Yaml $f
-                if($y -ne $null) {
+                $yus = ConvertFrom-Yaml $f
+                
+                if($yus -ne $null) {
+                    # Create an ordered dictionary
+                    $yk = $yus.keys | Sort
+                    $y = [ordered]@{}
+                    foreach($k in $yk) {
+                        $y[$k] = $yus[$k]
+                    }
+                    
+                    # Set the default values
                     $defaults.modules[$name].options = Convert-ConfigFile -Table $y           
                 } 
             }
