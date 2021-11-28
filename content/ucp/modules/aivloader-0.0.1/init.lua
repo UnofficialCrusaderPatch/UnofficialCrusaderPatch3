@@ -42,8 +42,8 @@ local function replaceFileWith(ai, castle, newFileName)
         end
         castle = tonumber(castle)
     end
-    if castle < 1 or castle > 8 then error("invalid castle argument: out of bounds [1-8]") end
-    print("Replacing: '" .. "aiv\\" .. ai .. castle .. ".aiv'" .. " with: " .. newFileName)
+    if castle < 1 or castle > 8 then error("invalid castle argument: out of bounds [1-8]: " .. tostring(castle)) end
+    print("Replacing: '" .. "aiv\\" .. ai .. castle .. ".aiv'" .. " with: '" .. newFileName .. "'")
     REPLACEMENTS["aiv\\" .. ai .. castle .. ".aiv"] = newFileName
 end
 
@@ -53,7 +53,7 @@ return {
 
             if fileName:match("aiv\\.+.aiv$") then
                 if REPLACEMENTS[fileName] ~= nil then
-                    print("Processing AIV override for: " .. fileName)
+                    print("Processing AIV override for: '" .. fileName .. "'")
                     print("\t replacement: '" .. REPLACEMENTS[fileName] .. "'")
                     return REPLACEMENTS[fileName]
                 end
