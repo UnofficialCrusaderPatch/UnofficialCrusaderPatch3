@@ -38,6 +38,31 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 -- abbot offset: 0xA90  => 1, 1, 1
 -- +4, normal2
 -- +8, turned up?
+-- disable sleeping phase for AI recruitment during attacks
+-- this is no good, because the AI sends newly recruited troops instantly forth
+-- while an attack is still going on, ending in streams of single soldiers
+-- 004D3BF6 jne 2E, skips some comparisons
+-- BinBytes.Change("ai_recruitsleep", ChangeType.Balancing, false, 0x75, 0x2E),
+-- /*
+-- AI RECRUITMENT ATTACK LIMITS
+-- */ 
+-- attack start troops: 023FC8E8 + AI_OFFSET * 4 + 1F4
+-- rat => 20
+-- snake => 30
+-- pig => 10
+-- wolf => 40
+-- saladin => 50
+-- kalif => 15
+-- sultan => 10
+-- richard => 20
+-- frederick => 30
+-- philipp => 10
+-- wazir => 40
+-- emir => 30
+-- nizar => 40
+-- sheriff => 50
+-- marshal => 10
+-- abbot => 50
 -- sets the recruitment interval to 1 for all AIs
 -- 004D3B41 mov eax, 1
 --____NEW CHANGE: ai_recruitinterval
