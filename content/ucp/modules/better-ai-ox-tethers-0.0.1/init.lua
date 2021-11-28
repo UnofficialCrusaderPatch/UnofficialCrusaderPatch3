@@ -24,6 +24,16 @@ local quarryLinkedOxtethersArray_address = core.readInteger(addrset1+41+12+8)
 local otBuildingType_address = core.readInteger(addrset1+41+12+8+23)
 local oxtetherLinkedQuarryID_address = core.readInteger(addrset1+41+12+8+23+10)
 
+local logging = false
+
+local function logit(message)
+    if logging then
+        log(INFO, message)
+    else
+
+    end
+end
+
 ns.oxTetherParameters = {
     -- total max ox tethers for a player
     maxOxTethers = 100,
@@ -66,18 +76,18 @@ local function newAiRequiresExtraOxTethers(playerID)
     local quarryCount = ns.countBuildingsForPlayer(ECX, playerID, 0x14, 0)
     local oxtetherCount = ns.countBuildingsForPlayer(ECX, playerID, 0x4, 0)
 
-    print("Player #" .. playerID .. ": quarries = " .. quarryCount .. " ox tethers = " .. oxtetherCount)
+    logit("Player #" .. playerID .. ": quarries = " .. quarryCount .. " ox tethers = " .. oxtetherCount)
 
     if quarryCount == 0 then
-        print("Player #" .. playerID .. ": no ox tethers required")
+        logit("Player #" .. playerID .. ": no ox tethers required")
         return 0
     end
     if oxtetherCount >= ns.oxTetherParameters.maxOxTethers then
-        print("Player #" .. playerID .. ": over or at the ox tether limit")
+        logit("Player #" .. playerID .. ": over or at the ox tether limit")
         return 0
     end
     if oxtetherCount >= (quarryCount * ns.oxTetherParameters.dynamicMaxOxTethers) then
-        print("Player #" .. playerID .. ": over or at the dynamic ox tethers limit: " .. (quarryCount * ns.oxTetherParameters.dynamicMaxOxTethers))
+        logit("Player #" .. playerID .. ": over or at the dynamic ox tethers limit: " .. (quarryCount * ns.oxTetherParameters.dynamicMaxOxTethers))
         return 0
     end
 
@@ -124,12 +134,12 @@ local function newAiRequiresExtraOxTethers(playerID)
         local overMax = false
 
         if linkedTetherCount >= ns.oxTetherParameters.maximumOxTethersPerQuarry then
-            print("Player #" .. playerID .. ": has too many ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
+            logit("Player #" .. playerID .. ": has too many ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
             overMax = true
         end
 
         if linkedTetherCount < ns.oxTetherParameters.minimalOxTethersPerQuarry then
-            print("Player #" .. playerID .. ": has too few ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
+            logit("Player #" .. playerID .. ": has too few ox tethers (" .. linkedTetherCount .. ") for quarry #" .. quarryID)
             core.writeInteger(highestLoadQuarryID_address + (0x39f4 * playerID), quarryID)
             return 1
         end
@@ -154,15 +164,15 @@ local function newAiRequiresExtraOxTethers(playerID)
         quarryID = ns.findNextBuildingForPlayerAndType(ECX, playerID, 0x14, quarryID)
     end
 
-    print("Player #" .. playerID .. " heaviest loaded quarry is #" .. highestLoadQuarryID .. " (" .. highestLoad .. ")")
+    logit("Player #" .. playerID .. " heaviest loaded quarry is #" .. highestLoadQuarryID .. " (" .. highestLoad .. ")")
 
     if highestLoad > ns.oxTetherParameters.tresholdStoneLoad then
-        print("Player #" .. playerID .. ": has too heavy loaded quarry #" .. highestLoadQuarryID)
+        logit("Player #" .. playerID .. ": has too heavy loaded quarry #" .. highestLoadQuarryID)
         core.writeInteger(highestLoadQuarryID_address + (0x39f4 * playerID), highestLoadQuarryID)
         return 1
     end
 
-    print("Player #" .. playerID .. " is fine with the ox tethers")
+    logit("Player #" .. playerID .. " is fine with the ox tethers")
     return 0
 end
 
@@ -172,6 +182,8 @@ end
 
 ns.enable = function(self, config)
     self.config = config
+
+    logging = self.config.logBehaviour
 
     -- 0x004cb3a0
     self.hookAddress = core.AOBScan("83 ec 08 55 8b 6c 24 10 56 57 6a 14 55 b9 ? ? ? ? e8 ? ? ? ? 6a 01 6a 04 33 ff 55 b9 ? ? ? ?")
