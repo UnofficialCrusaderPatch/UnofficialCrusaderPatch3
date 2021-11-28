@@ -82,8 +82,10 @@ namespace = {
             if type(config.aicFiles) == "table" then
                 hooks.registerHookCallback("afterInit", function()
                     for i, fileName in pairs(config.aicFiles) do
-                        print("Overwritten AIC values from file: " .. fileName)
-                        namespace.overwriteAICsFromFile(fileName)
+                        if fileName:len() > 0 then
+                            print("Overwritten AIC values from file: " .. fileName)
+                            namespace.overwriteAICsFromFile(fileName)
+                        end
                     end
                 end)
             else

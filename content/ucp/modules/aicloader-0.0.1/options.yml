@@ -1,2 +1,3 @@
 aicFiles:
-  default: []
+  default:
+    - ""
