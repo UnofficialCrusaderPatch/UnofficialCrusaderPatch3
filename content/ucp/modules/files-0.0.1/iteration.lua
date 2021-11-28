@@ -49,6 +49,7 @@ function IterationSession:nextExtra(this, struct)
     while EXTRA_DIRS[self.target] ~= nil and EXTRA_DIRS[self.target][self.extraDirIndex] ~= nil do
         local newTarget = EXTRA_DIRS[self.target][self.extraDirIndex]
         local newHandle = FindFirstFileA(this, newTarget, struct)
+        log(DEBUG, "checking directory: " .. core.readString(newTarget))
         if newHandle ~= -1 then
             return newHandle
         else
@@ -82,13 +83,15 @@ local function FindFirstFileA_hook(this, target, struct)
     CURRENT_ITERATION_SESSION = IterationSession:new(this, target, struct)
 
     local targetString = core.readString(target)
-    if targetString == "maps\\*.map" and DISABLE_GAME_DIR_MAPS then
+    local isUserPath = targetString:find(":") or targetString:find("~")
+
+    if (targetString == "maps\\*.map" or targetString == "mapsExtreme\\*.map") and DISABLE_GAME_DIR_MAPS then
         return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
-    elseif targetString:sub(-4) == ".map" and targetString:find("~") ~= nil and DISABLE_GAME_DIR_USER_MAPS then
+    elseif targetString:sub(-4) == ".map" and isUserPath ~= nil and DISABLE_GAME_DIR_USER_MAPS then
         --Trying to detect the request for user maps.
         --TODO: fully test this pattern for all languages
         return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
-    elseif targetString:sub(-4) == ".sav" and targetString:find("~") ~= nil and DISABLE_GAME_DIR_USER_SAVS then
+    elseif targetString:sub(-4) == ".sav" and isUserPath ~= nil and DISABLE_GAME_DIR_USER_SAVS then
         --Trying to detect the request for user savs.
         --TODO: fully test this pattern for all languages
         return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
@@ -137,6 +140,7 @@ return {
                 dir = dir .. "\\*.map"
             end
             registerExtraDir("maps\\*.map", dir)
+            registerExtraDir("mapsExtreme\\*.map", dir)
         end
 
         if config["extra-sav-directory"] then
