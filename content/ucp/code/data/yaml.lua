@@ -9,8 +9,17 @@ local yaml = require('vendor.yaml.yaml')
 local namespace = {}
 
 namespace.eval = function(yml)
-    yml = yml:gsub("\n +$", "\n")
-    return yaml.eval(yml)
+    if yml:len() == 0 then
+        return { }
+    end
+    yml = yml:gsub("\n +$", "")
+    yml = yml .. "\n"
+    local success, result = pcall(function() return yaml.eval(yml) end)
+    if success then
+        return result
+    else
+        return nil, result -- result is an error message
+    end
 end
 
 namespace.oriEval = yaml.eval

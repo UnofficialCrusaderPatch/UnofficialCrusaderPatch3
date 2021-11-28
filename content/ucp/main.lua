@@ -78,7 +78,10 @@ default_config = (function()
     local data = f:read("*all")
     f:close()
 
-    local result = yaml.eval(data)
+    local result, err = yaml.eval(data)
+    if not result then
+        log(ERROR, "failed to parse '" .. CONFIG_DEFAULTS_FILE .. "':\n" .. err)
+    end
     if not result.plugins then result.plugins = {} end
     if not result.modules then result.modules = {} end
     return result
@@ -96,7 +99,10 @@ config = (function()
     local data = f:read("*all")
     f:close()
 
-    local result = yaml.eval(data)
+    local result, err = yaml.eval(data)
+    if not result then
+        log(ERROR, "failed to parse ucp-config.yml:\n" .. err)
+    end
     if not result.plugins then result.plugins = {} end
     if not result.modules then result.modules = {} end
     return result
