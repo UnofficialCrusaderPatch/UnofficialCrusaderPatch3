@@ -1,6 +1,16 @@
 # UnofficialCrusaderPatch3
 Development for the new UCP DLL Injection approach.
 
+## Quick start
+1. Go to Actions and download the latest build (Release or DevRelease)
+2. Unzip to the game folder
+3. Run install.bat
+4. Run the game
+
+In case there is a complaint about missing dlls at startup, make sure you have Visual Studio C++ runtime installed: 
+
+https://aka.ms/vs/17/release/vc_redist.x86.exe
+
 ## Working on the DLL: Setting up the repo locally and building the project
 0. Make sure you have the nuget command line program installed. Also, create a access token with just read:packages rights via your GitHub settings if you do not have one. You need it at step 4.
 1. Start the VS2019 developer console.
