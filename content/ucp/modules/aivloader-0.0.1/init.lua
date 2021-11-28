@@ -52,8 +52,8 @@ return {
         modules.files:registerOverrideFunction(function(fileName)
 
             if fileName:match("aiv\\.+.aiv$") then
-                print("Processing AIV override for: " .. fileName)
                 if REPLACEMENTS[fileName] ~= nil then
+                    print("Processing AIV override for: " .. fileName)
                     print("\t replacement: '" .. REPLACEMENTS[fileName] .. "'")
                     return REPLACEMENTS[fileName]
                 end
