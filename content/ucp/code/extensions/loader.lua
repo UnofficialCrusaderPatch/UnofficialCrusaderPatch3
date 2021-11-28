@@ -112,6 +112,28 @@ function BaseLoader:dependencies()
     return deps
 end
 
+---Post processing. Changes file path strings to proper local file path strings.
+---Checks if a string starts with "local://" and replaces that with the path argument
+local function postProcess(path, t)
+    local localHeader = "local://"
+    local localHeaderSize = localHeader:len()
+    local jobs = {}
+
+    for k, v in pairs(t) do
+        print(k, v)
+        if type(v) == "table" then
+            postProcess(path, v)
+        elseif type(v) == "string" then
+            if v:sub(1, localHeaderSize) == localHeader then
+                table.insert(jobs, {tab = t, key = k, val = path .. "/" .. v:sub(localHeaderSize)})
+            end
+        end
+    end
+    for k, job in pairs(jobs) do
+        job.tab[job.key] = job.val
+    end
+end
+
 
 ---Read the demanded config
 function BaseLoader:config()
@@ -132,6 +154,8 @@ function BaseLoader:config()
     if not y then
         log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
     end
+
+    postProcess(self.path, y)
 
     return y
 end
