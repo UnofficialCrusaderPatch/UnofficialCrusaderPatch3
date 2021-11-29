@@ -34,7 +34,9 @@ exports.enable = function(self,config)
         mov eax,cap
         mul dword [ticksLastLoop]
         cdq
-        div dword [timeLastLoop]
+        mov esi,dword [timeLastLoop]
+        add esi,1
+        div esi
         mov edx,eax
         imul edx,ecx
         sub edx,ecx
