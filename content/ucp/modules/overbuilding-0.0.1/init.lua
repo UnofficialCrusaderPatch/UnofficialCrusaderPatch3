@@ -269,7 +269,7 @@ exports.enable = function(self)
 
     local repositionUnit = function(registers)
         local this = registers.ECX
-        local unitID = rI(registers.ESP + 8) -- esp value not correct!
+        local unitID = rI(registers.ESP)
         local unitArrayOffset = unitArray + (unitID * 0x490)
         local previousPosX = rSI(unitArrayOffset + 0xCC)
         local previousPosY = rSI(unitArrayOffset + 0xCE)

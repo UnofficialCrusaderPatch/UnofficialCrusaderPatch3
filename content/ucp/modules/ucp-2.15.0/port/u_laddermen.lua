@@ -14,31 +14,6 @@ local readInteger = core.readInteger
 local itob = utils.itob
 local smallIntegerToBytes = utils.smallIntegerToBytes
 
--- disable sleeping phase for AI recruitment during attacks
--- this is no good, because the AI sends newly recruited troops instantly forth
--- while an attack is still going on, ending in streams of single soldiers
--- 004D3BF6 jne 2E, skips some comparisons
--- BinBytes.Change("ai_recruitsleep", ChangeType.Balancing, false, 0x75, 0x2E),
--- /*
--- AI RECRUITMENT ATTACK LIMITS
--- */ 
--- attack start troops: 023FC8E8 + AI_OFFSET * 4 + 1F4
--- rat => 20
--- snake => 30
--- pig => 10
--- wolf => 40
--- saladin => 50
--- kalif => 15
--- sultan => 10
--- richard => 20
--- frederick => 30
--- philipp => 10
--- wazir => 40
--- emir => 30
--- nizar => 40
--- sheriff => 50
--- marshal => 10
--- abbot => 50
 -- BinInt32.Change("laddermadness", ChangeType.Troops, 1),
 -- Armbrust dmg table: 0xB4ED20
 -- Bogen dmg table: 0xB4EAA0
