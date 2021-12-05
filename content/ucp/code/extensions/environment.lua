@@ -46,9 +46,8 @@ local function restrictedRequireFunction(path, env, allow_binary)
 
                 end
                 -- TODO: This will run in a global env, test that.
-
-                local value = assert(package.loadlib(full_path, "luaopen_" .. sanitized_file_name)())
-                LOADED[sanitized_file] = value
+                local value, err = loadLibrary(full_path, sanitized_file_name) --TODO specifically document loadLibrary can only return 1 value?
+                if value == nil then error(err) end
                 return value
             end
             error("binary files are not allowed: " .. full_path)
