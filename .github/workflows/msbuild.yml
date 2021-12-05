@@ -72,13 +72,13 @@ jobs:
           $moduleDir = "$env:BUILD_CONFIGURATION\ucp-package\ucp\modules\" + $module.Name + "\"
           
           # If the module uses C++ we have to build it first
-          $hasVCXProj = Test-Path -Path ($module.FullName + "\*.vcxproj")
+          $hasSLN = Get-ChildItem -Recurse -Path ($module.FullName + "\*.sln")
           
           # If the module specifies a custom list of files to include, read that
-          $hasFilesList = Test-Path -Path ($module.FullName + "\module.files")
+          $hasFilesList = Test-Path -Path ($module.FullName + "\files.xml")
           
           # Modules that should be compiled do not inherit the Secure build configurations for now
-          $simpleBuildConfiguration="Release"
+          $simpleBuildConfiguration=$env:BUILD_CONFIGURATION
           if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
             $simpleBuildConfiguration="Debug"
           }
@@ -87,8 +87,8 @@ jobs:
           }
           
           # Build the module
-          if($hasVCXProj) {
-            pushd $module.FullName
+          if($hasSLN) {
+            pushd $hasSLN.Directory.FullName
             nuget restore
             msbuild /m /p:Configuration=$simpleBuildConfiguration
             popd
@@ -96,14 +96,32 @@ jobs:
           
           # Copy the specified files, or *.lua and definition.yml if no module.files file was found.
           if($hasFilesList) {
-            $node = Select-Xml -XPath "/module/files" -Path ($module.FullName + "\module.files")
+            $defaultFilesNode = Select-Xml -XPath "/module/files[not(@build)]" -Path ($module.FullName + "\files.xml")
+            $buildFilesNode = Select-Xml -XPath "/module/files[@build='$simpleBuildConfiguration']" -Path ($module.FullName + "\files.xml")
+            
+            $node = $null
+            if($buildFilesNode) {
+              $node = $buildFilesNode
+            } elseif ($defaultFilesNode) {
+              $node = $defaultFilesNode
+            } else {
+              Throw "Invalid files.xml in module: " + $moduleDir
+            }
+            
             $moduleFiles = $node.Node.file
             foreach($moduleFile in $moduleFiles) {
               # To allow specification of $(Configuration) in "src" in module.files, we substitute it with the right value here
               $srcFile = $moduleFile.src.Replace("`$(Configuration)", "$simpleBuildConfiguration")
               
+              $t = $null
+              if($moduleFile.target -eq $null) {
+                $t = "."
+              } else {
+                $t = $moduleFile.target
+              }
+              
               # Copy the file, can include wildcards
-              Copy-Item ($module.FullName + "\" + $srcFile) -Destination $moduleDir -Recurse
+              Copy-Item ($module.FullName + "\" + $srcFile) -Destination ($moduleDir + "\" + $t + "\") -Recurse
             }
           } else {
             # TODO: avoid this wildcard. Include .lua .yml and ... only?
