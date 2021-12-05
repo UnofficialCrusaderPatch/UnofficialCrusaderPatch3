@@ -175,6 +175,14 @@ namespace LuaIO {
 		return luaListFileSystemDirectories(L);
 	}
 
+	FARPROC loadFunctionFromDLL(HMODULE handle, std::string name) {
+		return GetProcAddress(handle, name.c_str());
+	}
+
+	HMODULE loadDLL(std::string path) {
+		return LoadLibraryA(path.c_str());
+	}
+
 	int luaLoadLibrary(lua_State* L) {
 		//Read path from the stack (first argument)
 		if (lua_gettop(L) != 2) {
@@ -232,7 +240,13 @@ namespace LuaIO {
 		}
 #else
 
-		std::filesystem::path fullPath = Core::getInstance().UCP_DIR / sanitizedPath;
+		std::filesystem::path fullPath;
+		if (sanitizedPath.rfind("ucp/", 0) == 0) {
+			fullPath = Core::getInstance().UCP_DIR / sanitizedPath.substr(4);
+		}
+		else {
+			fullPath = Core::getInstance().UCP_DIR / sanitizedPath;
+		}
 		if (!std::filesystem::exists(fullPath)) {
 			lua_pushnil(L);
 			lua_pushstring(L, "file does not exist"); //error message
@@ -240,42 +254,26 @@ namespace LuaIO {
 		}
 
 		std::filesystem::path stem = fullPath.stem();
-		if (stem.string().find("-")) {
+		if (stem.string().rfind("-") != std::string::npos) {
 			lua_pushnil(L);
-			lua_pushstring(L, "invalid dll file name");
+			lua_pushstring(L, ("invalid dll file name: " + stem.string()).c_str());
 			return 2;
 		}
 
-		int a = lua_gettop(L); // This is placed here instead of right before getfield loadlib, because package is popped from the stack.
-		lua_getglobal(L, "package");
-		lua_getfield(L, -1, "loadlib");
-		lua_remove(L, -2); //Remove 'package' from the stack
-		lua_pushstring(L, fullPath.string().c_str()); // Full path
-		lua_pushstring(L, ("luaopen_" + modName).c_str()); // The function name
-		if (lua_pcall(L, 2, LUA_MULTRET, NULL) != LUA_OK) {
-			std::string errorMsg = lua_tostring(L, -1);
-			lua_pop(L, 1);
-			return luaL_error(L, errorMsg.c_str()); //Fail with an error message
+		HMODULE handle = loadDLL(fullPath.string());
+		if (handle == NULL) {
+			return luaL_error(L, ("Cannot load library: " + fullPath.string()).c_str());
 		}
 
-		int b = lua_gettop(L);
-		if (b - a == 1) {
-			// The luaCFunction is now at the top of the stack.
-			if (!lua_iscfunction(L, -1)) {
-				return luaL_error(L, "package.loadlib returned an unexpected result");
-			}
-			lua_CFunction func = lua_tocfunction(L, -1);
-			lua_pop(L, 1); // Pop the func
-			luaL_requiref(L, modName.c_str(), func, 0);
-			return 1; //Return the module.
-		}
-		else if (b - a == 2) {
-			// loadlib returned an error, just pass it back.
-			return 2;
+		lua_CFunction func = (lua_CFunction)loadFunctionFromDLL(handle, "luaopen_" + modName);
+		if (func == NULL) {
+			return luaL_error(L, ("Cannot find function: " + ("luaopen_" + modName)).c_str());
 		}
 
-		//We should never end up here.
-		return luaL_error(L, "package.loadlib returned an unexpected result");
+		luaL_requiref(L, modName.c_str(), func, 0); // store in package.loaded
+		
+		// copy of module is left on the stack, return it
+		return 1;
 #endif // COMPILED_MODULES			
 
 	}
