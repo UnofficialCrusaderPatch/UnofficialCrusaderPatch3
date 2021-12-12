@@ -15,8 +15,10 @@ return {
         --- Priest unit targeting improvement: only units who are walking to an area near the priest are selected.
 
         local infoLocation = core.AOBScan("b9 ? ? ? ? c1 fe 06 e8 ? ? ? ? 83 f8 28 7f 17 99 2b c2 d1 f8 f7 d8 03 f0 3b 74 24 10 7e 08 89 74 24 10 89 6c 24 14")
-        local euclidFunction = core.readInteger(infoLocation + 9) + infoLocation + 8 + 5
-        local euclidFunctionThis = core.readInteger(infoLocation + 1)
+
+        ---This function does a rectangle based distance calculation
+        local distanceFunction = core.readInteger(infoLocation + 9) + infoLocation + 8 + 5
+        local distanceFunctionThis = core.readInteger(infoLocation + 1)
 
         local hookLocation = infoLocation + 18
 
@@ -39,8 +41,8 @@ return {
         mov ecx, dword [ESP + 0x1c + 0x10] ; add 16 because four pushes done so far
         push ecx
 
-        mov ecx, euclidFunctionThis
-        call euclidFunction ; resulting distance is in eax
+        mov ecx, distanceFunctionThis
+        call distanceFunction ; resulting distance is in eax
 
         cmp eax, 40
         pop eax ; restore original eax value
@@ -59,8 +61,8 @@ return {
                 hookLocation,
                 5,
                 {core.AssemblyLambda(addedCode, {
-                    euclidFunction = euclidFunction,
-                    euclidFunctionThis = euclidFunctionThis,
+                    distanceFunction = distanceFunction,
+                    distanceFunctionThis = distanceFunctionThis,
                     failLocation = failLocation,
                     -- returnLocation = returnLocation
                 })})

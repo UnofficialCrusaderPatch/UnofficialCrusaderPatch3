@@ -21,6 +21,7 @@ return {
         local currentXPosition = core.readInteger(infoLocation + 48 + 3)
         local workTimer = currentXPosition + 0x224 --TODO if necessary, cmp with workTimer and just return home after a while...
 
+        ---This function does a rectangle based distance calculation
         local distFuncECX = core.readInteger(infoLocation + 73 + 1)
         local distFunc = core.readInteger(infoLocation + 78 + 1) + (infoLocation + 78) + 5
 
