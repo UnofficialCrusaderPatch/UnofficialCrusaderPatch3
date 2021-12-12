@@ -6,6 +6,10 @@
 
 
 return {
+    init = function(self, config)
+
+    end,
+
     enable = function(self, config)
 
         --- Priest unit targeting improvement: only units who are walking to an area near the priest are selected.

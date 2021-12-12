@@ -177,3 +177,6 @@ u_tanner_fix:
 u_priest_range_restriction:
   enabled:
     default: true
+u_priest_range_check:
+  enabled:
+    default: true
