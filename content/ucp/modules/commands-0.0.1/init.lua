@@ -35,29 +35,24 @@ local activateModalDialog = core.exposeCode(0x004a9ed0, 3, 1)
 local onCommand = function(registers)
     local chatMessage = core.readString(0x01a1f240)
 
-    print("Intercepted chat message: " .. "'" .. chatMessage .. "'")
-
     if chatMessage:sub(1, 1) ~= "/" then
         activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
         return registers
     end
-
-    print("Processing command: " .. chatMessage)
 
     local handled = false
 
     for k, v in pairs(COMMAND_REGISTRY) do
         if startsWith(chatMessage, "/" .. k) then
             handled = true
-            local success, closeModal = pcall(v, chatMessage)
+            local success, keepModalOpen = pcall(v, chatMessage)
 
             if not success then
                 log(WARNING, "[commands]: error in processing command: " .. chatMessage .. "\nerror: " .. closeModal)
                 core.writeBytes(0x01a1f240, convertStringToNullTerminatedBytes("[commands]: error in processing command: " .. chatMessage .. "\nerror: " .. closeModal)) -- DAT_ReceivedChatMessage
                 activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
             else
-                if closeModal then
-                    print("Closing chat modal")
+                if not keepModalOpen then
                     activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
                 end
             end
@@ -101,6 +96,19 @@ exports = {
         exports.addChatMessageToDisplayList = core.exposeCode(0x0047f6a0, 3, 1)
 
         self.registerCommand = registerCommand
+
+        self.registerCommand("help", function(command)
+            local commands = {}
+            for k, v in pairs(COMMAND_REGISTRY) do
+                table.insert(commands, k)
+            end
+            table.sort(commands)
+            local result = ""
+            for k, command in pairs(commands) do
+                result = result .. ", " .. command
+            end
+            displayChatText("available commands: " .. result)
+        end)
 
         return true
     end,
