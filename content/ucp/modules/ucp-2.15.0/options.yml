@@ -174,9 +174,3 @@ u_spearmen_run:
 u_tanner_fix:
   enabled:
     default: false
-u_priest_range_restriction:
-  enabled:
-    default: true
-u_priest_range_check:
-  enabled:
-    default: true
