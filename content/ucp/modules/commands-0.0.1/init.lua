@@ -6,6 +6,12 @@ local convertStringToBytes = function(s)
     return table.pack(string.byte(s, 1, -1))
 end
 
+local convertStringToNullTerminatedBytes = function(s)
+    local r = convertStringToBytes(s)
+    table.insert(r, 0)
+    return r
+end
+
 local chatDisplayParam1 = 0
 local chatDisplayParam2 = 0
 
@@ -24,26 +30,40 @@ local displayChatText = function(text)
     exports.addChatMessageToDisplayList(0x191d768, chatDisplayParam1, chatDisplayParam2)
 end
 
+local activateModalDialog = core.exposeCode(0x004a9ed0, 3, 1)
+
 local onCommand = function(registers)
     local chatMessage = core.readString(0x01a1f240)
 
-    if chatMessage:sub(1) ~= "/" then return registers end
+    print("Intercepted chat message: " .. "'" .. chatMessage .. "'")
+
+    if chatMessage:sub(1, 1) ~= "/" then
+        activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
+        return registers
+    end
+
+    print("Processing command: " .. chatMessage)
 
     local handled = false
 
     for k, v in pairs(COMMAND_REGISTRY) do
         if startsWith(chatMessage, "/" .. k) then
             handled = true
-            local success, errorMessage = pcall(v, chatMessage)
-            if not success then
-                local text = "Error: " .. errorMessage
-                local b = convertStringToBytes(text)
-                table.insert(b, 0)
-                core.writeBytes(0x01a1f240, b) -- DAT_ReceivedChatMessage
+            local success, closeModal = pcall(v, chatMessage)
 
-                return registers
+            if not success then
+                log(WARNING, "[commands]: error in processing command: " .. chatMessage .. "\nerror: " .. closeModal)
+                core.writeBytes(0x01a1f240, convertStringToNullTerminatedBytes("[commands]: error in processing command: " .. chatMessage .. "\nerror: " .. closeModal)) -- DAT_ReceivedChatMessage
+                activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
+            else
+                if closeModal then
+                    print("Closing chat modal")
+                    activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
+                end
             end
-            break
+
+            return registers
+            -- core.writeBytes(0x01a1f240, b) -- DAT_ReceivedChatMessage
         end
     end
 
@@ -52,10 +72,14 @@ local onCommand = function(registers)
         local b = convertStringToBytes(text)
         table.insert(b, 0)
         core.writeBytes(0x01a1f240, b) -- DAT_ReceivedChatMessage
+
+        activateModalDialog(0x01fe7c90, -1, 0) -- close the chat modal
     end
 
     return registers
 end
+
+-- namespace
 
 exports = {
     enable = function(self, module_options, global_options)
@@ -68,6 +92,11 @@ exports = {
 
         core.writeCode(0x004b30d7, { 0x90, 0x90 }) -- nop instructions to make VK_RETURN send a chat in all game modes.
         core.writeCode(0x004b30e4, { 0xEB }) -- change a jnz to a jmp to make VK_RETURN send a chat in all game modes.
+
+        core.writeCode(0x004b315d, {
+            0x90, 0x90, 0x90, 0x90,
+            0x90, 0x90, 0x90, 0x90,
+            0x90, 0x90, 0x90, 0x90, 0x90}) -- wipe 13 bytes to prevent automatic closing of chat modal
 
         exports.addChatMessageToDisplayList = core.exposeCode(0x0047f6a0, 3, 1)
 
