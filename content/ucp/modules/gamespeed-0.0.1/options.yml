@@ -1,4 +1,4 @@
-# default will result in 30 fps (1000ms / 33ms = 30 frames)
+# default will result in 30 fps (1000 ms / (33 ms per frame) = 30 fps)
 capMillisecForOneFrame:
   default: 33
   type: integer
