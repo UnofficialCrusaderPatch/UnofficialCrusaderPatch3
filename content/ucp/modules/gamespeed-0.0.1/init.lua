@@ -1,18 +1,22 @@
 -- imports
+local scanForAOB = core.scanForAOB
+local readInteger = core.readInteger
 local AssemblyLambda = core.AssemblyLambda
 local insertCode = core.insertCode
 local writeCode = core.writeCode
 
 -- AOBs
-local DAT_MillisecLoopMainFunc = 0x165271C -- 0x165271C
-local DAT_TickRate = 0x1FE7DC0 -- 0x1FE7DC0
-local DAT_MillisecCarry = 0xDF4228 -- 0xDF4228
+local base = scanForAOB("B8 E8 03 00 00 99 F7 FE 3B FB") -- 0x00487B42
 
-local accuracyValue1 = 0x00487B43 -- 0x00487B43
-local accuracyValue2 = accuracyValue1 - 0xF -- 0x00487B34
-local accuracyFix = accuracyValue1 + 0x10 -- 0x00487B53
-local speedCapEntry = accuracyValue1 + 0x45 -- 00487B88
-local speedCapExit = accuracyValue1 + 0xD2 -- 00487C15
+local DAT_MillisecLoopMainFunc = readInteger(base + 0x13) -- 0x165271C
+local DAT_TickRate = readInteger(scanForAOB("8B 0D ? ? ? ? 8B 15 ? ? ? ? 89 0D ? ? ? ? 52") + 2) -- 0x1FE7DC0
+local DAT_MillisecCarry = readInteger(base + 0x19) -- 0xDF4228
+
+local accuracyValue1 = base + 1 -- 0x00487B43
+local accuracyValue2 = base - 0xE -- 0x00487B34
+local accuracyFix = base + 0x11 -- 0x00487B53
+local speedCapEntry = base + 0x46 -- 0x00487B88
+local speedCapExit = base + 0xD3 -- 0x00487C15
 
 
 local insertAssembly = function(address, patchSize, script, valueMapping, returnTo, original)
@@ -26,8 +30,8 @@ local exports = {}
 exports.enable = function(self,config)
 
     -- enable increased accuracy
-    writeCode(accuracyValue1,{0x40, 0x42, 0x0F, 0x00}) -- F4240h = 3E8h * 3E8h
-    writeCode(accuracyValue2,{0xC0, 0xBD, 0xF0, 0xFF}) -- FFF0BDC0
+    writeCode(accuracyValue1,{0x40, 0x42, 0x0F, 0x00}) -- F4240h = 3E8h * 3E8h = 1000 * 1000
+    writeCode(accuracyValue2,{0xC0, 0xBD, 0xF0, 0xFF}) -- FFF0BDC0h = - 1000 * 1000
 
     local script = [[
         imul edx,0x3E8
