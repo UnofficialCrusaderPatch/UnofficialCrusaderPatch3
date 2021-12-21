@@ -8,7 +8,10 @@ local hookCode = core.hookCode
 -- exports
 local exports = {}
 
-local assignSelectionToKey_address = AOBScan("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") -- 0x459c10
+local SEC_CurrentPlayerSlotID = readInteger(AOBScan("8B 04 BD ? ? ? ? 8B 15 ? ? ? ? 83 C9 FF") + 9) -- 0x1a275dc
+local SEC_Units = readInteger(AOBScan("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") + 0x4e) - 0x8c -- 0x138854C
+local DAT_UnitProcessorClass_UnitCountPlusOne = readInteger(AOBScan("B9 ? ? ? ? E8 ? ? ? ? 69 F6 ? ? ? ? 0F BF B6 ? ? ? ?") + 1) -- 0x1387f38
+local assignSelectionToKey_address = core.scanForAOB("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") -- 0x459c10
 local arraySize = readInteger(assignSelectionToKey_address + 0x83)
 
 
@@ -17,13 +20,12 @@ local deleteUnitFromKey
 local shiftRemainingArrayElements
 
 local assignSelectionToKey_hook = function(numberKeyArrays, number, _) -- last arg = tribeID, doesn't get used
-    local shc = modules.shcLibrary.getLibrary()
-    local unitsTotal = readInteger(shc.DAT_UnitProcessorClass_UnitCountPlusOne) - 1
+    local unitsTotal = readInteger(DAT_UnitProcessorClass_UnitCountPlusOne) - 1
     if unitsTotal < 1 then return end
     
     local pos = 0
     for unitID = 1, unitsTotal do
-        local unit_offset   = shc.SEC_Units + (unitID * 0x490)
+        local unit_offset   = SEC_Units + (unitID * 0x490)
         local logicalState  = readSmallInteger(unit_offset + 0x8c)
         local dying         = readSmallInteger(unit_offset + 0x2a0)
         local playerID      = readSmallInteger(unit_offset + 0x96)
@@ -32,7 +34,7 @@ local assignSelectionToKey_hook = function(numberKeyArrays, number, _) -- last a
         if
             logicalState == 2 and
             dying        == 0 and
-            playerID     == readInteger(shc.SEC_CurrentPlayerSlotID) and
+            playerID     == readInteger(SEC_CurrentPlayerSlotID) and
             isSelected   == 1
         then
             local array = numberKeyArrays + (number * arraySize * 8)
