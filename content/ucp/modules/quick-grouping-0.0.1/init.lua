@@ -11,7 +11,7 @@ local exports = {}
 local SEC_CurrentPlayerSlotID = readInteger(AOBScan("8B 04 BD ? ? ? ? 8B 15 ? ? ? ? 83 C9 FF") + 9) -- 0x1a275dc
 local SEC_Units = readInteger(AOBScan("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") + 0x4e) - 0x8c -- 0x138854C
 local DAT_UnitProcessorClass_UnitCountPlusOne = readInteger(AOBScan("B9 ? ? ? ? E8 ? ? ? ? 69 F6 ? ? ? ? 0F BF B6 ? ? ? ?") + 1) -- 0x1387f38
-local assignSelectionToKey_address = core.scanForAOB("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") -- 0x459c10
+local assignSelectionToKey_address = core.AOBScan("83 EC 14 53 8B 5C 24 20 69 DB ? ? ? ?") -- 0x459c10
 local arraySize = readInteger(assignSelectionToKey_address + 0x83)
 
 
