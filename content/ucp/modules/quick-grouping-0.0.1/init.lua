@@ -24,7 +24,7 @@ local assignSelectionToKey_hook = function(numberKeyArrays, number, _) -- last a
     if unitsTotal < 1 then return end
     
     local pos = 0
-    for unitID = 1, unitsTotal do
+    for unitID = 0, unitsTotal-1 do
         local unit_offset   = SEC_Units + (unitID * 0x490)
         local logicalState  = readSmallInteger(unit_offset + 0x8c)
         local dying         = readSmallInteger(unit_offset + 0x2a0)
