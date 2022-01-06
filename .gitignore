@@ -389,3 +389,6 @@ MigrationBackup/
 *.exe
 *.out
 *.app
+
+# macOS folder attributes
+*.DS_Store
