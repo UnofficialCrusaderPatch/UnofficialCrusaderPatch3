@@ -212,21 +212,23 @@ log(DEBUG, "[main]: explicitly active extensions:\n" .. json:encode_pretty(expli
 necessaryDependencies = {}
 for k, ext in pairs(explicitlyActiveExtensions) do
     for k2, dep in pairs(extensionDependencies[ext]) do
-        table.insert(necessaryDependencies, dep)
+        if not table.find(necessaryDependencies, dep) then
+            table.insert(necessaryDependencies, dep)
+        end
     end
 end
 
 i = 1
 while i <= #necessaryDependencies do
-	local ext = necessaryDependencies[i]
-	if ext then
-		for k, dep in pairs(extensionDependencies[ext]) do
-			if not table.find(necessaryDependencies, dep) then
-				table.insert(necessaryDependencies, dep)
-			end
-		end
-	end
-	i = i + 1
+    local ext = necessaryDependencies[i]
+    if ext then
+        for k, dep in pairs(extensionDependencies[ext]) do
+            if not table.find(necessaryDependencies, dep) then
+                table.insert(necessaryDependencies, dep)
+            end
+        end
+    end
+    i = i + 1
 end
 
 log(DEBUG, "required dependencies:\n" .. json:encode_pretty(necessaryDependencies))
