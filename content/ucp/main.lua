@@ -357,4 +357,20 @@ for k, dep in pairs(allActiveExtensions) do
     end
 end
 
+(function() 
+  local f = io.open("ucp/dev.lua", 'r')
+  if not f then return end
+  
+  print("loading 'ucp/dev.lua'")
+  
+  local f, err = load(f:read("*all"), "ucp/dev.lua")
+  if not f then
+    print("\t" .. err)
+  end
+  local success, result = pcall(f)
+  if not success then
+    print("\t" .. result)
+  end
+end)()
+
 data.cache.AOB.dumpToFile()
