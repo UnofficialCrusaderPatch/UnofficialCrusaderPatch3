@@ -11,27 +11,71 @@ local GM_DATA = {
 }
 
 local LORD_ID = {
-  RAT         = 1,
-  SNAKE       = 2,
-  PIG         = 3,
-  Wolf        = 4,
-  SALADIN     = 5,
-  CALIPH      = 6,
-  SULTAN      = 7,
-  RICHARD     = 8,
-  FREDERICK   = 9,        
-  PHILLIP     = 10,
-  WAZIR       = 11,
-  EMIR        = 12,
-  NIZAR       = 13,
-  SHERIFF     = 14,
-  MARSHAL     = 15,
-  ABBOT       = 16,
+  RAT         = 0,
+  SNAKE       = 1,
+  PIG         = 2,
+  Wolf        = 3,
+  SALADIN     = 4,
+  CALIPH      = 5,
+  SULTAN      = 6,
+  RICHARD     = 7,
+  FREDERICK   = 8,        
+  PHILLIP     = 9,
+  WAZIR       = 10,
+  EMIR        = 11,
+  NIZAR       = 12,
+  SHERIFF     = 13,
+  MARSHAL     = 14,
+  ABBOT       = 15,
 }
 
 local DATA_PATH = {
   NORMAL_PORTRAIT     = "portrait.png",
   SMALL_PORTRAIT      = "portrait_small.png",
+  META                = "meta.json",
+  TEXT                = "lines.json",
+}
+
+
+local NUMBER_OF_LINES = 34
+local INDEX_OF_AI_TEXT = 231
+
+-- missing: description and AI names
+local TEXT_ID = {
+  UNKNOWN_1     = 0   ,
+  TAUNT_1       = 1   ,
+  TAUNT_2       = 2   ,
+  TAUNT_3       = 3   ,
+  TAUNT_4       = 4   ,
+  ANGER_1       = 5   ,
+  ANGER_2       = 6   ,
+  PLEAD         = 7   ,
+  NERVOUS_1     = 8   ,
+  NERVOUS_2     = 9   ,
+  VICTORY_1     = 10  ,
+  VICTORY_2     = 11  ,
+  VICTORY_3     = 12  ,
+  VICTORY_4     = 13  ,
+  REQUEST       = 14  ,
+  THANKS        = 15  ,
+  ALLY_DEATH    = 16  ,
+  CONGRATS      = 17  ,
+  BOAST         = 18  ,
+  HELP          = 19  ,
+  EXTRA         = 20  ,
+  UNKNOWN_2     = 21  ,
+  UNKNOWN_3     = 22  ,
+  SIEGE         = 23  ,
+  NO_ATTACK_1   = 24  ,
+  NO_ATTACK_2   = 25  ,
+  NO_HELP_1     = 26  ,
+  NO_HELP_2     = 27  ,
+  NO_SENT       = 28  ,
+  SENT          = 29  ,
+  TEAM_WINNING  = 30  ,
+  TEAM_LOSING   = 31  ,
+  HELP_SENT     = 32  ,
+  WILL_ATTACK   = 33  ,
 }
 
 --[[ Variables ]]--
@@ -107,7 +151,13 @@ local function loadDataFromJSON(path)
   if not data then
     return data, msg
   end
-  return json:decode(data)
+
+  local status, jsonOrErr = pcall(json.decode, json, data)
+  if status then
+    return jsonOrErr, nil
+  else
+    return nil, jsonOrErr
+  end
 end
 
 
@@ -137,15 +187,12 @@ local function freePortraitResource(index)
 end
 
 local function resetPortrait(index)
-  local cppIndex = index - 1 -- because lua starts at 1
-  gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_ICON_INDEX + cppIndex, -1, -1)
-  gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_SMALL_ICON_INDEX + cppIndex, -1, -1)
+  gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_ICON_INDEX + index, -1, -1)
+  gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_SMALL_ICON_INDEX + index, -1, -1)
   freePortraitResource(index)
 end
 
 local function loadAndSetPortrait(indexToReplace, aiName)
-  local cppIndex = indexToReplace - 1 -- because lua starts at 1
-  
   local normalPortraitPath = getAiDataPath(aiName, DATA_PATH.NORMAL_PORTRAIT)
   local smallPortraitPath = getAiDataPath(aiName, DATA_PATH.SMALL_PORTRAIT)
 
@@ -157,33 +204,58 @@ local function loadAndSetPortrait(indexToReplace, aiName)
   if portraitResourceIds.normal < 0 then
     log(WARNING, aiName .. " has no portrait.")
   else
-    gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_ICON_INDEX + cppIndex, portraitResourceIds.normal, 0)
+    gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_ICON_INDEX + indexToReplace, portraitResourceIds.normal, 0)
   end
   
   if portraitResourceIds.small < 0 then
     log(WARNING, aiName .. " has no small portrait.")
   else
-    gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_SMALL_ICON_INDEX + cppIndex, portraitResourceIds.small, 0)
+    gmModule.SetGm(GM_DATA.GM_INDEX, GM_DATA.FIRST_SMALL_ICON_INDEX + indexToReplace, portraitResourceIds.small, 0)
   end
 
+  freePortraitResource(indexToReplace)
   resourceIds[indexToReplace] = portraitResourceIds
 end
 
 
+local function setAiTextLine(lineIndex, text)
+  textModule.SetText(INDEX_OF_AI_TEXT, lineIndex, text) -- nil will reset it
+end
 
+local function getAiLineIndex(lordId, lineId)
+  return lordId * NUMBER_OF_LINES + lineId
+end
 
+local function resetAiTexts(aiIndexToReset)
+  local resetStart = getAiLineIndex(aiIndexToReset, 0)
+  for i = resetStart, resetStart + NUMBER_OF_LINES - 1 do
+    setAiTextLine(i, nil)
+  end
+end
 
-
--- resets everything
-local function resetAI(positionToReset)
-  if not containsValue(LORD_ID, positionToReset) then
-    log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
+local function setAiTexts(aiIndexToReplace, aiName, aiLang)
+  local linesPath = getPathForLocale(aiName, aiLang, DATA_PATH.TEXT)
+  local lineData, msg = loadDataFromJSON(linesPath)
+  
+  if lineData == nil then
+    log(WARNING, string.format("Unable to read lines file of AI '%s'. %s.", aiName, msg))
     return
   end
   
-  resetPortrait(positionToReset)
+  local transformedIndexLineData = {}
+  for lineName, text in pairs(lineData) do
+    transformedIndexLineData[string.upper(lineName)] = text -- identifier to uppercase
+  end
   
+  for lineName, lineId in pairs(TEXT_ID) do
+    local lineIndex = getAiLineIndex(aiIndexToReplace, lineId)
+    setAiTextLine(lineIndex, transformedIndexLineData[lineName]) -- nil will auto reset
+  end
 end
+
+-- TODO: AI names and descriptions
+
+
 
 
 local function setAI(positionToReplace, aiName)
@@ -192,9 +264,9 @@ local function setAI(positionToReplace, aiName)
     return
   end
 
-  local meta, err = loadDataFromJSON(getAiDataPath(aiName, "meta.json"))
+  local meta, err = loadDataFromJSON(getAiDataPath(aiName, DATA_PATH.META))
   if meta == nil then
-    log(WARNING, string.format("Unable to set AI '%s'. No meta file found.", aiName))
+    log(WARNING, string.format("Unable to set AI '%s'. Issues with meta file: %s", aiName, err))
     return
   end
 
@@ -216,17 +288,30 @@ local function setAI(positionToReplace, aiName)
     return
   end
   
-  -- resets everything; while more to do, it will make sure that at least no other AI dirties the result
-  resetAI(positionToReplace)
+  -- all parts take care of their own reset, otherwise they are not useable on their own
   
   -- will only be true if true, nil will also be false
   if meta.switched.portrait then
     loadAndSetPortrait(positionToReplace, aiName)
   end
 
-  
+  if meta.switched.lines then
+    setAiTexts(positionToReplace, aiName, aiLang)
+  end
   
 
+end
+
+
+-- resets everything
+local function resetAI(positionToReset)
+  if not containsValue(LORD_ID, positionToReset) then
+    log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
+    return
+  end
+  
+  resetPortrait(positionToReset)
+  resetAiTexts(positionToReset)
 end
 
 
