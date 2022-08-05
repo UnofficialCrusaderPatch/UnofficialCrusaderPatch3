@@ -37,11 +37,36 @@ local DATA_PATH = {
 }
 
 
-local NUMBER_OF_LINES = 34
-local INDEX_OF_AI_TEXT = 231
+local NUMBER_OF_SKRIMISH_LINES = 34
+local INDEX_OF_AI_NAMES_AND_MENU_TEXT = 79
+local AI_NAMES_AND_MENU_TEXT_ID_START = 111
 
--- missing: description and AI names
-local TEXT_ID = {
+local INDEX_OF_AI_SKRIMISH_TEXT = 231
+local NUMBER_OF_TITLES = 8
+
+
+local NAMES_AND_MENU_TEXT_ID = {
+  COMPLETE_TITLE_1    = 0   ,
+  COMPLETE_TITLE_2    = 1   ,
+  COMPLETE_TITLE_3    = 2   ,
+  COMPLETE_TITLE_4    = 3   ,
+  COMPLETE_TITLE_5    = 4   ,
+  COMPLETE_TITLE_6    = 5   ,
+  COMPLETE_TITLE_7    = 6   ,
+  COMPLETE_TITLE_8    = 7   ,
+  AI_NAME             = 128 ,
+  TITLE_1             = 129 ,
+  TITLE_2             = 130 ,
+  TITLE_3             = 131 ,
+  TITLE_4             = 132 ,
+  TITLE_5             = 133 ,
+  TITLE_6             = 134 ,
+  TITLE_7             = 135 ,
+  TITLE_8             = 136 ,
+  DESCRIPTION         = 274 ,
+}
+
+local SKRIMISH_TEXT_ID = {
   UNKNOWN_1     = 0   ,
   TAUNT_1       = 1   ,
   TAUNT_2       = 2   ,
@@ -93,6 +118,19 @@ local resourceIds = {} -- contains table of tables with the structure aiIndex = 
 
 
 --[[ Functions ]]--
+
+-- returns new table containing the value references of the source, but with transformed keys
+-- collisions in the transformed keys lead to overwrites
+local function createTableWithTransformedKeys(source, transformer, recursive)
+  local newTable = {}
+  for key, value in pairs(source) do
+    if recursive and type(value) == "table" then
+      value = createTableWithTransformedKeys(value, transformer, recursive)
+    end
+    newTable[transformer(key)] = value
+  end
+  return newTable
+end
 
 -- source https://stackoverflow.com/a/33511163 (1. comment)
 local function containsValue(tableToCheck, value)
@@ -218,19 +256,31 @@ local function loadAndSetPortrait(indexToReplace, aiName)
 end
 
 
-local function setAiTextLine(lineIndex, text)
-  textModule.SetText(INDEX_OF_AI_TEXT, lineIndex, text) -- nil will reset it
+local function getAiSkrimishLineIndex(lordId, lineId)
+  return lordId * NUMBER_OF_SKRIMISH_LINES + lineId
 end
 
-local function getAiLineIndex(lordId, lineId)
-  return lordId * NUMBER_OF_LINES + lineId
+local function getAiNamesLineIndex(lordId, lineId)
+  local linesToSkipForLords = NUMBER_OF_TITLES
+  if lineId > NAMES_AND_MENU_TEXT_ID.TITLE_8 then
+    linesToSkipForLords = 1 -- because only 1 desc line
+  elseif lineId >= NAMES_AND_MENU_TEXT_ID.AI_NAME then
+    linesToSkipForLords = linesToSkipForLords + 1 -- because the name is there, making it 9 there
+  end
+  return AI_NAMES_AND_MENU_TEXT_ID_START + lineId + lordId * linesToSkipForLords
+end
+
+local function performTextSetBasedOnEnum(enum, source, aiIndex, linesIndexConstant, lineIndexGetter)
+  source = source or {} -- to avoid error
+  for lineName, lineId in pairs(enum) do
+    local lineIndex = lineIndexGetter(aiIndex, lineId)
+    textModule.SetText(linesIndexConstant, lineIndex, source[lineName]) -- nil will auto reset
+  end
 end
 
 local function resetAiTexts(aiIndexToReset)
-  local resetStart = getAiLineIndex(aiIndexToReset, 0)
-  for i = resetStart, resetStart + NUMBER_OF_LINES - 1 do
-    setAiTextLine(i, nil)
-  end
+  performTextSetBasedOnEnum(SKRIMISH_TEXT_ID, nil, aiIndexToReset, INDEX_OF_AI_SKRIMISH_TEXT, getAiSkrimishLineIndex)
+  performTextSetBasedOnEnum(NAMES_AND_MENU_TEXT_ID, nil, aiIndexToReset, INDEX_OF_AI_NAMES_AND_MENU_TEXT, getAiNamesLineIndex)
 end
 
 local function setAiTexts(aiIndexToReplace, aiName, aiLang)
@@ -242,23 +292,40 @@ local function setAiTexts(aiIndexToReplace, aiName, aiLang)
     return
   end
   
-  local transformedIndexLineData = {}
-  for lineName, text in pairs(lineData) do
-    transformedIndexLineData[string.upper(lineName)] = text -- identifier to uppercase
+  local transformedIndexLineData = createTableWithTransformedKeys(lineData, string.upper)
+  
+  -- set skrimish lines
+  performTextSetBasedOnEnum(SKRIMISH_TEXT_ID, transformedIndexLineData, aiIndexToReplace, INDEX_OF_AI_SKRIMISH_TEXT, getAiSkrimishLineIndex)
+  
+  -- create complete titles
+  local aiNameStr = transformedIndexLineData.AI_NAME
+  if aiNameStr then
+    for i = 1, 8 do
+      local title = transformedIndexLineData["TITLE_" .. i]
+      if title then
+        transformedIndexLineData["COMPLETE_TITLE_" .. i] = string.format("%s, %s", aiNameStr, title)
+      end
+    end
   end
   
-  for lineName, lineId in pairs(TEXT_ID) do
-    local lineIndex = getAiLineIndex(aiIndexToReplace, lineId)
-    setAiTextLine(lineIndex, transformedIndexLineData[lineName]) -- nil will auto reset
-  end
+  -- set names and description
+  performTextSetBasedOnEnum(NAMES_AND_MENU_TEXT_ID, transformedIndexLineData, aiIndexToReplace, INDEX_OF_AI_NAMES_AND_MENU_TEXT, getAiNamesLineIndex)
 end
 
 -- TODO: AI names and descriptions
 
 
+local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPosition, ...)
+  if shouldModify then
+    if dataPresent then
+      setFunc(aiPosition, ...)
+    else
+      resetFunc(aiPosition)
+    end
+  end
+end
 
-
-local function setAI(positionToReplace, aiName)
+local function setAI(positionToReplace, aiName, control)
   if not containsValue(LORD_ID, positionToReplace) then
     log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
     return
@@ -288,18 +355,27 @@ local function setAI(positionToReplace, aiName)
     return
   end
   
+  
   -- all parts take care of their own reset, otherwise they are not useable on their own
   
-  -- will only be true if true, nil will also be false
-  if meta.switched.portrait then
-    loadAndSetPortrait(positionToReplace, aiName)
+  local finalControl = {
+    binks = true,
+    speech = true,
+    aic = true,
+    aiv = true,
+    lord = true,
+    startTroops = true,
+    ["lines"] = true,
+    portrait = true,
+  }
+  if control then
+    for key, value in pairs(control) do
+      finalControl[key] = value and finalControl[key]
+    end
   end
 
-  if meta.switched.lines then
-    setAiTexts(positionToReplace, aiName, aiLang)
-  end
-  
-
+  setAiPart(loadAndSetPortrait, resetPortrait, finalControl.portrait, meta.switched.portrait, positionToReplace, aiName)
+  setAiPart(setAiTexts, resetAiTexts, finalControl.lines, meta.switched.lines, positionToReplace, aiName, aiLang)
 end
 
 
