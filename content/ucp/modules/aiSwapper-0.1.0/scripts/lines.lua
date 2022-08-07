@@ -1,13 +1,14 @@
 
 --[[ NOTE: Titles in-game are backed and can currently not be changed. ]]
 
-local ENUMS = require("scripts.general_enums")
 local util = require("scripts.util")
 
 local textModule = modules.textResourceModifier
 
 
 --[[ IDs and Constants ]]--
+
+local DATA_PATH_TEXT = "lines.json"
 
 local NUMBER_OF_SKRIMISH_LINES = 34
 local INDEX_OF_AI_NAMES_AND_MENU_TEXT = 79
@@ -105,8 +106,8 @@ local function resetAiTexts(aiIndexToReset)
   performTextSetBasedOnEnum(NAMES_AND_MENU_TEXT_ID, nil, aiIndexToReset, INDEX_OF_AI_NAMES_AND_MENU_TEXT, getAiNamesLineIndex)
 end
 
-local function setAiTexts(aiIndexToReplace, aiName, aiLang)
-  local linesPath = util.getPathForLocale(aiName, aiLang, ENUMS.DATA_PATH.TEXT)
+local function setAiTexts(aiIndexToReplace, pathroot, aiName, aiLang)
+  local linesPath = util.getPathForLocale(pathroot, aiName, aiLang, DATA_PATH_TEXT)
   local lineData, msg = util.loadDataFromJSON(linesPath)
   
   if lineData == nil then

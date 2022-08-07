@@ -1,11 +1,13 @@
 
-local ENUMS = require("scripts.general_enums")
 local util = require("scripts.util")
 
 local gmModule = modules.gmResourceModifier
 
 
 --[[ IDs and Constants ]]--
+
+local DATA_PATH_NORMAL_PORTRAIT = "portrait.png"
+local DATA_PATH_SMALL_PORTRAIT = "portrait_small.png"
 
 local GM_DATA = {
   GM_INDEX                  = 46    ,
@@ -39,9 +41,9 @@ local function resetPortrait(index)
   freePortraitResource(index)
 end
 
-local function loadAndSetPortrait(indexToReplace, aiName)
-  local normalPortraitPath = util.getAiDataPath(aiName, ENUMS.DATA_PATH.NORMAL_PORTRAIT)
-  local smallPortraitPath = util.getAiDataPath(aiName, ENUMS.DATA_PATH.SMALL_PORTRAIT)
+local function loadAndSetPortrait(indexToReplace, pathroot, aiName)
+  local normalPortraitPath = util.getAiDataPath(pathroot, aiName, DATA_PATH_NORMAL_PORTRAIT)
+  local smallPortraitPath = util.getAiDataPath(pathroot, aiName, DATA_PATH_SMALL_PORTRAIT)
 
   local portraitResourceIds = {
     normal  = util.doesFileExist(normalPortraitPath) and gmModule.LoadResourceFromImage(normalPortraitPath) or -1,
