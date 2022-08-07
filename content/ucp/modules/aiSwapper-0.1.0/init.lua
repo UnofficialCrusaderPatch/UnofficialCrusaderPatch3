@@ -4,6 +4,7 @@
 local util = require("scripts.util")
 local portrait = require("scripts.portrait")
 local text = require("scripts.lines")
+local aic = require("scripts.aic")
 
 
 --[[ IDs and Constants ]]--
@@ -34,7 +35,6 @@ local DATA_PATH_META = "meta.json"
 
 --[[ Variables ]]--
 
-local aicModule = nil
 local aivModule = nil
 local filesModule = nil
 
@@ -103,6 +103,9 @@ local function setAI(positionToReplace, aiName, control, pathroot)
 
   setAiPart(portrait.loadAndSetPortrait, portrait.resetPortrait, control.portrait, meta.switched.portrait, positionToReplace, pathroot, aiName)
   setAiPart(text.setAiTexts, text.resetAiTexts, control.lines, meta.switched.lines, positionToReplace, pathroot, aiName, aiLang)
+  
+  local loadedCharacterJson = nil
+  loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic, positionToReplace, pathroot, aiName, loadedCharacterJson)
 end
 
 
@@ -115,6 +118,7 @@ local function resetAI(positionToReset)
   
   portrait.resetPortrait(positionToReset)
   text.resetAiTexts(positionToReset)
+  aic.resetAIC(positionToReset)
 end
 
 
@@ -126,7 +130,6 @@ local exports = {}
 exports.enable = function(self, moduleConfig, globalConfig)
 
   -- get modules for easier variable access
-  aicModule = modules.aicloader
   aivModule = modules.aivloader
   filesModule = modules.files
   
