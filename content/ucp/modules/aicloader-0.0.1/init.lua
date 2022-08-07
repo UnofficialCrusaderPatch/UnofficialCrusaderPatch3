@@ -1,14 +1,17 @@
 
 local writeInteger = core.writeInteger
+local readInteger = core.readInteger
 
 local AICharacterName = require("characters")
 local FieldTypes = require("fieldtypes")
 
 local personality = require("personality")
-local AIPersonalityFieldsEnum = personality.enum
-local AIPersonalityFieldTypes = personality.types
+local AIPersonalityFields = personality
 
 local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d ? ? ? ? 83 3d ? ? ? ? 00 75 44 6a 08 b9 ? ? ? ? e8 ? ? ? ? 85 c0 74 34 8b c5 2b 05"))
+
+local isInitialized = false
+local vanillaAIC = {}
 
 local booleanToInteger = function(value)
     if type(value) == "boolean" then
@@ -40,31 +43,33 @@ local booleanToInteger = function(value)
     return value
 end
 
-local fieldValueToInteger = function(fieldName, stringValue)
-    local result = nil
-
-    local fieldType = AIPersonalityFieldTypes[fieldName]
-
-    if fieldType == nil then
-        error("invalid field name: " .. fieldName)
-    end
-
-    result = FieldTypes[fieldType][stringValue]
-
-    if result == nil then
-        error("invalid field value: " .. stringValue .. " for fieldName " .. fieldName)
-    end
-
-    return result
-end
-
 local aiTypeToInteger = function(aiType)
-    for k, v in pairs(AICharacterName) do
-        if k == aiType then
-            return v
-        end
+    local aiInteger = AICharacterName[aiType]
+    if aiInt ~= nil then
+        return aiInteger
     end
     error("no ai exists with the name: " .. aiType)
+end
+
+local function initializedCheck()
+    if isInitialized then
+       return true
+    end
+    
+    log(WARN, "AIC loader not yet initialized. Call ignored.")
+    return false
+end
+
+local function saveVanillaAIC()
+    for aiName, aiIndex in pairs(AICharacterName) do
+        local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiIndex)
+        local vanillaData = {}
+        vanillaAIC[aiIndex] = vanillaData
+
+        for fieldName, fieldData in pairs(AIPersonalityFields) do
+            vanillaData[fieldData.fieldIndex] = readInteger(aicAddr + (4 * fieldData.fieldIndex))
+        end
+    end
 end
 
 -- You can consider this a forward declaration
@@ -77,26 +82,41 @@ namespace = {
             modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
             modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
         end
-
-        if config.aicFiles then
-            if type(config.aicFiles) == "table" then
-                hooks.registerHookCallback("afterInit", function()
+        
+        hooks.registerHookCallback("afterInit", function()
+            
+            saveVanillaAIC()
+            
+            isInitialized = true
+            
+            if config.aicFiles then
+                if type(config.aicFiles) == "table" then
                     for i, fileName in pairs(config.aicFiles) do
                         if fileName:len() > 0 then
                             print("Overwritten AIC values from file: " .. fileName)
                             namespace.overwriteAICsFromFile(fileName)
                         end
                     end
-                end)
-            else
-                error("aicFiles should be a yaml array")
+                else
+                    error("aicFiles should be a yaml array")
+                end
             end
-        end
+            
+            log(INFO, "AIC loader initialized.")
+        end)
+    end,
 
-    end,
     disable = function(self)
+        if not initializedCheck() then
+            return
+        end
     end,
+
     onCommandSetAICValue = function(command)
+        if not initializedCheck() then
+            return
+        end
+      
         local aiType, fieldName, value = command:match("^/setAICValue ([A-Za-z0-9_]+) ([A-Za-z0-9_]+) ([A-Za-z0-9_]+)$")
         if aiType == nil or fieldName == nil or value == nil then
             modules.commands.displayChatText(
@@ -107,7 +127,12 @@ namespace = {
             namespace.setAICValue(aiType, fieldName, value)
         end
     end,
+
     onCommandloadAICsFromFile = function(command)
+        if not initializedCheck() then
+            return
+        end
+      
         local path = command:match("^/loadAICsFromFile ([A-Za-z0-9_ /.:-]+)$")
         if path == nil then
             modules.commands.displayChatText(
@@ -118,40 +143,63 @@ namespace = {
             namespace.overwriteAICsFromFile(path)
         end
     end,
+
     setAICValue = function(aiType, aicField, aicValue)
-        if type(aiType) == "string" then
-            aiType = aiTypeToInteger(aiType)
+        if not initializedCheck() then
+            return
         end
 
-        local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiType)
-
-        local set = false
-
-        -- we are doing a loop because we need to know the index, so this is also an index() logic
-        for fieldIndex, fieldName in pairs(AIPersonalityFieldsEnum) do
-            if fieldName == aicField then
-                local fieldType = AIPersonalityFieldTypes[fieldName]
-                if fieldType == "integer" then
-                elseif fieldType == "boolean" then
-                    aicValue = booleanToInteger(aicValue)
-                else
-                    aicValue = fieldValueToInteger(aicField, aicValue)
-                end
-                set = true
-                writeInteger(aicAddr + (4 * (fieldIndex - 1)), aicValue) -- lua is 1-based, therefore fieldIndex-1
-                --TODO: optimize by writing a longer array of bytes...
+        local status, err = pcall(function ()
+            if type(aiType) == "string" then
+                aiType = aiTypeToInteger(aiType)
             end
-        end
-        if not set then
-            error("invalid aic field name specified: " .. aicField)
+
+            local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiType)
+
+            local set = false
+
+            local fieldData = AIPersonalityFields[aicField]
+            if not fieldData then
+                error("Invalid aic field name specified: " .. aicField)
+            end
+            local fieldIndex = fieldData.fieldIndex
+            local fieldType = fieldData.fieldType
+
+            if fieldType == "integer" then
+            elseif fieldType == "boolean" then
+                aicValue = booleanToInteger(aicValue)
+            else
+                aicValue = FieldTypes[fieldType][aicValue]
+
+                if aicValue == nil then
+                    error("Invalid field value: " .. aicValue .. " for fieldName " .. aicValue)
+                end
+            end
+
+            writeInteger(aicAddr + (4 * fieldIndex), aicValue)
+            --TODO: optimize by writing a longer array of bytes...
+        end)
+
+        if not status then
+            log(WARNING, string.format("Error while setting '%s': '%s' Value ignored.", aicField, err))
         end
     end,
+
     overwriteAIC = function(aiType, aicSpec)
+        if not initializedCheck() then
+            return
+        end
+
         for name, value in pairs(aicSpec) do
             namespace.setAICValue(aiType, name, value)
         end
     end,
+
     overwriteAICsFromFile = function(aicFilePath)
+        if not initializedCheck() then
+            return
+        end
+
         local file = io.open(aicFilePath, "rb")
         local spec = file:read("*all")
 
@@ -160,6 +208,24 @@ namespace = {
 
         for k, aic in pairs(aics) do
             namespace.overwriteAIC(aic.Name, aic.Personality)
+        end
+    end,
+    
+    resetAIC = function(aiType)
+        if not initializedCheck() then
+            return
+        end
+
+        if type(aiType) == "string" then
+            aiType = aiTypeToInteger(aiType)
+        end
+        
+        for aiIndex, vanillaData in pairs(vanillaAIC) do
+            local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiIndex)
+
+            for fieldIndex, aicValue in pairs(vanillaData) do
+                writeInteger(aicAddr + (4 * fieldIndex), aicValue)
+            end
         end
     end
 }
