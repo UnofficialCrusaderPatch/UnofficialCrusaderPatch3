@@ -1,5 +1,6 @@
 local AIPersonalityFields = {
     WallDecoration                  = { fieldIndex = 0  , fieldType = "integer"                      },
+    Unknown000                      = { fieldIndex = 0  , fieldType = "integer"                      },
     Unknown001                      = { fieldIndex = 1  , fieldType = "integer"                      },
     Unknown002                      = { fieldIndex = 2  , fieldType = "integer"                      },
     Unknown003                      = { fieldIndex = 3  , fieldType = "integer"                      },
@@ -40,6 +41,7 @@ local AIPersonalityFields = {
     TradeAmountFood                 = { fieldIndex = 38 , fieldType = "integer"                      },
     TradeAmountEquipment            = { fieldIndex = 39 , fieldType = "integer"                      },
     AIRequestDelay                  = { fieldIndex = 40 , fieldType = "integer"                      },
+    Unknown040                      = { fieldIndex = 40 , fieldType = "integer"                      },
     MinimumGoodsRequiredAfterTrade  = { fieldIndex = 41 , fieldType = "integer"                      },
     DoubleRationsFoodThreshold      = { fieldIndex = 42 , fieldType = "integer"                      },
     MaxWood                         = { fieldIndex = 43 , fieldType = "integer"                      },
@@ -124,12 +126,14 @@ local AIPersonalityFields = {
     HarassingSiegeEngine8           = { fieldIndex = 122, fieldType = "HarassingSiegeEngineEnum"     },
     HarassingSiegeEnginesMax        = { fieldIndex = 123, fieldType = "integer"                      },
     RaidRetargetDelay               = { fieldIndex = 124, fieldType = "integer"                      },
+    Unknown124                      = { fieldIndex = 124, fieldType = "integer"                      },
     AttForceBase                    = { fieldIndex = 125, fieldType = "integer"                      },
     AttForceRandom                  = { fieldIndex = 126, fieldType = "integer"                      },
     AttForceSupportAllyThreshold    = { fieldIndex = 127, fieldType = "integer"                      },
     AttForceRallyPercentage         = { fieldIndex = 128, fieldType = "integer"                      },
     Unknown129                      = { fieldIndex = 129, fieldType = "integer"                      },
     AttAssaultDelay                 = { fieldIndex = 130, fieldType = "integer"                      },
+    Unknown130                      = { fieldIndex = 130, fieldType = "integer"                      },
     AttUnitPatrolRecommandDelay     = { fieldIndex = 131, fieldType = "integer"                      },
     Unknown132                      = { fieldIndex = 132, fieldType = "integer"                      },
     SiegeEngine1                    = { fieldIndex = 133, fieldType = "SiegeEngineEnum"              },
@@ -146,7 +150,9 @@ local AIPersonalityFields = {
     AttDiggingUnit                  = { fieldIndex = 144, fieldType = "UnitEnum"                     },
     AttDiggingUnitMax               = { fieldIndex = 145, fieldType = "integer"                      },
     AttUnitVanguard                 = { fieldIndex = 146, fieldType = "UnitEnum"                     },
+    AttUnit2                        = { fieldIndex = 146, fieldType = "UnitEnum"                     },
     AttUnitVanguardMax              = { fieldIndex = 147, fieldType = "integer"                      },
+    AttUnit2Max                     = { fieldIndex = 147, fieldType = "integer"                      },
     AttMaxAssassins                 = { fieldIndex = 148, fieldType = "integer"                      },
     AttMaxLaddermen                 = { fieldIndex = 149, fieldType = "integer"                      },
     AttMaxTunnelers                 = { fieldIndex = 150, fieldType = "integer"                      },
@@ -169,21 +175,5 @@ local AIPersonalityFields = {
     AttMainGroupsCount              = { fieldIndex = 167, fieldType = "integer"                      },
     TargetChoice                    = { fieldIndex = 168, fieldType = "TargetingTypeEnum"            },
 }
-
--- add Unknown entries to garantee backwards compatiblity
-local function addUnknownRefs()
-    local newEntries = {}
-    for fieldName, fieldData in pairs(AIPersonalityFields) do
-        local unknownName = string.format("Unknown%03d", fieldData.fieldIndex)
-        if fieldName ~= unknownName then
-            newEntries[unknownName] = fieldData
-        end
-    end
-
-    for unknownName, fieldData in pairs(newEntries) do
-        AIPersonalityFields[unknownName] = fieldData
-    end
-end
-addUnknownRefs()
 
 return AIPersonalityFields

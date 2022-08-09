@@ -13,6 +13,8 @@ local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d
 local isInitialized = false
 local vanillaAIC = {}
 
+
+
 local booleanToInteger = function(value)
     if type(value) == "boolean" then
         return value
@@ -61,14 +63,10 @@ local function initializedCheck()
 end
 
 local function saveVanillaAIC()
-    for aiName, aiIndex in pairs(AICharacterName) do
-        local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiIndex)
-        local vanillaData = {}
-        vanillaAIC[aiIndex] = vanillaData
-
-        for fieldName, fieldData in pairs(AIPersonalityFields) do
-            vanillaData[fieldData.fieldIndex] = readInteger(aicAddr + (4 * fieldData.fieldIndex))
-        end
+    local vanillaStartAddr = aicArrayBaseAddr + 4 * 169
+    local vanillaEndAddr = aicArrayBaseAddr + 4 * 169 * 16 + 4 * 168
+    for addr = vanillaStartAddr, vanillaEndAddr, 4 do
+        vanillaAIC[addr] = readInteger(addr)
     end
 end
 
@@ -219,13 +217,11 @@ namespace = {
         if type(aiType) == "string" then
             aiType = aiTypeToInteger(aiType)
         end
-        
-        for aiIndex, vanillaData in pairs(vanillaAIC) do
-            local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiIndex)
 
-            for fieldIndex, aicValue in pairs(vanillaData) do
-                writeInteger(aicAddr + (4 * fieldIndex), aicValue)
-            end
+        local vanillaStartAddr = aicArrayBaseAddr + 4 * 169 * aiType
+        local vanillaEndAddr = aicArrayBaseAddr + 4 * 169 * aiType + 4 * 168
+        for addr = vanillaStartAddr, vanillaEndAddr, 4 do
+            writeInteger(addr, vanillaAIC[addr])
         end
     end
 }
