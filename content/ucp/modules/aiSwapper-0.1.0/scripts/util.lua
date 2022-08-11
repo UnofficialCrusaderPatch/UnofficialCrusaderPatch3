@@ -1,13 +1,17 @@
 
 -- returns new table containing the value references of the source, but with transformed keys
 -- collisions in the transformed keys lead to overwrites
+-- "nil" returns for the key will not add the value to the new table
 local function createTableWithTransformedKeys(source, transformer, recursive)
   local newTable = {}
   for key, value in pairs(source) do
     if recursive and type(value) == "table" then
       value = createTableWithTransformedKeys(value, transformer, recursive)
     end
-    newTable[transformer(key)] = value
+    local newKey = transformer(key)
+    if newKey then
+      newTable[newKey] = value
+    end
   end
   return newTable
 end

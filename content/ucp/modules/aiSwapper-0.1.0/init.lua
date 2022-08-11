@@ -1,3 +1,4 @@
+-- NOTE: switch through console causes crashes sometimes, not easily reproduce-able
 
 --[[ Requires ]]--
 
@@ -38,11 +39,32 @@ local DATA_PATH_META = "meta.json"
 local aivModule = nil
 local filesModule = nil
 
-local language = nil
-local languageOverwrite = nil -- is {},  can be defined over the options to set a language for a specific AI
+local options = nil
 
 
 --[[ Functions ]]--
+
+local function determineLanguage(indexToReplace, aiName, meta)
+  local aiLang = nil
+  if options.ai[indexToReplace] and options.ai[indexToReplace][aiName] then
+    aiLang = options.ai[indexToReplace][aiName].language
+  end
+  
+  if aiLang == nil then
+    aiLang = options.defaultLanguage
+  end
+    
+  if aiLang == nil then
+    aiLang = meta.defaultLang
+  end
+  
+  if meta.supportedLang ~= nil and not util.containsValue(meta.supportedLang, aiLang) then
+    log(WARNING, string.format("Language '%s' is not supported. Using fallback.", aiLang))
+    aiLang = meta.defaultLang -- may or may not be default folder
+  end
+  return aiLang
+end
+
 
 local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPosition, pathroot, ...)
   if shouldModify == nil then -- if nil, nothing is done
@@ -54,6 +76,7 @@ local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPositi
     return resetFunc(aiPosition) -- resets if shouldModify false or no data present
   end
 end
+
 
 local function setAI(positionToReplace, aiName, control, pathroot)
   if not util.containsValue(LORD_ID, positionToReplace) then
@@ -68,19 +91,8 @@ local function setAI(positionToReplace, aiName, control, pathroot)
     log(WARNING, string.format("Unable to set AI '%s'. Issues with meta file: %s", aiName, err))
     return
   end
-
-  local aiLang = languageOverwrite[aiName]
-  if aiLang == nil then
-    aiLang = language
-    if aiLang == nil then
-      aiLang = meta.defaultLang
-    end
-  end
   
-  if meta.supportedLang ~= nil and not util.containsValue(meta.supportedLang, aiLang) then
-    log(WARNING, string.format("Language '%s' is not supported. Using fallback.", aiLang))
-    aiLang = meta.defaultLang -- may or may not be default folder
-  end
+  local aiLang = determineLanguage(positionToReplace, aiName, meta)
   
   if meta.switched == nil then
     log(WARNING, string.format("Unable to set AI '%s'. No switch settings in meta file found.", aiName))
@@ -122,6 +134,31 @@ local function resetAI(positionToReset)
 end
 
 
+local function applyAIOptions(indexToReplace)
+  if options.ai[indexToReplace] then
+    for aiName, aiOptions in pairs(options.ai[indexToReplace]) do
+      setAI(indexToReplace, aiName, aiOptions.control)
+    end
+  end
+end
+
+
+local function resetAIWithOptions(positionToReset, toVanilla)
+  resetAI(positionToReset)
+  
+  if not toVanilla then
+    applyAIOptions(positionToReset)
+  end
+end
+
+
+local function resetAllAIWithOptions(toVanilla)
+  for name, index in pairs(LORD_ID) do
+    resetAIWithOptions(index, toVanilla)
+  end
+end
+
+
 
 --[[ Main Func ]]--
 
@@ -132,15 +169,26 @@ exports.enable = function(self, moduleConfig, globalConfig)
   -- get modules for easier variable access
   aivModule = modules.aivloader
   filesModule = modules.files
-  
-  self.SetAI = setAI
-  self.ResetAI = resetAI
-
 
   -- get options
+  options = moduleConfig
+  if not options.ai then
+    options.ai = {}
+  else
+    options.ai = util.createTableWithTransformedKeys(options.ai, function(aiName) return LORD_ID[string.upper(aiName)] end, false)
+  end
   
-  language = moduleConfig.defaultLanguage
-  languageOverwrite = moduleConfig.languageOverwrite or {}
+  -- set functions
+  
+  self.SetAI = setAI
+  self.ResetAI = resetAIWithOptions
+  self.ResetAllAI = resetAllAIWithOptions
+  
+  hooks.registerHookCallback("afterInit", function()
+    for name, index in pairs(LORD_ID) do
+      applyAIOptions(index)
+    end
+  end)
 end
 
 exports.disable = function(self, moduleConfig, globalConfig) error("not implemented") end
