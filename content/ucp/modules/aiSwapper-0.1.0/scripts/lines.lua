@@ -1,6 +1,7 @@
 
 -- NOTE: Titles in-game are backed and can currently not be changed.
--- NOTE: Pointer to certain text parts are stored, so during this phase switches will cause nullptr access. (At least non-sense text.)
+-- NOTE: Pointer to certain text parts are stored, so during this phase switches might cause nullptr access. (At least non-sense text.)
+--  - tried to fix it with aiSwapperHelper
 
 local util = require("scripts.util")
 

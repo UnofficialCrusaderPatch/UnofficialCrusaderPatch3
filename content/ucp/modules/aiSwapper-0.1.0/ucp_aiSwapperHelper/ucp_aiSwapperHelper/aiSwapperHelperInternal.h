@@ -51,8 +51,8 @@ enum MessageType : int
   BOAST           = 18,
   HELP            = 19,
   EXTRA           = 20,
-  UNKNOWN_2       = 21,
-  UNKNOWN_3       = 22,
+  KICK_PLAYER     = 21,
+  ADD_PLAYER      = 22,
   SIEGE           = 23,
   NO_ATTACK_1     = 24,
   NO_ATTACK_2     = 25,
@@ -71,12 +71,16 @@ struct AiMessagePrepareFake
 {
 
   using PrepareAiMsgFunc = void (AiMessagePrepareFake::*)(const char* text, const char* binkFilename, const char* sfxFilename, int someIndex);
+  using PlaySFXFunc = void (AiMessagePrepareFake::*)(const char* sfxFilename); // issue -> this does not go through the file load, so this needs to handle the whole file
 
   inline static PrepareAiMsgFunc prepareAiMsgFunc{ nullptr };
+  inline static PlaySFXFunc playSFXFunc{ nullptr };
 
   inline static char** aMessageFromArray{ nullptr };
   inline static char** aiSfxArray{ nullptr };
   inline static char** aiBinkArray{ nullptr };
+
+  inline static AiMessagePrepareFake* objPtrForPlaySFX{ nullptr };  // does not point to this class
 
   // funcs
 
@@ -87,6 +91,8 @@ struct AiMessagePrepareFake
 
   // "this" will not be this class
   void __thiscall detouredSetMessageForAi(int playerIndex, AiType aiType, MessageType messageType);
+
+  static void __cdecl PlayMenuSelectSFX(AiType aiType, MessageType messageType);
 
 private:
 

@@ -2,11 +2,11 @@
 
 --[[ Requires ]]--
 
-local util = require("scripts.util")
-local portrait = require("scripts.portrait")
-local text = require("scripts.lines")
-local aic = require("scripts.aic")
-
+local util = nil
+local portrait = nil
+local text = nil
+local aic = nil
+local bink = nil
 
 --[[ IDs and Constants ]]--
 
@@ -165,6 +165,13 @@ end
 local exports = {}
 
 exports.enable = function(self, moduleConfig, globalConfig)
+
+  -- load requires here, so that the cpp helper module can find the functions
+  util = require("scripts.util")
+  portrait = require("scripts.portrait")
+  text = require("scripts.lines")
+  aic = require("scripts.aic")
+  bink = require("scripts.bink")
 
   -- get modules for easier variable access
   aivModule = modules.aivloader

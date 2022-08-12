@@ -43,7 +43,7 @@ bool AiMessagePrepareFake::fitsInPreparedText(const char* filename)
 const char* AiMessagePrepareFake::getMessageFrom(AiType aiType)
 {
   auto iter{ messageFromReplaced.find(aiType) };
-  return iter != messageFromReplaced.end() ? iter->second.c_str() : aMessageFromArray[aiType + 1];
+  return iter != messageFromReplaced.end() ? iter->second.c_str() : aMessageFromArray[aiType];
 }
 
 const char* AiMessagePrepareFake::getBink(int index)
@@ -62,6 +62,9 @@ int AiMessagePrepareFake::getSfxAndBinkIndex(AiType aiType, MessageType messageT
 {
   return (messageType - 1) * 0x11 + aiType;
 }
+
+
+
 
 void __thiscall AiMessagePrepareFake::detouredSetMessageForAi(int playerIndex, AiType aiType, MessageType messageType)
 {
@@ -94,8 +97,20 @@ void __thiscall AiMessagePrepareFake::detouredSetMessageForAi(int playerIndex, A
   }
 
   int sfxAndBinkIndex{ getSfxAndBinkIndex(aiType, messageType) };
-  (this->*prepareAiMsgFunc)(textPtr, getBink(sfxAndBinkIndex), getSfx(sfxAndBinkIndex), playerIndex);
+  (this->*prepareAiMsgFunc)(textPtr, getBink(sfxAndBinkIndex), getSfx(sfxAndBinkIndex), -playerIndex);
 }
+
+void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType messageType)
+{
+  if (!isValidAiType(aiType) || !isValidMessageType(messageType))
+  {
+    return;
+  }
+
+  (objPtrForPlaySFX->*playSFXFunc)(getSfx(getSfxAndBinkIndex(aiType, messageType)));
+}
+
+
 
 
 bool AiMessagePrepareFake::SetMessageFrom(AiType aiType, const char* filename)
@@ -123,7 +138,9 @@ bool AiMessagePrepareFake::SetBink(AiType aiType, MessageType messageType, const
 
 bool AiMessagePrepareFake::SetSfx(AiType aiType, MessageType messageType, const char* filename)
 {
-  if (!isValidAiType(aiType) || !isValidMessageType(messageType) || !fitsInPreparedText(filename))
+  // add player is only sfx and needs to use a complete path
+  if (!isValidAiType(aiType) || !isValidMessageType(messageType) ||
+    !(messageType == ADD_PLAYER || messageType == KICK_PLAYER || fitsInPreparedText(filename)))
   {
     return false;
   }

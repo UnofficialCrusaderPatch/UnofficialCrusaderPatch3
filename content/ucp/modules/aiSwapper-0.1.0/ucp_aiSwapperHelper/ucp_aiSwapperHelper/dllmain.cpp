@@ -44,6 +44,18 @@ extern "C" __declspec(dllexport) int __cdecl luaopen_aiSwapperHelper(lua_State *
   lua_pushinteger(L, (DWORD)&AiMessagePrepareFake::aiSfxArray);
   lua_setfield(L, -2, "address_AiSfxArray");
 
+  // address
+  lua_pushinteger(L, (DWORD)&AiMessagePrepareFake::PlayMenuSelectSFX);
+  lua_setfield(L, -2, "funcAddress_PlayMenuSelectSFX");
+
+  // address
+  lua_pushinteger(L, (DWORD)&AiMessagePrepareFake::playSFXFunc);
+  lua_setfield(L, -2, "address_PlaySFXFunc");
+
+  // address
+  lua_pushinteger(L, (DWORD)&AiMessagePrepareFake::objPtrForPlaySFX);
+  lua_setfield(L, -2, "address_ObjPtrForPlaySFX");
+
   // return lua funcs
 
   lua_pushcfunction(L, lua_SetMessageFrom);
