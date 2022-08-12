@@ -8,7 +8,7 @@
 #include "aiSwapperHelperInternal.h"
 
 // lua module load
-extern "C" __declspec(dllexport) int __cdecl luaopen_gmResourceModifier(lua_State * L)
+extern "C" __declspec(dllexport) int __cdecl luaopen_aiSwapperHelper(lua_State * L)
 {
   if (!LuaLog::init(L))
   {
