@@ -74,18 +74,19 @@ void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char
     activeMessage.bink = binkFilename;
     activeMessage.sound = sfxFilename;
     current = &activeMessage;
+
+
+    // empty queue here, since it is guarded as long as messages are present
+    while (!preparedMessages.empty())
+    {
+      preparedMessages.pop();
+    }
   }
   else
   {
     int preparedNum{ *((int*)that + 585) };
     if (preparedNum != 10)
     {
-      int removeElements{ static_cast<int>(preparedMessages.size()) - preparedNum };
-      for (int i{ 0 }; i < removeElements; ++i)
-      {
-        preparedMessages.pop();
-      }
-
       PreparedMessage newMsg{ text, binkFilename, sfxFilename };
       preparedMessages.push(std::move(newMsg));
       current = &preparedMessages.back();
