@@ -2,34 +2,17 @@
 
 --[[ Requires ]]--
 
+local enums = nil
 local util = nil
 local portrait = nil
 local text = nil
 local aic = nil
 local bink = nil
+local sfx = nil
 
 --[[ IDs and Constants ]]--
 
 local AI_ROOT_FOLDER = "ucp/resources/ai"
-
-local LORD_ID = {
-  RAT         = 0,
-  SNAKE       = 1,
-  PIG         = 2,
-  Wolf        = 3,
-  SALADIN     = 4,
-  CALIPH      = 5,
-  SULTAN      = 6,
-  RICHARD     = 7,
-  FREDERICK   = 8,        
-  PHILLIP     = 9,
-  WAZIR       = 10,
-  EMIR        = 11,
-  NIZAR       = 12,
-  SHERIFF     = 13,
-  MARSHAL     = 14,
-  ABBOT       = 15,
-}
 
 local DATA_PATH_META = "meta.json"
 
@@ -37,7 +20,6 @@ local DATA_PATH_META = "meta.json"
 --[[ Variables ]]--
 
 local aivModule = nil
-local filesModule = nil
 
 local options = nil
 
@@ -79,7 +61,7 @@ end
 
 
 local function setAI(positionToReplace, aiName, control, pathroot)
-  if not util.containsValue(LORD_ID, positionToReplace) then
+  if not util.containsValue(enums.LORD_ID, positionToReplace) then
     log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
     return
   end
@@ -123,7 +105,7 @@ end
 
 -- resets everything
 local function resetAI(positionToReset)
-  if not util.containsValue(LORD_ID, positionToReset) then
+  if not util.containsValue(enums.LORD_ID, positionToReset) then
     log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
     return
   end
@@ -153,7 +135,7 @@ end
 
 
 local function resetAllAIWithOptions(toVanilla)
-  for name, index in pairs(LORD_ID) do
+  for name, index in pairs(enums.LORD_ID) do
     resetAIWithOptions(index, toVanilla)
   end
 end
@@ -167,22 +149,23 @@ local exports = {}
 exports.enable = function(self, moduleConfig, globalConfig)
 
   -- load requires here, so that the cpp helper module can find the functions
+  enums = require("scripts.enums")
   util = require("scripts.util")
   portrait = require("scripts.portrait")
   text = require("scripts.lines")
   aic = require("scripts.aic")
   bink = require("scripts.bink")
+  sfx = require("scripts.bink")
 
   -- get modules for easier variable access
   aivModule = modules.aivloader
-  filesModule = modules.files
 
   -- get options
   options = moduleConfig
   if not options.ai then
     options.ai = {}
   else
-    options.ai = util.createTableWithTransformedKeys(options.ai, function(aiName) return LORD_ID[string.upper(aiName)] end, false)
+    options.ai = util.createTableWithTransformedKeys(options.ai, function(aiName) return enums.LORD_ID[string.upper(aiName)] end, false)
   end
   
   -- set functions
@@ -192,7 +175,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   self.ResetAllAI = resetAllAIWithOptions
   
   hooks.registerHookCallback("afterInit", function()
-    for name, index in pairs(LORD_ID) do
+    for name, index in pairs(enums.LORD_ID) do
       applyAIOptions(index)
     end
   end)

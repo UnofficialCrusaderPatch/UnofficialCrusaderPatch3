@@ -4,6 +4,7 @@
 --  - tried to fix it with aiSwapperHelper
 
 local util = require("scripts.util")
+local enums = require("scripts.enums")
 
 local textModule = modules.textResourceModifier
 
@@ -41,42 +42,7 @@ local NAMES_AND_MENU_TEXT_ID = {
   DESCRIPTION         = 274 ,
 }
 
-local SKRIMISH_TEXT_ID = {
-  UNKNOWN_1     = 0   ,
-  TAUNT_1       = 1   ,
-  TAUNT_2       = 2   ,
-  TAUNT_3       = 3   ,
-  TAUNT_4       = 4   ,
-  ANGER_1       = 5   ,
-  ANGER_2       = 6   ,
-  PLEAD         = 7   ,
-  NERVOUS_1     = 8   ,
-  NERVOUS_2     = 9   ,
-  VICTORY_1     = 10  ,
-  VICTORY_2     = 11  ,
-  VICTORY_3     = 12  ,
-  VICTORY_4     = 13  ,
-  REQUEST       = 14  ,
-  THANKS        = 15  ,
-  ALLY_DEATH    = 16  ,
-  CONGRATS      = 17  ,
-  BOAST         = 18  ,
-  HELP          = 19  ,
-  EXTRA         = 20  ,
-  UNKNOWN_2     = 21  ,
-  UNKNOWN_3     = 22  ,
-  SIEGE         = 23  ,
-  NO_ATTACK_1   = 24  ,
-  NO_ATTACK_2   = 25  ,
-  NO_HELP_1     = 26  ,
-  NO_HELP_2     = 27  ,
-  NO_SENT       = 28  ,
-  SENT          = 29  ,
-  TEAM_WINNING  = 30  ,
-  TEAM_LOSING   = 31  ,
-  HELP_SENT     = 32  ,
-  WILL_ATTACK   = 33  ,
-}
+local SKRIMISH_TEXT_ID = enums.SKRIMISH_MESSAGE_ID
 
 
 --[[ Functions ]]--

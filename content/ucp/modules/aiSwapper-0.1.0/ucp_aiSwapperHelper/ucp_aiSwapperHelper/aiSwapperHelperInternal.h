@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lua.h>
-#include <array>
+#include <queue>
 #include <unordered_map>
 
 /* classes, structs and enums */
@@ -66,6 +66,12 @@ enum MessageType : int
   WILL_ATTACK     = 33,
 };
 
+struct PreparedMessage
+{
+  std::string text;
+  std::string bink;
+  std::string sound;
+};
 
 struct AiMessagePrepareFake
 {
@@ -102,7 +108,8 @@ private:
   inline static std::unordered_map<int, std::string> binkReplaced{};
   inline static std::unordered_map<int, std::string> messageFromReplaced{};
 
-  inline static std::array<std::string, 11> preparedMessages{}; // only the text string is not saved
+  inline static PreparedMessage activeMessage{};
+  inline static std::queue<PreparedMessage> preparedMessages{};
 
   static bool isValidAiType(AiType aiType);
   static bool isValidMessageType(MessageType messageType);
@@ -112,6 +119,7 @@ private:
   static const char* getBink(int index);
   static const char* getSfx(int index);
   static int getSfxAndBinkIndex(AiType aiType, MessageType messageType);
+  static void prepareMessage(AiMessagePrepareFake* that, const char* text, const char* binkFilename, const char* sfxFilename, int someIndex);
 };
 
 /* LUA */

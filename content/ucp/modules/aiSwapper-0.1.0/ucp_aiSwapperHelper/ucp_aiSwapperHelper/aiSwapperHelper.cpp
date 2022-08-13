@@ -1,6 +1,7 @@
 
 #include "pch.h"
 
+#include <string>
 #include "textResourceModifierHeader.h"
 #include "aiSwapperHelperInternal.h"
 
@@ -63,7 +64,42 @@ int AiMessagePrepareFake::getSfxAndBinkIndex(AiType aiType, MessageType messageT
   return (messageType - 1) * 0x11 + aiType;
 }
 
+void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char* text, const char* binkFilename, const char* sfxFilename, int someIndex)
+{
+  PreparedMessage* current{ nullptr };
 
+  if (*((int*)that) == 0)   // in this case, the thing is played directly
+  {
+    activeMessage.text = text;
+    activeMessage.bink = binkFilename;
+    activeMessage.sound = sfxFilename;
+    current = &activeMessage;
+  }
+  else
+  {
+    int preparedNum{ *((int*)that + 585) };
+    if (preparedNum != 10)
+    {
+      int removeElements{ static_cast<int>(preparedMessages.size()) - preparedNum };
+      for (int i{ 0 }; i < removeElements; ++i)
+      {
+        preparedMessages.pop();
+      }
+
+      PreparedMessage newMsg{ text, binkFilename, sfxFilename };
+      preparedMessages.push(std::move(newMsg));
+      current = &preparedMessages.back();
+    }
+    else
+    {
+      return; // no need to call it in this case
+    }
+  }
+
+  // give the address as string, and transform it later in lua
+  (that->*prepareAiMsgFunc)(current->text.c_str(), std::to_string((int)current->bink.c_str()).c_str(),
+    std::to_string((int)current->sound.c_str()).c_str(), someIndex);
+}
 
 
 void __thiscall AiMessagePrepareFake::detouredSetMessageForAi(int playerIndex, AiType aiType, MessageType messageType)
@@ -73,31 +109,15 @@ void __thiscall AiMessagePrepareFake::detouredSetMessageForAi(int playerIndex, A
     return;
   }
 
-  (this->*prepareAiMsgFunc)("", "", getMessageFrom(aiType), playerIndex);
-
-  std::string text{ TextResourceModifierHeader::GetText(AI_MESSAGE_TEXT_INDEX, messageType - 34 + aiType * 34) };
-  const char* textPtr{ nullptr };
-  if (*((int*)this) == 0)   // in this case, the thing is played directly
-  {
-    preparedMessages[10].swap(text);
-    textPtr = preparedMessages[10].c_str();
-  }
-  else
-  {
-    int preparedNum{ *((int*)this + 585) };
-    if (preparedNum != 10)
-    {
-      preparedMessages[preparedNum].swap(text);
-      textPtr = preparedMessages[preparedNum].c_str();
-    }
-    else
-    {
-      textPtr = "";
-    }
-  }
+  prepareMessage(this, "", "", getMessageFrom(aiType), playerIndex);
 
   int sfxAndBinkIndex{ getSfxAndBinkIndex(aiType, messageType) };
-  (this->*prepareAiMsgFunc)(textPtr, getBink(sfxAndBinkIndex), getSfx(sfxAndBinkIndex), -playerIndex);
+
+  prepareMessage(this,
+    TextResourceModifierHeader::GetText(AI_MESSAGE_TEXT_INDEX, messageType - 34 + aiType * 34),
+    getBink(sfxAndBinkIndex),
+    getSfx(sfxAndBinkIndex),
+    -playerIndex);
 }
 
 void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType messageType)
