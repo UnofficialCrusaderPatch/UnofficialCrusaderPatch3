@@ -34,7 +34,7 @@ local RESOURCE_LOAD_ID = {
   [0x13]  = "FACES",
 }
 
-local TYPES_HANDLED_BY_OPEN = extensions.utils.Set:new({"aiv", "raw"})
+local TYPES_HANDLED_BY_OPEN = extensions.utils.Set:new({"aiv", "raw", "tex"})
 local TYPES_HANDLED_BY_RESOURCE_LOAD = extensions.utils.Set:new({"tgx", "gm1", "bik", "map", "act", "bmp", "wav", "hlp"})
 
 
