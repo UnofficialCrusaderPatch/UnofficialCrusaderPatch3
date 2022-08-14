@@ -97,7 +97,7 @@ end
 
 
 local function getExtension(filepath)
-  local _, _, ext = filepath.find(filepath, "%.(.+)$")
+  local _, _, ext = filepath.find(filepath, "%.(%a+)$")
   return ext
 end
 
