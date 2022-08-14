@@ -101,9 +101,16 @@ local function getExtension(filepath)
   return ext
 end
 
-
+-- nil extensions are ignored, since they are very likely part of a modification
 local function isHandled(handler, otherHandlers, filepath)
   local ext = getExtension(filepath)
+  
+  if not ext then
+    if logFileAccess then
+      log(DEBUG, "Let zero extension file pass: " .. override)
+    end
+    return true
+  end
   
   if not handler:contains(ext) then
     local handledByOther = false
