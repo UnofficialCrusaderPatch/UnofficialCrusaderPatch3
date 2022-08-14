@@ -30,6 +30,9 @@ local playSFXFuncThisPtr = core.readInteger(menuAiSelectSfxFuncStart + 0x27)
 local SFX_BASE = "fx\\speech\\"
 local BINK_BASE = "binks\\"
 
+local ratComplain = true
+local sultanComplain = true
+
 local function getPathFromStringAddress(removePattern, addressString)
   local testString = string.gsub(addressString, removePattern, "")
   if testString:len() > 0 then
@@ -48,10 +51,23 @@ modules.files:registerOverrideFunction(function(resourcePath)
   end
   
   if realPath then -- else nil
-    print(realPath)
     return realPath
   end
+  
+  if not ratComplain and string.find(resourcePath, "Genie_13") then
+    return ""
+  elseif not sultanComplain and string.find(resourcePath, "Genie_14") then
+    return ""
+  end
 end)
+
+local function setRatComplain(active)
+  ratComplain = active
+end
+
+local function setSultanComplain(active)
+  sultanComplain = active
+end
 
 
 
@@ -108,4 +124,6 @@ return {
   SetMessageFrom = requireTable.lua_SetMessageFrom,
   SetSfx = requireTable.lua_SetSfx,
   SetBink = requireTable.lua_SetBink,
+  SetRatComplain = setRatComplain,
+  SetSultanComplain = setSultanComplain,
 }

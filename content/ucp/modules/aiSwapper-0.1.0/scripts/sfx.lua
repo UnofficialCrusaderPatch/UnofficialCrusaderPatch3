@@ -9,6 +9,7 @@ local enums = require("scripts.enums")
 local DATA_PATH_SPEECH = "speech"
 local DATA_PATH_MAPPING_FILE = "mapping.json"
 
+local MESSAGE_FROM_NAME = "MESSAGE_FROM"
 local SKRIMISH_SFX_ID = enums.SKRIMISH_MESSAGE_ID
 
 
@@ -19,10 +20,19 @@ local function performSfxSet(aiIndex, source)
   for sfxName, sfxId in pairs(SKRIMISH_SFX_ID) do
     helper.SetSfx(aiIndex, sfxId, source[sfxName]) -- nil will auto reset
   end
+  helper.SetMessageFrom(aiIndex, source[MESSAGE_FROM_NAME])
 end
 
 local function resetAiSfx(aiIndexToReset)
-  performSfxSet(aiIndexToReset + 1, nil)
+  local dllAiIndex = aiIndexToReset + 1
+  performSfxSet(dllAiIndex, nil)
+  helper.SetMessageFrom(dllAiIndex, nil)
+  
+  if aiIndexToReset == enums.LORD_ID.RAT then
+    helper.SetRatComplain(true)
+  elseif aiIndexToReset == enums.LORD_ID.SULTAN then
+    helper.SetSultanComplain(true)
+  end
 end
 
 local function setAiSfx(aiIndexToReplace, pathroot, aiName, aiLang)
@@ -46,6 +56,13 @@ local function setAiSfx(aiIndexToReplace, pathroot, aiName, aiLang)
     end
   end
   performSfxSet(aiIndexToReplace + 1, transformedIndexMappingData) -- index + 1, because cpp module uses proper start value (Rat = 1)
+  
+  -- this ignores if it is just a modified Rat, but I think this is ok
+  if aiIndexToReplace == enums.LORD_ID.RAT then
+    helper.SetRatComplain(false)
+  elseif aiIndexToReplace == enums.LORD_ID.SULTAN then
+    helper.SetSultanComplain(false)
+  end
 end
 
 

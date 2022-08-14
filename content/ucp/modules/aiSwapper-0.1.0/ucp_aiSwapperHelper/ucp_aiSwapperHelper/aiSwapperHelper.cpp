@@ -148,7 +148,7 @@ void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType 
   // still needs transform to string ptr procedure
   std::pair<const char*, bool> sfxPair{ "", false };
   getSfx(getSfxAndBinkIndex(aiType, messageType), sfxPair);
-  (objPtrForPlaySFX->*playSFXFunc)(sfxPair.first);
+  (objPtrForPlaySFX->*playSFXFunc)(sfxPair.second ? std::to_string((int)sfxPair.first).c_str() : sfxPair.first);
 }
 
 
