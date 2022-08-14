@@ -34,8 +34,9 @@ local RESOURCE_LOAD_ID = {
   [0x13]  = "FACES",
 }
 
-local TYPES_HANDLED_BY_OPEN = extensions.utils.Set:new({"aiv", "raw", "tex"})
-local TYPES_HANDLED_BY_RESOURCE_LOAD = extensions.utils.Set:new({"tgx", "gm1", "bik", "map", "act", "bmp", "wav", "hlp"})
+local TYPES_HANDLED_BY_NON_EFFECT_SOUND = extensions.utils.Set:new({"raw", "wav"})
+local TYPES_HANDLED_BY_OPEN = extensions.utils.Set:new({"aiv", "tex"})
+local TYPES_HANDLED_BY_RESOURCE_LOAD = extensions.utils.Set:new({"tgx", "gm1", "bik", "map", "act", "bmp", "hlp"})
 
 
 --[[ Variables ]]--
@@ -43,11 +44,13 @@ local TYPES_HANDLED_BY_RESOURCE_LOAD = extensions.utils.Set:new({"tgx", "gm1", "
 local fileopen_use_address = core.AOBScan("E8 ? ? ? ? 83 c4 0c 83 f8 ff 89 86 08 0d 08 00 89 be c4 0b 00 00 75 07 5f 33 c0 5e c2 0c 00")
 local fileopen_address = core.readInteger(fileopen_use_address + 1) + fileopen_use_address + 5 -- turn into absolute address
 local resourceLoaderFuncStart = core.AOBScan("83 ec 24 a1 ? ? ? ? 33 c4 89 44 24 20 53 55", 0x400000)
+local playNonEffectSoundStreamFuncStart = core.AOBScan("56 8b f1 83 7e 08 00 0f 84 d3 01 00 00 53", 0x400000)
 
 local FILE_OVERRIDES = {}
 local FILE_OVERRIDE_FUNCTIONS = {}
 
 local resourceLoadFunc = nil
+local playNonEffectSoundStreamFunc = nil
 local stringBuffer = core.allocate(1001)
 
 local logFileAccess = nil
@@ -136,7 +139,7 @@ end
 local function fileOpenDetour(registers)
   local file = core.readString(core.readInteger(registers.ESP + 4))
 
-  if not isHandled(TYPES_HANDLED_BY_OPEN, {TYPES_HANDLED_BY_RESOURCE_LOAD}, file) then
+  if not isHandled(TYPES_HANDLED_BY_OPEN, {TYPES_HANDLED_BY_RESOURCE_LOAD, TYPES_HANDLED_BY_NON_EFFECT_SOUND}, file) then
     return
   end
 
@@ -160,7 +163,7 @@ local function resourceLoadHook(this, resourceFileType, shortFileNamePtr)
     resourceString = string.format("%s.gm1", resourceString)
   end
   
-  if not isHandled(TYPES_HANDLED_BY_RESOURCE_LOAD, {TYPES_HANDLED_BY_OPEN}, resourceString) then
+  if not isHandled(TYPES_HANDLED_BY_RESOURCE_LOAD, {TYPES_HANDLED_BY_OPEN, TYPES_HANDLED_BY_NON_EFFECT_SOUND}, resourceString) then
     return
   end
 
@@ -173,6 +176,22 @@ local function resourceLoadHook(this, resourceFileType, shortFileNamePtr)
   end
 end
 
+local function playNonEffectSoundStreamHook(this, sndStreamIndex, filename, flagsAndLoopCount)
+  local soundString = core.readString(filename)
+
+  if not isHandled(TYPES_HANDLED_BY_NON_EFFECT_SOUND, {TYPES_HANDLED_BY_OPEN, TYPES_HANDLED_BY_RESOURCE_LOAD}, soundString) then
+    return
+  end
+
+  local override = overwriteResource(soundString)
+  if override ~= nil then
+    writeCString(stringBuffer, override)
+    filename = stringBuffer
+  end
+
+  playNonEffectSoundStreamFunc(this, sndStreamIndex, filename, flagsAndLoopCount)
+end
+
 
 return {
   enable = function(config)
@@ -182,6 +201,7 @@ return {
     
     core.detourCode(fileOpenDetour, fileopen_address, 6)
     resourceLoadFunc = core.hookCode(resourceLoadHook, resourceLoaderFuncStart, 3, 1, 8)
+    playNonEffectSoundStreamFunc = core.hookCode(playNonEffectSoundStreamHook, playNonEffectSoundStreamFuncStart, 4, 1, 7)
   end,
 
   overrideFileWith = function(file, newFile)
