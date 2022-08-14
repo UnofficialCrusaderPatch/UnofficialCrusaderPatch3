@@ -100,6 +100,8 @@ local function setAI(positionToReplace, aiName, control, pathroot)
   
   local loadedCharacterJson = nil
   loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic, positionToReplace, pathroot, aiName, loadedCharacterJson)
+  
+  setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks, positionToReplace, pathroot, aiName, aiLang)
 end
 
 
@@ -113,6 +115,7 @@ local function resetAI(positionToReset)
   portrait.resetPortrait(positionToReset)
   text.resetAiTexts(positionToReset)
   aic.resetAIC(positionToReset)
+  bink.resetAiBinks(positionToReset)
 end
 
 

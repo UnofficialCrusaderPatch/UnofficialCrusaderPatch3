@@ -59,9 +59,6 @@ playBinkAndSfxFunc = core.hookCode(function(this, binkPtr, soundPtr)
     realSoundPtr = soundPtr
   end
   
-  print(core.readString(realBinkPtr))
-  print(core.readString(realSoundPtr))
-  
   playBinkAndSfxFunc(this, realBinkPtr, realSoundPtr)
 end, binkAndSfxPlayFuncStart, 3, 1, 7)
 

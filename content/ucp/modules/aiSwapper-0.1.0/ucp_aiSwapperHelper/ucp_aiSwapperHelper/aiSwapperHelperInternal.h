@@ -113,7 +113,6 @@ private:
 
   static bool isValidAiType(AiType aiType);
   static bool isValidMessageType(MessageType messageType);
-  static bool fitsInPreparedText(const char* filename);
 
   static const char* getMessageFrom(AiType aiType);
   static const char* getBink(int index);

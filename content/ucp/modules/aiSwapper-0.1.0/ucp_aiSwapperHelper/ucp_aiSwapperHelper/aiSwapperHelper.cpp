@@ -22,7 +22,10 @@ static void placeInMapHelper(std::unordered_map<int, std::string>& map, int key,
   }
   else
   {
-    map.try_emplace(key, string);
+    if (string)
+    {
+      map.try_emplace(key, string);
+    }
   }
 }
 
@@ -34,11 +37,6 @@ bool AiMessagePrepareFake::isValidAiType(AiType aiType)
 bool AiMessagePrepareFake::isValidMessageType(MessageType messageType)
 {
   return !(messageType < 1 || messageType > 34);
-}
-
-bool AiMessagePrepareFake::fitsInPreparedText(const char* filename)
-{
-  return std::strlen(filename) < 25;  // max length of bink or sound filename length
 }
 
 const char* AiMessagePrepareFake::getMessageFrom(AiType aiType)
@@ -136,7 +134,7 @@ void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType 
 
 bool AiMessagePrepareFake::SetMessageFrom(AiType aiType, const char* filename)
 {
-  if (!isValidAiType(aiType) || !fitsInPreparedText(filename))
+  if (!isValidAiType(aiType))
   {
     return false;
   }
@@ -147,7 +145,7 @@ bool AiMessagePrepareFake::SetMessageFrom(AiType aiType, const char* filename)
 
 bool AiMessagePrepareFake::SetBink(AiType aiType, MessageType messageType, const char* filename)
 {
-  if (!isValidAiType(aiType) || !isValidMessageType(messageType) || !fitsInPreparedText(filename))
+  if (!isValidAiType(aiType) || !isValidMessageType(messageType))
   {
     return false;
   }
@@ -159,9 +157,7 @@ bool AiMessagePrepareFake::SetBink(AiType aiType, MessageType messageType, const
 
 bool AiMessagePrepareFake::SetSfx(AiType aiType, MessageType messageType, const char* filename)
 {
-  // add player is only sfx and needs to use a complete path
-  if (!isValidAiType(aiType) || !isValidMessageType(messageType) ||
-    !(messageType == ADD_PLAYER || messageType == KICK_PLAYER || fitsInPreparedText(filename)))
+  if (!isValidAiType(aiType) || !isValidMessageType(messageType))
   {
     return false;
   }
@@ -181,7 +177,7 @@ extern "C" __declspec(dllexport) int __cdecl lua_SetMessageFrom(lua_State * L)
     luaL_error(L, "[aiSwapperHelper]: lua_SetMessageFrom: Invalid number of args.");
   }
 
-  if (!lua_isinteger(L, 1) || !lua_isstring(L, 2))
+  if (!lua_isinteger(L, 1) || !(lua_isstring(L, 3) || lua_isnoneornil(L, 3)))
   {
     luaL_error(L, "[aiSwapperHelper]: lua_SetMessageFrom: Wrong input fields.");
   }
@@ -199,7 +195,7 @@ extern "C" __declspec(dllexport) int __cdecl lua_SetBink(lua_State * L)
     luaL_error(L, "[aiSwapperHelper]: lua_SetBink: Invalid number of args.");
   }
 
-  if (!(lua_isinteger(L, 1) && lua_isinteger(L, 2) && lua_isstring(L, 3)))
+  if (!(lua_isinteger(L, 1) && lua_isinteger(L, 2) && (lua_isstring(L, 3) || lua_isnoneornil(L, 3))))
   {
     luaL_error(L, "[aiSwapperHelper]: lua_SetBink: Wrong input fields.");
   }
@@ -217,7 +213,7 @@ extern "C" __declspec(dllexport) int __cdecl lua_SetSfx(lua_State * L)
     luaL_error(L, "[aiSwapperHelper]: lua_SetSfx: Invalid number of args.");
   }
 
-  if (!(lua_isinteger(L, 1) && lua_isinteger(L, 2) && lua_isstring(L, 3)))
+  if (!(lua_isinteger(L, 1) && lua_isinteger(L, 2) && (lua_isstring(L, 3) || lua_isnoneornil(L, 3))))
   {
     luaL_error(L, "[aiSwapperHelper]: lua_SetSfx: Wrong input fields.");
   }
