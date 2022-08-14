@@ -29,4 +29,4 @@ conflicts-config: []
 # A module (for example a map pack (Christmas calendar)) could require certain AIC or features from other modules to be configured in a certain way
 depends-config: []
 # State actual dependencies: (I need to clean this file someday.)
-depends: [gmResourceModifier>=0.1.0, textResourceModifier>=0.1.0, aicloader>=0.1.0, aivloader>=0.0.1]
+depends: [gmResourceModifier>=0.1.0, textResourceModifier>=0.1.0, aicloader>=0.1.0, aivloader>=0.0.1, files>=0.1.0]

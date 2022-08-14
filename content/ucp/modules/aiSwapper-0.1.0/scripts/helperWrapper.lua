@@ -1,5 +1,4 @@
 
-
 -- get addresses
 
 local setMessageForAiFuncStart = core.AOBScan("55 56 8b 74 24 10 8d 46 ff 83 f8 0f", 0x400000)
@@ -24,43 +23,37 @@ end
 local playSFXFunc = core.readInteger(menuAiSelectSfxFuncStart + 0x2C) + menuAiSelectSfxFuncStart + 0x2B + 5 -- relative call, so we need to reverse this
 local playSFXFuncThisPtr = core.readInteger(menuAiSelectSfxFuncStart + 0x27)
 
-local binkAndSfxPlayFuncStart = core.AOBScan("53 55 8b 6c 24 0c 56 8b f1 8d 5e 0c", 0x400000)
-if binkAndSfxPlayFuncStart == nil then
-  print("'aiSwapperHelper' was unable to find the start of the bink and sfx play func.")
-  error("'aiSwapperHelper' can not be initialized.")
-end
 
 
 -- handle weird way of manipulating the path strings
 
-local function getStringAddressFromString(addressString)
-  if addressString:len() > 0 then
-    if not addressString.find(addressString, "%D") then -- check if something else than numbers are in, and then if not
-      return tonumber(addressString)
+local SFX_BASE = "fx\\speech\\"
+local BINK_BASE = "binks\\"
+
+local function getPathFromStringAddress(removePattern, addressString)
+  local testString = string.gsub(addressString, removePattern, "")
+  if testString:len() > 0 then
+    if not testString.find(testString, "%D") then -- check if something else than numbers are in, and then if not
+      return core.readString(tonumber(testString))
     end
   end
   
   return nil
 end
 
+modules.files:registerOverrideFunction(function(resourcePath)
+  local realPath = getPathFromStringAddress(SFX_BASE, resourcePath)
+  if realPath == nil then
+    realPath = getPathFromStringAddress(BINK_BASE, resourcePath)
+  end
+  
+  if realPath then -- else nil
+    print(realPath)
+    return realPath
+  end
+end)
 
-local playBinkAndSfxFunc = nil
-playBinkAndSfxFunc = core.hookCode(function(this, binkPtr, soundPtr)
-  local binkStr = core.readString(binkPtr)
-  local soundStr = core.readString(soundPtr)
-  
-  local realBinkPtr = getStringAddressFromString(binkStr)
-  if not realBinkPtr then
-    realBinkPtr = binkPtr
-  end
-  
-  local realSoundPtr = getStringAddressFromString(soundStr)
-  if not realSoundPtr then
-    realSoundPtr = soundPtr
-  end
-  
-  playBinkAndSfxFunc(this, realBinkPtr, realSoundPtr)
-end, binkAndSfxPlayFuncStart, 3, 1, 7)
+
 
 local requireTable = require("aiSwapperHelper.dll") -- loads the dll in memory and runs luaopen_aiSwapperHelper
 

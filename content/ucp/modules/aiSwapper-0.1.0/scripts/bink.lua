@@ -6,7 +6,6 @@ local enums = require("scripts.enums")
 
 --[[ IDs and Constants ]]--
 
-local DATA_PATH_REVERSE = "../" -- reverse mapping needed to get out of the games binks folder
 local DATA_PATH_BINKS = "binks"
 local DATA_PATH_MAPPING_FILE = "mapping.json"
 
@@ -40,7 +39,7 @@ local function setAiBinks(aiIndexToReplace, pathroot, aiName, aiLang)
   for typeName, binkPath in pairs(transformedIndexMappingData) do
     local completeBinkPath = string.format("%s/%s", binkRootPath, binkPath)
     if util.doesFileExist(completeBinkPath) then
-      transformedIndexMappingData[typeName] = string.format("%s%s", DATA_PATH_REVERSE, completeBinkPath) -- needs to reverse the path at this point
+      transformedIndexMappingData[typeName] = completeBinkPath
     else
       log(WARNING, string.format("Problems with bink file of AI '%s'. '%s' does not exist.", aiName, completeBinkPath))
       transformedIndexMappingData[typeName] = nil

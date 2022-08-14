@@ -82,9 +82,9 @@ struct AiMessagePrepareFake
   inline static PrepareAiMsgFunc prepareAiMsgFunc{ nullptr };
   inline static PlaySFXFunc playSFXFunc{ nullptr };
 
-  inline static char** aMessageFromArray{ nullptr };
-  inline static char** aiSfxArray{ nullptr };
-  inline static char** aiBinkArray{ nullptr };
+  inline static const char** aMessageFromArray{ nullptr };
+  inline static const char** aiSfxArray{ nullptr };
+  inline static const char** aiBinkArray{ nullptr };
 
   inline static AiMessagePrepareFake* objPtrForPlaySFX{ nullptr };  // does not point to this class
 
@@ -114,11 +114,12 @@ private:
   static bool isValidAiType(AiType aiType);
   static bool isValidMessageType(MessageType messageType);
 
-  static const char* getMessageFrom(AiType aiType);
-  static const char* getBink(int index);
-  static const char* getSfx(int index);
+  static void getMessageFrom(AiType aiType, std::pair<const char*, bool>& pairToFill);
+  static void getBink(int index, std::pair<const char*, bool>& pairToFill);
+  static void getSfx(int index, std::pair<const char*, bool>& pairToFill);
   static int getSfxAndBinkIndex(AiType aiType, MessageType messageType);
-  static void prepareMessage(AiMessagePrepareFake* that, const char* text, const char* binkFilename, const char* sfxFilename, int someIndex);
+  static void prepareMessage(AiMessagePrepareFake* that, const char* text, const std::pair<const char*, bool>& binkPair,
+    const std::pair<const char*, bool>& sfxPair, int someIndex);
 };
 
 /* LUA */

@@ -102,6 +102,7 @@ local function setAI(positionToReplace, aiName, control, pathroot)
   loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic, positionToReplace, pathroot, aiName, loadedCharacterJson)
   
   setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks, positionToReplace, pathroot, aiName, aiLang)
+  setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech, positionToReplace, pathroot, aiName, aiLang)
 end
 
 
@@ -116,6 +117,7 @@ local function resetAI(positionToReset)
   text.resetAiTexts(positionToReset)
   aic.resetAIC(positionToReset)
   bink.resetAiBinks(positionToReset)
+  sfx.resetAiSfx(positionToReset)
 end
 
 
@@ -158,7 +160,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   text = require("scripts.lines")
   aic = require("scripts.aic")
   bink = require("scripts.bink")
-  sfx = require("scripts.bink")
+  sfx = require("scripts.sfx")
 
   -- get modules for easier variable access
   aivModule = modules.aivloader

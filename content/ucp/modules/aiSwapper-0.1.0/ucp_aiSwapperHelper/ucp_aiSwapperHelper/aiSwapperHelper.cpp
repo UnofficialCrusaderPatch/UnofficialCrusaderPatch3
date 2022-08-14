@@ -29,6 +29,20 @@ static void placeInMapHelper(std::unordered_map<int, std::string>& map, int key,
   }
 }
 
+static void fillInFittingPathPair(std::unordered_map<int, std::string>& mapToSearchIn, const char** vanillaArray, int index, std::pair<const char*, bool>& pairToFill)
+{
+  auto iter{ mapToSearchIn.find(index) };
+  pairToFill.second = iter != mapToSearchIn.end();
+  if (pairToFill.second)
+  {
+    pairToFill.first = iter->second.c_str();
+  }
+  else
+  {
+    pairToFill.first = vanillaArray[index];
+  }
+}
+
 bool AiMessagePrepareFake::isValidAiType(AiType aiType)
 {
   return !(aiType < 1 || aiType > 16);
@@ -39,22 +53,19 @@ bool AiMessagePrepareFake::isValidMessageType(MessageType messageType)
   return !(messageType < 1 || messageType > 34);
 }
 
-const char* AiMessagePrepareFake::getMessageFrom(AiType aiType)
+void AiMessagePrepareFake::getMessageFrom(AiType aiType, std::pair<const char*, bool>& pairToFill)
 {
-  auto iter{ messageFromReplaced.find(aiType) };
-  return iter != messageFromReplaced.end() ? iter->second.c_str() : aMessageFromArray[aiType];
+  fillInFittingPathPair(messageFromReplaced, aMessageFromArray, aiType, pairToFill);
 }
 
-const char* AiMessagePrepareFake::getBink(int index)
+void AiMessagePrepareFake::getBink(int index, std::pair<const char*, bool>& pairToFill)
 {
-  auto iter{ binkReplaced.find(index) };
-  return iter != binkReplaced.end() ? iter->second.c_str() : aiBinkArray[index];
+  fillInFittingPathPair(binkReplaced, aiBinkArray, index, pairToFill);
 }
 
-const char* AiMessagePrepareFake::getSfx(int index)
+void AiMessagePrepareFake::getSfx(int index, std::pair<const char*, bool>& pairToFill)
 {
-  auto iter{ sfxReplaced.find(index) };
-  return iter != sfxReplaced.end() ? iter->second.c_str() : aiSfxArray[index];
+  fillInFittingPathPair(sfxReplaced, aiSfxArray, index, pairToFill);
 }
 
 int AiMessagePrepareFake::getSfxAndBinkIndex(AiType aiType, MessageType messageType)
@@ -62,15 +73,16 @@ int AiMessagePrepareFake::getSfxAndBinkIndex(AiType aiType, MessageType messageT
   return (messageType - 1) * 0x11 + aiType;
 }
 
-void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char* text, const char* binkFilename, const char* sfxFilename, int someIndex)
+void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char* text, const std::pair<const char*, bool>& binkPair,
+  const std::pair<const char*, bool>& sfxPair, int someIndex)
 {
   PreparedMessage* current{ nullptr };
 
   if (*((int*)that) == 0)   // in this case, the thing is played directly
   {
     activeMessage.text = text;
-    activeMessage.bink = binkFilename;
-    activeMessage.sound = sfxFilename;
+    activeMessage.bink = binkPair.first;
+    activeMessage.sound = sfxPair.first;
     current = &activeMessage;
 
 
@@ -85,7 +97,7 @@ void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char
     int preparedNum{ *((int*)that + 585) };
     if (preparedNum != 10)
     {
-      PreparedMessage newMsg{ text, binkFilename, sfxFilename };
+      PreparedMessage newMsg{ text, binkPair.first, sfxPair.first };
       preparedMessages.push(std::move(newMsg));
       current = &preparedMessages.back();
     }
@@ -96,8 +108,10 @@ void AiMessagePrepareFake::prepareMessage(AiMessagePrepareFake* that, const char
   }
 
   // give the address as string, and transform it later in lua
-  (that->*prepareAiMsgFunc)(current->text.c_str(), std::to_string((int)current->bink.c_str()).c_str(),
-    std::to_string((int)current->sound.c_str()).c_str(), someIndex);
+  (that->*prepareAiMsgFunc)(current->text.c_str(),
+    binkPair.second ? std::to_string((int)current->bink.c_str()).c_str() : current->bink.c_str(),
+    sfxPair.second ? std::to_string((int)current->sound.c_str()).c_str() : current->sound.c_str(),
+    someIndex);
 }
 
 
@@ -108,15 +122,20 @@ void __thiscall AiMessagePrepareFake::detouredSetMessageForAi(int playerIndex, A
     return;
   }
 
-  prepareMessage(this, "", "", getMessageFrom(aiType), playerIndex);
+  std::pair<const char*, bool> binkPair{"", false};
+  std::pair<const char*, bool> sfxPair{"", false};
+  getMessageFrom(aiType, sfxPair);
+
+  prepareMessage(this, "", binkPair, sfxPair, playerIndex);
 
   int sfxAndBinkIndex{ getSfxAndBinkIndex(aiType, messageType) };
 
+  getBink(sfxAndBinkIndex, binkPair);
+  getSfx(sfxAndBinkIndex, sfxPair);
+
   prepareMessage(this,
     TextResourceModifierHeader::GetText(AI_MESSAGE_TEXT_INDEX, messageType - 34 + aiType * 34),
-    getBink(sfxAndBinkIndex),
-    getSfx(sfxAndBinkIndex),
-    -playerIndex);
+    binkPair, sfxPair, -playerIndex);
 }
 
 void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType messageType)
@@ -126,7 +145,10 @@ void __cdecl AiMessagePrepareFake::PlayMenuSelectSFX(AiType aiType, MessageType 
     return;
   }
 
-  (objPtrForPlaySFX->*playSFXFunc)(getSfx(getSfxAndBinkIndex(aiType, messageType)));
+  // still needs transform to string ptr procedure
+  std::pair<const char*, bool> sfxPair{ "", false };
+  getSfx(getSfxAndBinkIndex(aiType, messageType), sfxPair);
+  (objPtrForPlaySFX->*playSFXFunc)(sfxPair.first);
 }
 
 
