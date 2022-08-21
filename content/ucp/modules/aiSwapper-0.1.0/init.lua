@@ -9,6 +9,7 @@ local text = nil
 local aic = nil
 local bink = nil
 local sfx = nil
+local aiv = nil
 
 --[[ IDs and Constants ]]--
 
@@ -18,8 +19,6 @@ local DATA_PATH_META = "meta.json"
 
 
 --[[ Variables ]]--
-
-local aivModule = nil
 
 local options = nil
 
@@ -103,6 +102,7 @@ local function setAI(positionToReplace, aiName, control, pathroot)
   
   setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks, positionToReplace, pathroot, aiName, aiLang)
   setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech, positionToReplace, pathroot, aiName, aiLang)
+  setAiPart(aiv.setAIV, aiv.resetAIV, control.aiv, meta.switched.aiv, positionToReplace, pathroot, aiName)
 end
 
 
@@ -118,6 +118,7 @@ local function resetAI(positionToReset)
   aic.resetAIC(positionToReset)
   bink.resetAiBinks(positionToReset)
   sfx.resetAiSfx(positionToReset)
+  aiv.resetAIV(positionToReset)
 end
 
 
@@ -161,9 +162,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   aic = require("scripts.aic")
   bink = require("scripts.bink")
   sfx = require("scripts.sfx")
-
-  -- get modules for easier variable access
-  aivModule = modules.aivloader
+  aiv = require("scripts.aiv")
 
   -- get options
   options = moduleConfig
