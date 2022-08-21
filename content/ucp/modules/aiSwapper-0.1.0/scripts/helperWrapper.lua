@@ -3,7 +3,7 @@
 
 local setMessageForAiFuncStart = core.AOBScan("55 56 8b 74 24 10 8d 46 ff 83 f8 0f", 0x400000)
 if setMessageForAiFuncStart == nil then
-  print("'aiSwapperHelper' was unable to find the start of the ai message function.")
+  log(ERROR, "'aiSwapperHelper' was unable to find the start of the ai message function.")
   error("'aiSwapperHelper' can not be initialized.")
 end
 
@@ -16,7 +16,7 @@ local aiSfxArray = core.readInteger(setMessageForAiFuncStart + 0x4D)
 
 local menuAiSelectSfxFuncStart = core.AOBScan("8b 4c 24 04 83 f9 10 77 27", 0x400000)
 if menuAiSelectSfxFuncStart == nil then
-  print("'aiSwapperHelper' was unable to find the start of the ai menu select sfx function.")
+  log(ERROR, "'aiSwapperHelper' was unable to find the start of the ai menu select sfx function.")
   error("'aiSwapperHelper' can not be initialized.")
 end
 

@@ -10,6 +10,7 @@ local aic = nil
 local bink = nil
 local sfx = nil
 local aiv = nil
+local lordAndTroops = nil
 
 --[[ IDs and Constants ]]--
 
@@ -163,6 +164,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   bink = require("scripts.bink")
   sfx = require("scripts.sfx")
   aiv = require("scripts.aiv")
+  lordAndTroops = require("scripts.lordAndTroops")
 
   -- get options
   options = moduleConfig
