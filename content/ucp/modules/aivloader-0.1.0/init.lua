@@ -51,7 +51,7 @@ local init = false
 local aivInitFuncAddr = core.AOBScan("83 ec 0c 53 55 56 57 8b f9 89", 0x400000)
 
 local ptrGenerateAivFileStatCallPos = aivInitFuncAddr + 123
-local ptrGenerateAivFileStatFunc = core.readInteger(ptrGenerateAivFileStatCallPos + 1) - ptrGenerateAivFileStatCallPos - 5
+local ptrGenerateAivFileStatFunc = core.readInteger(ptrGenerateAivFileStatCallPos + 1) + ptrGenerateAivFileStatCallPos + 5
 
 local ptrAIWithAvailableCastleArray = core.readInteger(aivInitFuncAddr + 179)
 
@@ -99,6 +99,19 @@ local stringBuffer = core.allocate(1001)
 
 
 --[[ functions ]]--
+
+local function overwriteTooLong(overwrite)
+  if overwrite:len() > 1000 then
+    log(WARNING, "Path to long. Max length is 1000 chars. Can not set overwrite: " .. overwrite)
+    return true
+  end
+  return false
+end
+
+local function writeCString(address, str)
+  core.writeString(address, str)
+  core.writeByte(address + str:len(), 0)
+end
 
 local function validateAiAndCastleValues(ai, castle)
   local aiIndex, aiName = nil
@@ -160,7 +173,7 @@ local function doesCastleExist(castleStatPtr)
 end
 
 local function doesVanillaCastleExist(vanillaCastleValue)
-  return getVanillaCastleStat(aiIndex, castleIndex) > -1
+  return vanillaCastleValue > -1
 end
 
 
@@ -178,12 +191,17 @@ local function setAIWithCastleActive(index, active)
       num = num + 1
     end
   end
+  for i = num, 15 do
+    core.writeInteger(ptrAIWithAvailableCastleArray + num * 4, 0)
+  end
+  
   core.writeInteger(ptrNumberOfAIsWithCastle, num)
 end
 
 
 local function setAivForAi(ai, castle, newFileName)
   local aiIndex, aiName, castleIndex = validateAiAndCastleValues(ai, castle)
+  local defaultAiPath = createDefaultAIVPath(aiName, castleIndex)
   
   local castleStatIndex = getCastleStatIndex(aiIndex, castleIndex)
   local castleStatPtr = getCastleStatPtr(castleStatIndex)
@@ -198,7 +216,11 @@ local function setAivForAi(ai, castle, newFileName)
     newCastleStat = getVanillaCastleStat(castleStatIndex)
     setToExistingCastle = doesVanillaCastleExist(newCastleStat)
   else
-    core.writeString(stringBuffer, newFileName)
+    if overwriteTooLong(newFileName) then
+      return
+    end
+  
+    writeCString(stringBuffer, newFileName)
     newCastleStat = generateAivFileStatFunc(0, stringBuffer) -- does not use this ptr
     
     if newCastleStat < 0 then
@@ -228,7 +250,14 @@ local function setAivForAi(ai, castle, newFileName)
   end
   
   core.writeInteger(numberOfCastlesPtr, currentNumberOfThisAIsCastles)
-  setAIWithCastleActive(index, currentNumberOfThisAIsCastles > -1)
+  setAIWithCastleActive(aiIndex, currentNumberOfThisAIsCastles > 0)
+end
+
+local function isInit()
+  if not init then
+    log(WARNING, "aivloader not initialized yet. Ignoring request.")
+  end
+  return init
 end
 
 
@@ -264,20 +293,25 @@ return {
 
   -- ReadOnlyTable is preventing this from being prettier (we cannot expose 'api' because it becomes frozen)
   setAIVFileForAI = function(ai, castle, fileName)
+    if not isInit() then return end
     setAivForAi(ai, castle, fileName)
   end,
   disableAIVForAi = function(ai, castle)
+    if not isInit() then return end
     setAivForAi(ai, castle, "")
   end,
   resetAIVForAi = function(ai, castle)
+    if not isInit() then return end
     setAivForAi(ai, castle, nil)
   end,
   resetAllAIVForAi = function(ai)
+    if not isInit() then return end
     for i = 1, 8 do
       setAivForAi(ai, i, nil)
     end
   end,
   setMultipleAIVForAi = function(ai, castleToPathTable)
+    if not isInit() then return end
     for castleIndex, filePath in pairs(castleToPathTable) do
       setAivForAi(ai, castleIndex, filePath)
     end
