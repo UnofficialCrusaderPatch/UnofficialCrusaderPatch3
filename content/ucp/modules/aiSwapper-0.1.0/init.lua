@@ -10,7 +10,7 @@ local aic = nil
 local bink = nil
 local sfx = nil
 local aiv = nil
-local lordAndTroops = nil
+local lord = nil
 
 --[[ IDs and Constants ]]--
 
@@ -100,6 +100,7 @@ local function setAI(positionToReplace, aiName, control, pathroot)
   
   local loadedCharacterJson = nil
   loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic, positionToReplace, pathroot, aiName, loadedCharacterJson)
+  loadedCharacterJson = setAiPart(lord.setLord, lord.resetLord, control.lord, meta.switched.lord, positionToReplace, pathroot, aiName, loadedCharacterJson)
   
   setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks, positionToReplace, pathroot, aiName, aiLang)
   setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech, positionToReplace, pathroot, aiName, aiLang)
@@ -120,6 +121,7 @@ local function resetAI(positionToReset)
   bink.resetAiBinks(positionToReset)
   sfx.resetAiSfx(positionToReset)
   aiv.resetAIV(positionToReset)
+  lord.resetLord(positionToReset)
 end
 
 
@@ -164,7 +166,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   bink = require("scripts.bink")
   sfx = require("scripts.sfx")
   aiv = require("scripts.aiv")
-  lordAndTroops = require("scripts.lordAndTroops")
+  lord = require("scripts.lord")
 
   -- get options
   options = moduleConfig
