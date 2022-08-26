@@ -11,6 +11,7 @@ local bink = nil
 local sfx = nil
 local aiv = nil
 local lord = nil
+local troops = nil
 
 --[[ IDs and Constants ]]--
 
@@ -95,16 +96,25 @@ local function setAI(positionToReplace, aiName, control, pathroot)
     portrait = true,
   }
 
-  setAiPart(portrait.loadAndSetPortrait, portrait.resetPortrait, control.portrait, meta.switched.portrait, positionToReplace, pathroot, aiName)
-  setAiPart(text.setAiTexts, text.resetAiTexts, control.lines, meta.switched.lines, positionToReplace, pathroot, aiName, aiLang)
+  setAiPart(portrait.loadAndSetPortrait, portrait.resetPortrait, control.portrait,
+      meta.switched.portrait, positionToReplace, pathroot, aiName)
+  setAiPart(text.setAiTexts, text.resetAiTexts, control.lines, meta.switched.lines,
+      positionToReplace, pathroot, aiName, aiLang)
   
   local loadedCharacterJson = nil
-  loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic, positionToReplace, pathroot, aiName, loadedCharacterJson)
-  loadedCharacterJson = setAiPart(lord.setLord, lord.resetLord, control.lord, meta.switched.lord, positionToReplace, pathroot, aiName, loadedCharacterJson)
+  loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic,
+      positionToReplace, pathroot, aiName, loadedCharacterJson)
+  loadedCharacterJson = setAiPart(lord.setLord, lord.resetLord, control.lord, meta.switched.lord,
+      positionToReplace, pathroot, aiName, loadedCharacterJson)
+  loadedCharacterJson = setAiPart(troops.setStartTroops, troops.resetStartTroops, control.startTroops,
+      meta.switched.startTroops, positionToReplace, pathroot, aiName, loadedCharacterJson)
   
-  setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks, positionToReplace, pathroot, aiName, aiLang)
-  setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech, positionToReplace, pathroot, aiName, aiLang)
-  setAiPart(aiv.setAIV, aiv.resetAIV, control.aiv, meta.switched.aiv, positionToReplace, pathroot, aiName)
+  setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks,
+      positionToReplace, pathroot, aiName, aiLang)
+  setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech,
+      positionToReplace, pathroot, aiName, aiLang)
+  setAiPart(aiv.setAIV, aiv.resetAIV, control.aiv, meta.switched.aiv,
+      positionToReplace, pathroot, aiName)
 end
 
 
@@ -122,6 +132,7 @@ local function resetAI(positionToReset)
   sfx.resetAiSfx(positionToReset)
   aiv.resetAIV(positionToReset)
   lord.resetLord(positionToReset)
+  troops.resetStartTroops(positionToReset)
 end
 
 
@@ -167,6 +178,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   sfx = require("scripts.sfx")
   aiv = require("scripts.aiv")
   lord = require("scripts.lord")
+  troops = require("scripts.troops")
 
   -- get options
   options = moduleConfig
