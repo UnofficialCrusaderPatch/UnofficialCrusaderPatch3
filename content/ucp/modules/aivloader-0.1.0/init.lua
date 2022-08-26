@@ -74,7 +74,7 @@ aivInitFunc = core.hookCode(function(this)
   ptrAivStatArray = this + 0x3da5c
   ptrNumberOfAIsWithCastle = this + 0x3f0ac
   
-  -- save vanilla
+  -- save vanilla (NOTE: since it does not use the functions of the AI setters, this might be a bug source)
   for i = 0, 15 do
     local aiWithCastle = core.readInteger(ptrAIWithAvailableCastleArray + i * 4)
     vanillaAIV.aiWithAvailableCastle[i] = aiWithCastle
@@ -157,7 +157,7 @@ local function getNumberOfCastlesPerAiPtr(aiIndex)
 end
 
 local function getCastleStatIndex(aiIndex, castleIndex)
-  return aiIndex * 8 + castleIndex
+  return aiIndex * 8 + castleIndex - 1 -- because castle ptr is castleIndex - 1
 end
 
 local function getVanillaCastleStat(castleStatIndex)
