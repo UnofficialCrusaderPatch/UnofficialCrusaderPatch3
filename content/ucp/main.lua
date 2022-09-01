@@ -212,21 +212,23 @@ log(DEBUG, "[main]: explicitly active extensions:\n" .. json:encode_pretty(expli
 necessaryDependencies = {}
 for k, ext in pairs(explicitlyActiveExtensions) do
     for k2, dep in pairs(extensionDependencies[ext]) do
-        table.insert(necessaryDependencies, dep)
+        if not table.find(necessaryDependencies, dep) then
+            table.insert(necessaryDependencies, dep)
+        end
     end
 end
 
 i = 1
 while i <= #necessaryDependencies do
-	local ext = necessaryDependencies[i]
-	if ext then
-		for k, dep in pairs(extensionDependencies[ext]) do
-			if not table.find(necessaryDependencies, dep) then
-				table.insert(necessaryDependencies, dep)
-			end
-		end
-	end
-	i = i + 1
+    local ext = necessaryDependencies[i]
+    if ext then
+        for k, dep in pairs(extensionDependencies[ext]) do
+            if not table.find(necessaryDependencies, dep) then
+                table.insert(necessaryDependencies, dep)
+            end
+        end
+    end
+    i = i + 1
 end
 
 log(DEBUG, "required dependencies:\n" .. json:encode_pretty(necessaryDependencies))
@@ -344,15 +346,33 @@ for k, dep in pairs(allActiveExtensions) do
     local t = extensionLoaders[dep]:type()
     if t == "ModuleLoader" then
         print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:enable(configFinal.modules[dep].options or {})
+        local o = configFinal.modules[dep] or {}
+        extensionLoaders[dep]:enable(o.options or {})
         modules[dep] = extensions.createRecursiveReadOnlyTable(modules[dep])
     elseif t == "PluginLoader" then
         print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:enable(configFinal.plugins[dep].options or {})
+        local o = configFinal.plugins[dep] or {}
+        extensionLoaders[dep]:enable(o.options or {})
         plugins[dep] = extensions.createRecursiveReadOnlyTable(plugins[dep])
     else
         error("unknown extension type for: " .. dep)
     end
 end
+
+(function() 
+  local f = io.open("ucp/dev.lua", 'r')
+  if not f then return end
+  
+  print("loading 'ucp/dev.lua'")
+  
+  local f, err = load(f:read("*all"), "ucp/dev.lua")
+  if not f then
+    print("\t" .. err)
+  end
+  local success, result = pcall(f)
+  if not success then
+    print("\t" .. result)
+  end
+end)()
 
 data.cache.AOB.dumpToFile()

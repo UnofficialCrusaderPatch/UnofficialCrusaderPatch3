@@ -4,6 +4,7 @@
 #include <fstream>
 #include "Core.h"
 #include "LuaIO.h"
+#include "LuaUtil.h"
 #include "RuntimePatchingSystem.h"
 
 #define LOGURU_WITH_STREAMS 1
@@ -24,6 +25,9 @@ void addUtilityFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, luaAssemble);
 	lua_setfield(L, -2, "assemble");
+
+	lua_pushcfunction(L, LuaUtil::luaGetCurrentThreadID);
+	lua_setfield(L, -2, "GetCurrentThreadID");
 
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }

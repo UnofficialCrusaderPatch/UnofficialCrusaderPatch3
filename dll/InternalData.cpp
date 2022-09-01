@@ -34,7 +34,9 @@ require = function(path)
        end
 
        local contents = f:read("*all")
-       local func = load(contents, sanitizedPath, "t", _G)
+       local func, err = load(contents, sanitizedPath, "t", _G)
+	   if not func then error(err) end
+
        local status, result = pcall(func)
 
        if not status then
