@@ -122,8 +122,14 @@ jobs:
                 $t = $moduleFile.target
               }
               
+              # create dest if not exist
+              $destinationFolder = $moduleDir + "\" + $t + "\"
+              if (!(Test-Path -path $destinationFolder)) {
+                New-Item $destinationFolder -Type Directory
+              }
+              
               # Copy the file, can include wildcards
-              Copy-Item ($module.FullName + "\" + $srcFile) -Destination ($moduleDir + "\" + $t + "\") -Recurse
+              Copy-Item ($module.FullName + "\" + $srcFile) -Destination $destinationFolder -Recurse
             }
           } else {
             # TODO: avoid this wildcard. Include .lua .yml and ... only?
