@@ -18,7 +18,7 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
 1. Start the VS2019 developer console.
 1. Clone the repo, and change directory into the repo directory.
   ```powershell
-  git clone https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3
+  git clone --recurse-submodules -j8 https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3
   cd UnofficialCrusaderPatch3
   ```
 6. Start a powershell session in the dev console
