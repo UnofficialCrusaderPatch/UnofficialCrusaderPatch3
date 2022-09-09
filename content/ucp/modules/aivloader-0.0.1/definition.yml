@@ -1,5 +1,0 @@
-name: aivloader
-version: 0.0.1
-depends: [files>=0.0.1]
-author: gynt
-game: [SHC==1.41, SHCE==1.41, SHCE==1.41.1]
