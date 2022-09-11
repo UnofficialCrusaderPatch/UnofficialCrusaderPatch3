@@ -198,6 +198,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="InternalData.h" />
     <ClInclude Include="LuaIO.h" />
+    <ClInclude Include="LuaUtil.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="internal-data-def.h" />
     <ClInclude Include="fasm.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="InternalData.cpp" />
     <ClCompile Include="LuaIO.cpp" />
     <ClCompile Include="fasm.cpp" />
+    <ClCompile Include="LuaUtil.cpp" />
     <ClCompile Include="ucp3-basic.cpp" />
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
   </ItemGroup>

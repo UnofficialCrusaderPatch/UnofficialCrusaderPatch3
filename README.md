@@ -41,7 +41,8 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
   ```cmd
   msbuild /p:Configuration=$env:BUILD_CONFIGURATION`
   ```
-## Creating the UCP3 package:
+## Creating the UCP3 installation package:
+
 Execute powershell scripts found [here](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/blob/main/.github/workflows/msbuild.yml) (copy paste) into your powershell session. 
 
 All files will be prepared in `$env:BUILD_CONFIGURATION\ucp-package` (e.g., Release\ucp-package). The files from this folder can be directly copied to the game directory.

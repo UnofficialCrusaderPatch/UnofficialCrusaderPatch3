@@ -249,7 +249,7 @@ namespace LuaIO {
 		}
 		if (!std::filesystem::exists(fullPath)) {
 			lua_pushnil(L);
-			lua_pushstring(L, "file does not exist"); //error message
+			lua_pushstring(L, "file does not exist"); //error message. TODO: improve
 			return 2;
 		}
 
