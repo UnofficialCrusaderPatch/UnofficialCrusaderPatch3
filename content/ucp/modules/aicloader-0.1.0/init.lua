@@ -3,47 +3,14 @@ local writeInteger = core.writeInteger
 local readInteger = core.readInteger
 
 local AICharacterName = require("characters")
-local FieldTypes = require("fieldtypes")
 
-local personality = require("personality")
-local AIPersonalityFields = personality
+local getAndValidateAicValue = require("personality")
 
 local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d ? ? ? ? 83 3d ? ? ? ? 00 75 44 6a 08 b9 ? ? ? ? e8 ? ? ? ? 85 c0 74 34 8b c5 2b 05"))
 
 local isInitialized = false
 local vanillaAIC = {}
 
-
-
-local booleanToInteger = function(value)
-    if type(value) == "boolean" then
-        return value
-    end
-
-    if type(value) == "number" then
-        if value ~= 1 and value ~= 0 then
-            error("incomprehensible boolean value: " .. value)
-        else
-            return value
-        end
-    end
-
-    if type(value) == "string" then
-        if value:lower() == "true" then
-            value = 1
-        elseif value:lower() == "false" then
-            value = 0
-        elseif value == "1" then
-            value = 1
-        elseif value == "0" then
-            value = 0
-        else
-            error("incomprehensible boolean value: " .. value)
-        end
-    end
-
-    return value
-end
 
 local aiTypeToInteger = function(aiType)
     local aiInteger = AICharacterName[aiType]
@@ -153,28 +120,8 @@ namespace = {
             end
 
             local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiType)
-
-            local set = false
-
-            local fieldData = AIPersonalityFields[aicField]
-            if not fieldData then
-                error("Invalid aic field name specified: " .. aicField)
-            end
-            local fieldIndex = fieldData.fieldIndex
-            local fieldType = fieldData.fieldType
-
-            if fieldType == "integer" then
-            elseif fieldType == "boolean" then
-                aicValue = booleanToInteger(aicValue)
-            else
-                aicValue = FieldTypes[fieldType][aicValue]
-
-                if aicValue == nil then
-                    error("Invalid field value: " .. aicValue .. " for fieldName " .. aicValue)
-                end
-            end
-
-            writeInteger(aicAddr + (4 * fieldIndex), aicValue)
+            local fieldIndex, fieldValue = getAndValidateAicValue(aicField, aicValue)
+            writeInteger(aicAddr + (4 * fieldIndex), fieldValue)
             --TODO: optimize by writing a longer array of bytes...
         end)
 
