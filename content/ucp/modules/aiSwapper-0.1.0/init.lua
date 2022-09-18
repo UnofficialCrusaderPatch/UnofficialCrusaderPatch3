@@ -27,6 +27,17 @@ local options = nil
 
 --[[ Functions ]]--
 
+local function getLordIndex(input)
+  local inputType = type(input)
+  if inputType == "number" and math.floor(input) == input then
+    return input
+  elseif inputType == "string" then
+    return enums.LORD_ID[string.upper(input)] or -1
+  else
+    return -1
+  end
+end
+
 local function determineLanguage(indexToReplace, aiName, meta)
   local aiLang = nil
   if options.ai[indexToReplace] and options.ai[indexToReplace][aiName] then
@@ -61,9 +72,10 @@ local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPositi
 end
 
 
-local function setAI(positionToReplace, aiName, control, pathroot)
+local function setAI(lordToReplace, aiName, control, pathroot)
+  local positionToReplace = getLordIndex(lordToReplace)
   if not util.containsValue(enums.LORD_ID, positionToReplace) then
-    log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
+    log(WARNING, string.format("Unable to set AI '%s'. Invalid lord to replace given.", aiName))
     return
   end
   
@@ -120,11 +132,6 @@ end
 
 -- resets everything
 local function resetAI(positionToReset)
-  if not util.containsValue(enums.LORD_ID, positionToReset) then
-    log(WARNING, string.format("Unable to set AI '%s'. Invalid lord index.", aiName))
-    return
-  end
-  
   portrait.resetPortrait(positionToReset)
   text.resetAiTexts(positionToReset)
   aic.resetAIC(positionToReset)
@@ -145,7 +152,13 @@ local function applyAIOptions(indexToReplace)
 end
 
 
-local function resetAIWithOptions(positionToReset, toVanilla)
+local function resetAIWithOptions(lordToReplace, toVanilla)
+  local positionToReset = getLordIndex(lordToReplace)
+  if not util.containsValue(enums.LORD_ID, positionToReset) then
+    log(WARNING, "Unable to reset AI. Invalid lord to replace given.")
+    return
+  end
+
   resetAI(positionToReset)
   
   if not toVanilla then
