@@ -185,7 +185,15 @@ exports.enable = function(self, moduleConfig, globalConfig)
   if not options.ai then
     options.ai = {}
   else
-    options.ai = util.createTableWithTransformedKeys(options.ai, function(aiName) return enums.LORD_ID[string.upper(aiName)] end, false)
+    options.ai = util.createTableWithTransformedKeys(options.ai,
+      function(aiName)
+        local index = enums.LORD_ID[string.upper(aiName)]
+        if index == nil then
+          log(WARNING, string.format("Unable to apply AI options for '%s'. Unknown lord.", aiName))
+        end
+        return index
+      end,
+      false)
   end
   
   -- set functions
@@ -195,7 +203,7 @@ exports.enable = function(self, moduleConfig, globalConfig)
   self.ResetAllAI = resetAllAIWithOptions
   
   hooks.registerHookCallback("afterInit", function()
-    for name, index in pairs(enums.LORD_ID) do
+    for index, _ in pairs(options.ai) do
       applyAIOptions(index)
     end
   end)
