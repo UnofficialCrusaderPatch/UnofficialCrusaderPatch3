@@ -1,0 +1,516 @@
+- category:
+  - AI
+  - Buildings
+  name: ai_access
+  text: '{{ai_access}}'
+  tooltip: '{{ai_access_descr}}'
+  type: Switch
+  url: ucp.ai_access
+  value:
+    default: false
+- category:
+  - AI
+  - Attack
+  name: ai_addattack
+  text: '{{ai_addattack}}'
+  tooltip: '{{ai_addattack_descr}}'
+  type: Number
+  url: ucp.ai_addattack.ai_addattack
+  value:
+    default: 5
+- category:
+  - AI
+  - Attack
+  name: ai_addattack_alt
+  text: '{{ai_addattack_alt}}'
+  tooltip: '{{ai_addattack_alt_descr}}'
+  type: Number
+  url: ucp.ai_addattack.ai_addattack_alt
+  value:
+    default: 0
+- category:
+  - AI
+  - Attack
+  name: ai_attacklimit
+  text: '{{ai_attacklimit}}'
+  tooltip: '{{ai_attacklimit_descr}}'
+  type: Number
+  url: ucp.ai_attacklimit
+  value:
+    default: 200
+- category:
+  - AI
+  - Attack
+  name: ai_assaultswitch
+  text: '{{ai_assaultswitch}}'
+  tooltip: '{{ai_assaultswitch_descr}}'
+  type: Switch
+  url: ucp.ai_assaultswitch
+  value:
+    default: false
+- category:
+  - AI
+  - Attack
+  name: ai_attacktarget
+  text: '{{ai_attacktarget}}'
+  tooltip: '{{ai_attacktarget_descr}}'
+  type: Switch
+  url: ucp.ai_attacktarget
+  value:
+    default: false
+- category:
+  - AI
+  - Attack
+  name: ai_attackwave
+  text: '{{ai_attackwave}}'
+  tooltip: '{{ai_attackwave_descr}}'
+  type: Switch
+  url: ucp.ai_attackwave
+  value:
+    default: false
+- category:
+  - AI
+  - Resources
+  name: ai_buywood
+  text: '{{ai_buywood}}'
+  tooltip: '{{ai_buywood_descr}}'
+  type: Switch
+  url: ucp.ai_buywood
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_defense
+  text: '{{ai_defense}}'
+  tooltip: '{{ai_defense_descr}}'
+  type: Switch
+  url: ucp.ai_defense
+  value:
+    default: false
+- category:
+  - AI
+  - Buildings
+  name: ai_demolish
+  text: '{{ai_demolish}}'
+  tooltip: '{{ai_demolish_descr}}'
+  type: Switch
+  url: ucp.ai_demolish
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_fix_crusader_archers_pitch
+  text: '{{ai_fix_crusader_archers_pitch}}'
+  tooltip: '{{ai_fix_crusader_archers_pitch_descr}}'
+  type: Switch
+  url: ucp.ai_fix_crusader_archers_pitch
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_fix_laddermen_with_enclosed_keep
+  text: '{{ai_fix_laddermen_with_enclosed_keep}}'
+  tooltip: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
+  type: Switch
+  url: ucp.ai_fix_laddermen_with_enclosed_keep
+  value:
+    default: false
+- category:
+  - AI
+  - Buildings
+  name: ai_housing
+  text: '{{ai_housing}}'
+  tooltip: '{{ai_housing_descr}}'
+  type: Number
+  url: ucp.ai_housing
+  value:
+    default: 0
+- category:
+  - AI
+  - Buildings
+  name: ai_nosleep
+  text: '{{ai_nosleep}}'
+  tooltip: '{{ai_nosleep_descr}}'
+  type: Switch
+  url: ucp.ai_nosleep
+  value:
+    default: false
+- category:
+  - AI
+  - Buildings
+  name: ai_rebuild
+  text: '{{ai_rebuild}}'
+  tooltip: '{{ai_rebuild_descr}}'
+  type: Switch
+  url: ucp.ai_rebuild
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_recruitinterval
+  text: '{{ai_recruitinterval}}'
+  tooltip: '{{ai_recruitinterval_descr}}'
+  type: Switch
+  url: ucp.ai_recruitinterval
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_recruitstate_initialtimer
+  text: '{{ai_recruitstate_initialtimer}}'
+  tooltip: '{{ai_recruitstate_initialtimer_descr}}'
+  type: Number
+  url: ucp.ai_recruitstate_initialtimer
+  value:
+    default: 6
+- category:
+  - AI
+  - Buildings
+  name: ai_tethers
+  text: '{{ai_tethers}}'
+  tooltip: '{{ai_tethers_descr}}'
+  type: Switch
+  url: ucp.ai_tethers
+  value:
+    default: false
+- category:
+  - AI
+  - Units
+  name: ai_towerengines
+  text: '{{ai_towerengines}}'
+  tooltip: '{{ai_towerengines_descr}}'
+  type: Switch
+  url: ucp.ai_towerengines
+  value:
+    default: false
+- category:
+  - Fixes
+  - Buildings
+  name: fix_apple_orchard_build_size
+  text: '{{fix_apple_orchard_build_size}}'
+  tooltip: '{{fix_apple_orchard_build_size_descr}}'
+  type: Switch
+  url: ucp.fix_apple_orchard_build_size
+  value:
+    default: false
+- category:
+  - Fixes
+  - UI
+  name: o_armory_marketplace_weapon_order_fix
+  text: '{{o_armory_marketplace_weapon_order_fix}}'
+  tooltip: '{{o_armory_marketplace_weapon_order_fix_descr}}'
+  type: Switch
+  url: ucp.o_armory_marketplace_weapon_order_fix
+  value:
+    default: false
+- category:
+  - Fixes
+  name: o_change_siege_engine_spawn_position_catapult
+  text: '{{o_change_siege_engine_spawn_position_catapult}}'
+  tooltip: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
+  type: Switch
+  url: ucp.o_change_siege_engine_spawn_position_catapult
+  value:
+    default: false
+- category:
+  - Multiplayer
+  name: o_default_multiplayer_speed
+  text: '{{o_default_multiplayer_speed}}'
+  tooltip: '{{o_default_multiplayer_speed_descr}}'
+  type: Number
+  url: ucp.o_default_multiplayer_speed
+  value:
+    default: 40
+- category:
+  - UI
+  name: o_engineertent
+  text: '{{o_engineertent}}'
+  tooltip: '{{o_engineertent_descr}}'
+  type: Switch
+  url: ucp.o_engineertent
+  value:
+    default: false
+- category:
+  - Changes
+  - Fire
+  name: o_firecooldown
+  text: '{{o_firecooldown}}'
+  tooltip: '{{o_firecooldown_descr}}'
+  type: Number
+  url: ucp.o_firecooldown
+  value:
+    default: 2000
+- category:
+  - Fixes
+  - Units
+  name: o_fix_baker_disappear
+  text: '{{o_fix_baker_disappear}}'
+  tooltip: '{{o_fix_baker_disappear_descr}}'
+  type: Switch
+  url: ucp.o_fix_baker_disappear
+  value:
+    default: false
+- category:
+  - Fixes
+  - Units
+  name: o_fix_fletcher_bug
+  text: '{{o_fix_fletcher_bug}}'
+  tooltip: '{{o_fix_fletcher_bug_descr}}'
+  type: Switch
+  url: ucp.o_fix_fletcher_bug
+  value:
+    default: false
+- category:
+  - Fixes
+  - Units
+  name: o_fix_ladderclimb
+  text: '{{o_fix_ladderclimb}}'
+  tooltip: '{{o_fix_ladderclimb_descr}}'
+  type: Switch
+  url: ucp.o_fix_ladderclimb
+  value:
+    default: false
+- category:
+  - Fixes
+  - Units
+  name: o_fix_moat_digging_unit_disappearing
+  text: '{{o_fix_moat_digging_unit_disappearing}}'
+  tooltip: '{{o_fix_moat_digging_unit_disappearing_descr}}'
+  type: Switch
+  url: ucp.o_fix_moat_digging_unit_disappearing
+  value:
+    default: false
+- category:
+  - Changes
+  - Buildings
+  name: o_freetrader
+  text: '{{o_freetrader}}'
+  tooltip: '{{o_freetrader_descr}}'
+  type: Switch
+  url: ucp.o_freetrader
+  value:
+    default: false
+- category:
+  - Changes
+  - Game speed
+  name: o_gamespeed
+  text: '{{o_gamespeed}}'
+  tooltip: '{{o_gamespeed_descr}}'
+  type: Switch
+  url: ucp.o_gamespeed
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: o_healer
+  text: '{{o_healer}}'
+  tooltip: '{{o_healer_descr}}'
+  type: Switch
+  url: ucp.o_healer
+  value:
+    default: false
+- category:
+  - Pathing
+  name: o_increase_path_update_tick_rate
+  text: '{{o_increase_path_update_tick_rate}}'
+  tooltip: '{{o_increase_path_update_tick_rate_descr}}'
+  type: Switch
+  url: ucp.o_increase_path_update_tick_rate
+  value:
+    default: false
+- category:
+  - Keyboard
+  name: o_keys
+  text: '{{o_keys}}'
+  tooltip: '{{o_keys_descr}}'
+  type: Switch
+  url: ucp.o_keys
+  value:
+    default: false
+- category:
+  - Changes
+  name: o_moatvisibility
+  text: '{{o_moatvisibility}}'
+  tooltip: '{{o_moatvisibility_descr}}'
+  type: Switch
+  url: ucp.o_moatvisibility
+  value:
+    default: false
+- category: []
+  name: o_onlyai
+  text: '{{o_onlyai}}'
+  tooltip: '{{o_onlyai_descr}}'
+  type: Switch
+  url: ucp.o_onlyai
+  value:
+    default: false
+- category:
+  - Changes
+  name: o_override_identity_menu
+  text: '{{o_override_identity_menu}}'
+  tooltip: '{{o_override_identity_menu_descr}}'
+  type: Switch
+  url: ucp.o_override_identity_menu
+  value:
+    default: false
+- category:
+  - Graphics
+  name: o_playercolor
+  text: '{{o_playercolor}}'
+  tooltip: '{{o_playercolor_descr}}'
+  type: Number
+  url: ucp.o_playercolor
+  value:
+    default: 1
+- category:
+  - Changes
+  - Buildings
+  name: o_responsivegates
+  text: '{{o_responsivegates}}'
+  tooltip: '{{o_responsivegates_descr}}'
+  type: Switch
+  url: ucp.o_responsivegates
+  value:
+    default: false
+- category:
+  - Sounds
+  name: o_restore_arabian_engineer_speech
+  text: '{{o_restore_arabian_engineer_speech}}'
+  tooltip: '{{o_restore_arabian_engineer_speech_descr}}'
+  type: Switch
+  url: ucp.o_restore_arabian_engineer_speech
+  value:
+    default: false
+- category:
+  - Randomness
+  name: o_seed_modification_possibility_title
+  text: '{{o_seed_modification_possibility_title}}'
+  tooltip: '{{o_seed_modification_possibility_title_descr}}'
+  type: Switch
+  url: ucp.o_seed_modification_possibility_title
+  value:
+    default: false
+- category:
+  - Changes
+  name: o_shfy
+  text: '{{o_shfy}}'
+  tooltip: '{{o_shfy_descr}}'
+  type: Switch
+  url: ucp.o_shfy
+  value:
+    default: false
+- category:
+  - Changes
+  - Buildings
+  name: o_stop_player_keep_rotation
+  text: '{{o_stop_player_keep_rotation}}'
+  tooltip: '{{o_stop_player_keep_rotation_descr}}'
+  type: Switch
+  url: ucp.o_stop_player_keep_rotation
+  value:
+    default: false
+- category:
+  - Changes
+  name: o_xtreme
+  text: '{{o_xtreme}}'
+  tooltip: '{{o_xtreme_descr}}'
+  type: Switch
+  url: ucp.o_xtreme
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_arabwall
+  text: '{{u_arabwall}}'
+  tooltip: '{{u_arabwall_descr}}'
+  type: Switch
+  url: ucp.u_arabwall
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_arabxbow
+  text: '{{u_arabxbow}}'
+  tooltip: '{{u_arabxbow_descr}}'
+  type: Switch
+  url: ucp.u_arabxbow
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_fireballistafix
+  text: '{{u_fireballistafix}}'
+  tooltip: '{{u_fireballistafix_descr}}'
+  type: Switch
+  url: ucp.u_fireballistafix
+  value:
+    default: false
+- category:
+  - Fixes
+  - Units
+  name: u_fix_applefarm_blocking
+  text: '{{u_fix_applefarm_blocking}}'
+  tooltip: '{{u_fix_applefarm_blocking_descr}}'
+  type: Switch
+  url: ucp.u_fix_applefarm_blocking
+  value:
+    default: false
+- category:
+  - Graphics
+  - Animations
+  name: u_fix_lord_animation_stuck_movement
+  text: '{{u_fix_lord_animation_stuck_movement}}'
+  tooltip: '{{u_fix_lord_animation_stuck_movement_descr}}'
+  type: Switch
+  url: ucp.u_fix_lord_animation_stuck_movement
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_laddermen
+  text: '{{u_laddermen}}'
+  tooltip: '{{u_laddermen_descr}}'
+  type: Switch
+  url: ucp.u_laddermen
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_spearmen
+  text: '{{u_spearmen}}'
+  tooltip: '{{u_spearmen_descr}}'
+  type: Switch
+  url: ucp.u_spearmen
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_spearmen_run
+  text: '{{u_spearmen_run}}'
+  tooltip: '{{u_spearmen_run_descr}}'
+  type: Switch
+  url: ucp.u_spearmen_run
+  value:
+    default: false
+- category:
+  - Changes
+  - Units
+  name: u_tanner_fix
+  text: '{{u_tanner_fix}}'
+  tooltip: '{{u_tanner_fix_descr}}'
+  type: Switch
+  url: ucp.u_tanner_fix
+  value:
+    default: false
