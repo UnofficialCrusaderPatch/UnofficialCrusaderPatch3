@@ -5,7 +5,7 @@
   text: '{{ai_access}}'
   tooltip: '{{ai_access_descr}}'
   type: Switch
-  url: ucp.ai_access
+  url: ucp.ai_access.enabled
   value:
     default: false
 - category:
@@ -15,7 +15,7 @@
   text: '{{ai_addattack}}'
   tooltip: '{{ai_addattack_descr}}'
   type: Number
-  url: ucp.ai_addattack.ai_addattack
+  url: ucp.ai_addattack.ai_addattack.value
   value:
     default: 5
 - category:
@@ -25,7 +25,7 @@
   text: '{{ai_addattack_alt}}'
   tooltip: '{{ai_addattack_alt_descr}}'
   type: Number
-  url: ucp.ai_addattack.ai_addattack_alt
+  url: ucp.ai_addattack.ai_addattack_alt.value
   value:
     default: 0
 - category:
@@ -35,7 +35,7 @@
   text: '{{ai_attacklimit}}'
   tooltip: '{{ai_attacklimit_descr}}'
   type: Number
-  url: ucp.ai_attacklimit
+  url: ucp.ai_attacklimit.value
   value:
     default: 200
 - category:
@@ -45,7 +45,7 @@
   text: '{{ai_assaultswitch}}'
   tooltip: '{{ai_assaultswitch_descr}}'
   type: Switch
-  url: ucp.ai_assaultswitch
+  url: ucp.ai_assaultswitch.enabled
   value:
     default: false
 - category:
@@ -55,7 +55,7 @@
   text: '{{ai_attacktarget}}'
   tooltip: '{{ai_attacktarget_descr}}'
   type: Switch
-  url: ucp.ai_attacktarget
+  url: ucp.ai_attacktarget.enabled
   value:
     default: false
 - category:
@@ -65,7 +65,7 @@
   text: '{{ai_attackwave}}'
   tooltip: '{{ai_attackwave_descr}}'
   type: Switch
-  url: ucp.ai_attackwave
+  url: ucp.ai_attackwave.enabled
   value:
     default: false
 - category:
@@ -75,7 +75,7 @@
   text: '{{ai_buywood}}'
   tooltip: '{{ai_buywood_descr}}'
   type: Switch
-  url: ucp.ai_buywood
+  url: ucp.ai_buywood.enabled
   value:
     default: false
 - category:
@@ -85,7 +85,7 @@
   text: '{{ai_defense}}'
   tooltip: '{{ai_defense_descr}}'
   type: Switch
-  url: ucp.ai_defense
+  url: ucp.ai_defense.enabled
   value:
     default: false
 - category:
@@ -95,7 +95,7 @@
   text: '{{ai_demolish}}'
   tooltip: '{{ai_demolish_descr}}'
   type: Switch
-  url: ucp.ai_demolish
+  url: ucp.ai_demolish.enabled
   value:
     default: false
 - category:
@@ -105,7 +105,7 @@
   text: '{{ai_fix_crusader_archers_pitch}}'
   tooltip: '{{ai_fix_crusader_archers_pitch_descr}}'
   type: Switch
-  url: ucp.ai_fix_crusader_archers_pitch
+  url: ucp.ai_fix_crusader_archers_pitch.enabled
   value:
     default: false
 - category:
@@ -115,7 +115,7 @@
   text: '{{ai_fix_laddermen_with_enclosed_keep}}'
   tooltip: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
   type: Switch
-  url: ucp.ai_fix_laddermen_with_enclosed_keep
+  url: ucp.ai_fix_laddermen_with_enclosed_keep.enabled
   value:
     default: false
 - category:
@@ -125,7 +125,7 @@
   text: '{{ai_housing}}'
   tooltip: '{{ai_housing_descr}}'
   type: Number
-  url: ucp.ai_housing
+  url: ucp.ai_housing.enabled
   value:
     default: 0
 - category:
@@ -135,7 +135,7 @@
   text: '{{ai_nosleep}}'
   tooltip: '{{ai_nosleep_descr}}'
   type: Switch
-  url: ucp.ai_nosleep
+  url: ucp.ai_nosleep.enabled
   value:
     default: false
 - category:
@@ -145,7 +145,7 @@
   text: '{{ai_rebuild}}'
   tooltip: '{{ai_rebuild_descr}}'
   type: Switch
-  url: ucp.ai_rebuild
+  url: ucp.ai_rebuild.enabled
   value:
     default: false
 - category:
@@ -155,7 +155,7 @@
   text: '{{ai_recruitinterval}}'
   tooltip: '{{ai_recruitinterval_descr}}'
   type: Switch
-  url: ucp.ai_recruitinterval
+  url: ucp.ai_recruitinterval.enabled
   value:
     default: false
 - category:
@@ -165,7 +165,7 @@
   text: '{{ai_recruitstate_initialtimer}}'
   tooltip: '{{ai_recruitstate_initialtimer_descr}}'
   type: Number
-  url: ucp.ai_recruitstate_initialtimer
+  url: ucp.ai_recruitstate_initialtimer.value
   value:
     default: 6
 - category:
@@ -175,7 +175,7 @@
   text: '{{ai_tethers}}'
   tooltip: '{{ai_tethers_descr}}'
   type: Switch
-  url: ucp.ai_tethers
+  url: ucp.ai_tethers.enabled
   value:
     default: false
 - category:
@@ -185,7 +185,7 @@
   text: '{{ai_towerengines}}'
   tooltip: '{{ai_towerengines_descr}}'
   type: Switch
-  url: ucp.ai_towerengines
+  url: ucp.ai_towerengines.enabled
   value:
     default: false
 - category:
@@ -195,7 +195,7 @@
   text: '{{fix_apple_orchard_build_size}}'
   tooltip: '{{fix_apple_orchard_build_size_descr}}'
   type: Switch
-  url: ucp.fix_apple_orchard_build_size
+  url: ucp.fix_apple_orchard_build_size.enabled
   value:
     default: false
 - category:
@@ -205,7 +205,7 @@
   text: '{{o_armory_marketplace_weapon_order_fix}}'
   tooltip: '{{o_armory_marketplace_weapon_order_fix_descr}}'
   type: Switch
-  url: ucp.o_armory_marketplace_weapon_order_fix
+  url: ucp.o_armory_marketplace_weapon_order_fix.enabled
   value:
     default: false
 - category:
@@ -214,7 +214,7 @@
   text: '{{o_change_siege_engine_spawn_position_catapult}}'
   tooltip: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
   type: Switch
-  url: ucp.o_change_siege_engine_spawn_position_catapult
+  url: ucp.o_change_siege_engine_spawn_position_catapult.enabled
   value:
     default: false
 - category:
@@ -223,7 +223,7 @@
   text: '{{o_default_multiplayer_speed}}'
   tooltip: '{{o_default_multiplayer_speed_descr}}'
   type: Number
-  url: ucp.o_default_multiplayer_speed
+  url: ucp.o_default_multiplayer_speed.value
   value:
     default: 40
 - category:
@@ -232,7 +232,7 @@
   text: '{{o_engineertent}}'
   tooltip: '{{o_engineertent_descr}}'
   type: Switch
-  url: ucp.o_engineertent
+  url: ucp.o_engineertent.enabled
   value:
     default: false
 - category:
@@ -242,7 +242,7 @@
   text: '{{o_firecooldown}}'
   tooltip: '{{o_firecooldown_descr}}'
   type: Number
-  url: ucp.o_firecooldown
+  url: ucp.o_firecooldown.value
   value:
     default: 2000
 - category:
@@ -252,7 +252,7 @@
   text: '{{o_fix_baker_disappear}}'
   tooltip: '{{o_fix_baker_disappear_descr}}'
   type: Switch
-  url: ucp.o_fix_baker_disappear
+  url: ucp.o_fix_baker_disappear.enabled
   value:
     default: false
 - category:
@@ -262,7 +262,7 @@
   text: '{{o_fix_fletcher_bug}}'
   tooltip: '{{o_fix_fletcher_bug_descr}}'
   type: Switch
-  url: ucp.o_fix_fletcher_bug
+  url: ucp.o_fix_fletcher_bug.enabled
   value:
     default: false
 - category:
@@ -272,7 +272,7 @@
   text: '{{o_fix_ladderclimb}}'
   tooltip: '{{o_fix_ladderclimb_descr}}'
   type: Switch
-  url: ucp.o_fix_ladderclimb
+  url: ucp.o_fix_ladderclimb.enabled
   value:
     default: false
 - category:
@@ -282,7 +282,7 @@
   text: '{{o_fix_moat_digging_unit_disappearing}}'
   tooltip: '{{o_fix_moat_digging_unit_disappearing_descr}}'
   type: Switch
-  url: ucp.o_fix_moat_digging_unit_disappearing
+  url: ucp.o_fix_moat_digging_unit_disappearing.enabled
   value:
     default: false
 - category:
@@ -292,7 +292,7 @@
   text: '{{o_freetrader}}'
   tooltip: '{{o_freetrader_descr}}'
   type: Switch
-  url: ucp.o_freetrader
+  url: ucp.o_freetrader.enabled
   value:
     default: false
 - category:
@@ -302,7 +302,7 @@
   text: '{{o_gamespeed}}'
   tooltip: '{{o_gamespeed_descr}}'
   type: Switch
-  url: ucp.o_gamespeed
+  url: ucp.o_gamespeed.enabled
   value:
     default: false
 - category:
@@ -312,7 +312,7 @@
   text: '{{o_healer}}'
   tooltip: '{{o_healer_descr}}'
   type: Switch
-  url: ucp.o_healer
+  url: ucp.o_healer.enabled
   value:
     default: false
 - category:
@@ -321,7 +321,7 @@
   text: '{{o_increase_path_update_tick_rate}}'
   tooltip: '{{o_increase_path_update_tick_rate_descr}}'
   type: Switch
-  url: ucp.o_increase_path_update_tick_rate
+  url: ucp.o_increase_path_update_tick_rate.enabled
   value:
     default: false
 - category:
@@ -330,7 +330,7 @@
   text: '{{o_keys}}'
   tooltip: '{{o_keys_descr}}'
   type: Switch
-  url: ucp.o_keys
+  url: ucp.o_keys.enabled
   value:
     default: false
 - category:
@@ -339,7 +339,7 @@
   text: '{{o_moatvisibility}}'
   tooltip: '{{o_moatvisibility_descr}}'
   type: Switch
-  url: ucp.o_moatvisibility
+  url: ucp.o_moatvisibility.enabled
   value:
     default: false
 - category: []
@@ -347,7 +347,7 @@
   text: '{{o_onlyai}}'
   tooltip: '{{o_onlyai_descr}}'
   type: Switch
-  url: ucp.o_onlyai
+  url: ucp.o_onlyai.enabled
   value:
     default: false
 - category:
@@ -356,7 +356,7 @@
   text: '{{o_override_identity_menu}}'
   tooltip: '{{o_override_identity_menu_descr}}'
   type: Switch
-  url: ucp.o_override_identity_menu
+  url: ucp.o_override_identity_menu.enabled
   value:
     default: false
 - category:
@@ -365,7 +365,7 @@
   text: '{{o_playercolor}}'
   tooltip: '{{o_playercolor_descr}}'
   type: Number
-  url: ucp.o_playercolor
+  url: ucp.o_playercolor.value
   value:
     default: 1
 - category:
@@ -375,7 +375,7 @@
   text: '{{o_responsivegates}}'
   tooltip: '{{o_responsivegates_descr}}'
   type: Switch
-  url: ucp.o_responsivegates
+  url: ucp.o_responsivegates.enabled
   value:
     default: false
 - category:
@@ -384,7 +384,7 @@
   text: '{{o_restore_arabian_engineer_speech}}'
   tooltip: '{{o_restore_arabian_engineer_speech_descr}}'
   type: Switch
-  url: ucp.o_restore_arabian_engineer_speech
+  url: ucp.o_restore_arabian_engineer_speech.enabled
   value:
     default: false
 - category:
@@ -393,7 +393,7 @@
   text: '{{o_seed_modification_possibility_title}}'
   tooltip: '{{o_seed_modification_possibility_title_descr}}'
   type: Switch
-  url: ucp.o_seed_modification_possibility_title
+  url: ucp.o_seed_modification_possibility_title.enabled
   value:
     default: false
 - category:
@@ -402,7 +402,7 @@
   text: '{{o_shfy}}'
   tooltip: '{{o_shfy_descr}}'
   type: Switch
-  url: ucp.o_shfy
+  url: ucp.o_shfy.enabled
   value:
     default: false
 - category:
@@ -412,7 +412,7 @@
   text: '{{o_stop_player_keep_rotation}}'
   tooltip: '{{o_stop_player_keep_rotation_descr}}'
   type: Switch
-  url: ucp.o_stop_player_keep_rotation
+  url: ucp.o_stop_player_keep_rotation.enabled
   value:
     default: false
 - category:
@@ -421,7 +421,7 @@
   text: '{{o_xtreme}}'
   tooltip: '{{o_xtreme_descr}}'
   type: Switch
-  url: ucp.o_xtreme
+  url: ucp.o_xtreme.enabled
   value:
     default: false
 - category:
@@ -431,7 +431,7 @@
   text: '{{u_arabwall}}'
   tooltip: '{{u_arabwall_descr}}'
   type: Switch
-  url: ucp.u_arabwall
+  url: ucp.u_arabwall.enabled
   value:
     default: false
 - category:
@@ -441,7 +441,7 @@
   text: '{{u_arabxbow}}'
   tooltip: '{{u_arabxbow_descr}}'
   type: Switch
-  url: ucp.u_arabxbow
+  url: ucp.u_arabxbow.enabled
   value:
     default: false
 - category:
@@ -451,7 +451,7 @@
   text: '{{u_fireballistafix}}'
   tooltip: '{{u_fireballistafix_descr}}'
   type: Switch
-  url: ucp.u_fireballistafix
+  url: ucp.u_fireballistafix.enabled
   value:
     default: false
 - category:
@@ -461,7 +461,7 @@
   text: '{{u_fix_applefarm_blocking}}'
   tooltip: '{{u_fix_applefarm_blocking_descr}}'
   type: Switch
-  url: ucp.u_fix_applefarm_blocking
+  url: ucp.u_fix_applefarm_blocking.enabled
   value:
     default: false
 - category:
@@ -471,7 +471,7 @@
   text: '{{u_fix_lord_animation_stuck_movement}}'
   tooltip: '{{u_fix_lord_animation_stuck_movement_descr}}'
   type: Switch
-  url: ucp.u_fix_lord_animation_stuck_movement
+  url: ucp.u_fix_lord_animation_stuck_movement.enabled
   value:
     default: false
 - category:
@@ -481,7 +481,7 @@
   text: '{{u_laddermen}}'
   tooltip: '{{u_laddermen_descr}}'
   type: Switch
-  url: ucp.u_laddermen
+  url: ucp.u_laddermen.enabled
   value:
     default: false
 - category:
@@ -491,7 +491,7 @@
   text: '{{u_spearmen}}'
   tooltip: '{{u_spearmen_descr}}'
   type: Switch
-  url: ucp.u_spearmen
+  url: ucp.u_spearmen.enabled
   value:
     default: false
 - category:
@@ -501,7 +501,7 @@
   text: '{{u_spearmen_run}}'
   tooltip: '{{u_spearmen_run_descr}}'
   type: Switch
-  url: ucp.u_spearmen_run
+  url: ucp.u_spearmen_run.enabled
   value:
     default: false
 - category:
@@ -511,6 +511,6 @@
   text: '{{u_tanner_fix}}'
   tooltip: '{{u_tanner_fix_descr}}'
   type: Switch
-  url: ucp.u_tanner_fix
+  url: ucp.u_tanner_fix.enabled
   value:
     default: false
