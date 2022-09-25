@@ -329,7 +329,7 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "UCP3*.zip"
-        token: ${{ secrets.YOUR_GITHUB_TOKEN }}      
+        token: "${{ secrets.GITHUB_TOKEN }}"      
         tag: "latest"
         commit: "main"
         allowUpdates: true
