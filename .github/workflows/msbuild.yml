@@ -326,14 +326,16 @@ jobs:
         7z a -tzip -m0=Copy "..\..\$env:NAME" *
         popd
         
-    - uses: "marvinpinto/action-automatic-releases@latest"
+    - uses: ncipollo/release-action@v1
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
+        artifacts: "UCP3*.zip"
+        token: ${{ secrets.YOUR_GITHUB_TOKEN }}      
+        tag: "latest"
+        commit: "main"
+        allowUpdates: true
+        name: "Development Build"
         prerelease: true
-        title: "Development Build"
-        files: |
-          *.zip
+        replacesArtifacts: false
     
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
