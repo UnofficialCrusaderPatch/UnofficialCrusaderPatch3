@@ -316,8 +316,28 @@ jobs:
           $type = "Release"
         }
         echo "NAME=UCP3-snapshot-$type-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+    - name: Zip up UCP3
+      shell: pwsh
+      env:
+        DIR: ${{ env.BUILD_CONFIGURATION }}/ucp-package/
+        NAME: ${{ env.NAME }}.zip
+      run: |
+        pushd "$env:DIR"
+        7z a -tzip -m0=Copy "..\..\$env:NAME" *
+        popd
+        
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          ${{ env.NAME }}.zip
+    
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.NAME }}
         path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
+        
