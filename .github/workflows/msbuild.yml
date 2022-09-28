@@ -328,7 +328,7 @@ jobs:
         popd
         
     - uses: ncipollo/release-action@v1
-      if: ${{ matrix.build_configuration == "DevRelease" }}
+      if: env.BUILD_CONFIGURATION == "DevRelease"
       with:
         artifacts: "UCP3*.zip"
         token: "${{ secrets.GITHUB_TOKEN }}"      
