@@ -349,7 +349,7 @@ jobs:
         $artifactDirs = Get-ChildItem -Directory
         foreach($artifactDir in $artifactDirs) {
           pushd $artifactDir
-          7z a -tzip -m0=Copy "..\$artifactDir" *
+          7z a -tzip -m0=Copy "..\$artifactDir.zip" *
           popd
         }
         
