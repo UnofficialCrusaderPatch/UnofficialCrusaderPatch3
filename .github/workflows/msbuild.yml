@@ -28,7 +28,6 @@ jobs:
   build:
     runs-on: windows-latest
     strategy:
-      max-parallel: 1
       matrix:
         build_configuration: [Debug, Release, DebugSecure, ReleaseSecure]
     env:
@@ -326,9 +325,21 @@ jobs:
         pushd "$env:DIR"
         7z a -tzip -m0=Copy "..\..\$env:NAME" *
         popd
-        
+    
+    - name: Upload UCP3 as an artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.NAME }}
+        path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+      
     - uses: ncipollo/release-action@v1
-      if: matrix.build_configuration == 'ReleaseSecure'
       with:
         artifacts: "UCP3*.zip"
         token: "${{ secrets.GITHUB_TOKEN }}"      
@@ -338,10 +349,5 @@ jobs:
         name: "Development Build"
         prerelease: true
         replacesArtifacts: true
-    
-    - name: Upload UCP3 as an artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.NAME }}
-        path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
-        
+        removeArtifacts: true
+         
