@@ -28,6 +28,7 @@ jobs:
   build:
     runs-on: windows-latest
     strategy:
+      max-parallel: 1
       matrix:
         build_configuration: [Debug, Release, DebugSecure, ReleaseSecure]
     env:
@@ -327,6 +328,7 @@ jobs:
         popd
         
     - uses: ncipollo/release-action@v1
+      if: ${{ matrix.build_configuration == "DevRelease" }}
       with:
         artifacts: "UCP3*.zip"
         token: "${{ secrets.GITHUB_TOKEN }}"      
@@ -335,7 +337,7 @@ jobs:
         allowUpdates: true
         name: "Development Build"
         prerelease: true
-        replacesArtifacts: false
+        replacesArtifacts: true
     
     - name: Upload UCP3 as an artifact
       uses: actions/upload-artifact@v2
