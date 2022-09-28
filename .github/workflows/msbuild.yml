@@ -338,10 +338,27 @@ jobs:
     steps:
     - name: Download all workflow run artifacts
       uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+      
+    - name: zip artifacts
+      shell: pwsh
+      run: |
+        pushd artifacts
+        
+        $artifactDirs = Get-ChildItem -Directory
+        foreach($artifactDir in $artifactDirs) {
+          pushd $artifactDir
+          7z a -tzip -m0=Copy "..\$artifactDir" *
+          popd
+        }
+        
+        popd
+      
       
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "UCP3*.zip"
+        artifacts: "artifacts/*.zip"
         token: "${{ secrets.GITHUB_TOKEN }}"      
         tag: "latest"
         commit: "main"
