@@ -42,8 +42,11 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
   msbuild /p:Configuration=$env:BUILD_CONFIGURATION`
   ```
 ## Creating the UCP3 installation package:
-
-Execute powershell scripts found [here](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/blob/main/.github/workflows/msbuild.yml) (copy paste) into your powershell session. 
+11. Execute build.ps1
+```cmd
+. .\build.ps1 -build "Release" -token YOUR_READ_PACKAGES_GITHUB_TOKEN
+```
+or run the scripts from `.github/workflows/msbuild.yml` manually
 
 All files will be prepared in `$env:BUILD_CONFIGURATION\ucp-package` (e.g., Release\ucp-package). The files from this folder can be directly copied to the game directory.
 To install the system, run `install.bat` to backup the game's `binkw32.dll` (to `binkw32_real.dll`) and overwrite `binkw32.dll` with `binkw32_ucp.dll`.
