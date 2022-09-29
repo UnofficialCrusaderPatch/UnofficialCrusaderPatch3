@@ -25,7 +25,7 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
   ```powershell
   powershell.exe
   ```
-7. Add gynt's NuGet package repo to the known sources for NuGet. If you do not like storing the access token in plain text, omit the Username and Password parameters, and use them when asked at step 5.
+7. Then, skip to step 11 if you want to create the installation package. Else, add gynt's NuGet package repo to the known sources for NuGet. If you do not like storing the access token in plain text, omit the Username and Password parameters, and use them when asked at step 5.
   ```powershell
   nuget sources add -Name "gynt-packages" -Source "https://nuget.pkg.github.com/gynt/index.json" -StorePasswordInClearText -Username git -Password "%YOUR_ACCESS_TOKEN%"
   ```
