@@ -1,4 +1,0 @@
-# default will result in 30 fps (1000 / 33 = 30)
-capMillisecForOneFrame:
-  default: 33
-  type: integer

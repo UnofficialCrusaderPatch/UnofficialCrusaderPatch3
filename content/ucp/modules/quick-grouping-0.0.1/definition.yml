@@ -1,4 +1,0 @@
-name: quick-grouping
-version: 0.0.1
-author: Le Spec
-game: [SHC==1.41, SHCE==1.41, SHCE==1.41.1]
