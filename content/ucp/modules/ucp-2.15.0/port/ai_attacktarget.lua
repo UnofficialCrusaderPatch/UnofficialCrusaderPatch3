@@ -22,26 +22,32 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
+        self.choice = config.choice or 'nearest'
         self.ai_attacktarget_edit = AOBScan("83 F8 04 75 33 83 3C BD ? ? ? ? FF 0F 84 82 00 00 00 A1 ? ? ? ? 3B 44 24 10 7F 77 89 44")
     end,
 
     enable = function(self, config)
         
-        -- new DefaultHeader("ai_attacktarget_nearest", true)
-        local code = {
-            0xEB, 0x11, 0x90
-        }
-        writeCode(self.ai_attacktarget_edit, code)
-        -- new DefaultHeader("ai_attacktarget_richest", false)
-        local code = {
-            0xEB, 0x3F, 0x90
-        }
-        writeCode(self.ai_attacktarget_edit, code)
-        -- new DefaultHeader("ai_attacktarget_weakest", false)
-        local code = {
-            0xEB, 0x52, 0x90
-        }
-        writeCode(self.ai_attacktarget_edit, code)
+        if self.choice == 'nearest' then
+            -- new DefaultHeader("ai_attacktarget_nearest", true)
+            local code = {
+                0xEB, 0x11, 0x90
+            }
+            writeCode(self.ai_attacktarget_edit, code)
+        elseif self.choice == 'richest' then
+            -- new DefaultHeader("ai_attacktarget_richest", false)
+            local code = {
+                0xEB, 0x3F, 0x90
+            }
+            writeCode(self.ai_attacktarget_edit, code)
+        elseif self.choice == 'weakest' then
+            -- new DefaultHeader("ai_attacktarget_weakest", false)
+            local code = {
+                0xEB, 0x52, 0x90
+            }
+            writeCode(self.ai_attacktarget_edit, code)
+        else
+        end
     end,
 
     disable = function(self, config)

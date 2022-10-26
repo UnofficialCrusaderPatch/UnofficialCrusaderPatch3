@@ -18,9 +18,15 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
-        self.config = config
-        if self.config.ai_addattack.value == nil then self.config.ai_addattack.value = 5 end
-        if self.config.ai_addattack_alt.value == nil then self.config.ai_addattack_alt.value = 0 end
+        if config.choice == 'absolute' then
+            self.ai_addattack_enabled = true
+            self.ai_addattack_value = config.choices.absolute.slider or 5
+        elseif config.choice == 'relative' then
+            self.ai_addattack_alt_enabled = true
+            self.ai_addattack_alt_value = config.choices.relative.slider or 0
+        elseif config.choice == nil or config.choice == '' then
+        else
+        end
 
         -- 004CDEDC
         self.ai_addattack_edit = AOBScan("7E 11 8D 0C C5 00 00 00 00 2B C8 01 8E ? ? ? ? EB 09 8D 14 80 01 96 ? ? ? ? B8 C8 00 00")
@@ -37,16 +43,16 @@ return {
          -- if (ai gold < 10000)
             0x7E, 0x7,  -- jle to 8
             0xB9,  -- mov ecx, value * 7/5 (vanilla = 7)
-            itob(self.config.ai_addattack.value * (7//5)), 
+            itob(self.ai_addattack_value * (7//5)), 
             0xEB, 0x5,  -- jmp
             0xB9,  -- mov ecx, value (vanilla = 5)
-            itob(self.config.ai_addattack.value), 
+            itob(self.ai_addattack_value), 
             0xF7, 0xE9,  -- imul ecx
             0x90, 0x90, 0x90, 
             0x90, 0x90, 0x90, 
             0x01, 0x86,  -- mov [addtroops], eax instead of ecx
         }
-        if self.config.ai_addattack.enabled == true then
+        if self.ai_addattack_enabled == true then
           writeCode(self.ai_addattack_edit, code)
         end
         -- alternative:
@@ -62,7 +68,7 @@ return {
             itob(attacknum), 
             0xF7, 0xE9,  -- imul ecx   => attack number * initial attack troops
             0x69, 0xC0,  -- imul eax, value
-            itob(self.config.ai_addattack_alt.value * 10), 
+            itob(self.ai_addattack_alt_value * 10), 
             0xB9, 0x0A, 0x00, 0x00, 0x00,  -- mov ecx, 0A { 10 }
             0xF7, 0xF9,  -- idiv ecx
             0x83, 0xC0, 0x5,  -- add eax, 5   => because in vanilla, attackNum was already 1 for first attack
@@ -79,7 +85,7 @@ return {
             0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
             0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
         }
-        if self.config.ai_addattack_alt.enabled == true then
+        if self.ai_addattack_alt_enabled == true then
           writeCode(self.ai_addattack_alt_edit, code)
         end
     end,

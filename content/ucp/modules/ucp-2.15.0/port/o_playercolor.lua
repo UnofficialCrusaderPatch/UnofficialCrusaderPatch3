@@ -14,6 +14,17 @@ local readInteger = core.readInteger
 local itob = utils.itob
 local smallIntegerToBytes = utils.smallIntegerToBytes
 
+local COLORS = {
+    ['red'] = 0,
+    ['orange'] = 1,
+    ['yellow'] = 2,
+    ['blue'] = 3,
+    ['black'] = 4,
+    ['purple'] = 5,
+    ['lightblue'] = 6,
+    ['green'] = 7,
+}
+
 -- /*
 -- PLAYER 1 COLOR
 -- */
@@ -21,8 +32,8 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
-        self.value = config.value
-        if self.value == nil then self.value = 0 end
+        self.choice = config.choice or 'red'
+        self.value = COLORS[self.choice] or 0
     
         -- 004AF3D0
         self.o_playercolor_table_drag_edit = AOBScan("8D 85 22 02 00 00 50 6A 2E B9 ? ? ? ? E8 ? ? ? ? 85 DB 0F 85 A2 00 00 00 8B 04 AD")

@@ -22,8 +22,7 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
-        self.value = config.value
-        if self.value == nil then self.value = 2000 end
+        self.value = config.sliderValue or 2000
         
         self.o_firecooldown_edit = AOBScan("66 C7 84 30 D8 02 00 00 D0 07 0F B7 80 ? ? ? ? 66 3D 1E 00 89 4C 24 18 75 05 8D 5F 09 EB 25")
     end,

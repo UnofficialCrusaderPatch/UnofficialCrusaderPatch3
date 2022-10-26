@@ -18,8 +18,7 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
-        self.value = config.value
-        if self.value == nil then self.value = 6 end
+        self.value = config.sliderValue or 6
         
         self.ai_recruitstate_initialtimer_edit = AOBScan("03 CB 03 CD 74 4D")
     end,

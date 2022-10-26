@@ -18,8 +18,7 @@ local smallIntegerToBytes = utils.smallIntegerToBytes
 return {
 
     init = function(self, config)
-        self.value = config.value
-        if self.value == nil then self.value = 0 end
+        self.value = config.sliderValue or 40
         
         -- 878FB
         self.o_default_multiplayer_speed_edit = AOBScan("C7 87 ? ? ? ? 64 00 00 00 C7 87 ? ? ? ? 28 00 00 00 C7 87 ? ? ? ? 03 00 00 00")

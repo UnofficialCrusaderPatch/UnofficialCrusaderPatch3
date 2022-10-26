@@ -2,54 +2,65 @@
   - AI
   - Buildings
   name: ai_access
-  text: '{{ai_access}}'
-  tooltip: '{{ai_access_descr}}'
+  header: '{{ai_access}}'
+  text: '{{ai_access_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_access.enabled
   value:
     default: false
-- category:
-  - AI
-  - Attack
-  name: ai_addattack
-  text: '{{ai_addattack}}'
-  tooltip: '{{ai_addattack_descr}}'
-  type: integer
-  display: Number
-  url: ucp.ai_addattack.ai_addattack.value
+
+- category: [AI, Attack]
+  name: ai_addattack_ui_alt
+  display: UCP2SliderChoice
+  hasHeader: true
+  header: '{{ai_addattack}}'
+  url: ucp.ai_addattack
   value:
-    default: 5
-- category:
-  - AI
-  - Attack
-  name: ai_addattack_alt
-  text: '{{ai_addattack_alt}}'
-  tooltip: '{{ai_addattack_alt_descr}}'
-  type: integer
-  display: Number
-  url: ucp.ai_addattack.ai_addattack_alt.value
-  value:
-    default: 0
+    default:
+      enabled: false
+      choice: ''
+      choices:
+        absolute:
+          slider: 5
+        relative:
+          slider: 0.3
+  choices:
+  - name: absolute
+    min: 0
+    max: 250
+    step: 1
+    text: '{{ai_addattack_descr}}'
+  - name: relative
+    min: 0.0
+    max: 3.0
+    step: 0.1
+    text: '{{ai_addattack_alt_descr}}'
 - category:
   - AI
   - Attack
   name: ai_attacklimit
-  text: '{{ai_attacklimit}}'
-  tooltip: '{{ai_attacklimit_descr}}'
+  header: '{{ai_attacklimit}}'
+  text: '{{ai_attacklimit_descr}}'
+  hasHeader: true
   type: integer
-  display: Number
+  display: UCP2Slider
   url: ucp.ai_attacklimit.value
+  min: 0
+  max: 500
+  step: 1
   value:
-    default: 200
+    default:
+      enabled: false
+      sliderValue: 200
 - category:
   - AI
   - Attack
   name: ai_assaultswitch
-  text: '{{ai_assaultswitch}}'
-  tooltip: '{{ai_assaultswitch_descr}}'
+  header: '{{ai_assaultswitch}}'
+  text: '{{ai_assaultswitch_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_assaultswitch.enabled
   value:
     default: false
@@ -57,21 +68,31 @@
   - AI
   - Attack
   name: ai_attacktarget
-  text: '{{ai_attacktarget}}'
-  tooltip: '{{ai_attacktarget_descr}}'
+  header: '{{ai_attacktarget}}'
+  text: '{{ai_attacktarget_weakest_descr}}'
+  hasHeader: true
   type: boolean
-  display: Switch
-  url: ucp.ai_attacktarget.enabled
+  display: UCP2RadioGroup
+  url: ucp.ai_attacktarget
+  choices:
+  - name: nearest
+    text: '{{ai_attacktarget_nearest}}'
+  - name: richest
+    text: '{{ai_attacktarget_richest}}'
+  - name: weakest
+    text: '{{ai_attacktarget_weakest}}'
   value:
-    default: false
+    default:
+      enabled: false
+      choice: ''
 - category:
   - AI
   - Attack
   name: ai_attackwave
-  text: '{{ai_attackwave}}'
-  tooltip: '{{ai_attackwave_descr}}'
+  header: '{{ai_attackwave}}'
+  text: '{{ai_attackwave_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_attackwave.enabled
   value:
     default: false
@@ -79,10 +100,10 @@
   - AI
   - Resources
   name: ai_buywood
-  text: '{{ai_buywood}}'
-  tooltip: '{{ai_buywood_descr}}'
+  header: '{{ai_buywood}}'
+  text: '{{ai_buywood_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_buywood.enabled
   value:
     default: false
@@ -90,32 +111,52 @@
   - AI
   - Units
   name: ai_defense
-  text: '{{ai_defense}}'
-  tooltip: '{{ai_defense_descr}}'
+  header: '{{ai_defense}}'
+  text: '{{ai_defense_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_defense.enabled
   value:
     default: false
 - category:
   - AI
   - Buildings
-  name: ai_demolish
-  text: '{{ai_demolish}}'
-  tooltip: '{{ai_demolish_descr}}'
-  type: boolean
-  display: Switch
-  url: ucp.ai_demolish.enabled
-  value:
-    default: false
+  display: Group
+  name: ai_demolish_group
+  children:
+  - name: ai_demolish
+    header: '{{ai_demolish}}'
+    text: '{{ai_demolish_eco_descr}}'
+    display: Paragraph
+  - name: ai_demolish_walls
+    type: boolean
+    display: UCP2Switch
+    header: '{{ai_demolish_walls}}'
+    url: ucp.ai_demolish.ai_demolish_walls.enabled
+    value:
+      default: false
+  - name: ai_demolish_trapped
+    type: boolean
+    display: UCP2Switch
+    header: '{{ai_demolish_trapped}}'
+    url: ucp.ai_demolish.ai_demolish_trapped.enabled
+    value:
+      default: false
+  - name: ai_demolish_eco
+    type: boolean
+    display: UCP2Switch
+    header: '{{ai_demolish_eco}}'
+    url: ucp.ai_demolish.ai_demolish_eco.enabled
+    value:
+      default: false      
 - category:
   - AI
   - Units
   name: ai_fix_crusader_archers_pitch
-  text: '{{ai_fix_crusader_archers_pitch}}'
-  tooltip: '{{ai_fix_crusader_archers_pitch_descr}}'
+  header: '{{ai_fix_crusader_archers_pitch}}'
+  text: '{{ai_fix_crusader_archers_pitch_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_fix_crusader_archers_pitch.enabled
   value:
     default: false
@@ -123,32 +164,65 @@
   - AI
   - Units
   name: ai_fix_laddermen_with_enclosed_keep
-  text: '{{ai_fix_laddermen_with_enclosed_keep}}'
-  tooltip: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
+  header: '{{ai_fix_laddermen_with_enclosed_keep}}'
+  text: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_fix_laddermen_with_enclosed_keep.enabled
   value:
     default: false
 - category:
   - AI
   - Buildings
-  name: ai_housing
-  text: '{{ai_housing}}'
-  tooltip: '{{ai_housing_descr}}'
-  type: integer
-  display: Number
-  url: ucp.ai_housing.enabled
-  value:
-    default: 0
+  header: '{{ai_housing}}'
+  name: ai_housing_group
+  display: Group
+  children:
+  - display: Paragraph
+    header: '{{ai_housing}}'
+  - display: UCP2Slider
+    text: '{{build_housing_descr}}'
+    header: Set limit on houses
+    type: number
+    min: 0
+    max: 100
+    step: 1
+    hasHeader: true
+    url: ucp.ai_housing.build_housing
+    value:
+      default:
+        enabled: false
+        sliderValue: 0
+  - display: UCP2Slider
+    name: campfire_housing
+    text: '{{campfire_housing_descr}}'
+    header: Set limit on idle paesants
+    type: number
+    min: 0
+    max: 25
+    step: 1
+    hasHeader: true
+    url: ucp.ai_housing.campfire_housing
+    value:
+      default:
+        enabled: false
+        sliderValue: 0
+  - display: UCP2Switch
+    name: delete_housing
+    type: boolean
+    header: '{{delete_housing}}'
+    text: '{{delete_housing_descr}}'
+    url: ucp.ai_housing.delete_housing.enabled
+    value:
+      default: false
 - category:
   - AI
   - Buildings
   name: ai_nosleep
-  text: '{{ai_nosleep}}'
-  tooltip: '{{ai_nosleep_descr}}'
+  header: '{{ai_nosleep}}'
+  text: '{{ai_nosleep_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_nosleep.enabled
   value:
     default: false
@@ -156,10 +230,10 @@
   - AI
   - Buildings
   name: ai_rebuild
-  text: '{{ai_rebuild}}'
-  tooltip: '{{ai_rebuild_descr}}'
+  header: '{{ai_rebuild}}'
+  text: '{{ai_rebuild_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_rebuild.enabled
   value:
     default: false
@@ -167,10 +241,10 @@
   - AI
   - Units
   name: ai_recruitinterval
-  text: '{{ai_recruitinterval}}'
-  tooltip: '{{ai_recruitinterval_descr}}'
+  header: '{{ai_recruitinterval}}'
+  text: '{{ai_recruitinterval_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_recruitinterval.enabled
   value:
     default: false
@@ -178,21 +252,27 @@
   - AI
   - Units
   name: ai_recruitstate_initialtimer
-  text: '{{ai_recruitstate_initialtimer}}'
-  tooltip: '{{ai_recruitstate_initialtimer_descr}}'
+  header: '{{ai_recruitstate_initialtimer}}'
+  text: '{{ai_recruitstate_initialtimervalue_descr}}'
   type: integer
-  display: Number
-  url: ucp.ai_recruitstate_initialtimer.value
+  display: UCP2Slider
+  url: ucp.ai_recruitstate_initialtimer
+  hasHeader: true
+  min: 0
+  max: 30
+  step: 1
   value:
-    default: 6
+    default:
+      enabled: false
+      sliderValue: 6
 - category:
   - AI
   - Buildings
   name: ai_tethers
-  text: '{{ai_tethers}}'
-  tooltip: '{{ai_tethers_descr}}'
+  header: '{{ai_tethers}}'
+  text: '{{ai_tethers_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_tethers.enabled
   value:
     default: false
@@ -200,10 +280,10 @@
   - AI
   - Units
   name: ai_towerengines
-  text: '{{ai_towerengines}}'
-  tooltip: '{{ai_towerengines_descr}}'
+  header: '{{ai_towerengines}}'
+  text: '{{ai_towerengines_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.ai_towerengines.enabled
   value:
     default: false
@@ -211,10 +291,10 @@
   - Fixes
   - Buildings
   name: fix_apple_orchard_build_size
-  text: '{{fix_apple_orchard_build_size}}'
-  tooltip: '{{fix_apple_orchard_build_size_descr}}'
+  header: '{{fix_apple_orchard_build_size}}'
+  text: '{{fix_apple_orchard_build_size_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.fix_apple_orchard_build_size.enabled
   value:
     default: false
@@ -222,62 +302,83 @@
   - Fixes
   - UI
   name: o_armory_marketplace_weapon_order_fix
-  text: '{{o_armory_marketplace_weapon_order_fix}}'
-  tooltip: '{{o_armory_marketplace_weapon_order_fix_descr}}'
+  header: '{{o_armory_marketplace_weapon_order_fix}}'
+  text: '{{o_armory_marketplace_weapon_order_fix_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_armory_marketplace_weapon_order_fix.enabled
   value:
     default: false
 - category:
   - Fixes
   name: o_change_siege_engine_spawn_position_catapult
-  text: '{{o_change_siege_engine_spawn_position_catapult}}'
-  tooltip: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
+  header: '{{o_change_siege_engine_spawn_position_catapult}}'
+  text: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_change_siege_engine_spawn_position_catapult.enabled
   value:
     default: false
 - category:
   - Multiplayer
   name: o_default_multiplayer_speed
-  text: '{{o_default_multiplayer_speed}}'
-  tooltip: '{{o_default_multiplayer_speed_descr}}'
+  header: '{{o_default_multiplayer_speed}}'
+  text: '{{o_default_multiplayer_speed_descr}}'
   type: integer
-  display: Number
-  url: ucp.o_default_multiplayer_speed.value
+  display: UCP2Slider
+  hasHeader: true
+  url: ucp.o_default_multiplayer_speed
+  min: 20
+  max: 90
+  step: 1
   value:
-    default: 40
+    default:
+      enabled: false
+      sliderValue: 40
 - category:
   - UI
   name: o_engineertent
-  text: '{{o_engineertent}}'
-  tooltip: '{{o_engineertent_descr}}'
+  header: '{{o_engineertent}}'
+  text: '{{o_engineertent_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_engineertent.enabled
   value:
     default: false
 - category:
+  - UI
+  name: o_override_identity_menu
+  url: ucp.o_override_identity_menu.enabled
+  value:
+    default: false
+  type: boolean
+  display: UCP2Switch
+  header: '{{o_override_identity_menu}}'
+  text: '{{o_override_identity_menu_descr}}'
+- category:
   - Changes
   - Fire
   name: o_firecooldown
-  text: '{{o_firecooldown}}'
-  tooltip: '{{o_firecooldown_descr}}'
+  header: '{{o_firecooldown}}'
+  text: '{{o_firecooldown_descr}}'
   type: integer
-  display: Number
-  url: ucp.o_firecooldown.value
+  display: UCP2Slider
+  url: ucp.o_firecooldown
+  min: 0
+  max: 20000
+  step: 1
   value:
-    default: 2000
+    default:
+      enabled: false
+      sliderValue: 2000
 - category:
   - Fixes
   - Units
   name: o_fix_baker_disappear
-  text: '{{o_fix_baker_disappear}}'
-  tooltip: '{{o_fix_baker_disappear_descr}}'
+  header: '{{o_fix_baker_disappear}}'
+  text: '{{o_fix_baker_disappear_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_fix_baker_disappear.enabled
   value:
     default: false
@@ -285,10 +386,10 @@
   - Fixes
   - Units
   name: o_fix_fletcher_bug
-  text: '{{o_fix_fletcher_bug}}'
-  tooltip: '{{o_fix_fletcher_bug_descr}}'
+  header: '{{o_fix_fletcher_bug}}'
+  text: '{{o_fix_fletcher_bug_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_fix_fletcher_bug.enabled
   value:
     default: false
@@ -296,10 +397,10 @@
   - Fixes
   - Units
   name: o_fix_ladderclimb
-  text: '{{o_fix_ladderclimb}}'
-  tooltip: '{{o_fix_ladderclimb_descr}}'
+  header: '{{o_fix_ladderclimb}}'
+  text: '{{o_fix_ladderclimb_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_fix_ladderclimb.enabled
   value:
     default: false
@@ -307,10 +408,10 @@
   - Fixes
   - Units
   name: o_fix_moat_digging_unit_disappearing
-  text: '{{o_fix_moat_digging_unit_disappearing}}'
-  tooltip: '{{o_fix_moat_digging_unit_disappearing_descr}}'
+  header: '{{o_fix_moat_digging_unit_disappearing}}'
+  text: '{{o_fix_moat_digging_unit_disappearing_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_fix_moat_digging_unit_disappearing.enabled
   value:
     default: false
@@ -318,10 +419,10 @@
   - Changes
   - Buildings
   name: o_freetrader
-  text: '{{o_freetrader}}'
-  tooltip: '{{o_freetrader_descr}}'
+  header: '{{o_freetrader}}'
+  text: '{{o_freetrader_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_freetrader.enabled
   value:
     default: false
@@ -329,10 +430,10 @@
   - Changes
   - Game speed
   name: o_gamespeed
-  text: '{{o_gamespeed}}'
-  tooltip: '{{o_gamespeed_descr}}'
+  header: '{{o_gamespeed}}'
+  text: '{{o_gamespeed_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_gamespeed.enabled
   value:
     default: false
@@ -340,131 +441,181 @@
   - Changes
   - Units
   name: o_healer
-  text: '{{o_healer}}'
-  tooltip: '{{o_healer_descr}}'
+  header: '{{o_healer}}'
+  text: '{{o_healer_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_healer.enabled
   value:
     default: false
 - category:
   - Pathing
   name: o_increase_path_update_tick_rate
-  text: '{{o_increase_path_update_tick_rate}}'
-  tooltip: '{{o_increase_path_update_tick_rate_descr}}'
+  header: '{{o_increase_path_update_tick_rate}}'
+  text: '{{o_increase_path_update_tick_rate_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_increase_path_update_tick_rate.enabled
   value:
     default: false
 - category:
   - Keyboard
   name: o_keys
-  text: '{{o_keys}}'
-  tooltip: '{{o_keys_descr}}'
+  header: '{{o_keys}}'
+  text: '{{o_keys_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_keys.enabled
   value:
     default: false
 - category:
   - Changes
   name: o_moatvisibility
-  text: '{{o_moatvisibility}}'
-  tooltip: '{{o_moatvisibility_descr}}'
+  header: '{{o_moatvisibility}}'
+  text: '{{o_moatvisibility_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_moatvisibility.enabled
   value:
     default: false
 - category: []
   name: o_onlyai
-  text: '{{o_onlyai}}'
-  tooltip: '{{o_onlyai_descr}}'
+  header: '{{o_onlyai}}'
+  text: '{{o_onlyai_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_onlyai.enabled
-  value:
-    default: false
-- category:
-  - Changes
-  name: o_override_identity_menu
-  text: '{{o_override_identity_menu}}'
-  tooltip: '{{o_override_identity_menu_descr}}'
-  type: boolean
-  display: Switch
-  url: ucp.o_override_identity_menu.enabled
   value:
     default: false
 - category:
   - Graphics
   name: o_playercolor
-  text: '{{o_playercolor}}'
-  tooltip: '{{o_playercolor_descr}}'
+  header: '{{o_playercolor}}'
+  text: '{{o_playercolor_descr}}'
   type: integer
-  display: Number
-  url: ucp.o_playercolor.value
+  display: UCP2RadioGroup
+  hasHeader: true
+  url: ucp.o_playercolor
+  choices:
+  - name: 'red'
+    text: 'red'
+  - name: 'orange'
+    text: 'orange'
+  - name: 'yellow'
+    text: 'yellow'
+  - name: 'blue'
+    text: 'blue'
+  - name: 'black'
+    text: 'black'
+  - name: 'purple'
+    text: 'purple'
+  - name: 'lightblue'
+    text: 'lightblue'
+  - name: 'green'
+    text: 'green' 
   value:
-    default: 1
+    default:
+      enabled: false
+      choice: 'red'
 - category:
   - Changes
   - Buildings
   name: o_responsivegates
-  text: '{{o_responsivegates}}'
-  tooltip: '{{o_responsivegates_descr}}'
+  header: '{{o_responsivegates}}'
+  text: '{{o_responsivegates_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_responsivegates.enabled
   value:
     default: false
 - category:
   - Sounds
   name: o_restore_arabian_engineer_speech
-  text: '{{o_restore_arabian_engineer_speech}}'
-  tooltip: '{{o_restore_arabian_engineer_speech_descr}}'
+  header: '{{o_restore_arabian_engineer_speech}}'
+  text: '{{o_restore_arabian_engineer_speech_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_restore_arabian_engineer_speech.enabled
   value:
     default: false
 - category:
   - Randomness
-  name: o_seed_modification_possibility_title
-  text: '{{o_seed_modification_possibility_title}}'
-  tooltip: '{{o_seed_modification_possibility_title_descr}}'
-  type: boolean
-  display: Switch
-  url: ucp.o_seed_modification_possibility_title.enabled
-  value:
-    default: false
+  display: Group
+  children:
+  - category:
+    - Randomness
+    name: o_seed_modification_possibility_title
+    type: boolean
+    enabled: false
+    header: '{{o_seed_modification_possibility_title}}'
+    hasHeader: true
+    display: UCP2RadioGroup
+    url: ucp.o_seed_modification_possibility_title
+    choices:
+    - name: o_seed_modification_possibility_only_set
+      text: '{{o_seed_modification_possibility_only_set}}'
+      subtext: '{{o_seed_modification_possibility_only_set_descr}}'
+    - name: o_seed_modification_possibility
+      text: '{{o_seed_modification_possibility}}'
+      subtext: '{{o_seed_modification_possibility_descr}}'
+    value:
+      default:
+        enabled: false
+        choice: ''
 - category:
   - Changes
-  name: o_shfy
-  text: '{{o_shfy}}'
-  tooltip: '{{o_shfy_descr}}'
-  type: boolean
-  display: Switch
-  url: ucp.o_shfy.enabled
-  value:
-    default: false
+  name: strongholdify
+  display: Group
+  children:
+  - display: Paragraph
+    header: '{{o_shfy}}'
+    text: '{{o_shfy_resourcequantity_descr}}'
+  - name: o_shfy_beer
+    header: '{{o_shfy_beer}}'
+    type: boolean
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_beer.enabled
+    value:
+      default: false
+  - name: o_shfy_religion
+    header: '{{o_shfy_religion}}'
+    type: boolean
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_religion.enabled
+    value:
+      default: false
+  - name: o_shfy_peasantspawnrate
+    header: '{{o_shfy_peasantspawnrate}}'
+    type: boolean
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_peasantspawnrate.enabled
+    value:
+      default: false
+  - name: o_shfy_resourcequantity
+    header: '{{o_shfy_resourcequantity}}'
+    type: boolean
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_resourcequantity.enabled
+    value:
+      default: false
 - category:
   - Changes
   - Buildings
   name: o_stop_player_keep_rotation
-  text: '{{o_stop_player_keep_rotation}}'
-  tooltip: '{{o_stop_player_keep_rotation_descr}}'
+  header: '{{o_stop_player_keep_rotation}}'
+  text: '{{o_stop_player_keep_rotation_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_stop_player_keep_rotation.enabled
   value:
     default: false
 - category:
   - Changes
   name: o_xtreme
-  text: '{{o_xtreme}}'
-  tooltip: '{{o_xtreme_descr}}'
+  header: '{{o_xtreme}}'
+  text: '{{o_xtreme_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.o_xtreme.enabled
   value:
     default: false
@@ -472,10 +623,10 @@
   - Changes
   - Units
   name: u_arabwall
-  text: '{{u_arabwall}}'
-  tooltip: '{{u_arabwall_descr}}'
+  header: '{{u_arabwall}}'
+  text: '{{u_arabwall_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_arabwall.enabled
   value:
     default: false
@@ -483,10 +634,10 @@
   - Changes
   - Units
   name: u_arabxbow
-  text: '{{u_arabxbow}}'
-  tooltip: '{{u_arabxbow_descr}}'
+  header: '{{u_arabxbow}}'
+  text: '{{u_arabxbow_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_arabxbow.enabled
   value:
     default: false
@@ -494,10 +645,10 @@
   - Changes
   - Units
   name: u_fireballistafix
-  text: '{{u_fireballistafix}}'
-  tooltip: '{{u_fireballistafix_descr}}'
+  header: '{{u_fireballistafix}}'
+  text: '{{u_fireballistafix_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_fireballistafix.enabled
   value:
     default: false
@@ -505,10 +656,10 @@
   - Fixes
   - Units
   name: u_fix_applefarm_blocking
-  text: '{{u_fix_applefarm_blocking}}'
-  tooltip: '{{u_fix_applefarm_blocking_descr}}'
+  header: '{{u_fix_applefarm_blocking}}'
+  text: '{{u_fix_applefarm_blocking_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_fix_applefarm_blocking.enabled
   value:
     default: false
@@ -516,10 +667,10 @@
   - Graphics
   - Animations
   name: u_fix_lord_animation_stuck_movement
-  text: '{{u_fix_lord_animation_stuck_movement}}'
-  tooltip: '{{u_fix_lord_animation_stuck_movement_descr}}'
+  header: '{{u_fix_lord_animation_stuck_movement}}'
+  text: '{{u_fix_lord_animation_stuck_movement_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_fix_lord_animation_stuck_movement.enabled
   value:
     default: false
@@ -527,10 +678,10 @@
   - Changes
   - Units
   name: u_laddermen
-  text: '{{u_laddermen}}'
-  tooltip: '{{u_laddermen_descr}}'
+  header: '{{u_laddermen}}'
+  text: '{{u_laddermen_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_laddermen.enabled
   value:
     default: false
@@ -538,10 +689,10 @@
   - Changes
   - Units
   name: u_spearmen
-  text: '{{u_spearmen}}'
-  tooltip: '{{u_spearmen_descr}}'
+  header: '{{u_spearmen}}'
+  text: '{{u_spearmen_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_spearmen.enabled
   value:
     default: false
@@ -549,10 +700,10 @@
   - Changes
   - Units
   name: u_spearmen_run
-  text: '{{u_spearmen_run}}'
-  tooltip: '{{u_spearmen_run_descr}}'
+  header: '{{u_spearmen_run}}'
+  text: '{{u_spearmen_run_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_spearmen_run.enabled
   value:
     default: false
@@ -560,10 +711,10 @@
   - Changes
   - Units
   name: u_tanner_fix
-  text: '{{u_tanner_fix}}'
-  tooltip: '{{u_tanner_fix_descr}}'
+  header: '{{u_tanner_fix}}'
+  text: '{{u_tanner_fix_descr}}'
   type: boolean
-  display: Switch
+  display: UCP2Switch
   url: ucp.u_tanner_fix.enabled
   value:
     default: false
