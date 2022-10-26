@@ -5,17 +5,19 @@ ai_addattack:
   ai_addattack:
     enabled:
       default: false
-    value:
-      default: 5
-  ai_addattack_alt:
-    enabled:
-      default: false
-    value:
-      default: 0
+    choice:
+      default: ''
+    choices:
+      absolute:
+        slider:
+          default: 5
+      relative:
+        slider:
+          default: 0.3
 ai_attacklimit:
   enabled:
     default: false
-  value:
+  slidervalue:
     default: 200
 ai_assaultswitch:
   enabled:
@@ -23,6 +25,8 @@ ai_assaultswitch:
 ai_attacktarget:
   enabled:
     default: false
+  choice:
+    default: ''
 ai_attackwave:
   enabled:
     default: false
@@ -33,8 +37,15 @@ ai_defense:
   enabled:
     default: false
 ai_demolish:
-  enabled:
-    default: false
+  ai_demolish_walls:
+    enabled:
+      default: false
+  ai_demolish_trapped:
+    enabled:
+      default: false
+  ai_demolish_eco:
+    enabled:
+      default: false
 ai_fix_crusader_archers_pitch:
   enabled:
     default: false
@@ -42,10 +53,19 @@ ai_fix_laddermen_with_enclosed_keep:
   enabled:
     default: false
 ai_housing:
-  enabled:
-    default: false
-  value:
-    default: 0
+  build_housing:
+    enabled:
+      default: false
+    sliderValue:
+      default: 0
+  campfire_housing:
+    enabled:
+      default: false
+    sliderValue:
+      default: 0
+  delete_housing:
+    enabled: 
+      default: false
 ai_nosleep:
   enabled:
     default: false
@@ -58,7 +78,7 @@ ai_recruitinterval:
 ai_recruitstate_initialtimer:
   enabled:
     default: false
-  value:
+  sliderValue:
     default: 6
 ai_tethers:
   enabled:
@@ -78,7 +98,7 @@ o_change_siege_engine_spawn_position_catapult:
 o_default_multiplayer_speed:
   enabled:
     default: false
-  value:
+  sliderValue:
     default: 40
 o_engineertent:
   enabled:
@@ -86,7 +106,7 @@ o_engineertent:
 o_firecooldown:
   enabled:
     default: false
-  value:
+  sliderValue:
     default: 2000
 o_fix_baker_disappear:
   enabled:
@@ -127,8 +147,8 @@ o_override_identity_menu:
 o_playercolor:
   enabled:
     default: false
-  value:
-    default: 1
+  choice:
+    default: 'red'
 o_responsivegates:
   enabled:
     default: false
@@ -138,9 +158,21 @@ o_restore_arabian_engineer_speech:
 o_seed_modification_possibility_title:
   enabled:
     default: false
+  choice:
+    default: ''
 o_shfy:
-  enabled:
-    default: false
+  o_shfy_beer:
+    enabled:
+      default: false
+  o_shfy_religion:
+    enabled:
+      default: false
+  o_shfy_peasantspawnrate:
+    enabled:
+      default: false
+  o_shfy_resourcequantity:
+    enabled:
+      default: false
 o_stop_player_keep_rotation:
   enabled:
     default: false
@@ -176,7 +208,7 @@ u_tanner_fix:
     default: false
 u_priest_range_restriction:
   enabled:
-    default: true
+    default: false
 u_priest_range_check:
   enabled:
-    default: true
+    default: false

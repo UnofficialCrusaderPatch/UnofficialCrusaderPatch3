@@ -346,16 +346,6 @@
   value:
     default: false
 - category:
-  - UI
-  name: o_override_identity_menu
-  url: ucp.o_override_identity_menu.enabled
-  value:
-    default: false
-  type: boolean
-  display: UCP2Switch
-  header: '{{o_override_identity_menu}}'
-  text: '{{o_override_identity_menu_descr}}'
-- category:
   - Changes
   - Fire
   name: o_firecooldown
@@ -487,6 +477,16 @@
   url: ucp.o_onlyai.enabled
   value:
     default: false
+- category:
+  - UI
+  name: o_override_identity_menu
+  url: ucp.o_override_identity_menu.enabled
+  value:
+    default: false
+  type: boolean
+  display: UCP2Switch
+  header: '{{o_override_identity_menu}}'
+  text: '{{o_override_identity_menu_descr}}'
 - category:
   - Graphics
   name: o_playercolor
