@@ -15,14 +15,14 @@ local itob = utils.itob
 local smallIntegerToBytes = utils.smallIntegerToBytes
 
 local COLORS = {
-    ['red'] = 0,
-    ['orange'] = 1,
-    ['yellow'] = 2,
-    ['blue'] = 3,
-    ['black'] = 4,
-    ['purple'] = 5,
-    ['lightblue'] = 6,
-    ['green'] = 7,
+    ['red'] = 1,
+    ['orange'] = 2,
+    ['yellow'] = 3,
+    ['blue'] = 4,
+    ['black'] = 5,
+    ['purple'] = 6,
+    ['lightblue'] = 7,
+    ['green'] = 8,
 }
 
 -- /*
