@@ -33,7 +33,7 @@ return {
 
     init = function(self, config)
         self.choice = config.choice or 'red'
-        self.value = COLORS[self.choice] or 0
+        self.value = COLORS[self.choice] or 1
     
         -- 004AF3D0
         self.o_playercolor_table_drag_edit = AOBScan("8D 85 22 02 00 00 50 6A 2E B9 ? ? ? ? E8 ? ? ? ? 85 DB 0F 85 A2 00 00 00 8B 04 AD")
