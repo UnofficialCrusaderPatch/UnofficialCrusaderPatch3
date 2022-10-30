@@ -88,6 +88,57 @@ local function restrictedRequireFunction(path, env, allow_binary)
     end
 end
 
+local SPECIAL_DIRECTORIES = {
+    --- Meant to resolve to: C:/Users/Users/Documents/Stronghold Crusader/
+    ["$DATA"] = true,
+    ["./"] = true,
+}
+
+---This function generated a function that is meant to prevent modules from escaping the UCP directory
+---
+---@private
+---
+---@param path string path to the file to be opened
+---@param specialDirectories table table of directories that should receive special treatment
+---@return table
+local function ucpRestrictedOpenFileFunction(path, specialDirectories)
+    local specialDirectories = specialDirectories or SPECIAL_DIRECTORIES
+
+    return function(filename, mode)
+
+        filename = filename.gsub("\\+", "/")
+
+        -- Disallow parent paths
+        filename = filename.gsub("[.][.]/", "")
+
+        if filename.find(":") then
+            error("Colons are not allowed in a path: " .. filename)
+        end
+
+        if filename.find("/") == 1 then
+            error("A path cannot start with a . " .. filename)
+        end
+
+        if filename:find("./") == 1 then
+            if specialDirectories['./'] then
+                filename = path .. "/" .. filename:sub(3)
+            else
+                error("Paths relative to the extension have been disabled: " .. filename)
+            end
+        elseif filename:find("$DATA") == 1 then
+            if specialDirectories['$DATA'] then
+                filename = path .. "/" .. filename:sub(3)
+            else
+                error("Access to the data path has been disabled: " .. filename)
+            end            
+        elseif filename:find("ucp/") == nil then
+            error("Access to a file must be relative to the ucp directory: " .. filename)
+        end
+
+        return io.open(filename, mode)
+    end
+end
+
 ---Prefixes the module name to a print when the module calls 'print'
 ---@param moduleName string the name of the module
 ---@see print
