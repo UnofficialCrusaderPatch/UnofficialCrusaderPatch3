@@ -426,9 +426,13 @@ namespace LuaIO {
 
 	/**
 	 * The code below is taken from the lua source code for the 'io' module.
+	 * The code below is meant to open regular files living on the file system.
+	 * 
 	 */
 
 	/*
+	** (comment from original code)
+	** 
 	** When creating file handles, always creates a 'closed' file handle
 	** before opening the actual file; so, if there is a memory error, the
 	** handle is in a consistent state.
@@ -457,6 +461,7 @@ namespace LuaIO {
 	}
 
 	static int l_checkmode(const char* mode) {
+		if (mode == 0) return 0;
 		return (*mode != '\0' && strchr("rwa", *(mode++)) != NULL &&
 			(*mode != '+' || ((void)(++mode), 1)) &&  /* skip if char is '+' */
 			(strspn(mode, "b") == strlen(mode)));  /* check extensions */
