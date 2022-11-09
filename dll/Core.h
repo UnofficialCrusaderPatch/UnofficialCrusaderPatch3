@@ -46,9 +46,9 @@ public:
 	bool sanitizePath(const std::string& path, std::string& result);
 	bool resolvePath(const std::string& path, std::string& result, bool& isInternal);
 
-	bool pathIsInExtension(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath);
+	bool pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath);
 
-	std::map<std::string, zip_t*> extensionsZipMap;
-	std::map<std::string, bool> extensionsDirMap;
+	std::map<std::string, zip_t*> modulesZipMap;
+	std::map<std::string, bool> modulesDirMap;
 	void loadZippedModules();
 };

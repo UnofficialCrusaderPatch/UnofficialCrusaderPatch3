@@ -188,14 +188,14 @@ namespace LuaIO {
 		std::string extension;
 		std::string insideExtensionPath;
 
-		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
-			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
-				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+		if (Core::getInstance().pathIsInModule(sanitizedPath, extension, insideExtensionPath)) {
+			if (Core::getInstance().modulesZipMap.count(extension) == 1) {
+				zip_t* z = Core::getInstance().modulesZipMap.at(extension);
 
 				return luaZipFileDirectoryIterator(L, z);
 			}
-			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
-				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+			else if (Core::getInstance().modulesDirMap.count(extension) == 1) {
+				if (!Core::getInstance().modulesDirMap.at(extension)) {
 					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
 				}
 
@@ -271,11 +271,11 @@ namespace LuaIO {
 		std::string extension;
 		std::string insideExtensionPath;
 
-		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInModule(sanitizedPath, extension, insideExtensionPath)) {
 
-			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
+			if (Core::getInstance().modulesZipMap.count(extension) == 1) {
 
-				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+				zip_t* z = Core::getInstance().modulesZipMap.at(extension);
 
 
 				void* handle = (void*)loadDLLFromZip(insideExtensionPath, z);
@@ -292,8 +292,8 @@ namespace LuaIO {
 
 				return 1;
 	}
-			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
-				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+			else if (Core::getInstance().modulesDirMap.count(extension) == 1) {
+				if (!Core::getInstance().modulesDirMap.at(extension)) {
 					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
 				}
 
@@ -684,9 +684,9 @@ namespace LuaIO {
 		std::string extension;
 		std::string insideExtensionPath;
 
-		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInModule(sanitizedPath, extension, insideExtensionPath)) {
 
-			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
+			if (Core::getInstance().modulesZipMap.count(extension) == 1) {
 
 				if (mode != "r" && mode != "rb") {
 					lua_pushnil(L);
@@ -695,7 +695,7 @@ namespace LuaIO {
 				}
 
 
-				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+				zip_t* z = Core::getInstance().modulesZipMap.at(extension);
 
 				char* buf = NULL;
 				size_t bufsize = 0;
@@ -718,8 +718,8 @@ namespace LuaIO {
 
 				return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
 			}
-			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
-				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+			else if (Core::getInstance().modulesDirMap.count(extension) == 1) {
+				if (!Core::getInstance().modulesDirMap.at(extension)) {
 					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
 				}
 

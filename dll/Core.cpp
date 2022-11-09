@@ -227,7 +227,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	return true;
 }
 
-bool Core::pathIsInExtension(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath) {
+bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath) {
 
 	std::regex re("^ucp/+modules/+([A-Za-z0-9_.-]+)/+(.*)$");
 	std::filesystem::path path(sanitizedPath);
@@ -253,7 +253,7 @@ void Core::loadZippedModules() {
 		for (const auto& entry : std::filesystem::directory_iterator(this->UCP_DIR / "modules")) {
 			if (entry.is_directory()) {
 				std::string extensionName = entry.path().filename().string();
-				this->extensionsDirMap[extensionName] = true;
+				this->modulesDirMap[extensionName] = true;
 			}
 			else if (entry.is_regular_file()) {
 				if (entry.path().extension().string() == ".zip") {
@@ -262,7 +262,7 @@ void Core::loadZippedModules() {
 						throw "Invalid zip file: " + entry.path().string();
 					}
 					std::string extensionName = entry.path().stem().string();
-					this->extensionsZipMap[extensionName] = z;
+					this->modulesZipMap[extensionName] = z;
 				}
 			}
 		}
