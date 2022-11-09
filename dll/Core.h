@@ -10,7 +10,8 @@
 #include "lua.hpp"
 #include "console.h"
 #include <filesystem>
-
+#include <map>
+#include "zip.h"
 
 
 class Core
@@ -45,4 +46,9 @@ public:
 	bool sanitizePath(const std::string& path, std::string& result);
 	bool resolvePath(const std::string& path, std::string& result, bool& isInternal);
 
+	bool pathIsInExtension(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath);
+
+	std::map<std::string, zip_t*> extensionsZipMap;
+	std::map<std::string, bool> extensionsDirMap;
+	void loadZippedModules();
 };

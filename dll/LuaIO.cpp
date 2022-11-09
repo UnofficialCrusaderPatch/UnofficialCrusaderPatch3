@@ -81,7 +81,7 @@ namespace LuaIO {
 
 
 	// Only for filesystem files: unchecked path!
-	int luaListFileSystemDirectories(lua_State* L) {
+	int luaListFileSystemDirectories(lua_State* L, bool includeZipFiles) {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
@@ -89,11 +89,27 @@ namespace LuaIO {
 
 		std::filesystem::path targetPath = rawPath;
 
+		const std::filesystem::path zipExtension(".zip");
+
 		try {
-			for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
+			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
 				if (entry.is_directory()) {
 					lua_pushstring(L, (entry.path().string() + "/").c_str());
 					count += 1;
+				}
+
+				else {
+					if (includeZipFiles) {
+						if (entry.is_regular_file() && entry.path().extension() == ".zip") {
+							const std::string p = entry.path().string();
+							size_t lastIndex = p.find_last_of(".");
+							if (lastIndex != std::string::npos) {
+								lua_pushstring(L, (p.substr(0, lastIndex) + "/").c_str());
+								count += 1;
+							}
+	
+						}
+					}
 				}
 			}
 		}
@@ -104,8 +120,7 @@ namespace LuaIO {
 		return count;
 	}
 
-	// For internal files
-	int luaInternalDirectoryIterator(lua_State* L) {
+	int luaZipFileDirectoryIterator(lua_State* L, zip_t* z) {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
@@ -117,20 +132,16 @@ namespace LuaIO {
 			return 2;
 		}
 
-		if (!initInternalData()) {
-			return luaL_error(L, "could not initialize internal data");
-		}
-
 		int count = 0;
 
 		std::filesystem::path haystack = std::filesystem::path(rawPath);
 
-		int i, n = zip_entries_total(internalDataZip);
+		int i, n = zip_entries_total(z);
 		for (i = 0; i < n; ++i) {
-			zip_entry_openbyindex(internalDataZip, i);
+			zip_entry_openbyindex(z, i);
 			{
-				const char* name = zip_entry_name(internalDataZip);
-				int isdir = zip_entry_isdir(internalDataZip);
+				const char* name = zip_entry_name(z);
+				int isdir = zip_entry_isdir(z);
 				// Only directories
 				if (isdir) {
 					// Only subdirectories of the directly requested path
@@ -141,13 +152,23 @@ namespace LuaIO {
 						count += 1;
 					}
 				}
-				unsigned long long size = zip_entry_size(internalDataZip);
-				unsigned int crc32 = zip_entry_crc32(internalDataZip);
+				unsigned long long size = zip_entry_size(z);
+				unsigned int crc32 = zip_entry_crc32(z);
 			}
-			zip_entry_close(internalDataZip);
+			zip_entry_close(z);
 		}
 
 		return count;
+	}
+
+	// For internal files
+	int luaInternalDirectoryIterator(lua_State* L) {
+
+		if (!initInternalData()) {
+			return luaL_error(L, "could not initialize internal data");
+		}
+
+		return luaZipFileDirectoryIterator(L, internalDataZip);
 	};
 
 
@@ -155,8 +176,39 @@ namespace LuaIO {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
+
 		std::string sanitizedPath;
+
+		if (!Core::getInstance().sanitizePath(rawPath, sanitizedPath)) {
+			return luaL_error(L, ("Invalid path: " + rawPath).c_str());
+		}
+
 		bool isInternal;
+
+		std::string extension;
+		std::string insideExtensionPath;
+
+		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
+			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
+				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+
+				return luaZipFileDirectoryIterator(L, z);
+			}
+			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
+				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
+				}
+
+				// Pass through!
+
+			}
+			else {
+				lua_pushnil(L);
+				lua_pushstring(L, ("file does not exist because extension does not exist: " + sanitizedPath).c_str());
+				return 2;
+			}
+		}
+
 		if (!Core::getInstance().resolvePath(rawPath, sanitizedPath, isInternal)) {
 			lua_pushnil(L);
 			lua_pushstring(L, sanitizedPath.c_str()); //error message
@@ -164,15 +216,21 @@ namespace LuaIO {
 		}
 
 		if (isInternal) {
+			throw "internal directory iteration has been deprecated";
 			return luaInternalDirectoryIterator(L);
 		}
 		else {
 			lua_pushstring(L, sanitizedPath.c_str());
 			lua_replace(L, 1); // Replace the path 
-			return luaListFileSystemDirectories(L);
+
+			if (rawPath == "ucp/modules") {
+				return luaListFileSystemDirectories(L, true);
+			}
+
+			return luaListFileSystemDirectories(L, false);
 		}
 
-		return luaListFileSystemDirectories(L);
+		return luaListFileSystemDirectories(L, false);
 	}
 
 	FARPROC loadFunctionFromDLL(HMODULE handle, std::string name) {
@@ -208,6 +266,50 @@ namespace LuaIO {
 			return 2;
 		}
 
+
+
+		std::string extension;
+		std::string insideExtensionPath;
+
+		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
+
+			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
+
+				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+
+
+				void* handle = (void*)loadDLLFromZip(insideExtensionPath, z);
+				if (handle == NULL) {
+					return luaL_error(L, ("Cannot load library: " + sanitizedPath).c_str());
+				}
+
+				lua_CFunction func = (lua_CFunction)loadFunctionFromMemoryDLL(handle, "luaopen_" + modName);
+				if (func == NULL) {
+					return luaL_error(L, ("Cannot find function: " + ("luaopen_" + modName)).c_str());
+				}
+
+				luaL_requiref(L, modName.c_str(), func, 0);
+
+				return 1;
+	}
+			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
+				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
+				}
+
+				// Pass through!
+
+			}
+			else {
+				lua_pushnil(L);
+				lua_pushstring(L, ("file does not exist because extension does not exist: " + sanitizedPath).c_str());
+				return 2;
+			}
+
+
+		}
+
+
 #ifdef COMPILED_MODULES
 		//if pointing to the ucp directory, use the UCP_DIR variable, "ucp/" is special
 		if (sanitizedPath.rfind("ucp/", 0) == 0) {
@@ -239,6 +341,8 @@ namespace LuaIO {
 			return luaL_error(L, "Only allowed to open DLLs inside the ucp directory");
 		}
 #else
+
+
 
 		std::filesystem::path fullPath;
 		if (sanitizedPath.rfind("ucp/", 0) == 0) {
@@ -532,17 +636,18 @@ namespace LuaIO {
 	 */
 
 
-	FILE* setMemoryFileContents(MemoryStream m, std::string contents) {
+
+	FILE* setBinaryMemoryFileContents(MemoryStream m, const char* contents, size_t length) {
 		HANDLE write;
 		CreatePipe(&m.read, &write, NULL, 10000000); //10 MB pipe
 
 		DWORD written;
-		WriteFile(write, contents.c_str(), contents.size(), &written, NULL);
+		WriteFile(write, contents, length, &written, NULL);
 
 		//We can close this already because this is the only time we write contents to it.
 		CloseHandle(write);
 
-		if (written != contents.size()) {
+		if (written != length) {
 			throw "";
 		}
 
@@ -559,18 +664,89 @@ namespace LuaIO {
 		return f;
 	}
 
+	FILE* setMemoryFileContents(MemoryStream m, std::string contents) {
+		return setBinaryMemoryFileContents(m, contents.c_str(), contents.size());
+	}
+
+
 	int luaIOCustomOpen(lua_State* L) {
 		const std::string filename = luaL_checkstring(L, 1);
 		const std::string mode = luaL_optstring(L, 2, "r");
 
 		std::string sanitizedPath;
+
+		if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
+			return luaL_error(L, ("Invalid path: " + filename).c_str());
+		}
+
 		bool isInternal;
+
+		std::string extension;
+		std::string insideExtensionPath;
+
+		if (Core::getInstance().pathIsInExtension(sanitizedPath, extension, insideExtensionPath)) {
+
+			if (Core::getInstance().extensionsZipMap.count(extension) == 1) {
+
+				if (mode != "r" && mode != "rb") {
+					lua_pushnil(L);
+					lua_pushstring(L, ("tried to write to a zipped file: " + sanitizedPath).c_str());
+					return 2;
+				}
+
+
+				zip_t* z = Core::getInstance().extensionsZipMap.at(extension);
+
+				char* buf = NULL;
+				size_t bufsize = 0;
+
+				if (zip_entry_open(z, insideExtensionPath.c_str()) != 0) {
+					lua_pushnil(L);
+					lua_pushstring(L, ("file does not exist in extension zip: " + sanitizedPath).c_str());
+					return 2;
+				}
+
+				zip_entry_read(z, (void**)&buf, &bufsize);
+				zip_entry_close(z);
+
+				
+				MemoryStream* p = newMemoryFile(L);
+				p->f = setBinaryMemoryFileContents(*p, buf, bufsize);
+
+				free(buf);
+
+
+				return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+			}
+			else if (Core::getInstance().extensionsDirMap.count(extension) == 1) {
+				if (!Core::getInstance().extensionsDirMap.at(extension)) {
+					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());
+				}
+
+				// Pass through!
+
+			}
+			else {
+				lua_pushnil(L);
+				lua_pushstring(L, ("file does not exist because extension does not exist: " + sanitizedPath).c_str());
+				return 2;
+			}
+
+
+		}
 
 		if (!Core::getInstance().resolvePath(filename, sanitizedPath, isInternal)) {
 			return luaL_error(L, ("Invalid path: " + sanitizedPath).c_str());
 		}
 		
 		if (isInternal) {
+
+			if (mode != "r" && mode != "rb") {
+				lua_pushnil(L);
+				lua_pushstring(L, ("tried to write a zipped file: " + sanitizedPath).c_str());
+				return 2;
+			}
+
 			std::string contents = readInternalFile(sanitizedPath);
 
 			if (contents.empty()) {

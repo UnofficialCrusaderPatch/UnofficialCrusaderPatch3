@@ -227,6 +227,51 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	return true;
 }
 
+bool Core::pathIsInExtension(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath) {
+
+	std::regex re("^ucp/+modules/+([A-Za-z0-9_.-]+)/+(.*)$");
+	std::filesystem::path path(sanitizedPath);
+
+	if (sanitizedPath.find("ucp/modules/") == 0 || sanitizedPath == "ucp/modules/") {
+		std::smatch m;
+		if (std::regex_search(sanitizedPath, m, re)) {
+			extension = m[1];
+			insideExtensionPath = m[2];
+
+			return true;
+
+		}
+		return false;
+	}
+
+	return false;
+}
+
+void Core::loadZippedModules() {
+
+	try {
+		for (const auto& entry : std::filesystem::directory_iterator(this->UCP_DIR / "modules")) {
+			if (entry.is_directory()) {
+				std::string extensionName = entry.path().filename().string();
+				this->extensionsDirMap[extensionName] = true;
+			}
+			else if (entry.is_regular_file()) {
+				if (entry.path().extension().string() == ".zip") {
+					zip_t* z = zip_open(entry.path().string().c_str(), 0, 'r');
+					if (z == NULL) {
+						throw "Invalid zip file: " + entry.path().string();
+					}
+					std::string extensionName = entry.path().stem().string();
+					this->extensionsZipMap[extensionName] = z;
+				}
+			}
+		}
+	}
+	catch (std::filesystem::filesystem_error e) {
+		throw ("Cannot find the path: " + e.path1().string());
+	}
+}
+
 void Core::initialize() {
 
 	int verbosity = 0;
@@ -285,6 +330,8 @@ void Core::initialize() {
 #ifdef COMPILED_MODULES
 	this->UCP_DIR = "ucp/";
 
+	loadZippedModules();
+
 	std::string code = LuaIO::readInternalFile("ucp/main.lua");
 	if (code.empty()) {
 		MessageBoxA(0, "ERROR: failed to load ucp/main.lua: does not exist internally", "FATAL", MB_OK);
@@ -319,6 +366,8 @@ void Core::initialize() {
 		if (!path.is_absolute()) path = std::filesystem::current_path() / path;
 		this->UCP_DIR = path;
 	}
+
+	loadZippedModules();
 
 	std::filesystem::path mainPath = this->UCP_DIR / "main.lua";
 

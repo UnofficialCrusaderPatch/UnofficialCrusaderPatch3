@@ -17,6 +17,8 @@ namespace LuaIO {
 	std::string readInternalFile(std::string path);
 	bool initInternalData();
 
+	HMEMORYMODULE loadDLLFromZip(std::string path, zip_t* z);
 	HMEMORYMODULE loadInternalDLL(std::string path);
+	FARPROC loadFunctionFromMemoryDLL(HMEMORYMODULE handle, std::string functionName);
 	FARPROC loadFunctionFromInternalDLL(std::string dllPath, std::string functionName);
 }

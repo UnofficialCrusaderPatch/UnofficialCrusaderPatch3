@@ -133,7 +133,7 @@ end
 
 	std::map<std::string, HMEMORYMODULE> dllMap;
 
-	HMEMORYMODULE loadInternalDLL(std::string path) {
+	HMEMORYMODULE loadDLLFromZip(std::string path, zip_t* z) {
 		std::map<std::string, HMEMORYMODULE>::iterator it;
 
 		it = dllMap.find(path);
@@ -141,18 +141,17 @@ end
 			return it->second;
 		}
 
-		if (!initInternalData()) return 0;
 		unsigned char* buf = NULL;
 		size_t bufsize = 0;
 
-		if (zip_entry_open(internalDataZip, path.c_str()) != 0) {
+		if (zip_entry_open(z, path.c_str()) != 0) {
 			return 0;
 		}
 
-		zip_entry_read(internalDataZip, (void**)& buf, &bufsize);
-		zip_entry_close(internalDataZip);
+		zip_entry_read(z, (void**)&buf, &bufsize);
+		zip_entry_close(z);
 
-		HMEMORYMODULE handle = MemoryLoadLibrary((void*) buf, (size_t) bufsize);
+		HMEMORYMODULE handle = MemoryLoadLibrary((void*)buf, (size_t)bufsize);
 		free(buf);
 
 		if (handle == NULL)
@@ -162,17 +161,27 @@ end
 		}
 
 		dllMap[path] = handle;
-		
+
 		return handle;
+	}
+
+	HMEMORYMODULE loadInternalDLL(std::string path) {
+		if (!initInternalData()) return 0;
+		return loadDLLFromZip(path, internalDataZip);
+	}
+
+	FARPROC loadFunctionFromMemoryDLL(HMEMORYMODULE handle, std::string functionName) {
+		return MemoryGetProcAddress(handle, functionName.c_str());
 	}
 
 	FARPROC loadFunctionFromInternalDLL(std::string dllPath, std::string functionName) {
 		HMEMORYMODULE handle = loadInternalDLL(dllPath);
 		if (handle == 0) return 0;
 
-		return MemoryGetProcAddress(handle, functionName.c_str());
+		return loadFunctionFromMemoryDLL(handle, functionName.c_str());
 	}
 
+	
 
 
 }

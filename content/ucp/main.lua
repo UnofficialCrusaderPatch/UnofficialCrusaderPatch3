@@ -133,7 +133,7 @@ local function loadExtensionsFromFolder(folder, cls)
 		end
 		if subFolder:match("(-[0-9\\.]+)$") == nil then error("invalid extension folder name: " .. subFolder) end
         local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
-        local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]+([a-zA-Z0-9-]+)$")
+        local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]*([a-zA-Z0-9-]+)$")
 
         log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
 
