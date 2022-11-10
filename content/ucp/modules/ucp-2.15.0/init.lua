@@ -60,7 +60,7 @@ local changes = {
 
 local function anyChildTrue(t)
   for k, v in pairs(t) do
-    if k.enabled and k.enabled == true then
+    if v.enabled and v.enabled == true then
       return true
     end
   end
