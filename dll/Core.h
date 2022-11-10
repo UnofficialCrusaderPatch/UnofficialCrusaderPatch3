@@ -51,4 +51,6 @@ public:
 	std::map<std::string, zip_t*> modulesZipMap;
 	std::map<std::string, bool> modulesDirMap;
 	void loadZippedModules();
+
+	void log(int logLevel, std::string message);
 };

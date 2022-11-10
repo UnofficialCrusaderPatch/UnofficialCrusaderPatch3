@@ -12,6 +12,9 @@
 
 #include "fasm.h"
 
+#include "Hash.h"
+#include "ModuleVerification.h"
+
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
 	lua_getglobal(L, "ucp"); // [ucp]
@@ -163,6 +166,10 @@ void addLoggingFunctions(lua_State* L) {
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
 
+void Core::log(int logLevel, std::string message) {
+	VLOG_F(logLevel, message.c_str());
+}
+
 bool Core::resolvePath(const std::string& path, std::string& result, bool& isInternal) {
 
 	isInternal = true;
@@ -247,7 +254,18 @@ bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extensi
 	return false;
 }
 
+
+
+// TODO: reduce this to the required modules. So this should eventually be loaded from lua instead of at startup. Otherwise we lose performance because of modules that aren't even enabled!
 void Core::loadZippedModules() {
+
+
+	if (!ModuleVerifier::getInstance().initialize()) {
+#ifdef COMPILED_MODULES
+		VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot verify extensions because the folder with hashes is missing").c_str());
+		return;
+#endif
+	}
 
 	try {
 		for (const auto& entry : std::filesystem::directory_iterator(this->UCP_DIR / "modules")) {
@@ -257,11 +275,44 @@ void Core::loadZippedModules() {
 			}
 			else if (entry.is_regular_file()) {
 				if (entry.path().extension().string() == ".zip") {
+
+					std::string extensionName = entry.path().stem().string();
+
+					std::ifstream input(entry.path().string(), std::ios::binary);
+
+					std::vector<char> bytes(
+						(std::istreambuf_iterator<char>(input)),
+						(std::istreambuf_iterator<char>()));
+
+					input.close();
+
+					std::string hash;
+					std::string errorMsg;
+					if (!Hasher::getInstance().hash(bytes.data(), bytes.size(), hash, errorMsg)) {
+						VLOG_F(loguru::Verbosity_FATAL, errorMsg.c_str());
+						MessageBoxA(NULL, errorMsg.c_str(), "Error with hash verification", MB_OK);
+					}
+					else {
+
+						if (ModuleVerifier::getInstance().verify(extensionName, hash)) {
+							VLOG_F(loguru::Verbosity_INFO, ("Verified extension: " + extensionName).c_str());
+
+						}
+						else {
+							VLOG_F(loguru::Verbosity_WARNING, ("WARNING: Unverified content: " + extensionName + " " + hash).c_str());
+#ifdef COMPILED_MODULES
+							VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot run unverified module content: " + extensionName + " " + hash).c_str());
+							return;
+#endif
+						}
+
+					}
+
 					zip_t* z = zip_open(entry.path().string().c_str(), 0, 'r');
 					if (z == NULL) {
 						throw "Invalid zip file: " + entry.path().string();
 					}
-					std::string extensionName = entry.path().stem().string();
+					
 					this->modulesZipMap[extensionName] = z;
 				}
 			}

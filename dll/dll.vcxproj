@@ -196,9 +196,11 @@
     <ClInclude Include="console.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Hash.h" />
     <ClInclude Include="InternalData.h" />
     <ClInclude Include="LuaIO.h" />
     <ClInclude Include="LuaUtil.h" />
+    <ClInclude Include="ModuleVerification.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="internal-data-def.h" />
     <ClInclude Include="fasm.h" />
