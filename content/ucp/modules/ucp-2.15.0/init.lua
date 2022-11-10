@@ -60,8 +60,10 @@ local changes = {
 
 local function anyChildTrue(t)
   for k, v in pairs(t) do
-    if v.enabled and v.enabled == true then
-      return true
+    if typeof(v) == "table" then
+        if v.enabled == true then
+            return true
+        end
     end
   end
   return false
