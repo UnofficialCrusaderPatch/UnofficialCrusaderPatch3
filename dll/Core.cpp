@@ -262,7 +262,7 @@ void Core::loadZippedModules() {
 
 	if (!ModuleVerifier::getInstance().initialize()) {
 #ifdef COMPILED_MODULES
-		VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot verify extensions because the folder with hashes is missing").c_str());
+		VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot verify extensions because the folder with hashes is missing"));
 		return;
 #endif
 	}
