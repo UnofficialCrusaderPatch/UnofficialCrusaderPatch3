@@ -22,7 +22,7 @@ $env:DIR = "$env:BUILD_CONFIGURATION\ucp-package\"
 $env:GITHUB_ENV = "GITHUB_ENV"
 $env:GITHUB_SHA = git rev-parse HEAD
 
-rm -R .\$env:BUILD_CONFIGURATION\ucp-package\
+Get-ChildItem -Directory | Where({$_.Name -eq "$env:BUILD_CONFIGURATION"}) | Remove-Item -Recurse -Force
 
 foreach($step in $msbuild.jobs.build.steps) {
 	if ($step.ContainsKey("run")) {
