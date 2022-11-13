@@ -1,6 +1,6 @@
 param (
 	[string]$build = "Release",
-	[string]$token = ""
+	[string]$token = "missing"
 	#[Parameter(Mandatory=$true)][string]$username,
 	#[string]$password = $( Read-Host "Input password, please" )
 )
@@ -21,6 +21,7 @@ $env:BUILD_CONFIGURATION = $build
 $env:DIR = "$env:BUILD_CONFIGURATION\ucp-package\"
 $env:GITHUB_ENV = "GITHUB_ENV"
 $env:GITHUB_SHA = git rev-parse HEAD
+$env:UCP3_READ_PACKAGES = $token
 
 Get-ChildItem -Directory | Where({$_.Name -eq "$env:BUILD_CONFIGURATION"}) | Remove-Item -Recurse -Force
 
