@@ -276,9 +276,9 @@ $vyml = ConvertFrom-Yaml $f
 # Create the ucp-version.yml
 #Import-Module powershell-yaml
 $versionInfo = [ordered]@{
-    major = vyml.major;
-    minor = vyml.minor;
-    patch = vyml.patch;
+    major = $vyml.major;
+    minor = $vyml.minor;
+    patch = $vyml.patch;
     sha = "$GITHUB_SHA";
     build = "$BUILD_CONFIGURATION";
 }
