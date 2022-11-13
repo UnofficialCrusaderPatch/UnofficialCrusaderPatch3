@@ -73,6 +73,7 @@ jobs:
       with:
         name: ${{ env.NAME }}
         path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
+        retention-days: 1
 
   release:
     needs: build
