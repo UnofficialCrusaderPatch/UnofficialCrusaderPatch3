@@ -6,7 +6,7 @@ param (
 )
  
 # Install yaml library
-Install-Module powershell-yaml -Scope CurrentUser # -Force
+Install-Module powershell-yaml -Scope CurrentUser -Force
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 Import-Module powershell-yaml
 
