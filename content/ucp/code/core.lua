@@ -86,6 +86,17 @@ function core.allocate(size, zero)
     end
 end
 
+---Deallocate a piece of memory
+---@param address number The address of the memory block
+---@return nil
+function core.deallocate(address)
+    if type(address) == "number" then
+      return ucp.internal.deallocate(address)
+    else
+      error("unsupported argument type for address: " .. type(address))
+    end
+end
+
 ---Writes `code` to `address` in executable memory. If the memory has write-protection, this will be temporarily lifted.
 ---@param address number the address to make the changes
 ---@param code table the code to write to memory
@@ -99,7 +110,7 @@ function core.writeCode(address, code, compile)
     end
 end
 
----Allocates an executable memory section to store `data`
+---Allocates an executable memory section to store code
 ---@param data table|number data can be a number or a table. If a number, these bytes are allocated. If a table, the code is also written to this location
 ---@return number returns the address of the allocated memory.
 function core.allocateCode(data)
@@ -111,6 +122,17 @@ function core.allocateCode(data)
         return addr
     else
         error("unsupported argument type: " .. type(data))
+    end
+end
+
+---Deallocates an executable memory section
+---@param address number address is a pointer to the memory section returned by a allocateCode call
+---@return nil
+function core.deallocateCode(address)
+    if type(address) == "number" then
+        return ucp.internal.deallocateCode(address)
+    else
+        error("unsupported argument type: " .. type(address))
     end
 end
 

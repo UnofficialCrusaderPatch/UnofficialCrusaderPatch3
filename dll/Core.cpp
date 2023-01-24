@@ -366,8 +366,6 @@ void Core::initialize() {
 		
 	RPS_initializeLua();
 	this->L = RPS_getLuaState();
-
-	RPS_initializeCodeHeap();
 	
 	RPS_initializeLuaOpenLibs();
 
