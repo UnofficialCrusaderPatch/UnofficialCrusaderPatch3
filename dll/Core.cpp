@@ -381,25 +381,25 @@ void Core::initialize() {
 
 	loadZippedModules();
 
-	std::string code = LuaIO::readInternalFile("ucp/main.lua");
+	std::string code = LuaIO::readInternalFile("ucp/code/main.lua");
 	if (code.empty()) {
-		MessageBoxA(0, "ERROR: failed to load ucp/main.lua: does not exist internally", "FATAL", MB_OK);
-		LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << "does not exist internally";
+		MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist internally", "FATAL", MB_OK);
+		LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << "does not exist internally";
 	}
 	else {
-		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
 			std::string errorMsg = std::string(lua_tostring(this->L, -1));
 			lua_pop(this->L, 1);
-			MessageBoxA(0, ("ERROR: failed to load ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-			LOG_S(FATAL) << "ERROR: failed to load ucp/main.lua: " << errorMsg;
+			MessageBoxA(0, ("ERROR: failed to load ucp/code/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+			LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << errorMsg;
 		}
 
 		// Don't expect return values
 		if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
 			std::string errorMsg = std::string(lua_tostring(this->L, -1));
 			lua_pop(this->L, 1);
-			MessageBoxA(0, ("ERROR: failed to run ucp/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-			LOG_S(FATAL) << "ERROR: failed to run ucp/main.lua: " << errorMsg;
+			MessageBoxA(0, ("ERROR: failed to run ucp/code/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+			LOG_S(FATAL) << "ERROR: failed to run ucp/code/main.lua: " << errorMsg;
 		}
 	}
 
@@ -418,7 +418,7 @@ void Core::initialize() {
 
 	loadZippedModules();
 
-	std::filesystem::path mainPath = this->UCP_DIR / "main.lua";
+	std::filesystem::path mainPath = this->UCP_DIR / "code"/ "main.lua";
 
 	LOG_S(INFO) << "Running bootstrap file at: " << mainPath.string();
 
@@ -436,7 +436,7 @@ void Core::initialize() {
 			LOG_S(FATAL) << "Could not execute main.lua: empty file";
 		}
 		else {
-			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/main.lua", "t") != LUA_OK) {
+			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
 				std::string errorMsg = std::string(lua_tostring(this->L, -1));
 				lua_pop(this->L, 1);
 				MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);

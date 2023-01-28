@@ -34,8 +34,7 @@ if UCP_CONFIG then
 end
 
 ---Load essential ucp lua code
-memory = require('memory')
-core = memory -- this one is here for reverse compatibility
+core = require('core')
 utils = require('utils')
 data = require('data')
 yaml = data.yaml
