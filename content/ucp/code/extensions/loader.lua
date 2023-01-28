@@ -66,8 +66,10 @@ end
 function BaseLoader:loadDefinition()
     if self.definition ~= nil then return end
 
-    local handle, status, e = io.open(self.path .. "/definition.yml", 'r')
+    local path = self.path .. "/definition.yml"
+    local handle, status, e = io.open(path, 'r')
     if not handle then
+        log(WARNING, "could not get a handle to file "  .. path .. " status: " .. tostring(status))
         self.definition = false
         return nil
     end
@@ -76,7 +78,7 @@ function BaseLoader:loadDefinition()
     handle:close()
 
     if data:len() == 0 then
-        -- print("WARNING: the module.yml file of " .. self.name .. " is empty")
+        log(WARNING, "the definition.yml file of " .. self.name .. " is empty")
         self.definition = false
         return nil
     end

@@ -33,18 +33,12 @@ if UCP_CONFIG then
     CONFIG_FILE = UCP_CONFIG
 end
 
----Indicates where to load UCP lua files from
-package.path = BASEDIR .. "/code/?.lua"
-package.path = package.path .. ";" .. BASEDIR .. "/code/?/init.lua"
 ---Load essential ucp lua code
-core = require('core')
+memory = require('memory')
+core = memory -- this one is here for reverse compatibility
 utils = require('utils')
-data = {}
-data.common = require('data.common')
-data.structures = require('data.structures')
-data.version = require('data.version')
-data.cache = require('data.cache')
-yaml = require('data.yaml')
+data = require('data')
+yaml = data.yaml
 json = require('vendor.json.json')
 extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
@@ -54,6 +48,7 @@ require("logging")
 
 data.version.initialize()
 data.cache.AOB.loadFromFile()
+
 
 ---UCP3 Configuration
 ---Load the default config file
