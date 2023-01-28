@@ -138,6 +138,12 @@ function table.values(t)
     return values
 end
 
+function table.length(t)
+  local counter = 0
+  for k, v in pairs(t) do counter = counter + 1 end
+  return counter
+end
+
 function inheritsMetaTable(obj, metaTable)
     local needle = getmetatable(obj)
     while needle ~= nil do
@@ -146,6 +152,17 @@ function inheritsMetaTable(obj, metaTable)
         end
         needle = getmetatable(needle)
     end
+end
+
+function string.split (inputstr, sep)
+  if sep == nil then
+          sep = "%s"
+  end
+  local t={}
+  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+          table.insert(t, str)
+  end
+  return t
 end
 
 return namespace

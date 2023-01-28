@@ -49,7 +49,7 @@ require("logging")
 
 data.version.initialize()
 data.cache.AOB.loadFromFile()
-
+data.cache.DefaultConfigCache.loadFromFile()
 
 ---UCP3 Configuration
 ---Load the default config file
@@ -73,7 +73,7 @@ config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.Pl
 
 extensionsInLoadOrder = {}
 
-if user_config.order == nil or #(user_config.order) == 0 then
+if user_config.order == nil then
     log(FATAL, "user config does not contain an extension load 'order'")    
 else
   for k, req in pairs(user_config.order) do
@@ -182,3 +182,4 @@ end
 end)()
 
 data.cache.AOB.dumpToFile()
+data.cache.DefaultConfigCache.saveToFile()

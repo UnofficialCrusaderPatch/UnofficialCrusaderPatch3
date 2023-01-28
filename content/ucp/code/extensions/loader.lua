@@ -1,4 +1,5 @@
 local createRestrictedEnvironment = require('extensions.environment').createRestrictedEnvironment
+local utils = require('utils')
 
 --- Create a new instance of a BaseLoader with the :new function. `BaseLoader:new()`
 ---
@@ -162,6 +163,122 @@ function BaseLoader:config()
     return y
 end
 
+---Read the ui
+function BaseLoader:ui()
+    local handle, status, e = io.open(self.path .. "/ui.yml", 'r')
+    if not handle then
+        return { }
+    end
+
+    local data = handle:read("*all")
+    handle:close()
+
+    if data:len() == 0 then
+        return { }
+    end
+
+    local y, err = yaml.eval(data)
+
+    if not y then
+        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+    end
+
+    return y
+end
+
+---Read the options
+function BaseLoader:options()
+    local handle, status, e = io.open(self.path .. "/options.yml", 'r')
+    if not handle then
+        return { }
+    end
+
+    local data = handle:read("*all")
+    handle:close()
+
+    if data:len() == 0 then
+        return { }
+    end
+
+    local y, err = yaml.eval(data)
+
+    if not y then
+        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+    end
+
+    return y
+end
+
+function BaseLoader:defaults()
+  local function convertConfigFile(t)
+    if t.default ~= nil then
+      return t.default
+    else
+      local nht = {}
+      for k, v in pairs(t) do
+        if type(t[k]) == "table" then
+          nht[k] = convertConfigFile(t[k])
+        else
+          nht[k] = t[k]
+        end
+      end
+      return nht
+    end
+  end
+
+  local ui = self:ui()
+  if table.length(ui) == 0 then
+    local options = self:options()
+    if table.length(options) == 0 then
+      log(WARNING, "this extension '" .. self.name .. "' does not have any way to detect defaults")
+      return {}
+    end
+
+    return convertConfigFile(options)
+  end
+
+
+
+  local function yieldDefaults(d, part) 
+  
+    if type(part) == "table" then
+      if part.url ~= nil then
+        d[part.url] = (part.value or {}).default
+      end
+      if type(part.children) == "table" then
+        for k, child in pairs(part.children) do
+          yieldDefaults(d, child)
+        end
+      end
+    end
+  end
+  
+  local urlValueMapping = {}
+  for k, uiElement in pairs(ui) do yieldDefaults(urlValueMapping, uiElement) end
+
+  self.temp = urlValueMapping
+
+  local result = {}
+  for url, value in pairs(urlValueMapping) do
+    local urlParts = string.split(url, ".")
+    
+    local section = result
+
+    local firstPartIndex = 2
+    local lastPartIndex = table.length(urlParts)
+
+    for i=firstPartIndex, lastPartIndex-1 do
+      local part = urlParts[i]
+      if section[part] == nil then
+        section[part] = {}
+      end
+      section = section[part]
+    end
+    section[urlParts[lastPartIndex]] = value
+  end
+
+  return result
+end
 
 function BaseLoader:verifyVersion()
     self:loadDefinition()
