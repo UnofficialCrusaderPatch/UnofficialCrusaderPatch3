@@ -1,5 +1,6 @@
 local utils = {}
 
+local data = require('data')
 
 function utils.loadExtensionsFromFolder(extensionLoaders, folder, cls)
     ---Dynamic extensions discovery
@@ -21,10 +22,24 @@ function utils.loadExtensionsFromFolder(extensionLoaders, folder, cls)
 
         log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
 
-        if extensionLoaders[name] ~= nil then error("extension with name already exists: " .. name) end
+        if extensionLoaders[name] ~= nil then 
+            local existing = extensionLoaders[name]
+            local existingVersion = existing.version
+            
+            local comp = data.version.compareVersions(version, existingVersion)
+            if comp > 0 then
+                log(WARNING, "extension with name already exists: " .. name .. " but found a new version, using newer version: " .. tostring(version)) 
+            else
+                log(WARNING, "extension with name already exists: " .. name .. " and this version is outdated, so we are using version: " .. tostring(existingVersion)) 
+                goto continue
+            end
+            
+        end
 
         extensionLoaders[name] = cls:create(name, version)
         extensionLoaders[name]:verifyVersion()
+
+        ::continue::
     end
 end
 

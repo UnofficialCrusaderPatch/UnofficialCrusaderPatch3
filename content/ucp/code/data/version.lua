@@ -200,6 +200,62 @@ local COMPARATORS = {
     ["=="] = function(a, b) return a == b end,
 }
 
+function string.split (inputstr, sep)
+    if sep == nil then
+            sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+            table.insert(t, str)
+    end
+    return t
+end
+
+function toSemVer(v) 
+    local result = {}
+    local components = string.split(v, ".")
+    result['major'] = tonumber(components[1])
+    result['minor'] = tonumber(components[2])
+    result['patch'] = tonumber(components[3])
+    return result
+end
+
+---Compares two semantic version strings and returns which one is larger
+---@param a string version string A
+---@param b string version string B
+---@return number Returns the result
+namespace.compareVersions = function(a, b)
+    local semVerA = toSemVer(a)
+    local semVerB = toSemVer(b)
+
+    if semVerA.major > semVerB.major then
+        return 1
+    end
+
+    if semVerA.major < semVerB.major then
+        return -1
+    end
+
+    if semVerA.minor > semVerB.minor then
+        return 1
+    end
+
+    if semVerA.minor < semVerB.minor then
+        return -1
+    end
+
+    if semVerA.patch > semVerB.patch then
+        return 1
+    end
+
+    if semVerA.patch < semVerB.patch then
+        return -1
+    end
+
+    return 0
+
+end
+
 namespace.verifyGameDependency = function(ext, extensionLoaders)
     local extension = extensionLoaders[ext]
 
