@@ -96,7 +96,7 @@ local ConfigCache = {
     local fdata = handle:read("*all")
     handle:close()
     
-    local dc = data.json:decode(fdata)
+    local dc = json:decode(fdata)
 
     self.data = dc
   end,

@@ -38,10 +38,11 @@ local computeVersionString = function(config)
         return res
     end
 
+    -- TODO check!
     local mset = {}
-    for k, v in pairs(config.modules) do
+    for k, v in pairs(config) do
         if v.active then
-            mset[k] = v
+          mset[k] = v
         end
     end
     local s = dumpTableToDeterministicString(mset)

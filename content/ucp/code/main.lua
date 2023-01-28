@@ -18,9 +18,6 @@ else
   print("[main]: Using the default UCP_DIR")
 end
 
----File that contains the defaults
-CONFIG_DEFAULTS_FILE = "ucp-config-defaults.yml"
-
 ---Config file configuration
 CONFIG_FILE = "ucp-config.yml"
 
@@ -49,11 +46,7 @@ require("logging")
 
 data.version.initialize()
 data.cache.AOB.loadFromFile()
-data.cache.DefaultConfigCache.loadFromFile()
-
----UCP3 Configuration
----Load the default config file
-default_config = config.ConfigHandler.loadDefaultConfig()
+data.cache.DefaultConfigCache:loadFromFile()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
@@ -88,27 +81,28 @@ end
 
 ---Now we are ready to parse the configurations of each extension
 ---Low level conflict checking should be done when setting the user config
-joinedDefaultConfig = {extensions = {}}
-for k, v in pairs(default_config.modules) do
-    joinedDefaultConfig.extensions[k] = v
-end
-for k, v in pairs(default_config.plugins) do
-    joinedDefaultConfig.extensions[k] = v
-end
 
-joinedConfig = {extensions = {}}
+joinedUserConfig = {}
 for k, v in pairs(user_config.modules) do
-    joinedConfig.extensions[k] = v
-end
-for k, v in pairs(user_config.plugins) do
-    joinedConfig.extensions[k] = v
+  local key = k .. "-" .. v.version
+  local options = v.options
+  joinedUserConfig[key] = options
 end
 
+defaultConfig = {}
+for k, ext in pairs(extensionsInLoadOrder) do
+  local defaults = data.cache.DefaultConfigCache:retrieve(ext)
+  defaultConfig[ext.name .. "-" .. ext.version] = defaults
+end
 
 allActiveExtensions = extensionsInLoadOrder
 
 ---Resolve the user and default config to a final config
-configFinal = config.merger.resolveToFinalConfig(allActiveExtensions, user_config, default_config)
+configFinal = config.merger.resolveToFinalConfig(allActiveExtensions, joinedUserConfig, defaultConfig)
+
+local handle, err = io.open(".ucp-final-config-cache", 'w')
+handle:write(json:encode(configFinal))
+handle:close()
 
 ---Overwrite game menu version
 data.version.overwriteVersion(configFinal)
@@ -152,13 +146,13 @@ for k, ext in pairs(allActiveExtensions) do
     local t = ext:type()
     if t == "ModuleLoader" then
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
-        local o = configFinal.modules[ext.name] or {}
-        ext:enable(o.options or {})
+        local o = configFinal[ext.name .. "-" .. ext.version] or {}
+        ext:enable(o)
         modules[ext.name] = extensions.createRecursiveReadOnlyTable(modules[ext.name])
     elseif t == "PluginLoader" then
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
-        local o = configFinal.plugins[ext.name] or {}
-        ext:enable(o.options or {})
+        local o = configFinal[ext.name .. "-" .. ext.version] or {}
+        ext:enable(o)
         plugins[ext.name] = extensions.createRecursiveReadOnlyTable(plugins[ext.name])
     else
         error("unknown extension type for: " .. ext.name)
@@ -182,4 +176,4 @@ end
 end)()
 
 data.cache.AOB.dumpToFile()
-data.cache.DefaultConfigCache.saveToFile()
+data.cache.DefaultConfigCache:saveToFile()
