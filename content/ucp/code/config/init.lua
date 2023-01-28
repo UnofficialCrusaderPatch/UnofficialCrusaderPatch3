@@ -1,5 +1,6 @@
 local config = {}
 
+config.utils = require('config.utils')
 
 config.ConfigHandler = {
     loadDefaultConfig = function() 
@@ -40,7 +41,7 @@ config.ConfigHandler = {
         if not result.modules then result.modules = {} end
         return result
     end,
-    
+
 }
 
 

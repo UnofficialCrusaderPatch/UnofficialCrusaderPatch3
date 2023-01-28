@@ -56,10 +56,10 @@ default_config = config.ConfigHandler.loadDefaultConfig()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
-config = config.ConfigHandler.loadUserConfig()
+user_config = config.ConfigHandler.loadUserConfig()
 
 ---Early bail out of UCP
-if config.active == false then
+if user_config.active == false then
     log(WARNING, "[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
     return nil
 end
@@ -67,35 +67,8 @@ end
 extensionsTable = {}
 extensionLoaders = {}
 
-local function loadExtensionsFromFolder(folder, cls)
-    ---Dynamic extensions discovery
-    local subFolders, err = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
-
-	if not subFolders then
-		log(ERROR, "no subfolders detected for path: " .. BASEDIR .. "/" .. folder)
-		error(err)
-	end
-
-    --- Create a loader for all extensions we can find
-    for k, subFolder in ipairs(subFolders) do
-		if subFolder:sub(-1) == "/" then
-			subFolder = subFolder:sub(1, -2)
-		end
-		if subFolder:match("(-[0-9\\.]+)$") == nil then error("invalid extension folder name: " .. subFolder) end
-        local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
-        local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]*([a-zA-Z0-9-]+)$")
-
-        log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
-
-        if extensionLoaders[name] ~= nil then error("extension with name already exists: " .. name) end
-
-        extensionLoaders[name] = cls:create(name, version)
-        extensionLoaders[name]:verifyVersion()
-    end
-end
-
-loadExtensionsFromFolder("modules", extensions.ModuleLoader)
-loadExtensionsFromFolder("plugins", extensions.PluginLoader)
+config.utils.loadExtensionsFromFolder(extensionLoaders, "modules", extensions.ModuleLoader)
+config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.PluginLoader)
 
 log(INFO, "[main]: solving load order")
 
@@ -130,10 +103,10 @@ for k, v in pairs(default_config.plugins) do
 end
 
 joinedConfig = {extensions = {}}
-for k, v in pairs(config.modules) do
+for k, v in pairs(user_config.modules) do
     joinedConfig.extensions[k] = v
 end
-for k, v in pairs(config.plugins) do
+for k, v in pairs(user_config.plugins) do
     joinedConfig.extensions[k] = v
 end
 
@@ -224,7 +197,7 @@ function mergeConfiguration(c1, c2)
     end
 end
 
-configMaster = config
+configMaster = user_config
 configSlave = default_config
 
 allActiveExtensions = {}
