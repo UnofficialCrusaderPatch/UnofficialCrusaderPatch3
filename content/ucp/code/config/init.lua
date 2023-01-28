@@ -1,6 +1,8 @@
 local config = {}
 
 config.utils = require('config.utils')
+config.matcher = require("config.matcher")
+config.merger = require('config.merger')
 
 config.ConfigHandler = {
     loadDefaultConfig = function() 
@@ -19,11 +21,11 @@ config.ConfigHandler = {
         end
         if not result.plugins then result.plugins = {} end
         if not result.modules then result.modules = {} end
-        if not result.order then result.order = {} end
         return result 
     end,
 
     loadUserConfig = function()
+        log(DEBUG, "opening user config file at path: " .. CONFIG_FILE)
         local f, message = io.open(CONFIG_FILE)
         if not f then
             log(WARNING, "[main]: Could not read ucp-config.yml. Reason: " .. message)

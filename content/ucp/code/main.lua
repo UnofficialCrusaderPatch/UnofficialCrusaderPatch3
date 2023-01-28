@@ -9,7 +9,7 @@ DEBUG = true
 BASEDIR = "ucp"
 
 ---Change the ucp working directory based on an environment variable
----@deprecated UCP_DIR is now handled in the dll part
+---@extrecated UCP_DIR is now handled in the dll part
 ---@param UCP_DIR string path to the ucp directory
 UCP_DIR = os.getenv("UCP_DIR")
 if UCP_DIR then
@@ -43,6 +43,7 @@ extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
 hooks = require('hooks')
 config = require('config')
+version = require('version')
 
 require("logging")
 
@@ -64,33 +65,26 @@ if user_config.active == false then
     return nil
 end
 
-extensionsTable = {}
+---Collection of all extensions in the form of extension loaders (ModuleLoader and PluginLoader) which interface with the file structure of extensions
 extensionLoaders = {}
 
 config.utils.loadExtensionsFromFolder(extensionLoaders, "modules", extensions.ModuleLoader)
 config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.PluginLoader)
 
-log(INFO, "[main]: solving load order")
+extensionsInLoadOrder = {}
 
-extensionDependencies = {}
-for name, ext in pairs(extensionLoaders) do
-    extensionDependencies[name] = {}
-    local deps = ext:dependencies()
-    if deps then
-        for k, dep in pairs(deps) do
-            table.insert(extensionDependencies[name], dep.name)
-        end
+if user_config.order == nil or #(user_config.order) == 0 then
+    log(FATAL, "user config does not contain an extension load 'order'")    
+else
+  for k, req in pairs(user_config.order) do
+    local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
+    if m == nil then
+      log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
     end
+    table.insert(extensionsInLoadOrder, m)
+  end
+    
 end
-
-extensionLoadOrder = {}
-for k, exts in pairs(extensions.DependencySolver:new(extensionDependencies):solve()) do
-    for l, ext in pairs(exts) do
-        table.insert(extensionLoadOrder, ext)
-    end
-end
-
-
 
 ---Now we are ready to parse the configurations of each extension
 ---Low level conflict checking should be done when setting the user config
@@ -110,122 +104,11 @@ for k, v in pairs(user_config.plugins) do
     joinedConfig.extensions[k] = v
 end
 
-log(INFO, "[main]: verifying extension dependencies")
-explicitlyActiveExtensions = {}
-for k, ext in pairs(extensionLoadOrder) do
-    if joinedConfig.extensions[ext] then
-        if joinedConfig.extensions[ext].active == true then
-            if data.version.verifyDependencies(ext, extensionLoaders) then
-                if data.version.verifyGameDependency(ext, extensionLoaders) then
-                    table.insert(explicitlyActiveExtensions, ext)
-                end
-			end
-        end
-    elseif joinedDefaultConfig.extensions[ext] and joinedDefaultConfig.extensions[ext].active == true then
-        if data.version.verifyDependencies(ext, extensionLoaders) then
-            if data.version.verifyGameDependency(ext, extensionLoaders) then
-                table.insert(explicitlyActiveExtensions, ext)
-            end
-        end
-    end
-end
 
-log(DEBUG, "[main]: explicitly active extensions:\n" .. json:encode_pretty(explicitlyActiveExtensions))
+allActiveExtensions = extensionsInLoadOrder
 
-necessaryDependencies = {}
-for k, ext in pairs(explicitlyActiveExtensions) do
-    for k2, dep in pairs(extensionDependencies[ext]) do
-        if not table.find(necessaryDependencies, dep) then
-            table.insert(necessaryDependencies, dep)
-        end
-    end
-end
-
-i = 1
-while i <= #necessaryDependencies do
-    local ext = necessaryDependencies[i]
-    if ext then
-        for k, dep in pairs(extensionDependencies[ext]) do
-            if not table.find(necessaryDependencies, dep) then
-                table.insert(necessaryDependencies, dep)
-            end
-        end
-    end
-    i = i + 1
-end
-
-log(DEBUG, "required dependencies:\n" .. json:encode_pretty(necessaryDependencies))
-
----Try to merge extension configurations with user 'config'
-
-function compareConfiguration(c1, c2, conflicts, path)
-    conflicts = conflicts or {}
-    path = path or "/root"
-    for k, v2 in pairs(c2) do
-        if c1[k] ~= nil then
-            ---k exists in c1 and c2, check if they clash
-            local v1 = c1[k]
-            if v1 ~= v2 then
-                if type(v1) == "table" and type(v2) == "table" then
-                    compareConfiguration(v1, v2, conflicts, path .. "/" .. k)
-                else
-                    table.insert(conflicts, {path = path .. "/" .. k, value1 = v1, value2 = v2})
-                end
-            end
-        end
-    end
-    return conflicts
-end
-
-function mergeConfiguration(c1, c2)
-    for k, v2 in pairs(c2) do
-        if c1[k] ~= nil then
-            ---k exists in c1 and c2, check if they clash
-            local v1 = c1[k]
-            if v1 ~= v2 then
-                if type(v1) == "table" and type(v2) == "table" then
-                    mergeConfiguration(v1, v2)
-                elseif type(v1) ~= type(v2) then
-                    error("incompatible types in key: " .. k)
-                else
-                    c1[k] = v2
-                end
-            end
-        else
-            c1[k] = v2
-        end
-    end
-end
-
-configMaster = user_config
-configSlave = default_config
-
-allActiveExtensions = {}
-for k, ext in pairs(necessaryDependencies) do
-    table.insert(allActiveExtensions, ext)
-end
-for k, ext in pairs(explicitlyActiveExtensions) do
-    if not table.find(allActiveExtensions, ext) then
-       table.insert(allActiveExtensions, ext)
-    end
-end
-
-for k, dep in pairs(allActiveExtensions) do
-    local depConfig = extensionLoaders[dep]:config()
-    local conflicts = compareConfiguration(configMaster, depConfig)
-    if #conflicts > 0 then
-        local msg = "failed to merge configuration of user and: " .. dep .. ".\ndifferences: "
-        for k2, conflict in pairs(conflicts) do
-            msg = "\n\tpath: " .. conflict.path .. ", value 1" .. conflict.value1 .. ", " .. conflict.value2
-        end
-        error(msg)
-    end
-    mergeConfiguration(configMaster, depConfig)
-end
-
----Lastly, to get a complete config, override the defaults, ignore differences or conflicts
-mergeConfiguration(default_config, configMaster)
-configFinal = default_config
+---Resolve the user and default config to a final config
+configFinal = config.merger.resolveToFinalConfig(allActiveExtensions, user_config, default_config)
 
 ---Overwrite game menu version
 data.version.overwriteVersion(configFinal)
@@ -250,35 +133,35 @@ pluginEnv = {
     ipairs = ipairs,
 }
 
-for k, dep in pairs(allActiveExtensions) do
-    local t = extensionLoaders[dep]:type()
+for k, ext in pairs(allActiveExtensions) do
+    local t = ext:type()
     if t == "ModuleLoader" then
-        print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:createEnvironment(moduleEnv)
-        modules[dep] = extensionLoaders[dep]:load(moduleEnv)
+        log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
+        ext:createEnvironment(moduleEnv)
+        modules[ext.name] = ext:load(moduleEnv)
     elseif t == "PluginLoader" then
-        print("[main]: loading extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        extensionLoaders[dep]:createEnvironment(pluginEnv)
-        plugins[dep] = extensionLoaders[dep]:load(pluginEnv)
+      log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
+        ext:createEnvironment(pluginEnv)
+        plugins[ext.name] = ext:load(pluginEnv)
     else
-        error("unknown extension type for: " .. dep)
+        error("unknown extension type for: " .. ext.name)
     end
 end
 
-for k, dep in pairs(allActiveExtensions) do
-    local t = extensionLoaders[dep]:type()
+for k, ext in pairs(allActiveExtensions) do
+    local t = ext:type()
     if t == "ModuleLoader" then
-        print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        local o = configFinal.modules[dep] or {}
-        extensionLoaders[dep]:enable(o.options or {})
-        modules[dep] = extensions.createRecursiveReadOnlyTable(modules[dep])
+      log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
+        local o = configFinal.modules[ext.name] or {}
+        ext:enable(o.options or {})
+        modules[ext.name] = extensions.createRecursiveReadOnlyTable(modules[ext.name])
     elseif t == "PluginLoader" then
-        print("[main]: enabling extension: " .. dep .. " version: " .. extensionLoaders[dep].version)
-        local o = configFinal.plugins[dep] or {}
-        extensionLoaders[dep]:enable(o.options or {})
-        plugins[dep] = extensions.createRecursiveReadOnlyTable(plugins[dep])
+      log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
+        local o = configFinal.plugins[ext.name] or {}
+        ext:enable(o.options or {})
+        plugins[ext.name] = extensions.createRecursiveReadOnlyTable(plugins[ext.name])
     else
-        error("unknown extension type for: " .. dep)
+        error("unknown extension type for: " .. ext.name)
     end
 end
 

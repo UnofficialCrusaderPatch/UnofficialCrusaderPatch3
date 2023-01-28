@@ -22,24 +22,15 @@ function utils.loadExtensionsFromFolder(extensionLoaders, folder, cls)
 
         log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
 
-        if extensionLoaders[name] ~= nil then 
-            local existing = extensionLoaders[name]
-            local existingVersion = existing.version
-            
-            local comp = data.version.compareVersions(version, existingVersion)
-            if comp > 0 then
-                log(WARNING, "extension with name already exists: " .. name .. " but found a new version, using newer version: " .. tostring(version)) 
-            else
-                log(WARNING, "extension with name already exists: " .. name .. " and this version is outdated, so we are using version: " .. tostring(existingVersion)) 
-                goto continue
-            end
-            
+        local fullName = name .. "-" .. version
+
+        if extensionLoaders[fullName] ~= nil then 
+            log(WARNING, "extension with name already exists: " .. name) 
         end
 
-        extensionLoaders[name] = cls:create(name, version)
-        extensionLoaders[name]:verifyVersion()
+        extensionLoaders[fullName] = cls:create(name, version)
+        extensionLoaders[fullName]:verifyVersion()
 
-        ::continue::
     end
 end
 
