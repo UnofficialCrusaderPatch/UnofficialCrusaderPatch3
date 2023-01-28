@@ -438,16 +438,14 @@ namespace LuaIO {
 		}
 
 		//Check the cache if the file exists
-		lua_getglobal(L, "package");
-		lua_getfield(L, -1, "loaded");
+		luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
 		lua_getfield(L, -1, path.c_str());
 		if (!lua_isnil(L, -1)) {
-			lua_remove(L, -3); //Remove package
 			lua_remove(L, -2); //Remove loaded
 			return 1; //Return the cached file
 		}
 		lua_pop(L, 1); //remove the nil value
-		lua_pop(L, 2); //pop package and loaded
+		lua_pop(L, 1); //pop loaded
 
 		//Then convert all dots to path separators
 		std::string slashPath = path;
@@ -530,11 +528,10 @@ namespace LuaIO {
 		// result is left on the stack
 		// Now we store it in cache
 
-		lua_getglobal(L, "package");
-		lua_getfield(L, -1, "loaded");
-		lua_pushvalue(L, -3); //Re add the result to the stack
+		luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+		lua_pushvalue(L, -2); //Re add the result to the stack
 		lua_setfield(L, -2, path.c_str());
-		lua_pop(L, 2); //Pop loaded and package
+		lua_pop(L, 1); //Pop loaded and package
 
 		// result is left on the stack, so we return
 		return 1;
