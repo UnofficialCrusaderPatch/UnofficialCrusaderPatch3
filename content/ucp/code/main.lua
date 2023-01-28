@@ -42,6 +42,7 @@ json = require('vendor.json.json')
 extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
 hooks = require('hooks')
+config = require('config')
 
 require("logging")
 
@@ -51,45 +52,11 @@ data.cache.AOB.loadFromFile()
 
 ---UCP3 Configuration
 ---Load the default config file
-default_config = (function()
-    local f, message = io.open(CONFIG_DEFAULTS_FILE)
-    if not f then
-	    log(WARNING, "[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
-        log(WARNING, "[main]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
-        return { modules = {} }
-    end
-    local data = f:read("*all")
-    f:close()
-
-    local result, err = yaml.eval(data)
-    if not result then
-        log(ERROR, "failed to parse '" .. CONFIG_DEFAULTS_FILE .. "':\n" .. err)
-    end
-    if not result.plugins then result.plugins = {} end
-    if not result.modules then result.modules = {} end
-    return result
-end)()
+default_config = config.ConfigHandler.loadDefaultConfig()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
-config = (function()
-    local f, message = io.open(CONFIG_FILE)
-    if not f then
-        log(WARNING, "[main]: Could not read ucp-config.yml. Reason: " .. message)
-        log(WARNING, "[main]: Treating ucp-config.yml as empty file")
-        return { modules = {}, plugins = {} }
-    end
-    local data = f:read("*all")
-    f:close()
-
-    local result, err = yaml.eval(data)
-    if not result then
-        log(ERROR, "failed to parse ucp-config.yml:\n" .. err)
-    end
-    if not result.plugins then result.plugins = {} end
-    if not result.modules then result.modules = {} end
-    return result
-end)()
+config = config.ConfigHandler.loadUserConfig()
 
 ---Early bail out of UCP
 if config.active == false then
