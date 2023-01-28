@@ -4,6 +4,12 @@
  * 
  * \author gynt
  * \date   September 2021
+ * 
+ * The functions in this file exist to handle custom IO operations.
+ * These custom IO operations are used to secure lua files from unwanted modification.
+ * 
+ * 
+ * 
  *********************************************************************/
 
 #include <filesystem>
@@ -52,6 +58,13 @@ namespace LuaIO {
 		return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 	}
 
+	/**
+	 * This function takes a path and sanitizes it. The result is in result.
+	 * 
+	 * \param path the path to sanitize
+	 * \param result the sanitized path if this function returns true, else the error message
+	 * \return whether or not the path was succesfully sanitized
+	 */
 	bool sanitizeRelativePath(const std::string &path, std::string &result) {
 		std::string rawPath = path;
 
@@ -71,7 +84,7 @@ namespace LuaIO {
 		}
 
 		if (std::filesystem::relative(std::filesystem::current_path() / sanitizedPath, std::filesystem::current_path()).string().find("..") == 0) {
-			result = "path has remain in the game directory";
+			result = "path has to remain in the game directory";
 			return false;
 		}
 		
@@ -291,7 +304,7 @@ namespace LuaIO {
 				luaL_requiref(L, modName.c_str(), func, 0);
 
 				return 1;
-	}
+			}
 			else if (Core::getInstance().modulesDirMap.count(extension) == 1) {
 				if (!Core::getInstance().modulesDirMap.at(extension)) {
 					return luaL_error(L, ("Unexpected error when reading: " + sanitizedPath).c_str());

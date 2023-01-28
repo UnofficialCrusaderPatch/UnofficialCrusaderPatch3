@@ -18,17 +18,6 @@ else
   print("[main]: Using the default UCP_DIR")
 end
 
----@deprecated UCP_DIR is now handled in the dll part
---[[
-if UCP_DIR then
-    if UCP_DIR:sub(-1) ~= "\\" and UCP_DIR:sub(-1) ~= "/" then
-        UCP_DIR = UCP_DIR + "\\"
-    end
-    print("[main]: Setting BASEDIR to " .. UCP_DIR)
-    BASEDIR = UCP_DIR
-end
---]]
-
 ---File that contains the defaults
 CONFIG_DEFAULTS_FILE = "ucp-config-defaults.yml"
 
