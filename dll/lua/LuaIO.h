@@ -9,7 +9,7 @@
 
 #include <string>
 #include "lua.hpp"
-#include "InternalData.h"
+#include "security/InternalData.h"
 
 namespace LuaIO {
 	int luaLoadLibrary(lua_State* L);

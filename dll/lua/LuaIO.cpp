@@ -16,8 +16,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "Core.h"
-#include "InternalData.h"
+#include "core/Core.h"
+#include "security/InternalData.h"
 #include <regex>
 
 
