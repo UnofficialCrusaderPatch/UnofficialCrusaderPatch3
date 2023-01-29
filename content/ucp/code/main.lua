@@ -95,6 +95,8 @@ for k, ext in pairs(extensionsInLoadOrder) do
   defaultConfig[ext.name .. "-" .. ext.version] = defaults
 end
 
+data.cache.DefaultConfigCache:saveToFile()
+
 allActiveExtensions = extensionsInLoadOrder
 
 ---Resolve the user and default config to a final config
@@ -176,4 +178,4 @@ end
 end)()
 
 data.cache.AOB.dumpToFile()
-data.cache.DefaultConfigCache:saveToFile()
+
