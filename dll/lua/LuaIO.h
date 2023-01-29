@@ -13,7 +13,6 @@
 
 namespace LuaIO {
 	int luaLoadLibrary(lua_State* L);
-	int luaIOCustomOpen(lua_State* L);
 	int luaListDirectories(lua_State* L);
 	int luaWideCharToMultiByte(lua_State* L);
 }
