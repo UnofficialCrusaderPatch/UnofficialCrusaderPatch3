@@ -6,6 +6,7 @@
 #include "lua/LuaIO.h"
 #include "lua/LuaUtil.h"
 #include "lua/LuaCustomOpenFile.h"
+#include "lua/LuaListDirectories.h"
 #include "RuntimePatchingSystem.h"
 
 #define LOGURU_WITH_STREAMS 1

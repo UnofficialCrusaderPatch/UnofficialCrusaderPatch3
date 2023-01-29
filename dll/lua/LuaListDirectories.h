@@ -13,3 +13,7 @@
 #include "security/InternalData.h"
 
 #include "io/utils.h"
+
+namespace LuaIO {
+	int luaListDirectories(lua_State* L);
+}
