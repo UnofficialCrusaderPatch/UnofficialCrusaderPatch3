@@ -3,7 +3,6 @@
 #include "framework.h"
 
 #include <bcrypt.h>
-#pragma comment(lib, "bcrypt.lib")
 
 #include <sstream>
 
