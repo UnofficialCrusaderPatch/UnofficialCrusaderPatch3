@@ -3,17 +3,17 @@
 #include <sstream>
 #include <fstream>
 #include "Core.h"
-#include "LuaIO.h"
-#include "LuaUtil.h"
+#include "lua/LuaIO.h"
+#include "lua/LuaUtil.h"
 #include "RuntimePatchingSystem.h"
 
 #define LOGURU_WITH_STREAMS 1
 #include "loguru.cpp"
 
-#include "fasm.h"
+#include "compilation/fasm.h"
 
-#include "Hash.h"
-#include "ModuleVerification.h"
+#include "security/Hash.h"
+#include "security/ModuleVerification.h"
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack

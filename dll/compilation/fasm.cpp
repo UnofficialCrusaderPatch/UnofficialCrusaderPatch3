@@ -3,7 +3,7 @@
 #include "fasm.h"
 #include "windows.h"
 
-#include "Core.h"
+#include "core/Core.h"
 #include "MemoryModule.h"
 #include "InternalData.h"
 

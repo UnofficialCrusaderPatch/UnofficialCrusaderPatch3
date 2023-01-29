@@ -8,7 +8,7 @@
 
 #include "framework.h"
 #include "lua.hpp"
-#include "console.h"
+#include "console/console.h"
 #include <filesystem>
 #include <map>
 #include "zip.h"

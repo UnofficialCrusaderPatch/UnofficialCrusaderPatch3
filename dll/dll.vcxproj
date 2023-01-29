@@ -102,7 +102,7 @@
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,7 +124,7 @@
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,7 +175,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\vendor\loguru;$(ProjectDir)\vendor\MemoryModule;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -192,29 +192,29 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Core.h" />
-    <ClInclude Include="console.h" />
+    <ClInclude Include="core\Core.h" />
+    <ClInclude Include="console\console.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Hash.h" />
+    <ClInclude Include="security\Hash.h" />
     <ClInclude Include="InternalData.h" />
-    <ClInclude Include="LuaIO.h" />
-    <ClInclude Include="LuaUtil.h" />
-    <ClInclude Include="ModuleVerification.h" />
+    <ClInclude Include="lua\LuaIO.h" />
+    <ClInclude Include="lua\LuaUtil.h" />
+    <ClInclude Include="security\ModuleVerification.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="internal-data-def.h" />
-    <ClInclude Include="fasm.h" />
+    <ClInclude Include="compilation\fasm.h" />
     <ClInclude Include="ucp3-basic.h" />
     <ClInclude Include="vendor\MemoryModule\MemoryModule.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core.cpp" />
-    <ClCompile Include="console.cpp" />
+    <ClCompile Include="core\Core.cpp" />
+    <ClCompile Include="console\console.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="InternalData.cpp" />
-    <ClCompile Include="LuaIO.cpp" />
-    <ClCompile Include="fasm.cpp" />
-    <ClCompile Include="LuaUtil.cpp" />
+    <ClCompile Include="lua\LuaIO.cpp" />
+    <ClCompile Include="compilation\fasm.cpp" />
+    <ClCompile Include="lua\LuaUtil.cpp" />
     <ClCompile Include="ucp3-basic.cpp" />
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
   </ItemGroup>
