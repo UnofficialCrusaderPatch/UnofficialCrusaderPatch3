@@ -200,7 +200,9 @@
     <ClInclude Include="console\console.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="io\utils.h" />
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
+    <ClInclude Include="lua\LuaListDirectories.h" />
     <ClInclude Include="security\Hash.h" />
     <ClInclude Include="security\InternalData.h" />
     <ClInclude Include="lua\LuaIO.h" />
@@ -216,7 +218,9 @@
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="console\console.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="io\utils.cpp" />
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
+    <ClCompile Include="lua\LuaListDirectories.cpp" />
     <ClCompile Include="security\InternalData.cpp" />
     <ClCompile Include="lua\LuaIO.cpp" />
     <ClCompile Include="compilation\fasm.cpp" />
