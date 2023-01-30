@@ -53,4 +53,11 @@ public:
 	void loadZippedModules();
 
 	void log(int logLevel, std::string message);
+
+#ifdef COMPILED_MODULES
+	const inline bool secureMode = true;
+#else
+	const bool secureMode = false;
+#endif
+
 };
