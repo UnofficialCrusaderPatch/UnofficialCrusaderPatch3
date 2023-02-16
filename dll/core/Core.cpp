@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include "Core.h"
-#include "lua/LuaIO.h"
+#include "lua/LuaLoadLibrary.h"
 #include "lua/LuaUtil.h"
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaListDirectories.h"
@@ -15,7 +15,9 @@
 #include "compilation/fasm.h"
 
 #include "security/Hash.h"
-#include "security/ModuleVerification.h"
+#include "security/Store.h"
+#include "lua/Preload.h"
+#include "io/modules/ModuleHandle.h"
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
@@ -25,7 +27,7 @@ void addUtilityFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaListDirectories); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
 
-	lua_pushcfunction(L, LuaIO::luaWideCharToMultiByte);
+	lua_pushcfunction(L, LuaUtil::luaWideCharToMultiByte);
 	lua_setfield(L, -2, "WideCharToMultiByte");
 
 	lua_pushcfunction(L, luaAssemble);
@@ -54,7 +56,7 @@ void addIOFunctions(lua_State* L) {
 	lua_setfield(L, -2, "require"); //Overriding the global require
 	
 	* But we can also do this: */
-	std::string pre = LuaIO::readInternalFile("ucp/code/pre.lua");
+	std::string pre = ucp_code_pre;
 	if (luaL_loadbufferx(L, pre.c_str(), pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
 		std::cout << "ERROR in loading pre.lua" << lua_tostring(L, -1) << std::endl;
 		lua_pop(L, 1);
@@ -236,7 +238,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	return true;
 }
 
-bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& insideExtensionPath) {
+bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath) {
 
 	std::regex re("^ucp/+modules/+([A-Za-z0-9_.-]+)/+(.*)$");
 	std::filesystem::path path(sanitizedPath);
@@ -246,7 +248,7 @@ bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extensi
 		if (std::regex_search(sanitizedPath, m, re)) {
 			extension = m[1];
 			insideExtensionPath = m[2];
-
+			basePath = (Core::getInstance().UCP_DIR / "modules" / extension).string();
 			return true;
 
 		}
@@ -256,73 +258,23 @@ bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extensi
 	return false;
 }
 
+bool Core::pathIsInInternalCode(const std::string& sanitizedPath, std::string& insideCodePath) {
 
+	std::regex re("^ucp/+code/+(.*)$");
+	std::filesystem::path path(sanitizedPath);
 
-// TODO: reduce this to the required modules. So this should eventually be loaded from lua instead of at startup. Otherwise we lose performance because of modules that aren't even enabled!
-void Core::loadZippedModules() {
+	if (sanitizedPath.find("ucp/code/") == 0 || sanitizedPath == "ucp/code/") {
+		std::smatch m;
+		if (std::regex_search(sanitizedPath, m, re)) {
+			insideCodePath = m[1];
 
+			return true;
 
-	if (!ModuleVerifier::getInstance().initialize()) {
-#ifdef COMPILED_MODULES
-		VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot verify extensions because the folder with hashes is missing"));
-		return;
-#endif
-	}
-
-	try {
-		for (const auto& entry : std::filesystem::directory_iterator(this->UCP_DIR / "modules")) {
-			if (entry.is_directory()) {
-				std::string extensionName = entry.path().filename().string();
-				this->modulesDirMap[extensionName] = true;
-			}
-			else if (entry.is_regular_file()) {
-				if (entry.path().extension().string() == ".zip") {
-
-					std::string extensionName = entry.path().stem().string();
-
-					std::ifstream input(entry.path().string(), std::ios::binary);
-
-					std::vector<char> bytes(
-						(std::istreambuf_iterator<char>(input)),
-						(std::istreambuf_iterator<char>()));
-
-					input.close();
-
-					std::string hash;
-					std::string errorMsg;
-					if (!Hasher::getInstance().hash(bytes.data(), bytes.size(), hash, errorMsg)) {
-						VLOG_F(loguru::Verbosity_FATAL, errorMsg.c_str());
-						MessageBoxA(NULL, errorMsg.c_str(), "Error with hash verification", MB_OK);
-					}
-					else {
-
-						if (ModuleVerifier::getInstance().verify(extensionName, hash)) {
-							VLOG_F(loguru::Verbosity_INFO, ("Verified extension: " + extensionName).c_str());
-
-						}
-						else {
-							VLOG_F(loguru::Verbosity_WARNING, ("WARNING: Unverified content: " + extensionName + " " + hash).c_str());
-#ifdef COMPILED_MODULES
-							VLOG_F(loguru::Verbosity_FATAL, ("FATAL: Cannot run unverified module content: " + extensionName + " " + hash).c_str());
-							return;
-#endif
-						}
-
-					}
-
-					zip_t* z = zip_open(entry.path().string().c_str(), 0, 'r');
-					if (z == NULL) {
-						throw "Invalid zip file: " + entry.path().string();
-					}
-					
-					this->modulesZipMap[extensionName] = z;
-				}
-			}
 		}
+		return false;
 	}
-	catch (std::filesystem::filesystem_error e) {
-		throw ("Cannot find the path: " + e.path1().string());
-	}
+
+	return false;
 }
 
 void Core::initialize() {
@@ -378,90 +330,57 @@ void Core::initialize() {
 	addUtilityFunctions(this->L);
 	addIOFunctions(this->L);
 
-#ifdef COMPILED_MODULES
-	this->UCP_DIR = "ucp/";
+	ModuleHandle* mh;
 
-	loadZippedModules();
+	try {
+		mh = ModuleHandleManager::getInstance().getLatestCodeHandle();
 
-	std::string code = LuaIO::readInternalFile("ucp/code/main.lua");
-	if (code.empty()) {
-		MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist internally", "FATAL", MB_OK);
-		LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << "does not exist internally";
-	}
-	else {
-		if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
-			std::string errorMsg = std::string(lua_tostring(this->L, -1));
-			lua_pop(this->L, 1);
-			MessageBoxA(0, ("ERROR: failed to load ucp/code/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-			LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << errorMsg;
-		}
+		std::string mainPath = "main.lua";
+		std::string error;
+		FILE* f = mh->openFile(mainPath, error);
 
-		// Don't expect return values
-		if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
-			std::string errorMsg = std::string(lua_tostring(this->L, -1));
-			lua_pop(this->L, 1);
-			MessageBoxA(0, ("ERROR: failed to run ucp/code/main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-			LOG_S(FATAL) << "ERROR: failed to run ucp/code/main.lua: " << errorMsg;
-		}
-	}
-
-#else
-
-	/**
-	 * Allow UCP_DIR configuration via the command line.
-	 *
-	 */
-	char * ENV_UCP_DIR = std::getenv("UCP_DIR");
-	if (ENV_UCP_DIR != NULL) {
-		std::filesystem::path path = std::filesystem::path(ENV_UCP_DIR);
-		if (!path.is_absolute()) path = std::filesystem::current_path() / path;
-		this->UCP_DIR = path;
-	}
-
-	loadZippedModules();
-
-	std::filesystem::path mainPath = this->UCP_DIR / "code"/ "main.lua";
-
-	LOG_S(INFO) << "Running bootstrap file at: " << mainPath.string();
-
-	if (!std::filesystem::exists(mainPath)) {
-		MessageBoxA(0, ("Main file not found: " + mainPath.string()).c_str(), "FATAL", MB_OK);
-		LOG_S(FATAL) << "FATAL: Main file not found: " << mainPath << std::endl;
-	}
-	else {
-		std::ifstream t(mainPath.string());
-		std::stringstream buffer;
-		buffer << t.rdbuf();
-		std::string code = buffer.str();
-		if (code.empty()) {
-			MessageBoxA(0, "Could not execute main.lua: empty file", "FATAL", MB_OK);
-			LOG_S(FATAL) << "Could not execute main.lua: empty file";
+		if (f == NULL) {
+			MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist", "FATAL", MB_OK);
+			LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << "does not exist";
 		}
 		else {
-			if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
-				std::string errorMsg = std::string(lua_tostring(this->L, -1));
-				lua_pop(this->L, 1);
-				MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-				LOG_S(FATAL) << "Failed to load main.lua: " << errorMsg;
-				
-				
+			std::filebuf buf(f);
+			std::istream inp(&buf);
+			std::stringstream buffer;
+			buffer << inp.rdbuf();
+			std::string code = buffer.str();
+			if (code.empty()) {
+				MessageBoxA(0, "Could not execute main.lua: empty file", "FATAL", MB_OK);
+				LOG_S(FATAL) << "Could not execute main.lua: empty file";
 			}
+			else {
+				if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
+					std::string errorMsg = std::string(lua_tostring(this->L, -1));
+					lua_pop(this->L, 1);
+					MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+					LOG_S(FATAL) << "Failed to load main.lua: " << errorMsg;
 
-			// Don't expect return values
-			if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
-				std::string errorMsg = std::string(lua_tostring(this->L, -1));
-				lua_pop(this->L, 1);
-				MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
-				LOG_S(FATAL) << "Failed to run main.lua: " << errorMsg;
+
+				}
+
+				// Don't expect return values
+				if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
+					std::string errorMsg = std::string(lua_tostring(this->L, -1));
+					lua_pop(this->L, 1);
+					MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
+					LOG_S(FATAL) << "Failed to run main.lua: " << errorMsg;
+				}
+
+				LOG_S(INFO) << "Finished running bootstrap file";
 			}
-
-			LOG_S(INFO) << "Finished running bootstrap file";
 		}
-	}
 
-	
-	
-#endif
+
+	}
+	catch (ModuleHandleException e) {
+		MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist", "FATAL", MB_OK);
+		LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << "does not exist";
+	}
 	
 	if (this->hasConsole) {
 		consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);
@@ -476,4 +395,25 @@ void Core::initialize() {
 			CloseHandle(consoleThread);
 		}
 	}
+}
+
+bool Core::moduleExists(const std::string moduleFullName, bool& asZip, bool& asFolder) {
+
+	asFolder = std::filesystem::is_directory(std::filesystem::path("ucp/modules") / moduleFullName);
+	asZip = std::filesystem::is_regular_file(std::filesystem::path("ucp/modules") / (moduleFullName + ".zip"));
+
+	return asZip || asFolder;
+}
+
+
+bool Core::codeLocationExists(bool& asZip, bool& asFolder) {
+
+	asFolder = std::filesystem::is_directory(std::filesystem::path("ucp/code"));
+	asZip = std::filesystem::is_regular_file(std::filesystem::path("ucp/code.zip"));
+
+	return asZip || asFolder;
+}
+
+Store Core::getModuleHashStore() {
+	return *this->moduleHashStore;
 }

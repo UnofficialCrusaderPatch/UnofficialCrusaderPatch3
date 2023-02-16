@@ -1,10 +1,13 @@
 #pragma once
 
-#include "framework.h"
 
 #include <bcrypt.h>
 
 #include <sstream>
+
+#include <filesystem>
+#include <sstream>
+#include <fstream>
 
 
 #define NT_SUCCESS(Status)          (((NTSTATUS)(Status)) >= 0)
@@ -195,5 +198,23 @@ public:
 
 		return true;
 
+	}
+
+	bool hashFile(const std::string path, std::string& hash, std::string& errorMsg) {
+		std::filesystem::path fpath = std::filesystem::path(path);
+		if (!std::filesystem::is_regular_file(fpath)) {
+			errorMsg = "not a regular file: " + path;
+			return false;
+		}
+		
+		std::ifstream input(fpath.string(), std::ios::binary);
+
+		std::vector<char> bytes(
+			(std::istreambuf_iterator<char>(input)),
+			(std::istreambuf_iterator<char>()));
+
+		input.close();
+
+		return this->hash(bytes.data(), bytes.size(), hash, errorMsg);
 	}
 };

@@ -1,6 +1,7 @@
 
 #include "utils.h"
-#include <filesystem>
+
+#include <shlobj.h>
 
 /**
  * This function takes a path and sanitizes it. The result is in result.
@@ -36,3 +37,29 @@ bool sanitizeRelativePath(const std::string& path, std::string& result) {
 	return true;
 }
 
+std::vector<unsigned char> HexToBytes(const std::string& hex) {
+	std::vector<unsigned char> bytes;
+
+	for (unsigned int i = 0; i < hex.length(); i += 2) {
+		std::string byteString = hex.substr(i, 2);
+		unsigned char byte = (unsigned char)strtol(byteString.c_str(), NULL, 16);
+		bytes.push_back(byte);
+	}
+
+	return bytes;
+}
+
+bool getAppDataPath(std::filesystem::path& appDataPath) {
+	wchar_t* ppszPath;
+	HRESULT res = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &ppszPath);
+	if (res == S_OK) {
+		appDataPath = std::filesystem::path(ppszPath);
+		CoTaskMemFree(ppszPath);
+		return true;
+	}
+
+	CoTaskMemFree(ppszPath);
+
+	appDataPath = "";
+	return false;
+}

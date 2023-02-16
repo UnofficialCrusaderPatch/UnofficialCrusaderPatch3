@@ -1,17 +1,16 @@
 #pragma once
 
-
+#include "framework.h"
 #include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "core/Core.h"
 #include <regex>
 
 #include <string>
 #include "lua.hpp"
-#include "security/InternalData.h"
 
+#include "core/Core.h"
 #include "io/utils.h"
 
 namespace LuaIO {

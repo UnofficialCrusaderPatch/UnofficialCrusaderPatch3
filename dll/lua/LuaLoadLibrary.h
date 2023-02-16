@@ -9,9 +9,8 @@
 
 #include <string>
 #include "lua.hpp"
-#include "security/InternalData.h"
 
 namespace LuaIO {
 	int luaLoadLibrary(lua_State* L);
-	int luaWideCharToMultiByte(lua_State* L);
+
 }

@@ -6,4 +6,5 @@
 
 namespace LuaUtil {
 	int luaGetCurrentThreadID(lua_State* L);
+	int luaWideCharToMultiByte(lua_State* L);
 }
