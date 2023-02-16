@@ -79,12 +79,6 @@ namespace LuaIO {
 			return entries.size();
 		}
 
-		if (!Core::getInstance().resolvePath(rawPath, sanitizedPath, isInternal)) {
-			lua_pushnil(L);
-			lua_pushstring(L, sanitizedPath.c_str()); //error message
-			return 2;
-		}
-
 		lua_pushstring(L, sanitizedPath.c_str());
 		lua_replace(L, 1); // Replace the path 
 

@@ -70,19 +70,12 @@ public:
 	bool hasConsole = false;
 
 	bool sanitizePath(const std::string& path, std::string& result);
-	bool resolvePath(const std::string& path, std::string& result, bool& isInternal);
 
 	bool pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
 	bool moduleExists(const std::string moduleName, bool& asZip, bool& asFolder);
 
 	bool pathIsInInternalCode(const std::string& sanitizedPath, std::string& insideCodePath);
 	bool codeLocationExists(bool& asZip, bool& asFolder);
-
-	std::map<std::string, zip_t*> modulesZipMap;
-	std::map<std::string, bool> modulesDirMap;
-	void loadZippedModules();
-	zip_t* loadZippedModule(std::string extension, bool& success, std::string& message);
-	zip_t* getZippedModule(const std::string extension, bool& success, std::string& message);
 
 	Store getModuleHashStore();
 

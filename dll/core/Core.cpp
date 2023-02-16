@@ -174,35 +174,6 @@ void Core::log(int logLevel, std::string message) {
 	VLOG_F(logLevel, message.c_str());
 }
 
-bool Core::resolvePath(const std::string& path, std::string& result, bool& isInternal) {
-
-	isInternal = true;
-
-	if (!this->sanitizePath(path, result)) {
-		return false;
-	}
-
-	if (result.find("ucp/") == 0 || result == "ucp") {
-#ifdef COMPILED_MODULES
-		if (result == "ucp/plugins" || result.find("ucp/plugins/") == 0) {
-			result = (std::filesystem::current_path() / result).string();
-			isInternal = false;
-			return true;
-		}
-		isInternal = true;
-		return true;
-#else
-		result = (this->UCP_DIR / result.substr(4)).string();
-		isInternal = false;
-		return true;
-#endif
-	}
-
-	result = (std::filesystem::current_path() / result).string();
-	isInternal = false;
-	return true;
-}
-
 bool Core::sanitizePath(const std::string& path, std::string& result) {
 	std::string rawPath = path;
 

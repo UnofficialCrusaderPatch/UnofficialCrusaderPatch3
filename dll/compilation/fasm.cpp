@@ -104,12 +104,6 @@ int luaAssemble(lua_State* L) {
 	}
 
 	if (fasmState == 0) {
-		std::string path;
-		bool isInternal;
-		if (!Core::getInstance().resolvePath(fasmPath, path, isInternal)) {
-			return luaL_error(L, "could not resolve fasm dll path");
-		}
-
 		try {
 			ModuleHandle* mh = ModuleHandleManager::getInstance().getLatestCodeHandle();
 
