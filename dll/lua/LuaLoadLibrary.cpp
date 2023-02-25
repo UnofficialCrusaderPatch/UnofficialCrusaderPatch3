@@ -89,7 +89,7 @@ namespace LuaIO {
 
 			}
 			else {
-				throw "can only load libraries when in a module or shipped with ucp: " + sanitizedPath;
+				return luaL_error(L, ("can only load libraries when in a module or shipped with ucp: " + sanitizedPath).c_str());
 			}
 		}
 
