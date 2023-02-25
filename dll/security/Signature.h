@@ -1,129 +1,155 @@
 #pragma once
 
-#include "framework.h"
+#include "windows.h"
 
 #include <string>
 
-#include <bcrypt.h>
+#include <wincrypt.h>
+#include <winefs.h>
+#include <winscard.h>
 
 #include "io/utils.h"
 #include <intrin.h>
 
-#define KEY_BIT_SIZE 4096
-#define KEY_EXPONENT 65537
+#include "exceptions/MessageException.h"
 
-#pragma pack(1)
-struct PubKey {
-	BCRYPT_RSAKEY_BLOB header;
-	unsigned int exponent = 0;
-	unsigned char key[KEY_BIT_SIZE / 8];
+class SignatureVerificationException : public MessageException {
+	using MessageException::MessageException;
 };
+
 
 class SignatureVerifier {
 
 private:
-	BCRYPT_ALG_HANDLE algHandle = NULL;
-	BCRYPT_KEY_HANDLE keyHandle = NULL;
-	PubKey pubKey;
+	const char* pubKey = "-----BEGIN RSA PUBLIC KEY-----"
+"MIICCgKCAgEAtYS43FjOHiK8tF+jMvc5CUcHplCrlSMsM+xcvFq/mnAdyXnOLOYw"
+"QoF7eT/JzW0kDUbtQwCqQi2H+wPDE+A2UK31eKwAtoqExTx2wfUFTEzC/k+572X0"
+"6utNzDIFLd0hWtLdw+QVj2E0GRLKdN7vUtCve5u1npGFMrYi+j0lw2y4Cb+v67dS"
+"vrAG/QLMALzqV1SK9zVel3/kC6qUDZ0w3GWjLgs1wclfHPMF/OL8qO62x2bvoDHT"
+"byZkYs0OMQF5wrYk4fwdfg5iDK7QAyTBB/O00/dwj1Th+lShOiLMB8CYXHf3maTU"
+"4kxMcagxuEIiZTHQ44ewAXADQhyxxwTFLHEUQ2J4SJPkxjQGZQMlOqG2HIRlP1KG"
+"xmHxzPMrlaL49B1PyBKSsleYTNnVb1Pc45y6uM5OagAGLF7MJ2xSgXKBINMIBYlG"
+"Vjdd6kYLwQTgeCUqBMk/lteSFrOE5Y1BGSkgyDgXJHZnj/HTCf4Bq/BqP33pX1+d"
+"nhQfTREY62Lsj+HkR5O94ObEAV0BNsncf38mvtCPrSTD0uvmw/Mt3sXnsd8Bks/k"
+"6nW1LdUj91sU3Wp+YEJRAT+licJSxlXxIwOtt/4gxo2ZCenfUfTMqFJbjmnsVC75"
+"Wi/igxc83NichuZ1g/ovLTY3yXL3gy9hn0pxPg7H8Rs1fw8WYqB1HM0CAwEAAQ=="
+"-----END RSA PUBLIC KEY-----";
+
+	SignatureVerifier() {
+
+	}
 
 public:
-	SignatureVerifier(std::string publicKey) {
-	
-		std::vector<unsigned char> keyData = HexToBytes(publicKey);
-		std::reverse(keyData.begin(), keyData.end());
-	
-		if (keyData.size() != (KEY_BIT_SIZE / 8)) {
-			throw "invalid public key size";
-		}
-		
-		NTSTATUS openStatus = BCryptOpenAlgorithmProvider(&this->algHandle, BCRYPT_RSA_ALGORITHM, MS_PRIMITIVE_PROVIDER, 0);
-		if (openStatus != 0) {
-
-			MessageBoxA(NULL, "bcrypt open error: " + openStatus, "bcrypt error", MB_OK);
-
-			/*if (openStatus == STATUS_NOT_FOUND) {
-				MessageBoxA(NULL, "not found", "bcrypt error", MB_OK);
-			}
-
-			if (openStatus == STATUS_INVALID_PARAMETER) {
-				MessageBoxA(NULL, "invalid parameter", "bcrypt error", MB_OK);
-			}
-
-			if (openStatus == STATUS_NO_MEMORY) {
-				MessageBoxA(NULL, "no memory", "bcrypt error", MB_OK);
-			}*/
-
-			return;
-		}
-
-		/**
-		int structSize = sizeof(BCRYPT_RSAKEY_BLOB) + (keyData.size() + publicExponentData.size());
-		BCRYPT_RSAKEY_BLOB* rsaKey = (BCRYPT_RSAKEY_BLOB*)calloc(1, structSize);
-		if (rsaKey == NULL || rsaKey == 0) {
-			MessageBoxA(NULL, "couldnt allocate struct", "bcrypt error", MB_OK);
-			return;
-		}
-		rsaKey->Magic = BCRYPT_RSAPUBLIC_MAGIC;
-		rsaKey->BitLength = 4096;
-		rsaKey->cbPublicExp = publicExponentData.size();
-		rsaKey->cbModulus = keyData.size();
-		rsaKey->cbPrime1 = 0;
-		rsaKey->cbPrime2 = 0;
-		
-		memcpy(rsaKey + sizeof(BCRYPT_RSAKEY_BLOB), publicExponentData.data(), publicExponentData.size()); // address to write the actual bytes to
-		memcpy(rsaKey + sizeof(BCRYPT_RSAKEY_BLOB) + publicExponentData.size(), keyData.data(), keyData.size()); // address to write the actual bytes to  */
-
-		this->pubKey.header.Magic = BCRYPT_RSAPUBLIC_MAGIC;
-		this->pubKey.header.BitLength = KEY_BIT_SIZE;
-		this->pubKey.header.cbPublicExp = sizeof(unsigned int);
-		this->pubKey.header.cbModulus = keyData.size();
-		this->pubKey.header.cbPrime1 = 0;
-		this->pubKey.header.cbPrime2 = 0;
-		this->pubKey.exponent = _byteswap_ulong(KEY_EXPONENT);
-		memcpy(&this->pubKey.key, keyData.data(), keyData.size()); // address to write the actual bytes to
-
-		NTSTATUS importStatus = BCryptImportKeyPair(this->algHandle, NULL, BCRYPT_RSAPUBLIC_BLOB, &this->keyHandle, (PUCHAR) &this->pubKey, sizeof(PubKey), BCRYPT_NO_KEY_VALIDATION);
-
-		if (importStatus != 0) {
-
-			MessageBoxA(NULL, "bcrypt import error: " + importStatus, "bcrypt error", MB_OK);
-
-			/*if (importStatus == STATUS_INVALID_HANDLE) {
-				MessageBoxA(NULL, "invalid handle", "bcrypt error", MB_OK);
-			}
-
-			if (importStatus == STATUS_INVALID_PARAMETER) {
-				MessageBoxA(NULL, "invalid parameter", "bcrypt error", MB_OK);
-			}
-
-			if (importStatus == STATUS_NOT_SUPPORTED) {
-				MessageBoxA(NULL, "not supported", "bcrypt error", MB_OK);
-			}*/
-
-			return;
-		}
-
+	static SignatureVerifier& getInstance()
+	{
+		static SignatureVerifier    instance; // Guaranteed to be destroyed.
+							  // Instantiated on first use.
+		return instance;
 	}
 
 
-	bool verify(std::string hash, std::string signedHash, std::string& error) {
-		std::vector<unsigned char> hashBytes = HexToBytes(hash);
-		std::vector<unsigned char> signedHashBytes = HexToBytes(signedHash);
-		BCRYPT_PKCS1_PADDING_INFO padding;
-		// padding.pszAlgId = BCRYPT_SHA256_ALGORITHM;
-		padding.pszAlgId = NULL;
-		NTSTATUS verifStatus = BCryptVerifySignature(keyHandle, (void*)&padding, hashBytes.data(), hashBytes.size(), signedHashBytes.data(), signedHashBytes.size(), BCRYPT_PAD_PKCS1);
+	SignatureVerifier(SignatureVerifier const&) = delete;
+	void operator=(SignatureVerifier const&) = delete;
 
-		if (verifStatus == 0) {
-			return true;
+
+	bool verify(unsigned char* data, int dataLen, unsigned char* signature, int signatureLen, std::string& error) {
+		/***************************************************
+		 * Import the public key and verify the signature
+		 ***************************************************/
+
+		DWORD dwBufferLen = 0, cbKeyBlob = 0, cbSignature = 0;
+		LPBYTE pbBuffer = NULL, pbKeyBlob = NULL, pbSignature = NULL;
+		HCRYPTPROV hProv = NULL;
+		HCRYPTKEY hKey = NULL;
+		HCRYPTHASH hHash = NULL;
+
+		bool status = false;
+
+		if (!CryptStringToBinaryA(pubKey, 0, CRYPT_STRING_BASE64HEADER, NULL, &dwBufferLen, NULL, NULL))
+		{
+			error = "Failed to convert BASE64 public key. Error 0x%.8X\n" + GetLastError();
+			goto main_exit;
 		}
 
-		/*if (verifStatus == STATUS_INVALID_SIGNATURE) {
-			error = "invalid signature";
-			return false;
-		}*/
+		pbBuffer = (LPBYTE)LocalAlloc(0, dwBufferLen);
+		if (pbBuffer == 0) {
 
-		error = "error when verifying signature: " + verifStatus;
-		return false;
+			goto main_exit;
+		}
+
+		if (!CryptStringToBinaryA(pubKey, 0, CRYPT_STRING_BASE64HEADER, pbBuffer, &dwBufferLen, NULL, NULL))
+		{
+			error =  ("Failed to convert BASE64 public key. Error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		if (!CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pbBuffer, dwBufferLen, 0, NULL, NULL, &cbKeyBlob))
+		{
+			error = ("Failed to parse public key. Error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		pbKeyBlob = (LPBYTE)LocalAlloc(0, cbKeyBlob);
+		if (pbKeyBlob == 0) {
+
+			goto main_exit;
+		}
+
+		if (!CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pbBuffer, dwBufferLen, 0, NULL, pbKeyBlob, &cbKeyBlob))
+		{
+			error = ("Failed to parse public key. Error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		if (!CryptAcquireContextA(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
+		{
+			error = ("CryptAcquireContext failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		if (pbKeyBlob == 0) {
+
+			goto main_exit;
+		}
+		if (!CryptImportKey(hProv, pbKeyBlob, cbKeyBlob, NULL, 0, &hKey))
+		{
+			error = ("CryptImportKey for public key failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		// Hash the data
+		if (!CryptCreateHash(hProv, CALG_SHA_256, NULL, 0, &hHash))
+		{
+			error = ("CryptCreateHash failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		if (!CryptHashData(hHash, (LPCBYTE)data, dataLen, 0))
+		{
+			error = ("CryptHashData failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		// Sign the hash using our imported key
+		if (!CryptVerifySignatureA(hHash, signature, signatureLen, hKey, NULL, 0))
+		{
+			error = ("Signature verification failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
+		}
+
+		error = ("Signature verified successfully!\n\n");
+		status = true;
+
+	main_exit:
+		if (pbBuffer) LocalFree(pbBuffer);
+		if (pbKeyBlob) LocalFree(pbKeyBlob);
+		if (pbSignature) LocalFree(pbSignature);
+		if (hHash) CryptDestroyHash(hHash);
+		if (hKey) CryptDestroyKey(hKey);
+		if (hProv) CryptReleaseContext(hProv, 0);
+
+		return status;
 	}
+	
+
 };

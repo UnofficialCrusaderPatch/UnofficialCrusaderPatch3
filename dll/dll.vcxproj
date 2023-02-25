@@ -111,7 +111,7 @@
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalDependencies>bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugSecure|Win32'">
@@ -199,6 +199,7 @@
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="console\console.h" />
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
     <ClInclude Include="io\utils.h" />

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <bcrypt.h>
+#include <wincrypt.h>
 
 #include <sstream>
 
@@ -10,12 +10,33 @@
 #include <fstream>
 
 
-#define NT_SUCCESS(Status)          (((NTSTATUS)(Status)) >= 0)
+class Hasher {
+private:
+	Hasher() {};
 
-#define STATUS_UNSUCCESSFUL         ((NTSTATUS)0xC0000001L)
 
-class Hasher
-{
+	std::string hexStr(const uint8_t* data, int len)
+	{
+		std::stringstream ss;
+		ss << std::hex;
+
+		for (int i(0); i < len; ++i)
+			ss << std::setw(2) << std::setfill('0') << (int)data[i];
+
+		return ss.str();
+	}
+
+	std::vector<unsigned char> HexToBytes(const std::string& hex) {
+		std::vector<unsigned char> bytes;
+
+		for (unsigned int i = 0; i < hex.length(); i += 2) {
+			std::string byteString = hex.substr(i, 2);
+			unsigned char byte = (unsigned char)strtol(byteString.c_str(), NULL, 16);
+			bytes.push_back(byte);
+		}
+
+		return bytes;
+	};
 
 public:
 	static Hasher& getInstance()
@@ -29,175 +50,60 @@ public:
 	Hasher(Hasher const&) = delete;
 	void operator=(Hasher const&) = delete;
 
-	/** If we need a destructor, put this there:
-	* 
-	if (hAlg)
-	{
-		BCryptCloseAlgorithmProvider(hAlg, 0);
-	}
 
-	if (hHash)
-	{
-		BCryptDestroyHash(hHash);
-	}
+	bool hash(unsigned char* data, size_t dataLen, std::string& result, std::string& error) {
 
-	if (pbHashObject)
-	{
-		HeapFree(GetProcessHeap(), 0, pbHashObject);
-	}
+		HCRYPTPROV hProv = NULL;
+		HCRYPTHASH hHash = NULL;
 
-	if (pbHash)
-	{
-		HeapFree(GetProcessHeap(), 0, pbHash);
-	}
+		BYTE hash[32];
+		DWORD hashLength = 32;
 
-	 */
+		bool status = false;
 
-private:
-
-	BCRYPT_ALG_HANDLE       hAlg = NULL;
-	BCRYPT_HASH_HANDLE      hHash = NULL;
-	NTSTATUS                status = STATUS_UNSUCCESSFUL;
-	DWORD                   cbData = 0,
-		cbHash = 0,
-		cbHashObject = 0;
-	PBYTE                   pbHashObject = NULL;
-	PBYTE                   pbHash = NULL;
-
-	Hasher() {
-
-
-
-		char msg[301];
-
-		//open an algorithm handle
-		if (!NT_SUCCESS(status = BCryptOpenAlgorithmProvider(
-			&hAlg,
-			BCRYPT_SHA256_ALGORITHM,
-			NULL,
-			0)))
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
 		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptOpenAlgorithmProvider\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			throw msg;
-			//goto Cleanup;
+			error = ("CryptAcquireContext failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
 		}
 
-		//calculate the size of the buffer to hold the hash object
-		if (!NT_SUCCESS(status = BCryptGetProperty(
-			hAlg,
-			BCRYPT_OBJECT_LENGTH,
-			(PBYTE)&cbHashObject,
-			sizeof(DWORD),
-			&cbData,
-			0)))
+		// Hash the data
+		if (!CryptCreateHash(hProv, CALG_SHA_256, NULL, 0, &hHash))
 		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptGetProperty\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			throw msg;
-			//goto Cleanup;
+			error = ("CryptCreateHash failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
 		}
 
-		//allocate the hash object on the heap
-		pbHashObject = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbHashObject);
-		if (NULL == pbHashObject)
+		if (!CryptHashData(hHash, (LPCBYTE)data, dataLen, 0))
 		{
-			snprintf(msg, 300, "**** memory allocation failed\n"); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			throw msg;
-			//goto Cleanup;
-		}
-
-		//calculate the length of the hash
-		if (!NT_SUCCESS(status = BCryptGetProperty(
-			hAlg,
-			BCRYPT_HASH_LENGTH,
-			(PBYTE)&cbHash,
-			sizeof(DWORD),
-			&cbData,
-			0)))
-		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptGetProperty\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			throw msg;
-			//goto Cleanup;
-		}
-
-		//allocate the hash buffer on the heap
-		pbHash = (PBYTE)HeapAlloc(GetProcessHeap(), 0, cbHash);
-		if (NULL == pbHash)
-		{
-			snprintf(msg, 300, "**** memory allocation failed\n"); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			throw msg;
-			//goto Cleanup;
-		}
-	
-	};
-
-public:
-
-	bool hash(char* data, size_t size, std::string& hash, std::string& errorMsg) {
-
-		char msg[301];
-
-		//create a hash
-		if (!NT_SUCCESS(status = BCryptCreateHash(
-			hAlg,
-			&hHash,
-			pbHashObject,
-			cbHashObject,
-			NULL,
-			0,
-			0)))
-		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptCreateHash\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			errorMsg = msg;
-			return false;
+			error = printf("CryptHashData failed with error 0x%.8X\n" + GetLastError());
+			goto main_exit;
 		}
 
 
-		//hash some data
-		if (!NT_SUCCESS(status = BCryptHashData(
+		if (CryptGetHashParam(
 			hHash,
-			(PBYTE)data,
-			size,
-			0)))
+			HP_HASHVAL,
+			hash,
+			&hashLength,
+			0))
 		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptHashData\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			errorMsg = msg;
-			return false;
+			result = hexStr(hash, hashLength);
+			status = true;
+		}
+		else
+		{
+			error = ("Error during reading hash value.");
+			goto main_exit;
 		}
 
-		//close the hash
-		if (!NT_SUCCESS(status = BCryptFinishHash(
-			hHash,
-			pbHash,
-			cbHash,
-			0)))
-		{
-			snprintf(msg, 300, "**** Error 0x%x returned by BCryptFinishHash\n", status); MessageBoxA(NULL, msg, "hash error", MB_OK);
-			errorMsg = msg;
-			return false;
-		}
+	main_exit:
+		if (hHash) CryptDestroyHash(hHash);
+		if (hProv) CryptReleaseContext(hProv, 0);
 
 
 
-		static const char characters[] = "0123456789ABCDEF";
-
-		// Zeroes out the buffer unnecessarily, can't be avoided for std::string.
-		std::string ret(cbHash * 2, 0);
-
-		// Hack... Against the rules but avoids copying the whole buffer.
-		auto buf = const_cast<char*>(ret.data());
-
-
-		for (int i = 0; i < cbHash; i++)
-		{
-			*buf++ = characters[pbHash[i] >> 4];
-			*buf++ = characters[pbHash[i] & 0x0F];
-		}
-
-		hash = ret;
-
-
-		return true;
-
+		return status;
 	}
 
 	bool hashFile(const std::string path, std::string& hash, std::string& errorMsg) {
@@ -206,7 +112,7 @@ public:
 			errorMsg = "not a regular file: " + path;
 			return false;
 		}
-		
+
 		std::ifstream input(fpath.string(), std::ios::binary);
 
 		std::vector<char> bytes(
@@ -215,6 +121,7 @@ public:
 
 		input.close();
 
-		return this->hash(bytes.data(), bytes.size(), hash, errorMsg);
+		return this->hash((unsigned char*) bytes.data(), bytes.size(), hash, errorMsg);
 	}
+
 };

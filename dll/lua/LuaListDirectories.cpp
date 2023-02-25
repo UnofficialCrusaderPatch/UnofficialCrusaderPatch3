@@ -11,8 +11,14 @@ namespace LuaIO {
 		int count = 0;
 
 		std::filesystem::path targetPath = rawPath;
+		if (rawPath.substr(0, 4) == "ucp/") {
+			targetPath = Core::getInstance().UCP_DIR / rawPath.substr(4);
+		}
+		
 
 		const std::filesystem::path zipExtension(".zip");
+
+
 
 		try {
 			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
@@ -56,8 +62,6 @@ namespace LuaIO {
 			return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 		}
 
-		bool isInternal;
-
 		std::string extension;
 		std::string insideExtensionPath;
 		std::string basePath;
@@ -83,6 +87,9 @@ namespace LuaIO {
 		lua_replace(L, 1); // Replace the path 
 
 		if (rawPath == "ucp/modules") {
+
+
+
 			return luaListFileSystemDirectories(L, true);
 		}
 

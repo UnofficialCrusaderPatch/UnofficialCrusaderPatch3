@@ -13,19 +13,7 @@
 #include "security/Hash.h"
 #include "io/utils.h"
 #include "MemoryModule.h"
-
-class MessageException : public std::exception {
-private:
-	std::string msg;
-public:
-	explicit MessageException(std::string msg) {
-		this->msg = msg;
-	}
-
-	char* what() {
-		return msg.data();
-	}
-};
+#include "exceptions/MessageException.h"
 
 class ModuleHandleException : public MessageException {
 	using MessageException::MessageException;
@@ -295,12 +283,12 @@ class ModuleHandleManager {
 
 private:
 
-	ModuleHandle* codeHandle;
+	ModuleHandle* codeHandle = NULL;
 	std::map<std::string, ModuleHandle*> moduleHandles;
 	std::map<std::string, std::string> moduleHandleErrors;
 
 	ModuleHandleManager() {
-
+		codeHandle = NULL;
 	}
 
 	bool verifyZipFile(std::string path, std::string name, std::string& errorMsg) {
@@ -403,6 +391,10 @@ public:
 		long latestV1 = -1;
 		long latestV2 = -1;
 		long latestV3 = -1;
+
+		if (!std::filesystem::is_directory(Core::getInstance().UCP_DIR)) {
+			throw ModuleHandleException("cannot get latest code handle because directory does not exist: " + Core::getInstance().UCP_DIR.string());
+		}
 
 		for (auto const& dir_entry : std::filesystem::directory_iterator(Core::getInstance().UCP_DIR)) {
 			std::string filename = dir_entry.path().stem().string();
