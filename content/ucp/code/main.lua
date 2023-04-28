@@ -50,10 +50,11 @@ data.cache.DefaultConfigCache:loadFromFile()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
-user_config = config.ConfigHandler.loadUserConfig()
+userConfig = config.ConfigHandler.loadUserConfig()
+config.ConfigHandler.validateUserConfig(userConfig)
 
 ---Early bail out of UCP
-if user_config.active == false then
+if userConfig.active == false then
     log(WARNING, "[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")
     return nil
 end
@@ -66,10 +67,14 @@ config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.Pl
 
 extensionsInLoadOrder = {}
 
-if user_config.order == nil then
-    log(FATAL, "user config does not contain an extension load 'order'")    
+fullUserConfig = userConfig['config-full']
+
+loadOrder = fullUserConfig['load-order']
+
+if loadOrder == nil then
+    log(FATAL, "user config does not contain 'load-order'")    
 else
-  for k, req in pairs(user_config.order) do
+  for k, req in pairs(loadOrder) do
     local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
     if m == nil then
       log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
@@ -83,11 +88,19 @@ end
 ---Low level conflict checking should be done when setting the user config
 
 joinedUserConfig = {}
-for k, v in pairs(user_config.modules) do
+for k, v in pairs(fullUserConfig.modules) do
   local key = k .. "-" .. v.version
-  local options = v.options
-  joinedUserConfig[key] = options
+  local config = v.config
+  joinedUserConfig[key] = config
 end
+for k, v in pairs(fullUserConfig.plugins) do
+  local key = k .. "-" .. v.version
+  local config = v.config
+  joinedUserConfig[key] = config
+end
+
+--[[
+-- The defaultConfig is kept in this file for now. We probably want its capabilities in the future...
 
 defaultConfig = {}
 for k, ext in pairs(extensionsInLoadOrder) do
@@ -97,10 +110,14 @@ end
 
 data.cache.DefaultConfigCache:saveToFile()
 
+--]]
+
 allActiveExtensions = extensionsInLoadOrder
 
----Resolve the user and default config to a final config
-configFinal = config.merger.resolveToFinalConfig(allActiveExtensions, joinedUserConfig, defaultConfig)
+---Resolve the user and default config to a final config.
+-- configFinal = config.merger.resolveToFinalConfig(allActiveExtensions, joinedUserConfig, defaultConfig)
+configFinal = joinedUserConfig
+config.ConfigHandler.normalizeContentsValues(configFinal)
 
 local handle, err = io.open(".ucp-final-config-cache", 'w')
 handle:write(json:encode(configFinal))
