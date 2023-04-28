@@ -75,7 +75,7 @@ return {
     
         log(DEBUG, "loading ucp changes")
 
-        local features = {}
+        local features = utils.OrderedTable:new()
 
         local sortedChanges = {}
         for change, opts in pairs(config) do
