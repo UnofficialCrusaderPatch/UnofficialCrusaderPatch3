@@ -1,5 +1,5 @@
 ---Version declarations, can be checked by modules
-API_VERSION = "0.0.1"
+LUA_API_VERSION = "1.0.0"
 UCP_VERSION = "3.0.0"
 
 ---Variable to indicate to show debug information
