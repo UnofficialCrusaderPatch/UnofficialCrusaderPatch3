@@ -165,4 +165,55 @@ function string.split (inputstr, sep)
   return t
 end
 
+namespace.OrderedTable = {
+  new = function(self)
+    local o = {
+
+    }
+
+    local keyOrder = {}
+
+    local ot = setmetatable({}, {
+
+      __index = function(self, k)
+        return o[k]
+      end,
+
+      __newindex = function(self, k, v)
+        table.insert(keyOrder, k)
+        o[k] = v
+      end,
+
+      __ipairs = function(self)
+        error("using ipairs on an OrderedTable is probably not want you want")
+      end,
+
+      __pairs = function(self)
+
+        -- Iterator function takes the table and an index and returns the next index and associated value
+        -- or nil to end iteration
+
+        local i = nil
+
+        local function stateless_iter(tbl, k)
+          local k
+          -- Implemented own key,value selection logic in place of next
+          i, k = next(keyOrder, i)
+          if nil~=k then 
+            return k, o[k] 
+          end
+        end
+
+        -- Return an iterator function, the table, starting point
+        return stateless_iter, self, nil
+      end,
+    })
+
+    self.__index = self
+
+    return ot
+  end,
+
+}
+
 return namespace
