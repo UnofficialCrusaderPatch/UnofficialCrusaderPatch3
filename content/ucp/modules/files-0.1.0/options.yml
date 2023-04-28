@@ -1,9 +1,33 @@
-disable-game-maps:
-  type: boolean
-  default: false
-disable-user-maps: 
-  type: boolean
-  default: false
-disable-user-savs:
-  type: boolean
-  default: false
+- category:
+  - Advanced
+  - Files
+  name: disable-game-maps
+  header: '{{disable-game-maps}}'
+  text: '{{disable-game-maps_descr}}'
+  display: UCP2Switch
+  url: disable-game-maps
+  contents:
+    type: boolean
+    value: false
+- category:
+  - Advanced
+  - Files
+  name: disable-user-maps
+  header: '{{disable-user-maps}}'
+  text: '{{disable-user-maps_descr}}'
+  display: UCP2Switch
+  url: disable-user-maps
+  contents:
+    type: boolean
+    value: false
+- category:
+  - Advanced
+  - Files
+  name: disable-user-savs
+  header: '{{disable-user-savs}}'
+  text: '{{disable-user-savs_descr}}'
+  display: UCP2Switch
+  url: disable-user-savs
+  contents:
+    type: boolean
+    value: false

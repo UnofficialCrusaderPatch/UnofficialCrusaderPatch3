@@ -1,8 +1,44 @@
-# Example usage:
-#rat:
-#  1: 'ucp\plugins\myplugin\aiv1.aiv'
-#  2: ''
-#  3: ''
-#snake:
-#  5: ''
-dummy: ''
+- category:
+  - Advanced
+  - AIC
+  name: aic_rat
+  header: '{{aic_rat}}'
+  text: '{{aic_rat_descr}}'
+  display: Text
+  url: rat
+  contents:
+    type: string
+    value: ""
+- category:
+  - Advanced
+  - AIC
+  name: aic_snake
+  header: '{{aic_snake}}'
+  text: '{{aic_snake_descr}}'
+  display: Text
+  url: snake
+  contents:
+    type: string
+    value: ""
+- category:
+  - Advanced
+  - AIC
+  name: aic_wolf
+  header: '{{aic_wolf}}'
+  text: '{{aic_wolf_descr}}'
+  display: Text
+  url: wolf
+  contents:
+    type: string
+    value: ""
+- category:
+  - Advanced
+  - AIC
+  name: aic_pig
+  header: '{{aic_pig}}'
+  text: '{{aic_pig_descr}}'
+  display: Text
+  url: pig
+  contents:
+    type: string
+    value: ""

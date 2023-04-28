@@ -1,3 +1,11 @@
-aicFiles:
-  default:
-    - []
+- category:
+  - Advanced
+  - AIC
+  name: aicFiles
+  header: '{{aicFiles}}'
+  text: '{{aicFiles_descr}}'
+  display: List
+  url: aicFiles
+  contents:
+    type: array
+    value: []
