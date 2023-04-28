@@ -46,7 +46,7 @@ require("logging")
 
 data.version.initialize()
 data.cache.AOB.loadFromFile()
-data.cache.DefaultConfigCache:loadFromFile()
+-- data.cache.DefaultConfigCache:loadFromFile()
 
 ---Load the config file
 ---Note: not yet declared as local because it is convenient to access in the console
