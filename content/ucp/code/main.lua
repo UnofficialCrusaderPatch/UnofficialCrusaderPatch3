@@ -162,12 +162,12 @@ for k, ext in pairs(allActiveExtensions) do
 end
 
 (function() 
-  local f = io.open("ucp/dev.lua", 'r')
+  local f = io.open("ucp/code/dev.lua", 'r')
   if not f then return end
   
-  print("loading 'ucp/dev.lua'")
+  print("loading 'ucp/code/dev.lua'")
   
-  local f, err = load(f:read("*all"), "ucp/dev.lua")
+  local f, err = load(f:read("*all"), "ucp/code/dev.lua")
   if not f then
     print("\t" .. err)
   end
