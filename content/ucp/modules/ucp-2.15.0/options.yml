@@ -44,11 +44,12 @@
   hasHeader: true
   display: UCP2Slider
   url: ucp.ai_attacklimit.value
-  min: 0
-  max: 500
-  step: 1
   contents:
-    type: integer
+    min: 0
+    max: 500
+    step: 1
+    decimals: 0
+    type: number
     value:
       enabled: false
       sliderValue: 200
@@ -72,14 +73,14 @@
   hasHeader: true
   display: UCP2RadioGroup
   url: ucp.ai_attacktarget
-  choices:
-  - name: nearest
-    text: '{{ai_attacktarget_nearest}}'
-  - name: richest
-    text: '{{ai_attacktarget_richest}}'
-  - name: weakest
-    text: '{{ai_attacktarget_weakest}}'
   contents:
+    choices:
+    - name: nearest
+      text: '{{ai_attacktarget_nearest}}'
+    - name: richest
+      text: '{{ai_attacktarget_richest}}'
+    - name: weakest
+      text: '{{ai_attacktarget_weakest}}'
     value:
       enabled: false
       choice: ''
@@ -181,12 +182,13 @@
   - display: UCP2Slider
     text: '{{build_housing_descr}}'
     header: Set limit on houses
-    min: 0
-    max: 100
-    step: 1
     hasHeader: true
     url: ucp.ai_housing.build_housing
     contents:
+      min: 0
+      max: 100
+      step: 1
+      decimals: 0
       value:
         enabled: false
         sliderValue: 0
@@ -194,12 +196,13 @@
     name: campfire_housing
     text: '{{campfire_housing_descr}}'
     header: Set limit on idle paesants
-    min: 0
-    max: 25
-    step: 1
     hasHeader: true
     url: ucp.ai_housing.campfire_housing
     contents:
+      min: 0
+      max: 25
+      step: 1
+      decimals: 0
       value:
         enabled: false
         sliderValue: 0
@@ -253,10 +256,11 @@
   display: UCP2Slider
   url: ucp.ai_recruitstate_initialtimer
   hasHeader: true
-  min: 0
-  max: 30
-  step: 1
   contents:
+    min: 0
+    max: 30
+    step: 1
+    decimals: 0
     value:
       enabled: false
       sliderValue: 6
@@ -322,10 +326,11 @@
   display: UCP2Slider
   hasHeader: true
   url: ucp.o_default_multiplayer_speed
-  min: 20
-  max: 90
-  step: 1
   contents:
+    min: 20
+    max: 90
+    step: 1
+    decimals: 0
     value:
       enabled: false
       sliderValue: 40
@@ -347,10 +352,11 @@
   text: '{{o_firecooldown_descr}}'
   display: UCP2Slider
   url: ucp.o_firecooldown
-  min: 0
-  max: 20000
-  step: 1
   contents:
+    min: 0
+    max: 20000
+    step: 1
+    decimals: 0
     value:
       enabled: false
       sliderValue: 2000
@@ -487,25 +493,25 @@
   text: '{{o_playercolor_descr}}'
   display: UCP2RadioGroup
   hasHeader: true
-  url: ucp.o_playercolor
-  choices:
-  - name: 'red'
-    text: 'red'
-  - name: 'orange'
-    text: 'orange'
-  - name: 'yellow'
-    text: 'yellow'
-  - name: 'blue'
-    text: 'blue'
-  - name: 'black'
-    text: 'black'
-  - name: 'purple'
-    text: 'purple'
-  - name: 'lightblue'
-    text: 'lightblue'
-  - name: 'green'
-    text: 'green' 
+  url: ucp.o_playercolor 
   contents:
+    choices:
+    - name: 'red'
+      text: 'red'
+    - name: 'orange'
+      text: 'orange'
+    - name: 'yellow'
+      text: 'yellow'
+    - name: 'blue'
+      text: 'blue'
+    - name: 'black'
+      text: 'black'
+    - name: 'purple'
+      text: 'purple'
+    - name: 'lightblue'
+      text: 'lightblue'
+    - name: 'green'
+      text: 'green'
     value:
       enabled: false
       choice: 'red'
@@ -543,14 +549,14 @@
     hasHeader: true
     display: UCP2RadioGroup
     url: ucp.o_seed_modification_possibility_title
-    choices:
-    - name: o_seed_modification_possibility_only_set
-      text: '{{o_seed_modification_possibility_only_set}}'
-      subtext: '{{o_seed_modification_possibility_only_set_descr}}'
-    - name: o_seed_modification_possibility
-      text: '{{o_seed_modification_possibility}}'
-      subtext: '{{o_seed_modification_possibility_descr}}'
     contents:
+      choices:
+      - name: o_seed_modification_possibility_only_set
+        text: '{{o_seed_modification_possibility_only_set}}'
+        subtext: '{{o_seed_modification_possibility_only_set_descr}}'
+      - name: o_seed_modification_possibility
+        text: '{{o_seed_modification_possibility}}'
+        subtext: '{{o_seed_modification_possibility_descr}}'
       value:
         enabled: false
         choice: ''
