@@ -76,8 +76,15 @@ return {
         log(DEBUG, "loading ucp changes")
 
         local features = {}
-        
+
+        local sortedChanges = {}
         for change, opts in pairs(config) do
+          table.insert(sortedChanges, change)
+        end
+        table.sort(sortedChanges)
+        
+        for _, change in pairs(sortedChanges) do
+          local opts = config[change]
           -- Only load a change if anything of that change is enabled
           if (opts.enabled and opts.enabled == true) or anyChildTrue(opts) then
             if changes[change] ~= nil then
