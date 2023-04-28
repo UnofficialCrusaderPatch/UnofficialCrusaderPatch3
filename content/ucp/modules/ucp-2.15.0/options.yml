@@ -1,214 +1,712 @@
-ai_access:
-  enabled:
-    default: false
-ai_addattack:
-  ai_addattack:
-    enabled:
-      default: false
-    choice:
-      default: ''
+- category:
+  - AI
+  - Buildings
+  name: ai_access
+  header: '{{ai_access}}'
+  text: '{{ai_access_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_access.enabled
+  contents:
+    type: boolean
+    value: false
+- category: [AI, Attack]
+  name: ai_addattack_ui_alt
+  display: UCP2SliderChoice
+  hasHeader: true
+  header: '{{ai_addattack}}'
+  url: ucp.ai_addattack
+  contents:
+    value:
+      enabled: false
+      choice: ''
+      choices:
+        absolute:
+          slider: 5
+        relative:
+          slider: 0.3
     choices:
-      absolute:
-        slider:
-          default: 5
-      relative:
-        slider:
-          default: 0.3
-ai_attacklimit:
-  enabled:
-    default: false
-  slidervalue:
-    default: 200
-ai_assaultswitch:
-  enabled:
-    default: false
-ai_attacktarget:
-  enabled:
-    default: false
-  choice:
-    default: ''
-ai_attackwave:
-  enabled:
-    default: false
-ai_buywood:
-  enabled:
-    default: false
-ai_defense:
-  enabled:
-    default: false
-ai_demolish:
-  ai_demolish_walls:
-    enabled:
-      default: false
-  ai_demolish_trapped:
-    enabled:
-      default: false
-  ai_demolish_eco:
-    enabled:
-      default: false
-ai_fix_crusader_archers_pitch:
-  enabled:
-    default: false
-ai_fix_laddermen_with_enclosed_keep:
-  enabled:
-    default: false
-ai_housing:
-  build_housing:
-    enabled:
-      default: false
-    sliderValue:
-      default: 0
-  campfire_housing:
-    enabled:
-      default: false
-    sliderValue:
-      default: 0
-  delete_housing:
-    enabled: 
-      default: false
-ai_nosleep:
-  enabled:
-    default: false
-ai_rebuild:
-  enabled:
-    default: false
-ai_recruitinterval:
-  enabled:
-    default: false
-ai_recruitstate_initialtimer:
-  enabled:
-    default: false
-  sliderValue:
-    default: 6
-ai_tethers:
-  enabled:
-    default: false
-ai_towerengines:
-  enabled:
-    default: false
-fix_apple_orchard_build_size:
-  enabled:
-    default: false
-o_armory_marketplace_weapon_order_fix:
-  enabled:
-    default: false
-o_change_siege_engine_spawn_position_catapult:
-  enabled:
-    default: false
-o_default_multiplayer_speed:
-  enabled:
-    default: false
-  sliderValue:
-    default: 40
-o_engineertent:
-  enabled:
-    default: false
-o_firecooldown:
-  enabled:
-    default: false
-  sliderValue:
-    default: 2000
-o_fix_baker_disappear:
-  enabled:
-    default: false
-o_fix_fletcher_bug:
-  enabled:
-    default: false
-o_fix_ladderclimb:
-  enabled:
-    default: false
-o_fix_moat_digging_unit_disappearing:
-  enabled:
-    default: false
-o_freetrader:
-  enabled:
-    default: false
-o_gamespeed:
-  enabled:
-    default: false
-o_healer:
-  enabled:
-    default: false
-o_increase_path_update_tick_rate:
-  enabled:
-    default: false
-o_keys:
-  enabled:
-    default: false
-o_moatvisibility:
-  enabled:
-    default: false
-o_onlyai:
-  enabled:
-    default: false
-o_override_identity_menu:
-  enabled:
-    default: false
-o_playercolor:
-  enabled:
-    default: false
-  choice:
-    default: 'red'
-o_responsivegates:
-  enabled:
-    default: false
-o_restore_arabian_engineer_speech:
-  enabled:
-    default: false
-o_seed_modification_possibility_title:
-  enabled:
-    default: false
-  choice:
-    default: ''
-o_shfy:
-  o_shfy_beer:
-    enabled:
-      default: false
-  o_shfy_religion:
-    enabled:
-      default: false
-  o_shfy_peasantspawnrate:
-    enabled:
-      default: false
-  o_shfy_resourcequantity:
-    enabled:
-      default: false
-o_stop_player_keep_rotation:
-  enabled:
-    default: false
-o_xtreme:
-  enabled:
-    default: false
-u_arabwall:
-  enabled:
-    default: false
-u_arabxbow:
-  enabled:
-    default: false
-u_fireballistafix:
-  enabled:
-    default: false
-u_fix_applefarm_blocking:
-  enabled:
-    default: false
-u_fix_lord_animation_stuck_movement:
-  enabled:
-    default: false
-u_laddermen:
-  enabled:
-    default: false
-u_spearmen:
-  enabled:
-    default: false
-u_spearmen_run:
-  enabled:
-    default: false
-u_tanner_fix:
-  enabled:
-    default: false
-#u_priest_range_restriction:
-  #enabled:
-    #default: false
-#u_priest_range_check:
-  #enabled:
-    #default: false
+    - name: absolute
+      min: 0
+      max: 250
+      step: 1
+      text: '{{ai_addattack_descr}}'
+    - name: relative
+      min: 0.0
+      max: 3.0
+      step: 0.1
+      text: '{{ai_addattack_alt_descr}}'
+- category:
+  - AI
+  - Attack
+  name: ai_attacklimit
+  header: '{{ai_attacklimit}}'
+  text: '{{ai_attacklimit_descr}}'
+  hasHeader: true
+  display: UCP2Slider
+  url: ucp.ai_attacklimit.value
+  min: 0
+  max: 500
+  step: 1
+  contents:
+    type: integer
+    value:
+      enabled: false
+      sliderValue: 200
+- category:
+  - AI
+  - Attack
+  name: ai_assaultswitch
+  header: '{{ai_assaultswitch}}'
+  text: '{{ai_assaultswitch_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_assaultswitch.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Attack
+  name: ai_attacktarget
+  header: '{{ai_attacktarget}}'
+  text: '{{ai_attacktarget_weakest_descr}}'
+  hasHeader: true
+  display: UCP2RadioGroup
+  url: ucp.ai_attacktarget
+  choices:
+  - name: nearest
+    text: '{{ai_attacktarget_nearest}}'
+  - name: richest
+    text: '{{ai_attacktarget_richest}}'
+  - name: weakest
+    text: '{{ai_attacktarget_weakest}}'
+  contents:
+    value:
+      enabled: false
+      choice: ''
+- category:
+  - AI
+  - Attack
+  name: ai_attackwave
+  header: '{{ai_attackwave}}'
+  text: '{{ai_attackwave_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_attackwave.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Resources
+  name: ai_buywood
+  header: '{{ai_buywood}}'
+  text: '{{ai_buywood_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_buywood.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Units
+  name: ai_defense
+  header: '{{ai_defense}}'
+  text: '{{ai_defense_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_defense.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Buildings
+  display: Group
+  name: ai_demolish_group
+  children:
+  - name: ai_demolish
+    header: '{{ai_demolish}}'
+    text: '{{ai_demolish_eco_descr}}'
+    display: Paragraph
+  - name: ai_demolish_walls
+    display: UCP2Switch
+    header: '{{ai_demolish_walls}}'
+    url: ucp.ai_demolish.ai_demolish_walls.enabled
+    contents:
+      value: false
+      type: boolean
+  - name: ai_demolish_trapped
+    display: UCP2Switch
+    header: '{{ai_demolish_trapped}}'
+    url: ucp.ai_demolish.ai_demolish_trapped.enabled
+    contents:
+      value: false
+      type: boolean
+  - name: ai_demolish_eco
+    display: UCP2Switch
+    header: '{{ai_demolish_eco}}'
+    url: ucp.ai_demolish.ai_demolish_eco.enabled
+    contents:
+      value: false
+      type: boolean 
+- category:
+  - AI
+  - Units
+  name: ai_fix_crusader_archers_pitch
+  header: '{{ai_fix_crusader_archers_pitch}}'
+  text: '{{ai_fix_crusader_archers_pitch_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_fix_crusader_archers_pitch.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Units
+  name: ai_fix_laddermen_with_enclosed_keep
+  header: '{{ai_fix_laddermen_with_enclosed_keep}}'
+  text: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_fix_laddermen_with_enclosed_keep.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Buildings
+  header: '{{ai_housing}}'
+  name: ai_housing_group
+  display: Group
+  children:
+  - display: Paragraph
+    header: '{{ai_housing}}'
+  - display: UCP2Slider
+    text: '{{build_housing_descr}}'
+    header: Set limit on houses
+    min: 0
+    max: 100
+    step: 1
+    hasHeader: true
+    url: ucp.ai_housing.build_housing
+    contents:
+      value:
+        enabled: false
+        sliderValue: 0
+  - display: UCP2Slider
+    name: campfire_housing
+    text: '{{campfire_housing_descr}}'
+    header: Set limit on idle paesants
+    min: 0
+    max: 25
+    step: 1
+    hasHeader: true
+    url: ucp.ai_housing.campfire_housing
+    contents:
+      value:
+        enabled: false
+        sliderValue: 0
+  - display: UCP2Switch
+    name: delete_housing
+    header: '{{delete_housing}}'
+    text: '{{delete_housing_descr}}'
+    url: ucp.ai_housing.delete_housing.enabled
+    contents:
+      value: false
+      type: boolean
+- category:
+  - AI
+  - Buildings
+  name: ai_nosleep
+  header: '{{ai_nosleep}}'
+  text: '{{ai_nosleep_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_nosleep.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Buildings
+  name: ai_rebuild
+  header: '{{ai_rebuild}}'
+  text: '{{ai_rebuild_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_rebuild.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Units
+  name: ai_recruitinterval
+  header: '{{ai_recruitinterval}}'
+  text: '{{ai_recruitinterval_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_recruitinterval.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Units
+  name: ai_recruitstate_initialtimer
+  header: '{{ai_recruitstate_initialtimer}}'
+  text: '{{ai_recruitstate_initialtimervalue_descr}}'
+  display: UCP2Slider
+  url: ucp.ai_recruitstate_initialtimer
+  hasHeader: true
+  min: 0
+  max: 30
+  step: 1
+  contents:
+    value:
+      enabled: false
+      sliderValue: 6
+- category:
+  - AI
+  - Buildings
+  name: ai_tethers
+  header: '{{ai_tethers}}'
+  text: '{{ai_tethers_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_tethers.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - AI
+  - Units
+  name: ai_towerengines
+  header: '{{ai_towerengines}}'
+  text: '{{ai_towerengines_descr}}'
+  display: UCP2Switch
+  url: ucp.ai_towerengines.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - Buildings
+  name: fix_apple_orchard_build_size
+  header: '{{fix_apple_orchard_build_size}}'
+  text: '{{fix_apple_orchard_build_size_descr}}'
+  display: UCP2Switch
+  url: ucp.fix_apple_orchard_build_size.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - UI
+  name: o_armory_marketplace_weapon_order_fix
+  header: '{{o_armory_marketplace_weapon_order_fix}}'
+  text: '{{o_armory_marketplace_weapon_order_fix_descr}}'
+  display: UCP2Switch
+  url: ucp.o_armory_marketplace_weapon_order_fix.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  name: o_change_siege_engine_spawn_position_catapult
+  header: '{{o_change_siege_engine_spawn_position_catapult}}'
+  text: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
+  display: UCP2Switch
+  url: ucp.o_change_siege_engine_spawn_position_catapult.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Multiplayer
+  name: o_default_multiplayer_speed
+  header: '{{o_default_multiplayer_speed}}'
+  text: '{{o_default_multiplayer_speed_descr}}'
+  display: UCP2Slider
+  hasHeader: true
+  url: ucp.o_default_multiplayer_speed
+  min: 20
+  max: 90
+  step: 1
+  contents:
+    value:
+      enabled: false
+      sliderValue: 40
+- category:
+  - UI
+  name: o_engineertent
+  header: '{{o_engineertent}}'
+  text: '{{o_engineertent_descr}}'
+  display: UCP2Switch
+  url: ucp.o_engineertent.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Fire
+  name: o_firecooldown
+  header: '{{o_firecooldown}}'
+  text: '{{o_firecooldown_descr}}'
+  display: UCP2Slider
+  url: ucp.o_firecooldown
+  min: 0
+  max: 20000
+  step: 1
+  contents:
+    value:
+      enabled: false
+      sliderValue: 2000
+- category:
+  - Fixes
+  - Units
+  name: o_fix_baker_disappear
+  header: '{{o_fix_baker_disappear}}'
+  text: '{{o_fix_baker_disappear_descr}}'
+  display: UCP2Switch
+  url: ucp.o_fix_baker_disappear.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - Units
+  name: o_fix_fletcher_bug
+  header: '{{o_fix_fletcher_bug}}'
+  text: '{{o_fix_fletcher_bug_descr}}'
+  display: UCP2Switch
+  url: ucp.o_fix_fletcher_bug.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - Units
+  name: o_fix_ladderclimb
+  header: '{{o_fix_ladderclimb}}'
+  text: '{{o_fix_ladderclimb_descr}}'
+  display: UCP2Switch
+  url: ucp.o_fix_ladderclimb.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - Units
+  name: o_fix_moat_digging_unit_disappearing
+  header: '{{o_fix_moat_digging_unit_disappearing}}'
+  text: '{{o_fix_moat_digging_unit_disappearing_descr}}'
+  display: UCP2Switch
+  url: ucp.o_fix_moat_digging_unit_disappearing.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Buildings
+  name: o_freetrader
+  header: '{{o_freetrader}}'
+  text: '{{o_freetrader_descr}}'
+  display: UCP2Switch
+  url: ucp.o_freetrader.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Game speed
+  name: o_gamespeed
+  header: '{{o_gamespeed}}'
+  text: '{{o_gamespeed_descr}}'
+  display: UCP2Switch
+  url: ucp.o_gamespeed.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: o_healer
+  header: '{{o_healer}}'
+  text: '{{o_healer_descr}}'
+  display: UCP2Switch
+  url: ucp.o_healer.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Pathing
+  name: o_increase_path_update_tick_rate
+  header: '{{o_increase_path_update_tick_rate}}'
+  text: '{{o_increase_path_update_tick_rate_descr}}'
+  display: UCP2Switch
+  url: ucp.o_increase_path_update_tick_rate.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Keyboard
+  name: o_keys
+  header: '{{o_keys}}'
+  text: '{{o_keys_descr}}'
+  display: UCP2Switch
+  url: ucp.o_keys.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  name: o_moatvisibility
+  header: '{{o_moatvisibility}}'
+  text: '{{o_moatvisibility_descr}}'
+  display: UCP2Switch
+  url: ucp.o_moatvisibility.enabled
+  contents:
+    value: false
+    type: boolean
+- category: []
+  name: o_onlyai
+  header: '{{o_onlyai}}'
+  text: '{{o_onlyai_descr}}'
+  display: UCP2Switch
+  url: ucp.o_onlyai.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - UI
+  name: o_override_identity_menu
+  url: ucp.o_override_identity_menu.enabled
+  contents:
+    value: false
+    type: boolean
+  display: UCP2Switch
+  header: '{{o_override_identity_menu}}'
+  text: '{{o_override_identity_menu_descr}}'
+- category:
+  - Graphics
+  name: o_playercolor
+  header: '{{o_playercolor}}'
+  text: '{{o_playercolor_descr}}'
+  display: UCP2RadioGroup
+  hasHeader: true
+  url: ucp.o_playercolor
+  choices:
+  - name: 'red'
+    text: 'red'
+  - name: 'orange'
+    text: 'orange'
+  - name: 'yellow'
+    text: 'yellow'
+  - name: 'blue'
+    text: 'blue'
+  - name: 'black'
+    text: 'black'
+  - name: 'purple'
+    text: 'purple'
+  - name: 'lightblue'
+    text: 'lightblue'
+  - name: 'green'
+    text: 'green' 
+  contents:
+    value:
+      enabled: false
+      choice: 'red'
+- category:
+  - Changes
+  - Buildings
+  name: o_responsivegates
+  header: '{{o_responsivegates}}'
+  text: '{{o_responsivegates_descr}}'
+  display: UCP2Switch
+  url: ucp.o_responsivegates.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Sounds
+  name: o_restore_arabian_engineer_speech
+  header: '{{o_restore_arabian_engineer_speech}}'
+  text: '{{o_restore_arabian_engineer_speech_descr}}'
+  display: UCP2Switch
+  url: ucp.o_restore_arabian_engineer_speech.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Randomness
+  display: Group
+  children:
+  - category:
+    - Randomness
+    name: o_seed_modification_possibility_title
+    type: boolean
+    enabled: false
+    header: '{{o_seed_modification_possibility_title}}'
+    hasHeader: true
+    display: UCP2RadioGroup
+    url: ucp.o_seed_modification_possibility_title
+    choices:
+    - name: o_seed_modification_possibility_only_set
+      text: '{{o_seed_modification_possibility_only_set}}'
+      subtext: '{{o_seed_modification_possibility_only_set_descr}}'
+    - name: o_seed_modification_possibility
+      text: '{{o_seed_modification_possibility}}'
+      subtext: '{{o_seed_modification_possibility_descr}}'
+    contents:
+      value:
+        enabled: false
+        choice: ''
+- category:
+  - Changes
+  name: strongholdify
+  display: Group
+  children:
+  - display: Paragraph
+    header: '{{o_shfy}}'
+    text: '{{o_shfy_resourcequantity_descr}}'
+  - name: o_shfy_beer
+    header: '{{o_shfy_beer}}'
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_beer.enabled
+    contents:
+      value: false
+      type: boolean
+  - name: o_shfy_religion
+    header: '{{o_shfy_religion}}'
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_religion.enabled
+    contents:
+      value: false
+      type: boolean
+  - name: o_shfy_peasantspawnrate
+    header: '{{o_shfy_peasantspawnrate}}'
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_peasantspawnrate.enabled
+    contents:
+      value: false
+      type: boolean
+  - name: o_shfy_resourcequantity
+    header: '{{o_shfy_resourcequantity}}'
+    display: UCP2Switch
+    url: ucp.o_shfy.o_shfy_resourcequantity.enabled
+    contents:
+      value: false
+      type: boolean
+- category:
+  - Changes
+  - Buildings
+  name: o_stop_player_keep_rotation
+  header: '{{o_stop_player_keep_rotation}}'
+  text: '{{o_stop_player_keep_rotation_descr}}'
+  display: UCP2Switch
+  url: ucp.o_stop_player_keep_rotation.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  name: o_xtreme
+  header: '{{o_xtreme}}'
+  text: '{{o_xtreme_descr}}'
+  display: UCP2Switch
+  url: ucp.o_xtreme.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_arabwall
+  header: '{{u_arabwall}}'
+  text: '{{u_arabwall_descr}}'
+  display: UCP2Switch
+  url: ucp.u_arabwall.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_arabxbow
+  header: '{{u_arabxbow}}'
+  text: '{{u_arabxbow_descr}}'
+  display: UCP2Switch
+  url: ucp.u_arabxbow.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_fireballistafix
+  header: '{{u_fireballistafix}}'
+  text: '{{u_fireballistafix_descr}}'
+  display: UCP2Switch
+  url: ucp.u_fireballistafix.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Fixes
+  - Units
+  name: u_fix_applefarm_blocking
+  header: '{{u_fix_applefarm_blocking}}'
+  text: '{{u_fix_applefarm_blocking_descr}}'
+  display: UCP2Switch
+  url: ucp.u_fix_applefarm_blocking.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Graphics
+  - Animations
+  name: u_fix_lord_animation_stuck_movement
+  header: '{{u_fix_lord_animation_stuck_movement}}'
+  text: '{{u_fix_lord_animation_stuck_movement_descr}}'
+  display: UCP2Switch
+  url: ucp.u_fix_lord_animation_stuck_movement.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_laddermen
+  header: '{{u_laddermen}}'
+  text: '{{u_laddermen_descr}}'
+  display: UCP2Switch
+  url: ucp.u_laddermen.enabled
+  contents:
+    value: 
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_spearmen
+  header: '{{u_spearmen}}'
+  text: '{{u_spearmen_descr}}'
+  display: UCP2Switch
+  url: ucp.u_spearmen.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_spearmen_run
+  header: '{{u_spearmen_run}}'
+  text: '{{u_spearmen_run_descr}}'
+  display: UCP2Switch
+  url: ucp.u_spearmen_run.enabled
+  contents:
+    value: false
+    type: boolean
+- category:
+  - Changes
+  - Units
+  name: u_tanner_fix
+  header: '{{u_tanner_fix}}'
+  text: '{{u_tanner_fix_descr}}'
+  display: UCP2Switch
+  url: ucp.u_tanner_fix.enabled
+  contents:
+    value: false
+    type: boolean
