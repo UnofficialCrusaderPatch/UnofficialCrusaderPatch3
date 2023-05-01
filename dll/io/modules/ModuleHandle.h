@@ -331,31 +331,32 @@ public:
 			throw ModuleHandleException(moduleHandleErrors[extension]);
 		}
 
-		bool existsAsZip = std::filesystem::is_regular_file(path + ".zip");
+		std::string zipPath = path + ".zip";
+		bool existsAsZip = std::filesystem::is_regular_file(zipPath);
 		bool existsAsFolder = std::filesystem::is_directory(path);
 
 		if (Core::getInstance().secureMode) {
 			if (!existsAsZip) {
 				if (existsAsFolder) {
-					ModuleHandleException* e = new ModuleHandleException("extension verification error: extension exists as a folder on the file system but not as a zip file as required in secure mode");
-					moduleHandleErrors[extension] = e->what();
-					throw e;
+					std::string errMsg = "extension verification error: extension '" + path + "' exists as a folder on the file system but not as a zip file as required in secure mode";
+					moduleHandleErrors[extension] = errMsg;
+					throw ModuleHandleException(errMsg);
 				}
 				else {
-					ModuleHandleException* e = new ModuleHandleException("extension does not exist");
-					moduleHandleErrors[extension] = e->what();
-					throw e;
+					std::string errMsg = ("extension does not exist");
+					moduleHandleErrors[extension] = errMsg;
+					throw ModuleHandleException(errMsg);
 				}
 			}
 
 			std::string errorMsg;
-			if (!verifyZipFile(path, extension, errorMsg)) {
-				ModuleHandleException* e = new ModuleHandleException("failed to verify zip file: " + extension + " reason: " + errorMsg);
-				moduleHandleErrors[extension] = e->what();
-				throw errorMsg;
+			if (!verifyZipFile(zipPath, extension, errorMsg)) {
+				std::string errMsg = ("failed to verify zip file: " + extension + " reason: " + errorMsg);
+				moduleHandleErrors[extension] = errMsg;
+				throw ModuleHandleException(errMsg);
 			}
 
-			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(path, extension);
+			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
 			moduleHandles[extension] = zfmh;
 
 			return zfmh;
@@ -369,7 +370,7 @@ public:
 		}
 
 		if (existsAsZip) {
-			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(path, extension);
+			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
 			moduleHandles[extension] = zfmh;
 
 			return zfmh;

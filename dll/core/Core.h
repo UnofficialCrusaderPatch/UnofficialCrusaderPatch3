@@ -32,7 +32,7 @@ private:
 
 	Core() {
 
-		if (!secureMode) {
+		if (!secureMode || debugMode) {
 			/**
 	 * Allow UCP_DIR configuration via the command line.
 	 *
@@ -46,6 +46,8 @@ private:
 		}
 
 		moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", secureMode);
+		
+		
 		std::filesystem::path appData;
 		if (!getAppDataPath(appData)) throw "failed to get app data path";
 		
