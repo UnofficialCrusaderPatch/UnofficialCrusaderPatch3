@@ -62,14 +62,15 @@ end
 ---Collection of all extensions in the form of extension loaders (ModuleLoader and PluginLoader) which interface with the file structure of extensions
 extensionLoaders = {}
 
+-- TODO: rewrite this such that only extensions are loaded that will be actually used...
 config.utils.loadExtensionsFromFolder(extensionLoaders, "modules", extensions.ModuleLoader)
 config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.PluginLoader)
-
-extensionsInLoadOrder = {}
 
 fullUserConfig = userConfig['config-full']
 
 loadOrder = fullUserConfig['load-order']
+
+extensionsInLoadOrder = {}
 
 if loadOrder == nil then
     log(FATAL, "user config does not contain 'load-order'")    

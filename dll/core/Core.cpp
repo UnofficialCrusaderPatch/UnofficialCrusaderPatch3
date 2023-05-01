@@ -349,8 +349,11 @@ void Core::initialize() {
 
 	}
 	catch (ModuleHandleException e) {
-		MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist", "FATAL", MB_OK);
-		LOG_S(FATAL) << "ERROR: failed to load ucp/code/main.lua: " << "does not exist";
+		std::string errorMsg = "ERROR: failed to load ucp/code/main.lua: does not exist";
+		errorMsg += ("\n reason: " + std::string(e.what()));
+
+		MessageBoxA(0, errorMsg.c_str(), "FATAL", MB_OK);
+		LOG_S(FATAL) << errorMsg;
 	}
 	
 	if (this->hasConsole) {

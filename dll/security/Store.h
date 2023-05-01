@@ -25,18 +25,14 @@ class Store {
 
 private:
 	std::filesystem::path path;
-	bool secureMode;
 	YAML::Node extensions;
 
 public:
 
 	Store(std::filesystem::path path, bool secureMode) {
 		this->path = path;
-		this->secureMode = secureMode;
 
-		if (!secureMode) {
-			return;
-		}
+		if (!secureMode) return;
 
 		if (!std::filesystem::is_regular_file(path)) {
 
@@ -55,13 +51,28 @@ public:
 
 		store_file_input.close();
 
-		std::ifstream signature_file_input(path.string() + ".sig", std::ios::binary);
+		std::string sigPath = path.string() + ".sig";
+
+		if (!std::filesystem::is_regular_file(sigPath)) {
+			throw ModuleStoreException("signature not found: '" + sigPath + "'");
+		}
+
+		std::ifstream signature_file_input(sigPath, std::ios::binary);
 
 		std::string signature;
 
 		signature_file_input >> signature;
 
 		signature_file_input.close();
+
+		size_t first_space = signature.find(' ');
+		if (first_space != std::string::npos && first_space >= 0) {
+			signature = signature.substr(0, first_space);
+		}
+
+		if (signature.size() != 1024) {
+			throw ModuleStoreException("hash in '" + sigPath + " ' is not of the correct length: '" + std::to_string(signature.size()) + "'");
+		}
 
 		std::vector<unsigned char> signature_file_bytes = HexToBytes(signature);
 
@@ -82,14 +93,16 @@ public:
 
 		YAML::Node root = YAML::LoadFile(path.string());
 
-
-
 		if (!root.IsMap()) {
 			throw ModuleStoreException("invalid store file");
 		}
 
 		if (root["ucp-build"].as<std::string>() != "3.0.0") {
 			throw ModuleStoreException("store file's ucp version does not match ucp build version");
+		}
+
+		if (!root["extensions"]) {
+			throw ModuleStoreException("extensions field in store file is not a sequence but NULL");
 		}
 
 		extensions = root["extensions"];
