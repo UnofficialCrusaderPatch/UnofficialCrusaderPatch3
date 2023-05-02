@@ -63,8 +63,18 @@ end
 extensionLoaders = {}
 
 -- TODO: rewrite this such that only extensions are loaded that will be actually used...
+--[[
+
+This code was a bit too expensive because it forces the computation of SHA256 sums on all extensions
+
 config.utils.loadExtensionsFromFolder(extensionLoaders, "modules", extensions.ModuleLoader)
 config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.PluginLoader)
+
+So for now we use the following logic:
+--]]
+
+moduleFolders = config.utils.parseExtensionsFolder("modules")
+pluginFolders = config.utils.parseExtensionsFolder("plugins")
 
 fullUserConfig = userConfig['config-full']
 
@@ -76,11 +86,30 @@ if loadOrder == nil then
     log(FATAL, "user config does not contain 'load-order'")    
 else
   for k, req in pairs(loadOrder) do
+  --[[
+    This code is for the future:
+    
     local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
+  --]]  
+  
+    local m = config.matcher.findPreMatchForExtensionRequirement(moduleFolders, req)
+    local e
+
     if m == nil then
-      log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
+        m = config.matcher.findPreMatchForExtensionRequirement(pluginFolders, req)
+
+        if m == nil then
+          log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
+        else
+          e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.PluginLoader)
+        end
+    else
+        e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.ModuleLoader)
     end
-    table.insert(extensionsInLoadOrder, m)
+
+
+
+    table.insert(extensionsInLoadOrder, e)
   end
     
 end
