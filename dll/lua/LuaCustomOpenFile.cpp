@@ -67,7 +67,7 @@ namespace LuaIO {
 		std::string sanitizedPath;
 
 		if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
-			return luaL_error(L, ("Invalid path: " + filename).c_str());
+			return luaL_error(L, ("Invalid path: " + filename + "\n reason: " + sanitizedPath).c_str());
 		}
 
 		std::string insidePath;
