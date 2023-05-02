@@ -179,7 +179,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 
 	//Assert non empty path
 	if (rawPath.empty()) {
-		result = "invalid path";
+		result = "empty path";
 		return false;
 	}
 
@@ -187,7 +187,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	sanitizedPath = sanitizedPath.lexically_normal(); // Remove "/../" and "/./"
 
 	if (!std::filesystem::path(sanitizedPath).is_relative()) {
-		result = "path has to be relative";
+		result = "path has to be a relative path";
 		return false;
 	}
 
@@ -199,8 +199,16 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	std::filesystem::path b = a / result;
 	std::filesystem::path r = std::filesystem::relative(b, a);
 	if (r.string().find("..") == 0) {
-		result = "the path specified is not a proper relative path";
-		return false;
+
+		if (this->debugMode) {
+			// Technically not allowed, but we will let it slip because we are debugging
+			LOG_S(INFO) << "the path specified is not a proper relative path. Is it escaping the game directory? path: " << std::endl << r.string();
+		}
+		else {
+			LOG_S(WARNING) << "the path specified is not a proper relative path. Is it escaping the game directory? path: " << std::endl << r.string();
+			result = "the path specified is not a proper relative path. Is it escaping the game directory? path: " + r.string();
+			return false;
+		}
 	}
 
 	//Replace \\ with /. Note: don't call make_preferred on the path, it will reverse this change.
