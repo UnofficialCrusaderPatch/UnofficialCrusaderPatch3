@@ -115,7 +115,7 @@ void initializeLogger(int logLevel) {
 	// Only log WARNING, ERROR and FATAL to "latest_readable.log":
 	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
 
-	loguru::add_callback("stdout", logToStdOut, NULL, loguru::Verbosity_MAX);
+	loguru::add_callback("stdout", logToStdOut, NULL, loguru::Verbosity_0);
 
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
@@ -202,7 +202,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 
 		if (this->debugMode) {
 			// Technically not allowed, but we will let it slip because we are debugging
-			LOG_S(INFO) << "the path specified is not a proper relative path. Is it escaping the game directory? path: " << std::endl << r.string();
+			LOG_S(1) << "the path specified is not a proper relative path. Is it escaping the game directory? path: " << std::endl << r.string();
 		}
 		else {
 			LOG_S(WARNING) << "the path specified is not a proper relative path. Is it escaping the game directory? path: " << std::endl << r.string();

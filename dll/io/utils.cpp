@@ -31,7 +31,7 @@ bool sanitizeRelativePath(const std::string& path, std::string& result) {
 
 	if (std::filesystem::relative(std::filesystem::current_path() / sanitizedPath, std::filesystem::current_path()).string().find("..") == 0) {
 		if (Core::getInstance().debugMode) {
-			Core::getInstance().log(0, "path has to remain in the game directory. path: " + sanitizedPath.string());
+			Core::getInstance().log(1, "path has to remain in the game directory. path: " + sanitizedPath.string());
 		}
 		else {
 			Core::getInstance().log(-1, "path has to remain in the game directory. path: " + sanitizedPath.string());
