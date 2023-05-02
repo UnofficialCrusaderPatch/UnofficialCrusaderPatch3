@@ -355,6 +355,9 @@ public:
 				moduleHandleErrors[extension] = errMsg;
 				throw ModuleHandleException(errMsg);
 			}
+			else {
+				Core::getInstance().log(0, "verified zip file: " + extension);
+			}
 
 			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
 			moduleHandles[extension] = zfmh;
