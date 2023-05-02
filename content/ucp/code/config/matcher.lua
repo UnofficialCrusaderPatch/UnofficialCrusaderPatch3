@@ -55,5 +55,57 @@ function matcher.findMatchForExtensionRequirement(extensions, requirementString)
 end
 
 
+---@param extensions table<string, BaseLoader> extensions
+---@param requirement string requirement string
+function matcher.findPreMatchForExtensionRequirement(preExtensions, requirementString)
+  local req = version.VersionRequirement:fromString(requirementString)
+  local m
+  log(DEBUG, "finding extension for requirement: " .. requirementString)
+  for k, preExtension in pairs(preExtensions) do
+      if preExtension.name == req.name then
+          if req.equality == "==" then
+              if version.SemanticVersion:fromString(preExtension.version):compare(req.version) == 0 then
+                  m = preExtension
+              end
+          elseif req.equality == ">" then
+              if version.SemanticVersion:fromString(preExtension.version):compare(req.version) > 0 then
+                  if m == nil then
+                      m = preExtension
+                  else
+                      if
+                          version.SemanticVersion:fromString(preExtension.version):compare(
+                              version.SemanticVersion:fromString(m.version)
+                          ) > 0
+                       then
+                          m = preExtension
+                      end
+                  end
+              end
+          elseif req.equality == ">=" then
+              local comp = version.SemanticVersion:fromString(preExtension.version):compare(req.version)
+              if comp == 0 or comp == 1 then
+                  if m == nil then
+                      m = preExtension
+                  else
+                      if
+                          version.SemanticVersion:fromString(preExtension.version):compare(
+                              version.SemanticVersion:fromString(m.version)
+                          ) > 0
+                       then
+                          m = preExtension
+                      end
+                  end
+              end
+          end
+      end
+  end
+
+  if m ~= nil then
+    log(DEBUG, "found required extension: " .. m.name)
+  end
+
+  return m
+end
+
 
 return matcher

@@ -62,6 +62,10 @@ version.SemanticVersion = {
         return self:new(parts[1], parts[2], parts[3])
     end,
 
+    toString = function(self)
+        return tostring(self.major) .. "." .. tostring(self.minor) .. "." .. tostring(self.patch)
+    end,
+
     compare = function(self, other) 
         return version.compareSemanticVersions(self, other)
     end,
