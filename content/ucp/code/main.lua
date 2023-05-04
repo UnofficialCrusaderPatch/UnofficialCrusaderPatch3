@@ -92,6 +92,8 @@ else
     local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
   --]]  
   
+  log(INFO, "iterating through load order, trying: " .. req)
+  
     local m = config.matcher.findPreMatchForExtensionRequirement(moduleFolders, req)
     local e
 
