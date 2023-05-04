@@ -28,6 +28,7 @@ public:
 	}
 
 private:
+
 	Store* moduleHashStore = NULL;
 
 	Core() {
@@ -55,6 +56,7 @@ private:
 	};
 
 public:
+	bool isInitialized = false;
 
 	Core(Core const&) = delete;
 	void operator=(Core const&) = delete;

@@ -1,0 +1,94 @@
+<Project>
+	<!-- https://github.com/Microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions -->
+	<!-- https://github.com/japj/CppWithNuGetPackageReference -->
+	<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019 -->
+  <PropertyGroup>
+  	<PackageId>UnofficialCrusaderPatch3</PackageId>
+	  <Version>3.0.0-cpp.1</Version>
+	  <Authors>gynt</Authors>
+	  <Company>gynt</Company>
+	  <TargetFramework>native</TargetFramework>
+	  <PackageOutputPath>.</PackageOutputPath>
+	  <Description>UnofficialCrusaderPatch3 package for C++ development. C++ development package for compiling against the ucp.dll</Description>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+
+		<PackageProjectUrl>https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3.git</RepositoryUrl>
+
+<IncludeBuildOutput>False</IncludeBuildOutput>
+	  
+	<EnableCentralPackageVersions>true</EnableCentralPackageVersions>
+    <TargetFramework>native</TargetFramework>
+	<RestoreAdditionalProjectSources>
+		<!-- for lua -->
+      https://api.nuget.org/v3/index.json; 			
+		<!-- for RPS -->
+      https://nuget.pkg.github.com/gynt/index.json; 
+    </RestoreAdditionalProjectSources>
+	<_NuGetTargetFallbackMoniker>$(_NuGetTargetFallbackMoniker);native,Version=v0.0</_NuGetTargetFallbackMoniker>
+	
+
+  </PropertyGroup>
+
+  <ItemGroup>
+		<PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0" developmentDependency="true">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+			<PackageReference Include="RPS" Version="1.3.1"/>
+			<PackageReference Include="lua" Version="5.4.4.1">
+				<IncludeAssets>All</IncludeAssets>
+				<PrivateAssets>None</PrivateAssets>
+			</PackageReference>
+			<PackageReference Include="zip" Version="0.2.0"/>
+		<!--<PackageReference Include="libyaml" Version="0.2.5.12" />-->
+		<PackageReference Include="yaml-cpp" Version="0.7.0" />
+
+		<Content Include="Debug\ucp.dll">
+			<Pack>true</Pack>
+			<PackagePath>build\native\bin\Win32\v143\Debug</PackagePath>
+		</Content>	
+		<Content Include="Debug\ucp.lib">
+			<Pack>true</Pack>
+			<PackagePath>build\native\lib\Win32\v143\Debug</PackagePath>
+		</Content>
+		<Content Include="Debug\ucp.pdb">
+			<Pack>true</Pack>
+			<PackagePath>build\native\lib\Win32\v143\Debug</PackagePath>
+		</Content>
+
+		<Content Include="Release\ucp.dll">
+			<Pack>true</Pack>
+			<PackagePath>build\native\bin\Win32\v143\Release</PackagePath>
+		</Content>
+		<Content Include="Release\ucp.lib">
+			<Pack>true</Pack>
+			<PackagePath>build\native\lib\Win32\v143\Release</PackagePath>
+		</Content>
+	
+		<Content Include="ucp3-cpp-api.h">
+			<Pack>true</Pack>
+			<PackagePath>build\native\include</PackagePath>
+		</Content>
+	
+		<Content Include="UnofficialCrusaderPatch3.targets">
+			<Pack>true</Pack>
+			<PackagePath>build\native</PackagePath>
+		</Content>
+		<Content Include="UnofficialCrusaderPatch3-propertiesui.xml">
+			<Pack>true</Pack>
+			<PackagePath>build\native</PackagePath>
+		</Content>
+
+		<Content Include="..\README.md">
+			<Pack>true</Pack>
+			<PackagePath>build</PackagePath>
+		</Content>
+		<Content Include="..\README.md">
+			<Pack>true</Pack>
+			<PackagePath>build\native\doc</PackagePath>
+		</Content>
+
+  </ItemGroup>
+  
+
+</Project>

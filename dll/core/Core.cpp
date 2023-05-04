@@ -377,6 +377,8 @@ void Core::initialize() {
 			CloseHandle(consoleThread);
 		}
 	}
+
+	this->isInitialized = true;
 }
 
 bool Core::moduleExists(const std::string moduleFullName, bool& asZip, bool& asFolder) {
