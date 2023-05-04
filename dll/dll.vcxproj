@@ -216,7 +216,7 @@
     <ClInclude Include="security\Signature.h" />
     <ClInclude Include="security\Store.h" />
     <ClInclude Include="compilation\fasm.h" />
-    <ClInclude Include="ucp3-basic.h" />
+    <ClInclude Include="ucp3-cpp-api.h" />
     <ClInclude Include="vendor\MemoryModule\MemoryModule.h" />
   </ItemGroup>
   <ItemGroup>
@@ -230,7 +230,7 @@
     <ClCompile Include="lua\LuaLoadLibrary.cpp" />
     <ClCompile Include="compilation\fasm.cpp" />
     <ClCompile Include="lua\LuaUtil.cpp" />
-    <ClCompile Include="ucp3-basic.cpp" />
+    <ClCompile Include="ucp3-cpp-api.cpp" />
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

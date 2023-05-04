@@ -7,4 +7,4 @@
 #include "framework.h"
 
 
-extern HMODULE hModule;
+//extern HMODULE hModule;

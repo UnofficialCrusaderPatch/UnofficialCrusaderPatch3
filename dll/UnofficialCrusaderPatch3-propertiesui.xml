@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="ReferencedPackages-ucp" PageTemplate="tool" DisplayName="Referenced Packages" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="ucp" DisplayName="UCP" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="UCPType" DisplayName="Library Type" Description="Which type of the library to link to" Category="ucp">
+      <EnumValue Name="dynamic" DisplayName="Dynamic Library - Dll (Default)" />
+    </EnumProperty>
+    <EnumProperty Name="UCPConfiguration" DisplayName="Configuration" Description="Which configuration of the library to use" Category="ucp">
+      <EnumValue Name="" DisplayName="default" />
+      <EnumValue Name="Release" DisplayName="Release" />
+      <EnumValue Name="Debug" DisplayName="Debug" />
+    </EnumProperty>
+    <EnumProperty Name="UCPRuntimePlatform" DisplayName="Runtime Platform" Description="Which cpp runtime platform version of the library to use" Category="ucp">
+      <EnumValue Name="" DisplayName="default" />
+      <EnumValue Name="v143" DisplayName="v143" />
+    </EnumProperty>
+  </Rule>
+</ProjectSchemaDefinitions>

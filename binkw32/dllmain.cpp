@@ -1,11 +1,11 @@
 
 #include "framework.h"
-#include "ucp3-basic.h"
+#include "ucp3-cpp-api.h"
 
 DWORD entryFunction = 0x00591049;
 
 void initializeUCP3DLL() {
-	initialize();
+	ucp_initialize();
 }
 
 /**
