@@ -20,8 +20,6 @@ if ($RemoveZippedFolders) {
   Remove-Item -Recurse -Force -Path "$($UCPPath)code\"	
 }
 
-throw "Quit"
-
 Write-Output "Zipping plugins"
 
 $pluginDirectories = Get-ChildItem -Path "$($UCPPath)\plugins" -Directory
