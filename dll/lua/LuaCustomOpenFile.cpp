@@ -71,8 +71,8 @@ namespace LuaIO {
 		}
 
 		std::string insidePath;
-		ModuleHandle* mh;
-		if (Core::getInstance().pathIsInInternalCode(sanitizedPath, insidePath)) {
+		ExtensionHandle* mh;
+		if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {
 
 			try {
 				mh = ModuleHandleManager::getInstance().getLatestCodeHandle();
@@ -87,7 +87,7 @@ namespace LuaIO {
 			std::string extension;
 			std::string insideExtensionPath;
 
-			if (Core::getInstance().pathIsInModule(sanitizedPath, extension, basePath, insidePath)) {
+			if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insidePath)) {
 				try {
 					mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 				}
@@ -97,14 +97,28 @@ namespace LuaIO {
 				
 			}
 			else {
-				// A regular file outside of the code module or modules directory
+				if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insidePath)) {
+					try {
+						mh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+					}
+					catch (ModuleHandleException e) {
+						return luaL_error(L, e.what());
+					}
 
-				luaL_Stream* p = newfile(L);
-				const char* md = mode.c_str();  /* to traverse/check mode */
-				luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
+				}
+				else {
+				
 
-				p->f = fopen(sanitizedPath.c_str(), mode.c_str());
-				return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+					// A regular file outside of the code module or modules directory
+
+					luaL_Stream* p = newfile(L);
+					const char* md = mode.c_str();  /* to traverse/check mode */
+					luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
+
+					p->f = fopen(sanitizedPath.c_str(), mode.c_str());
+					return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+				}
+
 			}
 		}
 

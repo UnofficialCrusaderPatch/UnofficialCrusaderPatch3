@@ -15,38 +15,102 @@
 #include "MemoryModule.h"
 #include "exceptions/MessageException.h"
 
+
 class ModuleHandleException : public MessageException {
 	using MessageException::MessageException;
 };
+
 
 class InvalidZipFileException : public ModuleHandleException {
 	using ModuleHandleException::ModuleHandleException;
 };
 
 
+class ExtensionHandle {
 
-class ModuleHandle {
 public:
 	std::string name;
 
-	ModuleHandle(std::string name) {
+	ExtensionHandle(std::string name) {
 		this->name = name;
 	};
+
 	virtual FILE* openFile(const std::string& path, std::string& error) = 0;
-	virtual void* loadLibrary(std::string& path) = 0;
 	virtual std::vector<std::string> listDirectories(std::string& path) = 0;
-	virtual FARPROC loadFunctionFromLibrary(void* handle, std::string name) = 0;
 
 };
 
-class ZipFileModuleHandle : public ModuleHandle {
+
+class FolderFileExtensionHandle : public virtual ExtensionHandle {
+
+protected:
+	std::filesystem::path modulePath;
+
+public:
+
+	FolderFileExtensionHandle(std::string modulePath, std::string extension) : ExtensionHandle(extension) {
+		this->modulePath = std::filesystem::path(modulePath);
+	}
+
+	// Only read mode is supported for now...
+	FILE* openFile(const std::string& path, std::string& error) {
+		std::filesystem::path fullPath = (this->modulePath / path);
+		if (!std::filesystem::is_regular_file(fullPath)) {
+			error = "not a regular file : " + path;
+			return NULL;
+		}
+
+		return fopen(fullPath.string().c_str(), "r");
+	}
+
+	std::vector<std::string> listDirectories(std::string& path) {
+
+		std::vector<std::string> result;
+
+		int count = 0;
+
+		std::filesystem::path targetPath = path;
+
+		if (!std::filesystem::is_directory(targetPath)) {
+			throw ModuleHandleException("not a directory: " + this->modulePath.string() + "/" + path);
+		}
+
+		const std::filesystem::path zipExtension(".zip");
+
+		try {
+			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
+				if (entry.is_directory()) {
+					result.push_back((entry.path().string() + "/"));
+					count += 1;
+				}
+
+				else {
+					if (entry.is_regular_file() && entry.path().extension() == ".zip") {
+						const std::string p = entry.path().string();
+						size_t lastIndex = p.find_last_of(".");
+						if (lastIndex != std::string::npos) {
+							result.push_back((p.substr(0, lastIndex) + "/"));
+							count += 1;
+						}
+
+					}
+				}
+			}
+		}
+		catch (std::filesystem::filesystem_error e) {
+			throw ModuleHandleException("Cannot find the path: " + e.path1().string());
+		}
+
+		return result;
+	}
+
+};
 
 
-private:
+class ZipFileExtensionHandle : public virtual ExtensionHandle {
+
+protected:
 	zip_t* z;
-	std::map<std::string, void*> loadedLibraries;
-
-
 
 	FILE* setBinaryMemoryFileContents(const char* contents, size_t length, std::string& error) {
 		HANDLE read;
@@ -87,7 +151,7 @@ private:
 
 public:
 
-	ZipFileModuleHandle(std::string modulePath, std::string extension) : ModuleHandle(extension) {
+	ZipFileExtensionHandle(std::string modulePath, std::string extension) : ExtensionHandle(extension) {
 
 
 		z = zip_open(modulePath.c_str(), 0, 'r');
@@ -98,7 +162,7 @@ public:
 
 	}
 
-	~ZipFileModuleHandle() {
+	~ZipFileExtensionHandle() {
 		if (z != 0) zip_close(z);
 		z = 0;
 	}
@@ -164,6 +228,98 @@ public:
 		return result;
 	}
 
+};
+
+
+class ModuleHandle : public virtual ExtensionHandle {
+
+protected:
+	std::map<std::string, void*> loadedLibraries;
+
+public:
+	ModuleHandle(std::string name) : ExtensionHandle(name) {};
+
+	virtual void* loadLibrary(std::string& path) = 0;
+	virtual FARPROC loadFunctionFromLibrary(void* handle, std::string name) = 0;
+};
+
+
+class FolderFileModuleHandle : public ModuleHandle, public FolderFileExtensionHandle {
+
+public:
+
+	FolderFileModuleHandle(std::string modulePath, std::string extension) : FolderFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
+
+	}
+
+	void* loadLibrary(std::string& path) {
+		if (loadedLibraries.count(path) == 1) {
+			return loadedLibraries[path];
+		}
+
+		std::filesystem::path libPath = (this->modulePath / path);
+		if (std::filesystem::is_regular_file(libPath)) {
+			HMODULE handle = LoadLibraryA(libPath.string().c_str());
+			loadedLibraries[path] = handle;
+			return handle;
+		}
+		throw ModuleHandleException("library does not exist: " + libPath.string());
+	}
+
+	FARPROC loadFunctionFromLibrary(void* handle, std::string name) {
+		return GetProcAddress((HMODULE) handle, name.c_str());
+	}
+
+};
+
+
+class ZipFileModuleHandle : public ZipFileExtensionHandle, public ModuleHandle {
+
+private:
+
+	FILE* setBinaryMemoryFileContents(const char* contents, size_t length, std::string& error) {
+		HANDLE read;
+		HANDLE write;
+
+		// A Pipe's resources are only freed after both handles are closed. But since _open_osfhandle involves a transfer of ownwership, I don't think we need flcose because lua will do that for us.
+		// https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/open-osfhandle?view=msvc-170
+		if (!CreatePipe(&read, &write, NULL, length)) {
+			throw ModuleHandleException("couldn't create anonymous pipe");
+		}
+
+		DWORD written;
+		WriteFile(write, contents, length, &written, NULL);
+
+		//We can close this already because this is the only time we write contents to it.
+		CloseHandle(write);
+
+		if (written != length) {
+			throw ModuleHandleException("couldn't write all contents to memory pipe");
+		}
+
+		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY);
+		if (fd == -1) {
+			throw ModuleHandleException("couldn't create handle to memory pipe");
+		}
+
+		FILE* f = _fdopen(fd, "r");
+		if (f == 0) {
+			throw ModuleHandleException("couldn't open memory pipe for reading");
+		}
+
+		return f;
+	}
+
+	FILE* setMemoryFileContents(std::string contents, std::string& error) {
+		return setBinaryMemoryFileContents(contents.c_str(), contents.size(), error);
+	}
+
+public:
+
+	ZipFileModuleHandle(std::string modulePath, std::string extension) : ZipFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
+
+	}
+
 	void* loadLibrary(std::string& path) {
 		if (loadedLibraries.count(path) == 1) {
 			return loadedLibraries[path];
@@ -197,87 +353,6 @@ public:
 	}
 };
 
-class FolderFileModuleHandle : public ModuleHandle {
-
-private:
-	std::filesystem::path modulePath;
-
-public:
-
-	FolderFileModuleHandle(std::string modulePath, std::string extension) : ModuleHandle(extension) {
-		this->modulePath = std::filesystem::path(modulePath);
-
-	}
-
-	// Only read mode is supported for now...
-	FILE* openFile(const std::string& path, std::string& error) {
-		std::filesystem::path fullPath = (this->modulePath / path);
-		if (!std::filesystem::is_regular_file(fullPath)) {
-			error = "not a regular file : " + path;
-			return NULL;
-		}
-
-		return fopen(fullPath.string().c_str(), "r");
-	}
-
-	std::vector<std::string> listDirectories(std::string& path) {
-
-		std::vector<std::string> result;
-
-		int count = 0;
-
-		std::filesystem::path targetPath = path;
-
-		if (!std::filesystem::is_directory(targetPath)) {
-			throw ModuleHandleException("not a directory: " + this->modulePath.string() + "/" + path);
-		}
-
-		const std::filesystem::path zipExtension(".zip");
-
-		try {
-			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
-				if (entry.is_directory()) {
-					result.push_back((entry.path().string() + "/"));
-					count += 1;
-				}
-
-				else {
-					if (entry.is_regular_file() && entry.path().extension() == ".zip") {
-						const std::string p = entry.path().string();
-						size_t lastIndex = p.find_last_of(".");
-						if (lastIndex != std::string::npos) {
-							result.push_back((p.substr(0, lastIndex) + "/"));
-							count += 1;
-						}
-
-					}
-				}
-			}
-		}
-		catch (std::filesystem::filesystem_error e) {
-			throw ModuleHandleException("Cannot find the path: " + e.path1().string());
-		}
-
-		return result;
-	}
-
-	void* loadLibrary(std::string& path) {
-		std::filesystem::path libPath = (this->modulePath / path);
-		if (std::filesystem::is_regular_file(libPath)) {
-			return LoadLibraryA(libPath.string().c_str());
-		}
-		throw ModuleHandleException("library does not exist: " + libPath.string());
-	}
-
-	FARPROC loadFunctionFromLibrary(void* handle, std::string name) {
-		return GetProcAddress((HMODULE) handle, name.c_str());
-	}
-
-};
-
-
-
-
 
 class ModuleHandleManager {
 
@@ -286,6 +361,9 @@ private:
 	ModuleHandle* codeHandle = NULL;
 	std::map<std::string, ModuleHandle*> moduleHandles;
 	std::map<std::string, std::string> moduleHandleErrors;
+
+	std::map<std::string, ExtensionHandle*> extensionHandles;
+	std::map<std::string, std::string> extensionHandleErrors;
 
 	ModuleHandleManager() {
 		codeHandle = NULL;
@@ -315,10 +393,75 @@ public:
 		return instance;
 	}
 
-
 	ModuleHandleManager(ModuleHandleManager const&) = delete;
 	void operator=(ModuleHandleManager const&) = delete;
 
+	ExtensionHandle* getExtensionHandle(const std::string& path, const std::string& extension, bool verifyContents)
+	{
+		if (extensionHandles.count(extension) == 1) {
+			return extensionHandles[extension];
+		}
+
+		if (extensionHandleErrors.count(extension) == 1) {
+			throw ModuleHandleException(extensionHandleErrors[extension]);
+		}
+
+		std::string zipPath = path + ".zip";
+		bool existsAsZip = std::filesystem::is_regular_file(zipPath);
+		bool existsAsFolder = std::filesystem::is_directory(path);
+
+		if (Core::getInstance().secureMode) {
+			if (verifyContents) {
+				if (!existsAsZip) {
+					if (existsAsFolder) {
+						std::string errMsg = "extension verification error: extension '" + path + "' exists as a folder on the file system but not as a zip file as required in secure mode";
+						extensionHandleErrors[extension] = errMsg;
+						throw ModuleHandleException(errMsg);
+					}
+					else {
+						std::string errMsg = ("extension does not exist");
+						extensionHandleErrors[extension] = errMsg;
+						throw ModuleHandleException(errMsg);
+					}
+				}
+
+				std::string errorMsg;
+				if (!verifyZipFile(zipPath, extension, errorMsg)) {
+					std::string errMsg = ("failed to verify zip file: " + extension + " reason: " + errorMsg);
+					extensionHandleErrors[extension] = errMsg;
+					throw ModuleHandleException(errMsg);
+				}
+				else {
+					Core::getInstance().log(0, "verified zip file: " + extension);
+				}
+
+				ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
+				extensionHandles[extension] = zfmh;
+
+				return zfmh;
+			}
+			else {
+				// Fall through
+			}
+			
+		}
+
+		if (existsAsFolder || (existsAsFolder && existsAsZip)) {
+			FolderFileExtensionHandle* ffeh = new FolderFileExtensionHandle(path, extension);
+			extensionHandles[extension] = ffeh;
+
+			return ffeh;
+		}
+
+		if (existsAsZip) {
+			ZipFileExtensionHandle* zfeh = new ZipFileExtensionHandle(zipPath, extension);
+			extensionHandles[extension] = zfeh;
+
+			return zfeh;
+		}
+
+		throw ModuleHandleException("extension does not exist: " + extension);
+	};
 
 	// also allows opening Code.zip
 	ModuleHandle* getModuleHandle(const std::string& path, const std::string& extension)

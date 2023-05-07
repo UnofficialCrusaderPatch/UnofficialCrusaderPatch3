@@ -59,8 +59,12 @@ enum ucp_NamedVerbosity : int
 UCP3_DLL void ucp_log(ucp_NamedVerbosity logLevel, std::string logMessage);
 
 
+/**
 
-UCP3_DLL FILE* ucp_getFileHandleReadMode(std::string path);
+	
+
+*/
+UCP3_DLL FILE* ucp_getFileHandle(std::string path, std::string mode, std::string &errorMsg);
 
 
 /**
