@@ -128,16 +128,6 @@ Copy-Item "dll\vendor\fasm\source\dll\fasm.dll" -Destination "$BUILD_CONFIGURATI
 Copy-Item "dll\vendor\fasm\LICENSE.txt" -Destination "$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\LICENSE.txt"
 
 
-### Deprecated
-## Zip files in secure mode
-#if(($BUILD_CONFIGURATION -eq "DebugSecure") -or ($BUILD_CONFIGURATION -eq "ReleaseSecure")) {
-  #pushd "$BUILD_CONFIGURATION\ucp-package\"
-  ## Zip all files and remove the original to avoid packing twice
-  #7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -x"!ucp/plugins" -sdel
-  #popd
-#} else {
-#}
-
 # Build UCP3
 msbuild /m /p:Configuration=$BUILD_CONFIGURATION .
 
@@ -159,119 +149,9 @@ Copy-Item "$binkw32dir\binkw32.dll" -Destination "$BUILD_CONFIGURATION\ucp-packa
 Rename-Item -Path "$BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewName "binkw32_ucp.dll"
 
 # Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
-Copy-Item installer\rename-dlls.bat "$BUILD_CONFIGURATION\ucp-package\install.bat"
-
-# Copy the legacy ucp.cfg
-Copy-Item installer\ucp.cfg "$BUILD_CONFIGURATION\ucp-package\ucp.cfg"
+Copy-Item installer\rename-dlls.bat "$BUILD_CONFIGURATION\ucp-package\ucp\install.bat"
 
 mkdir "$BUILD_CONFIGURATION\ucp-package\gameseeds"
-
-
-#Install-Module powershell-yaml -Scope CurrentUser -Force
-#Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-#Import-Module powershell-yaml
-
-# Set the defaults
-# Function to convert a options.yml definition to a simplified ucp-config.yml style format
-function Convert-ConfigFile 
-{
-  param (
-    [hashtable]$Table
-  )
-  if($Table.ContainsKey("default")) 
-  {
-    # We reached a terminal node
-    return $Table.default
-  } else 
-  {
-    # We did not reach a terminal node, continue looking for terminals, collect them
-    $nht = [ordered]@{}
-    foreach($key in $Table.keys) {
-        if($Table[$key] -is [System.Collections.IDictionary]) {
-            # This might be a good terminal node candidate.
-            $nht[$key] = Convert-ConfigFile -Table $Table[$key]
-        } else 
-        {
-            $nht[$key] = $Table[$key]
-        }
-    }
-    return $nht
-  }
-}
-
-$defaults = [ordered]@{"modules"=[ordered]@{};"plugins"=[ordered]@{}}
-
-$modules = Get-ChildItem -Directory content\ucp\modules
-
-foreach($module in $modules) 
-{
-    $i = Get-Content -Path ($module.FullName + "\definition.yml") -Raw
-    $iy = ConvertFrom-Yaml $i
-    
-    $name = $iy.name
-    $version = $iy.version
-    
-    $defaults.modules[$name] = [ordered]@{}
-    $defaults.modules[$name].active = $false
-    $defaults.modules[$name].version = $version
-    
-    if(Test-Path -Path ($module.FullName + "\options.yml")) 
-    {
-        $defaults.modules[$name].options = [ordered]@{}
-        
-        $f = Get-Content -Path ($module.FullName + "\options.yml") -Raw
-        $yus = ConvertFrom-Yaml $f
-        
-        if($yus -ne $null) 
-        {
-            # Create an ordered dictionary
-            $yk = $yus.keys | Sort
-            $y = [ordered]@{}
-            foreach($k in $yk) 
-            {
-                $y[$k] = $yus[$k]
-            }
-            
-            # Set the default values
-            $defaults.modules[$name].options = Convert-ConfigFile -Table $y           
-        } 
-    }
-}
-
-$plugins = Get-ChildItem -Directory content\ucp\plugins
-
-foreach($plugin in $plugins) 
-{
-    $i = Get-Content -Path ($plugin.FullName + "\definition.yml") -Raw
-    $iy = ConvertFrom-Yaml $i
-    
-    $name = $iy.name
-    $version = $iy.version
-    $default_active = $iy.default
-    if($default_active -eq $null) 
-    {
-      $default_active = $false
-    }
-    
-    $defaults.plugins[$name] = [ordered]@{}
-    $defaults.plugins[$name].active = $default_active
-    $defaults.plugins[$name].version = $version
-    
-    if(Test-Path -Path ($plugin.FullName + "\options.yml")) 
-    {
-        $defaults.plugins[$name].options = [ordered]@{}
-        
-        $f = Get-Content -Path ($plugin.FullName + "\options.yml") -Raw
-        $y = ConvertFrom-Yaml $f
-        if($y -ne $null) 
-        {
-            $defaults.plugins[$name].options = Convert-ConfigFile -Table $y                
-        }
-    }
-}
-
-$o = ConvertTo-Yaml $defaults
-Set-Content -Path "$BUILD_CONFIGURATION\ucp-package\ucp-config-defaults.yml" -Value $o
 
 
 $f = Get-Content -Path "version.yml" -Raw
@@ -287,7 +167,7 @@ $versionInfo = [ordered]@{
     build = "$BUILD_CONFIGURATION";
 }
 $y = ConvertTo-Yaml $versionInfo
-Set-Content -Path "$BUILD_CONFIGURATION\ucp-package\ucp-version.yml" -Value $y
+Set-Content -Path "$BUILD_CONFIGURATION\ucp-package\ucp\ucp-version.yml" -Value $y
 
 
 # Create a file name
