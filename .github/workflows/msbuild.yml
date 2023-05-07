@@ -61,7 +61,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       shell: pwsh
       run: |
-        .\scripts\signer.ps1 -Path "$($env:BUILD_CONFIGURATION)\ucp-package\ucp\" -RemoveZippedFolders -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" 
+        .\scripts\signer.ps1 -UCPPath "$($env:BUILD_CONFIGURATION)\ucp-package\ucp\" -RemoveZippedFolders -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" 
 
     - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
