@@ -191,10 +191,10 @@ if($BUILD_CONFIGURATION -eq "ReleaseSecure")
 }
 $NAME = "UCP3-snapshot-$type-$name"
 
-
+## DEPRECATED
 # Write a zip file in the main folder 
-pushd "$BUILD_CONFIGURATION/ucp-package/"
-7z a -tzip -m0=Copy "..\..\$($NAME).zip" *
-popd
+# pushd "$BUILD_CONFIGURATION/ucp-package/"
+# 7z a -tzip -m0=Copy "..\..\$($NAME).zip" *
+# popd
 
 
