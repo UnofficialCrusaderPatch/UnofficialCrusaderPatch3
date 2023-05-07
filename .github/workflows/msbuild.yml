@@ -91,6 +91,7 @@ jobs:
         retention-days: 1
 
   release:
+    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: windows-latest
     steps:
