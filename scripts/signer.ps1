@@ -1,6 +1,6 @@
 Param(
     [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [string]$Path,
+    [string]$UCPPath,
     [Parameter(Mandatory=$false, ValueFromPipeline=$false)]
     [switch]$RemoveZippedFolders,
     [Parameter(Mandatory=$true, ValueFromPipeline=$false)]
@@ -11,16 +11,20 @@ if ((Test-Path -Path "$Certificate") -ne $true ) {
   throw "Missing certificate to sign zip files with: $($Certificate)"
 }
 
-Write-Output "Zipping code: file: $($Path)code.zip folder: $($Path)code\*"
-7z a -tzip -m0=Copy "$($Path)code.zip" "$($Path)code\*"	
+$codeDirectory = Get-Item -Path "$($UCPPath)\code"
+
+Write-Output "Zipping code: file: $($UCPPath)code.zip folder: $($codeDirectory)\*"
+7z a -tzip -m0=Copy "$($codeDirectory.Parent)\$($codeDirectory.Name).zip" "$($codeDirectory.FullName)\*"	
 
 if ($RemoveZippedFolders) {
-  Remove-Item -Recurse -Force -Path "$($Path)code\"	
+  Remove-Item -Recurse -Force -Path "$($UCPPath)code\"	
 }
+
+throw "Quit"
 
 Write-Output "Zipping plugins"
 
-$pluginDirectories = Get-ChildItem -Path "$($Path)\plugins" -Directory
+$pluginDirectories = Get-ChildItem -Path "$($UCPPath)\plugins" -Directory
 
 foreach ($pluginDirectory in $pluginDirectories) {
 	
@@ -36,7 +40,7 @@ foreach ($pluginDirectory in $pluginDirectories) {
 
 Write-Output "Zipping modules"
 
-$moduleDirectories = Get-ChildItem -Path "$($Path)\modules" -Directory
+$moduleDirectories = Get-ChildItem -Path "$($UCPPath)\modules" -Directory
 
 foreach ($moduleDirectory in $moduleDirectories) {
 	
@@ -56,7 +60,7 @@ $extensions = [System.Collections.ArrayList]@()
 
 Write-Output "Hashing modules"
 
-$moduleZips = Get-ChildItem -Path "$($Path)\modules\*.zip" -File
+$moduleZips = Get-ChildItem -Path "$($UCPPath)\modules\*.zip" -File
 
 foreach ($moduleZip in $moduleZips) {
 	
@@ -76,7 +80,7 @@ Write-Output "Hashing code zip"
 $extensions.Add(
 	[ordered]@{
 		  name = "code";
-		  hash = (Get-FileHash -Algorithm SHA256 -Path "$($Path)\code.zip" | Select-Object -ExpandProperty Hash).ToLower();
+		  hash = (Get-FileHash -Algorithm SHA256 -Path "$($UCPPath)\code.zip" | Select-Object -ExpandProperty Hash).ToLower();
 	 })
 
 Write-Output "Writing extension store file"
@@ -90,9 +94,9 @@ $extensionStore = [ordered]@{
 
 $result = ConvertTo-Yaml $extensionStore
 
-Set-Content -Path "$($Path)\extension-store.yml" -Value $result
+Set-Content -Path "$($UCPPath)\extension-store.yml" -Value $result
 
 
 Write-Output "Signing extension store file"
 # ucp3-module-signing-key.pem 
-(openssl dgst -sign "$Certificate" -keyform PEM -sha256 -out "$($Path)\extension-store.yml.sig" -hex -r "$($Path)\extension-store.yml")
+(openssl dgst -sign "$Certificate" -keyform PEM -sha256 -out "$($UCPPath)\extension-store.yml.sig" -hex -r "$($UCPPath)\extension-store.yml")
