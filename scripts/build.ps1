@@ -23,16 +23,18 @@ $BUILD_DIR = "$BUILD_CONFIGURATION\ucp-package\"
 $GITHUB_ENV = "GITHUB_ENV"
 $GITHUB_SHA = git rev-parse HEAD
 
+if ($NugetToken -ne "missing") {
+  # Set up the right nuget packages
+  nuget sources add -Name "gynt-packages" -Source "https://nuget.pkg.github.com/gynt/index.json" -StorePasswordInClearText -Username git -Password "$NugetToken"
+}
 
-# Set up the right nuget packages
-nuget sources add -Name "gynt-packages" -Source "https://nuget.pkg.github.com/gynt/index.json" -StorePasswordInClearText -Username git -Password "$NugetToken"
 nuget restore
 
 
 # Prepare the directories
 # Get-ChildItem -Directory -Path "build" | Where({$_.Name -eq "$buildConfiguration"}) | Remove-Item -Recurse -Force
 
-if(!(Test-Path -Path "$BUILD_CONFIGURATION\ucp-package")) {
+if(!(Test-Path -Path "$BUILD_CONFIGURATION")) {
   mkdir "$BUILD_CONFIGURATION"  
 }
 
@@ -125,14 +127,16 @@ foreach($module in $modules) {
 Copy-Item "dll\vendor\fasm\source\dll\fasm.dll" -Destination "$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\fasm.dll"
 Copy-Item "dll\vendor\fasm\LICENSE.txt" -Destination "$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\LICENSE.txt"
 
-# Zip files in secure mode
-if(($BUILD_CONFIGURATION -eq "DebugSecure") -or ($BUILD_CONFIGURATION -eq "ReleaseSecure")) {
-  pushd "$BUILD_CONFIGURATION\ucp-package\"
-  # Zip all files and remove the original to avoid packing twice
-  7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -x"!ucp/plugins" -sdel
-  popd
-} else {
-}
+
+### Deprecated
+## Zip files in secure mode
+#if(($BUILD_CONFIGURATION -eq "DebugSecure") -or ($BUILD_CONFIGURATION -eq "ReleaseSecure")) {
+  #pushd "$BUILD_CONFIGURATION\ucp-package\"
+  ## Zip all files and remove the original to avoid packing twice
+  #7z a -tzip -m0=Copy ..\..\internaldata.zip ucp -x"!ucp/plugins" -sdel
+  #popd
+#} else {
+#}
 
 # Build UCP3
 msbuild /m /p:Configuration=$BUILD_CONFIGURATION .
