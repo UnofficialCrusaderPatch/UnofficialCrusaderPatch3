@@ -53,10 +53,12 @@ local computeVersionString = function(config)
     return digest
 end
 
+local UCP_VERSION_FILE_PATH = "ucp/ucp-version.yml"
+
 namespace.initialize = function()
-    local f, message = io.open("ucp-version.yml")
+    local f, message = io.open(UCP_VERSION_FILE_PATH)
     if not f then
-        print("Could not read '" .. "ucp-version.yml" .. "'.yml. Reason: " .. message)
+        print("Could not read '" .. UCP_VERSION_FILE_PATH .. "'. Reason: " .. message)
         namespace.known_version_string = ""
     else
         local data = f:read("*all")
