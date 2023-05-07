@@ -65,7 +65,7 @@ namespace LuaIO {
 
 		std::string insidePath;
 		ModuleHandle* mh;
-		if (Core::getInstance().pathIsInInternalCode(sanitizedPath, insidePath)) {
+		if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {
 
 			try {
 				mh = ModuleHandleManager::getInstance().getLatestCodeHandle();
@@ -79,7 +79,7 @@ namespace LuaIO {
 			std::string extension;
 			std::string basePath;
 
-			if (Core::getInstance().pathIsInModule(sanitizedPath, extension, basePath, insidePath)) {
+			if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insidePath)) {
 				try {
 					mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 				}

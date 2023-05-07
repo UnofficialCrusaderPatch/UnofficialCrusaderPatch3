@@ -67,7 +67,7 @@ namespace LuaIO {
 		std::string basePath;
 		ModuleHandle* mh;
 
-		if (Core::getInstance().pathIsInModule(sanitizedPath, extension, basePath, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 			}
@@ -76,6 +76,24 @@ namespace LuaIO {
 			}
 
 			std::vector<std::string> entries = mh->listDirectories(rawPath);
+			for (std::string entry : entries) {
+				lua_pushstring(L, entry.c_str());
+			}
+
+			return entries.size();
+		}
+
+		ExtensionHandle* eh;
+
+		if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
+			try {
+				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+			}
+			catch (ModuleHandleException e) {
+				return luaL_error(L, e.what());
+			}
+
+			std::vector<std::string> entries = eh->listDirectories(rawPath);
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
 			}

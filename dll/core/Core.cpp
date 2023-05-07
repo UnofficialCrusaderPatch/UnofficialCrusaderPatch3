@@ -217,7 +217,27 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	return true;
 }
 
-bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath) {
+bool Core::pathIsInPluginDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath) {
+
+	std::regex re("^ucp/+plugins/+([A-Za-z0-9_.-]+)/+(.*)$");
+	std::filesystem::path path(sanitizedPath);
+
+	if (sanitizedPath.find("ucp/plugins/") == 0 || sanitizedPath == "ucp/plugins/") {
+		std::smatch m;
+		if (std::regex_search(sanitizedPath, m, re)) {
+			extension = m[1];
+			insideExtensionPath = m[2];
+			basePath = (Core::getInstance().UCP_DIR / "plugins" / extension).string();
+			return true;
+
+		}
+		return false;
+	}
+
+	return false;
+}
+
+bool Core::pathIsInModuleDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath) {
 
 	std::regex re("^ucp/+modules/+([A-Za-z0-9_.-]+)/+(.*)$");
 	std::filesystem::path path(sanitizedPath);
@@ -237,7 +257,7 @@ bool Core::pathIsInModule(const std::string& sanitizedPath, std::string& extensi
 	return false;
 }
 
-bool Core::pathIsInInternalCode(const std::string& sanitizedPath, std::string& insideCodePath) {
+bool Core::pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::string& insideCodePath) {
 
 	std::regex re("^ucp/+code/+(.*)$");
 	std::filesystem::path path(sanitizedPath);

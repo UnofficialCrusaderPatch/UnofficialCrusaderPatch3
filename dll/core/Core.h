@@ -73,10 +73,11 @@ public:
 
 	bool sanitizePath(const std::string& path, std::string& result);
 
-	bool pathIsInModule(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
+	bool pathIsInPluginDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
+	bool pathIsInModuleDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
 	bool moduleExists(const std::string moduleName, bool& asZip, bool& asFolder);
 
-	bool pathIsInInternalCode(const std::string& sanitizedPath, std::string& insideCodePath);
+	bool pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::string& insideCodePath);
 	bool codeLocationExists(bool& asZip, bool& asFolder);
 
 	Store getModuleHashStore();
