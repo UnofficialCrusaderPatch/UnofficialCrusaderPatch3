@@ -55,7 +55,7 @@ jobs:
       env:
         UCP3_SIGNING_CERTIFICATE_CONTENTS: ${{ secrets.UCP3_SIGNING_CERTIFICATE_CONTENTS }}
       run: |
-        Set-Content -Value "$UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
+        Set-Content -Value "$env:UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
 
     - name: Zip and sign extensions
       working-directory: ${{env.GITHUB_WORKSPACE}}
