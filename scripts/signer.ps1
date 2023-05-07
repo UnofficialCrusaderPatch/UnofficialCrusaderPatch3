@@ -7,6 +7,10 @@ Param(
     [string]$Certificate
 )
 
+if ((Test-Path -Path "$Certificate") -ne $true ) {
+  throw "Missing certificate to sign zip files with: $($Certificate)"
+}
+
 $pluginDirectories = Get-ChildItem -Path "$($Path)\plugins" -Directory
 
 foreach ($pluginDirectory in $pluginDirectories) {
