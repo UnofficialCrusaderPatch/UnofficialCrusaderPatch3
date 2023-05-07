@@ -55,13 +55,13 @@ jobs:
       env:
         UCP3_SIGNING_CERTIFICATE_CONTENTS: ${{ secrets.UCP3_SIGNING_CERTIFICATE_CONTENTS }}
       run: |
-        Set-Content -Value "$UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "ucp3-module-signing-key.pem" -Force
+        Set-Content -Value "$UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
 
     - name: Zip and sign extensions
       working-directory: ${{env.GITHUB_WORKSPACE}}
       shell: pwsh
       run: |
-        .\scripts\signer.ps1 -Path "$($env:BUILD_CONFIGURATION)\ucp-package\ucp\" -RemoveZippedFolders -Certificate ucp3-module-signing-key.pem 
+        .\scripts\signer.ps1 -Path "$($env:BUILD_CONFIGURATION)\ucp-package\ucp\" -RemoveZippedFolders -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" 
 
     - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
