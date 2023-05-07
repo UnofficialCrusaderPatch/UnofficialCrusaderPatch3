@@ -4,7 +4,7 @@ Param(
     [Parameter(Mandatory=$false, ValueFromPipeline=$false)]
     [switch]$RemoveZippedFolders,
     [Parameter(Mandatory=$true, ValueFromPipeline=$false)]
-    [string]$Certificate,
+    [string]$Certificate
 )
 
 $pluginDirectories = Get-ChildItem -Path "$($Path)\plugins" -Directory
