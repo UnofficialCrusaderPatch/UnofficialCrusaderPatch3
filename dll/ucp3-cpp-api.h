@@ -1,15 +1,13 @@
 #pragma once
 
 #ifdef UCPDLL_EXPORTS
-#define UCP3_DLL    __declspec(dllexport)
+#define UCP3_DLL  extern "C"   __declspec(dllexport)
 #else
-#define UCP3_DLL    __declspec(dllimport)
+#define UCP3_DLL  extern "C"   __declspec(dllimport)
 #endif
 
-#include <string>
 
-
-
+#include <stdio.h>
 
 /**
 
@@ -39,7 +37,9 @@ enum ucp_NamedVerbosity : int
 	Verbosity_0 = 0,
 
 	// Verbosity levels 1-9 are generally not written to stderr, but are written to file.
+	// Verbosity 1 is a DEBUG verbosity that is written to the console
 	Verbosity_1 = +1,
+	// Verbosity 2 and above is meant for DEBUG messages that should not be written to the console
 	Verbosity_2 = +2,
 	Verbosity_3 = +3,
 	Verbosity_4 = +4,
@@ -56,16 +56,22 @@ enum ucp_NamedVerbosity : int
 /**
 	Call this function to log a message to the ucp console, and to log files
 */
-UCP3_DLL void ucp_log(ucp_NamedVerbosity logLevel, std::string logMessage);
+UCP3_DLL void ucp_log(ucp_NamedVerbosity logLevel, const char * logMessage);
 
 
 /**
 
 	
+	If fails, returns NULL and sets the LastErrorMessage;
+*/
+UCP3_DLL FILE* ucp_getFileHandle(const char* path, const char* mode);
+
+/**
+	
+	Gets the last error message;
 
 */
-UCP3_DLL FILE* ucp_getFileHandle(std::string path, std::string mode, std::string &errorMsg);
-
+UCP3_DLL const char * ucp_getLastErrorMessage();
 
 /**
 *

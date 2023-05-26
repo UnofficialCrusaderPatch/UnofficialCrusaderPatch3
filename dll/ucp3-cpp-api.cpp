@@ -2,6 +2,8 @@
 #include "core/Core.h"
 #include "io/modules/ModuleHandle.h"
 
+std::string errorMsg;
+
 void ucp_initialize() {
 	if (!Core::getInstance().isInitialized) {
 		Core::getInstance().initialize();
@@ -13,17 +15,19 @@ void ucp_initialize() {
  	
 }
 
-void ucp_log(ucp_NamedVerbosity logLevel, std::string logMessage) {
+void ucp_log(ucp_NamedVerbosity logLevel, const char * logMessage) {
 	Core::getInstance().log(logLevel, logMessage);
 }
 
-FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &errorMsg) {
+FILE* ucp_getFileHandle(const char * filename, const char * mode) {
 
+	std::string filenameString = filename;
+	std::string modeString = mode;
 
 	std::string sanitizedPath;
 
 	if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
-		errorMsg = ("Invalid path: " + filename + "\n reason: " + sanitizedPath);
+		errorMsg = ("Invalid path: " + filenameString + "\n reason: " + sanitizedPath);
 		return NULL;
 	}
 
@@ -32,7 +36,7 @@ FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &err
 	if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {
 
 		if (mode != "r" && mode != "rb") {
-			errorMsg = "invalid file access mode ('" + mode + "') for file path: " + sanitizedPath;
+			errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + sanitizedPath;
 			return NULL;
 		}
 
@@ -53,7 +57,7 @@ FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &err
 		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insidePath)) {
 			
 			if (mode != "r" && mode != "rb") {
-				errorMsg = "invalid file access mode ('" + mode + "') for file path: " + sanitizedPath;
+				errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + sanitizedPath;
 				return NULL;
 			}
 
@@ -72,7 +76,7 @@ FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &err
 			if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insidePath)) {
 
 				if (mode != "r" && mode != "rb") {
-					errorMsg = "invalid file access mode ('" + mode + "') for file path: " + sanitizedPath;
+					errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + sanitizedPath;
 					return NULL;
 				}
 
@@ -89,14 +93,14 @@ FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &err
 
 				// A regular file outside of the code module or modules directory
 
-				return fopen(sanitizedPath.c_str(), mode.c_str());
+				return fopen(sanitizedPath.c_str(), modeString.c_str());
 			}
 
 		}
 	}
 
 	if (mode != "r" && mode != "rb") {
-		errorMsg = "invalid file access mode ('" + mode + "') for file path: " + sanitizedPath;
+		errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + sanitizedPath;
 		return NULL;
 	}
 
@@ -115,4 +119,8 @@ FILE* ucp_getFileHandle(std::string filename, std::string mode, std::string &err
 		return NULL;
 	}
 
+}
+
+const char * ucp_getLastErrorMessage() {
+	return errorMsg.c_str();
 }
