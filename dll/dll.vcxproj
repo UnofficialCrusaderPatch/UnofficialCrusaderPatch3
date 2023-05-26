@@ -216,7 +216,8 @@
     <ClInclude Include="security\Signature.h" />
     <ClInclude Include="security\Store.h" />
     <ClInclude Include="compilation\fasm.h" />
-    <ClInclude Include="ucp3-cpp-api.h" />
+    <ClInclude Include="ucp3.h" />
+    <ClInclude Include="ucp3.hpp" />
     <ClInclude Include="vendor\MemoryModule\MemoryModule.h" />
   </ItemGroup>
   <ItemGroup>
@@ -230,8 +231,11 @@
     <ClCompile Include="lua\LuaLoadLibrary.cpp" />
     <ClCompile Include="compilation\fasm.cpp" />
     <ClCompile Include="lua\LuaUtil.cpp" />
-    <ClCompile Include="ucp3-cpp-api.cpp" />
+    <ClCompile Include="ucp3.cpp" />
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Directory.Build.props" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

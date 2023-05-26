@@ -1,6 +1,6 @@
 
 #include "framework.h"
-#include "ucp3-cpp-api.h"
+#include "ucp3.h"
 
 DWORD entryFunction = 0x00591049;
 
