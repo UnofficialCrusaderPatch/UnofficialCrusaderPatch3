@@ -205,6 +205,7 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="io\files.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
     <ClInclude Include="io\utils.h" />
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="console\console.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="io\files.cpp" />
     <ClCompile Include="io\utils.cpp" />
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
     <ClCompile Include="lua\LuaListDirectories.cpp" />
