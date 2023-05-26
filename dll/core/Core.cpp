@@ -278,6 +278,12 @@ bool Core::pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::
 
 void Core::initialize() {
 
+	if (this->isInitialized) {
+		MessageBoxA(NULL, "UCP3 dll was already initialized", "FATAL: already initialized", MB_OK);
+		LOG_S(FATAL) << "UCP3 dll was already initialized";
+		return;
+	}
+
 	int verbosity = 0;
 	char* ENV_UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
 	if (ENV_UCP_VERBOSITY == NULL) {

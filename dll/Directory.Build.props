@@ -4,7 +4,7 @@
 	<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019 -->
   <PropertyGroup>
   	<PackageId>UnofficialCrusaderPatch3</PackageId>
-	  <Version>3.0.0-cpp.1</Version>
+	  <Version>3.0.0</Version>
 	  <Authors>gynt</Authors>
 	  <Company>gynt</Company>
 	  <TargetFramework>native</TargetFramework>
@@ -65,12 +65,16 @@
 			<PackagePath>build\native\lib\Win32\v143\Release</PackagePath>
 		</Content>
 	
-		<Content Include="ucp3-cpp-api.h">
+		<Content Include="ucp3.h">
 			<Pack>true</Pack>
 			<PackagePath>build\native\include</PackagePath>
 		</Content>
-	
-		<Content Include="UnofficialCrusaderPatch3.targets">
+    <Content Include="ucp3.hpp">
+      <Pack>true</Pack>
+      <PackagePath>build\native\include</PackagePath>
+    </Content>
+
+    <Content Include="UnofficialCrusaderPatch3.targets">
 			<Pack>true</Pack>
 			<PackagePath>build\native</PackagePath>
 		</Content>
