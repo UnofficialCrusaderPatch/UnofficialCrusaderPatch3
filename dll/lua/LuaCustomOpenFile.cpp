@@ -1,6 +1,7 @@
 
 #include "LuaCustomOpenFile.h"
 #include "io/modules/ModuleHandle.h"
+#include "io/files.h"
 
 namespace LuaIO {
 
@@ -59,6 +60,21 @@ namespace LuaIO {
 	  *
 	  */
 
+
+	int luaIOCustomOpenFileHandle(lua_State* L) {
+		const std::string filename = luaL_checkstring(L, 1);
+		const std::string mode = luaL_optstring(L, 2, "r");
+
+		std::string errorMsg;
+		FILE* result = getFileHandle(filename, mode, errorMsg);
+
+		if (result != NULL) {
+			lua_pushinteger(L, (DWORD) result);
+			return 1;
+		}
+
+		return luaL_error(L, "Could not get file handle to path '%s'. Error message: '%s'", filename, errorMsg);
+	}
 
 	int luaIOCustomOpen(lua_State* L) {
 		const std::string filename = luaL_checkstring(L, 1);

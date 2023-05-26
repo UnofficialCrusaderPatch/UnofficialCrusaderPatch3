@@ -48,7 +48,10 @@ void addIOFunctions(lua_State* L) {
 	lua_getfield(L, -1, "io");
 	lua_pushcfunction(L, LuaIO::luaIOCustomOpen);
 	lua_setfield(L, -2, "open");
+	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFileHandle);
+	lua_setfield(L, -2, "openraw");
 	lua_pop(L, 1); // Pop the io table
+
 
 	/**
 	 * The code below is also possible.
@@ -56,8 +59,7 @@ void addIOFunctions(lua_State* L) {
 	lua_setfield(L, -2, "require"); //Overriding the global require
 	
 	* But we can also do this: */
-	std::string pre = ucp_code_pre;
-	if (luaL_loadbufferx(L, pre.c_str(), pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
+	if (luaL_loadbufferx(L, ucp_code_pre.c_str(), ucp_code_pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
 		std::cout << "ERROR in loading pre.lua" << lua_tostring(L, -1) << std::endl;
 		lua_pop(L, 1);
 	}
