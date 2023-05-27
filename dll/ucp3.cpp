@@ -24,6 +24,59 @@ FILE* ucp_getFileHandle(const char * filename, const char * mode) {
 	return getFileHandle(filename, mode, errorMsg);
 }
 
-const char * ucp_getLastErrorMessage() {
+const char * ucp_lastErrorMessage() {
 	return errorMsg.c_str();
+}
+
+int ucp_logLevel() {
+	return Core::getInstance().logLevel;
+}
+
+/** 
+void ucp_getPathToExtension(const char* extension, const char** path, int* pathSize) {
+	std::string p;
+	int size;
+
+	// Actual implementation goes here
+
+	if (path == NULL) {
+		*pathSize = size;
+		return;
+	}
+	memcpy_s(path, size, p.c_str(), size);
+}
+*/
+
+/**
+	Untested!
+*/
+void * ucp_getProcAddressFromLibraryInModule(const char* moduleName, const char* library, const char* name) {
+	std::string moduleNameString = moduleName;
+	ModuleHandle* mh = ModuleHandleManager::getInstance().loadedModuleHandle(moduleNameString);
+
+	if (mh == NULL) {
+		errorMsg = "no loaded extension handle found for module name: '" + moduleNameString + "'";
+		return NULL;
+	}
+
+	std::string libraryString = library;
+	std::string nameString = name;
+
+	try {
+		void* handle = mh->loadLibrary(libraryString);
+
+		if (handle == NULL) {
+			errorMsg = "library could not be loaded: '" + libraryString + "'";
+			return NULL;
+		}
+
+		FARPROC fp = mh->loadFunctionFromLibrary(handle, nameString);
+
+		return fp;
+	}
+	catch (ModuleHandleException e) {
+		errorMsg = e.what();
+		return NULL;
+	}
+	
 }

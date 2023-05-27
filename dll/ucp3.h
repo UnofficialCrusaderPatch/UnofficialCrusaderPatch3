@@ -71,7 +71,14 @@ UCP3_DLL FILE* ucp_getFileHandle(const char* path, const char* mode);
 	Gets the last error message;
 
 */
-UCP3_DLL const char * ucp_getLastErrorMessage();
+UCP3_DLL const char * ucp_lastErrorMessage();
+
+/**
+	moduleName should only be the name of the module, not the version, example. For extension example-0.0.1 (example version 0.0.1), moduleName "example" should be used.
+
+	returns a FARPROC
+*/
+UCP3_DLL void * ucp_getProcAddressFromLibraryInModule(const char* moduleName, const char* library, const char* name);
 
 /**
 *

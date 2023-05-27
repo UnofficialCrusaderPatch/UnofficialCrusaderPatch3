@@ -56,6 +56,8 @@ private:
 	};
 
 public:
+	int logLevel = 0;
+
 	bool isInitialized = false;
 
 	Core(Core const&) = delete;

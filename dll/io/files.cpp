@@ -4,6 +4,7 @@
 #include "core/Core.h"
 #include "io/modules/ModuleHandle.h"
 
+
 FILE* getFileHandle(std::string filename, std::string mode, std::string &errorMsg) {
 
 	std::string sanitizedPath;
