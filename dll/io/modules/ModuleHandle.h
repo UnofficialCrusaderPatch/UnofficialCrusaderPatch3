@@ -31,12 +31,12 @@ class ExtensionHandle {
 public:
 	std::string name;
 
-	ExtensionHandle(std::string name) {
+	ExtensionHandle(const std::string& name) {
 		this->name = name;
 	};
 
 	virtual FILE* openFile(const std::string& path, std::string& error) = 0;
-	virtual std::vector<std::string> listDirectories(std::string& path) = 0;
+	virtual std::vector<std::string> listDirectories(const std::string& path) = 0;
 
 };
 
@@ -48,7 +48,7 @@ protected:
 
 public:
 
-	FolderFileExtensionHandle(std::string modulePath, std::string extension) : ExtensionHandle(extension) {
+	FolderFileExtensionHandle(const std::string& modulePath, const std::string& extension) : ExtensionHandle(extension) {
 		this->modulePath = std::filesystem::path(modulePath);
 	}
 
@@ -63,7 +63,7 @@ public:
 		return fopen(fullPath.string().c_str(), "r");
 	}
 
-	std::vector<std::string> listDirectories(std::string& path) {
+	std::vector<std::string> listDirectories(const std::string& path) {
 
 		std::vector<std::string> result;
 
@@ -145,13 +145,13 @@ protected:
 		return f;
 	}
 
-	FILE* setMemoryFileContents(std::string contents, std::string& error) {
+	FILE* setMemoryFileContents(const std::string& contents, std::string& error) {
 		return setBinaryMemoryFileContents(contents.c_str(), contents.size(), error);
 	}
 
 public:
 
-	ZipFileExtensionHandle(std::string modulePath, std::string extension) : ExtensionHandle(extension) {
+	ZipFileExtensionHandle(const std::string &modulePath, const std::string& extension) : ExtensionHandle(extension) {
 
 
 		z = zip_open(modulePath.c_str(), 0, 'r');
@@ -191,7 +191,7 @@ public:
 		return result;
 	}
 
-	std::vector<std::string> listDirectories(std::string& path) {
+	std::vector<std::string> listDirectories(const std::string& path) {
 		std::vector<std::string> result;
 
 		//Not sure sanitization is necessary, because zip files cannot really handle weird path names anyway...
@@ -237,10 +237,10 @@ protected:
 	std::map<std::string, void*> loadedLibraries;
 
 public:
-	ModuleHandle(std::string name) : ExtensionHandle(name) {};
+	ModuleHandle(const std::string& name) : ExtensionHandle(name) {};
 
-	virtual void* loadLibrary(std::string& path) = 0;
-	virtual FARPROC loadFunctionFromLibrary(void* handle, std::string name) = 0;
+	virtual void* loadLibrary(const std::string& path) = 0;
+	virtual FARPROC loadFunctionFromLibrary(void* handle, const std::string& name) = 0;
 };
 
 
@@ -248,11 +248,11 @@ class FolderFileModuleHandle : public ModuleHandle, public FolderFileExtensionHa
 
 public:
 
-	FolderFileModuleHandle(std::string modulePath, std::string extension) : FolderFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
+	FolderFileModuleHandle(const std::string& modulePath, const std::string& extension) : FolderFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
 
 	}
 
-	void* loadLibrary(std::string& path) {
+	void* loadLibrary(const std::string& path) {
 		if (loadedLibraries.count(path) == 1) {
 			return loadedLibraries[path];
 		}
@@ -266,7 +266,7 @@ public:
 		throw ModuleHandleException("library does not exist: " + libPath.string());
 	}
 
-	FARPROC loadFunctionFromLibrary(void* handle, std::string name) {
+	FARPROC loadFunctionFromLibrary(void* handle, const std::string& name) {
 		return GetProcAddress((HMODULE) handle, name.c_str());
 	}
 
@@ -316,11 +316,11 @@ private:
 
 public:
 
-	ZipFileModuleHandle(std::string modulePath, std::string extension) : ZipFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
+	ZipFileModuleHandle(const std::string& modulePath, const std::string& extension) : ZipFileExtensionHandle(modulePath, extension), ModuleHandle(extension), ExtensionHandle(extension) {
 
 	}
 
-	void* loadLibrary(std::string& path) {
+	void* loadLibrary(const std::string& path) {
 		if (loadedLibraries.count(path) == 1) {
 			return loadedLibraries[path];
 		}
@@ -329,7 +329,8 @@ public:
 		size_t bufsize = 0;
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
-			return 0;
+			throw ModuleHandleException("library does not exist: " + path);
+			// return NULL;
 		}
 
 		zip_entry_read(z, (void**)&buf, &bufsize);
@@ -341,14 +342,14 @@ public:
 		if (handle == NULL)
 		{
 			MessageBoxA(0, ("Cannot load dll from memory: " + path).c_str(), "ERROR", MB_OK);
-			return 0;
+			return NULL;
 		}
 
 		loadedLibraries[path] = handle;
 		return handle;
 	}
 
-	FARPROC loadFunctionFromLibrary(void* handle, std::string name) {
+	FARPROC loadFunctionFromLibrary(void* handle, const std::string& name) {
 		return MemoryGetProcAddress(handle, name.c_str());
 	}
 };
@@ -369,7 +370,7 @@ private:
 		codeHandle = NULL;
 	}
 
-	bool verifyZipFile(std::string path, std::string name, std::string& errorMsg) {
+	bool verifyZipFile(const std::string& path, const std::string& name, std::string& errorMsg) {
 		std::string hash;
 
 		if (!Hasher::getInstance().hashFile(path, hash, errorMsg)) {
@@ -384,7 +385,6 @@ private:
 		return false;
 	}
 
-
 public:
 	static ModuleHandleManager& getInstance()
 	{
@@ -395,6 +395,56 @@ public:
 
 	ModuleHandleManager(ModuleHandleManager const&) = delete;
 	void operator=(ModuleHandleManager const&) = delete;
+
+	/**
+		This function works because only one version of any extension can be loaded at the same time.
+	*/
+	ExtensionHandle* loadedExtensionHandle(const std::string& nameWithoutVersion) {
+
+		for (std::map<std::string, ExtensionHandle*>::iterator iter = this->extensionHandles.begin(); iter != this->extensionHandles.end(); ++iter)
+		{
+			std::string k = iter->first;
+			// First test if the key starts with the extension name
+			if (k.rfind(nameWithoutVersion + "-", 0) == 0) {
+				// Remove the version portion.
+				int lastDashPosition = k.rfind("-");
+				if (lastDashPosition == std::string::npos) {
+					// We shouldn't get here.
+					continue;
+				}
+				if (k.substr(0, lastDashPosition) == nameWithoutVersion) {
+					return iter->second;
+				}
+			}
+		}
+
+		return NULL;
+	}
+
+	/**
+	This function works because only one version of any extension can be loaded at the same time.
+*/
+	ModuleHandle* loadedModuleHandle(const std::string& nameWithoutVersion) {
+
+		for (std::map<std::string, ModuleHandle*>::iterator iter = this->moduleHandles.begin(); iter != this->moduleHandles.end(); ++iter)
+		{
+			std::string k = iter->first;
+			// First test if the key starts with the extension name
+			if (k.rfind(nameWithoutVersion + "-", 0) == 0) {
+				// Remove the version portion.
+				int lastDashPosition = k.rfind("-");
+				if (lastDashPosition == std::string::npos) {
+					// We shouldn't get here.
+					continue;
+				}
+				if (k.substr(0, lastDashPosition) == nameWithoutVersion) {
+					return iter->second;
+				}
+			}
+		}
+
+		return NULL;
+	}
 
 	ExtensionHandle* getExtensionHandle(const std::string& path, const std::string& extension, bool verifyContents)
 	{
@@ -511,14 +561,14 @@ public:
 		if (existsAsFolder || (existsAsFolder && existsAsZip)) {
 			FolderFileModuleHandle* ffmh = new FolderFileModuleHandle(path, extension);
 			moduleHandles[extension] = ffmh;
-
+			extensionHandles[extension] = ffmh;
 			return ffmh;
 		}
 
 		if (existsAsZip) {
 			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
 			moduleHandles[extension] = zfmh;
-
+			extensionHandles[extension] = zfmh;
 			return zfmh;
 		}
 

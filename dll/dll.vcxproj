@@ -207,6 +207,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="io\files.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
+    <ClInclude Include="io\modules\module_utils.h" />
     <ClInclude Include="io\utils.h" />
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
     <ClInclude Include="lua\LuaListDirectories.h" />
@@ -226,6 +227,7 @@
     <ClCompile Include="console\console.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="io\files.cpp" />
+    <ClCompile Include="io\modules\module_utils.cpp" />
     <ClCompile Include="io\utils.cpp" />
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
     <ClCompile Include="lua\LuaListDirectories.cpp" />

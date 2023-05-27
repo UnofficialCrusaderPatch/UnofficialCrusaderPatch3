@@ -296,7 +296,8 @@ void Core::initialize() {
 		s >> verbosity; // We don't care about errors at this point.
 	}
 
-	initializeLogger(verbosity);
+	this->logLevel = verbosity;
+	initializeLogger(this->logLevel);
 
 #if !defined(_DEBUG) && defined(COMPILED_MODULES)
 	// No Console
