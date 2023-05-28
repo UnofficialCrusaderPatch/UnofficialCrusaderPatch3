@@ -25,7 +25,6 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
   ```powershell
   pwsh.exe
   ```
-## Creating the UCP3 installation package:
 7. Then, run the build script. You only need to add the NugetToken the first time you run this build script (succesfully). The token is used to add gynt's repo as a valid source for NuGet packages.
   ```powershell
   .\scripts\build.ps1 -Build "Release" -NugetToken "%YOUR_ACCESS_TOKEN%"
