@@ -68,6 +68,18 @@ UCP3_DLL int ucp_logLevel();
 */
 UCP3_DLL FILE* ucp_getFileHandle(const char* path, const char* mode);
 
+
+/**
+	extensionName should only be the name of the extension, not the version, example. For extension example-0.0.1 (example version 0.0.1), extensionName "example" should be used.
+
+	path should be the path inside the extension, excluding the extension name, e.g. for example-0.0.1/definition.yml, use "definition.yml"
+
+	Only a single version of an extension can be loaded at once, thus the function is deterministic even while excluding the version information
+
+	If fails, returns NULL and sets the LastErrorMessage;
+*/
+UCP3_DLL FILE* ucp_getFileHandleForFileInExtension(const char * extensionName, const char* path, const char* mode);
+
 /**
 	
 	Gets the last error message;
@@ -77,6 +89,8 @@ UCP3_DLL const char * ucp_lastErrorMessage();
 
 /**
 	moduleName should only be the name of the module, not the version, example. For extension example-0.0.1 (example version 0.0.1), moduleName "example" should be used.
+
+	Only a single version of an extension can be loaded at once, thus the function is deterministic even while excluding the version information
 
 	returns a FARPROC
 */

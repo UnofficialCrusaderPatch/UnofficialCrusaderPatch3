@@ -47,6 +47,33 @@ void ucp_getPathToExtension(const char* extension, const char** path, int* pathS
 }
 */
 
+FILE* ucp_getFileHandleForFileInExtension(const char* extensionName, const char* path, const char* mode) {
+
+	std::string pathString = path;
+	std::string modeString = mode;
+
+	if (modeString != "r" && modeString != "rb") {
+		errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + pathString;
+		return NULL;
+	}
+	
+	std::string extensionNameString = extensionName;
+	ExtensionHandle* eh = ModuleHandleManager::getInstance().loadedExtensionHandle(extensionNameString);
+	if (eh == NULL) {
+		errorMsg = "no loaded extension handle found for extension name: '" + extensionNameString + "'";
+		return NULL;
+	}
+
+	try {
+		return eh->openFile(pathString, errorMsg);
+	}
+	catch (ModuleHandleException e) {
+		errorMsg = e.what();
+		return NULL;
+	}
+	
+}
+
 /**
 	Untested!
 */

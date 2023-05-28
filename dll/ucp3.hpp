@@ -5,7 +5,7 @@
 
 inline FILE* ucp_getFileHandle(std::string path, std::string mode, std::string &errorMsg) {
 	FILE* result = ucp_getFileHandle(path.c_str(), mode.c_str());
-	errorMsg = ucp_getLastErrorMessage();
+	errorMsg = ucp_lastErrorMessage();
 
 	return result;
 }
