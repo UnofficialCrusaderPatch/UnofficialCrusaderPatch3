@@ -63,7 +63,7 @@ jobs:
       run: |
         Import-Module powershell-yaml
         
-        $f = Get-Content -Path "$($Path)\version.yml" -Raw
+        $f = Get-Content -Path "version.yml" -Raw
         $vyml = ConvertFrom-Yaml $f
             
         $version_string = "$($vyml.major).$($vyml.minor).$($vyml.patch)";
