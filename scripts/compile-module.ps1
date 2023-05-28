@@ -28,6 +28,8 @@ $simpleBuildConfiguration=$SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
 if($hasSLN) {
     pushd $hasSLN.Directory.FullName
     msbuild /t:restore
+    # This is kept in to keep compatibility with VS2019 style of nuget referencing
+    nuget restore
     msbuild /m /p:Configuration=$simpleBuildConfiguration
     popd
 }
