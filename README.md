@@ -36,7 +36,7 @@ https://aka.ms/vs/17/release/vc_redist.x86.exe
   ```
   You need to do this only once. If you do not like storing the access token in plain text, omit the Username and Password parameters, and use them when asked.
 
-8. All files will be prepared in `Release\ucp-package` (%BUILD_CONFIGURATION%\ucp-package). The files from this folder can be directly copied to the game directory.
+8. All files will be prepared in `Release\ucp-package` (%BUILD_CONFIGURATION%\ucp-package), and the repo directory will contain a zip file.
 To install ucp, do this in the game folder:
 - Unpack the zip in the game folder.
 - Rename `binkw32.dll` to `binkw32_real.dll`
