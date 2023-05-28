@@ -59,6 +59,8 @@ enum ucp_NamedVerbosity : int
 UCP3_DLL void ucp_log(ucp_NamedVerbosity logLevel, const char * logMessage);
 
 
+UCP3_DLL int ucp_logLevel();
+
 /**
 
 	
