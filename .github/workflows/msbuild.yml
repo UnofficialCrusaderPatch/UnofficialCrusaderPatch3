@@ -42,7 +42,7 @@ jobs:
         Set-Content -Value "$env:UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
 
 
-    - name: Run build script: dev build
+    - name: Run build script dev build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
@@ -50,7 +50,7 @@ jobs:
       run: |
         .\scripts\build.ps1 -Build "Release" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
 
-    - name: Run build script: release build
+    - name: Run build script release build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
