@@ -7,17 +7,24 @@ Param(
     [string]$Certificate
 )
 
+
+$ErrorActionPreference = "Stop"
+
+
+Write-Output "Signing extensions. Generating extension store"
+
+
 if ((Test-Path -Path "$Certificate") -ne $true ) {
   throw "Missing certificate to sign zip files with: $($Certificate)"
 }
 
 $codeDirectory = Get-Item -Path "$($UCPPath)\code"
 
-Write-Output "Zipping code: file: $($UCPPath)code.zip folder: $($codeDirectory)\*"
+Write-Output "Zipping code: file: $($UCPPath)\code.zip folder: $($codeDirectory)\*"
 7z a -tzip -m0=Copy "$($codeDirectory.Parent)\$($codeDirectory.Name).zip" "$($codeDirectory.FullName)\*"	
 
 if ($RemoveZippedFolders) {
-  Remove-Item -Recurse -Force -Path "$($UCPPath)code\"	
+  Remove-Item -Recurse -Force -Path "$($UCPPath)\code\"	
 }
 
 Write-Output "Zipping plugins"

@@ -1,8 +1,7 @@
 name: Build
 
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
+  # Trigger the workflow on push or pull request
   push:
     branches:
       - main
@@ -16,22 +15,15 @@ on:
   release:
     types: # This configuration does not affect the page_build event above
       - created
+  workflow_dispatch: {}
 
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: .
-  VERSION_MAJOR: 3
-  VERSION_MINOR: 0
-  VERSION_PATCH: 0
 
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        build_configuration: [Debug, Release, DebugSecure, ReleaseSecure]
-    env:
-        BUILD_CONFIGURATION: ${{ matrix.build_configuration }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -39,14 +31,6 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Run build script
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      env:
-        UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
-      shell: pwsh
-      run: |
-        .\scripts\build.ps1 -Build "$env:BUILD_CONFIGURATION" -NugetToken "$env:UCP3_READ_PACKAGES"
 
 
     - name: Prepare signing by exporting secret to file
@@ -57,14 +41,40 @@ jobs:
       run: |
         Set-Content -Value "$env:UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
 
-    - name: Zip and sign extensions
+
+    - name: Run build script: dev build
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
       shell: pwsh
       run: |
-        .\scripts\signer.ps1 -UCPPath "$($env:BUILD_CONFIGURATION)\ucp-package\ucp\" -RemoveZippedFolders -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" 
+        .\scripts\build.ps1 -Build "Release" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
 
-    - name: Generate a snapshot UCP3 artifact name
+    - name: Run build script: release build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
       shell: pwsh
+      run: |
+        .\scripts\build.ps1 -Build "ReleaseSecure" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
+
+    - name: Add UCP3 version to the github environment
+      shell: pwsh
+      run: |
+        Import-Module powershell-yaml
+        
+        $f = Get-Content -Path "$($Path)\version.yml" -Raw
+        $vyml = ConvertFrom-Yaml $f
+            
+        $version_string = "$($vyml.major).$($vyml.minor).$($vyml.patch)";
+
+        $env:UCP_VERSION = $version_string
+        echo "UCP_VERSION=$version_string" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Generate a snapshot UCP3 artifact name for dev build
+      shell: pwsh
+      env:
+        BUILD_CONFIGURATION: Release
       run: |
         $name = "$env:GITHUB_SHA".SubString(0, 10)
         $type = "$env:BUILD_CONFIGURATION" #.SubString(0, 1)
@@ -80,14 +90,45 @@ jobs:
         if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
           $type = "Release"
         }
-        $env:NAME = "UCP3-snapshot-$type-$name"
-        echo "NAME=UCP3-snapshot-$type-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-    
-    - name: Upload UCP3 as an artifact
+        $version = $env:UCP_VERSION
+        $env:UCP_NAME = "UCP3-snapshot-$type-$version-$name"
+        echo "UCP_NAME=UCP3-snapshot-$type-$version-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+ 
+    - name: Upload UCP3 dev release as an artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.NAME }}
-        path: ${{ env.BUILD_CONFIGURATION }}/ucp-package/*
+        name: ${{ env.UCP_NAME }}
+        path: Release/ucp-package/*
+        retention-days: 1
+
+    - name: Generate a snapshot UCP3 artifact name for release build
+      shell: pwsh
+      env:
+        BUILD_CONFIGURATION: ReleaseSecure
+      run: |
+        $name = "$env:GITHUB_SHA".SubString(0, 10)
+        $type = "$env:BUILD_CONFIGURATION" #.SubString(0, 1)
+        if($env:BUILD_CONFIGURATION -eq "Debug") {
+          $type = "DevDebug"
+        }
+        if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
+          $type = "Debug"
+        }
+        if($env:BUILD_CONFIGURATION -eq "Release") {
+          $type = "DevRelease"
+        }
+        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
+          $type = "Release"
+        }
+        $version = $env:UCP_VERSION
+        $env:UCP_NAME = "UCP3-snapshot-$type-$version-$name"
+        echo "UCP_NAME=UCP3-snapshot-$type-$version-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Upload UCP3 release as an artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.UCP_NAME }}
+        path: ReleaseSecure/ucp-package/*
         retention-days: 1
 
   release:
