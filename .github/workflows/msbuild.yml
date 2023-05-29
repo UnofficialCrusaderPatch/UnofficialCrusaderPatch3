@@ -87,6 +87,7 @@ jobs:
         
         echo "UCP_NAME_RELEASE=$($env:UCP_NAME_RELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         echo "UCP_NAME_DEVRELEASE=$($env:UCP_NAME_DEVRELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "UCP_NAME_NUPKG=$($env:UCP_NAME_NUPKG)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
  
     - name: Upload UCP3 dev release as an artifact
       uses: actions/upload-artifact@v3
