@@ -6,15 +6,7 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-function Require-Script {
-    param (
-        $ScriptName
-    )
-
-    & "$($PSScriptRoot)\$($ScriptName).ps1"
-}
-
-Require-Script "import-yaml"
+& "$($PSScriptRoot)\import-yaml"
 
 
 $BUILD_CONFIGURATION = $Build
@@ -57,19 +49,18 @@ if ((nuget sources list | Select-String "gynt-packages") -eq $null) {
 
 ### Compile UCP dll. Build all configurations to make a nuget package
 
-& "$($PSScriptRoot)\compile-ucp-dll.ps1" -Path "." -BUILD_CONFIGURATION "Debug"
-& "$($PSScriptRoot)\compile-ucp-dll.ps1" -Path "." -BUILD_CONFIGURATION "DebugSecure"
-& "$($PSScriptRoot)\compile-ucp-dll.ps1" -Path "." -BUILD_CONFIGURATION "Release"
-& "$($PSScriptRoot)\compile-ucp-dll.ps1" -Path "." -BUILD_CONFIGURATION "ReleaseSecure"
+& "$($PSScriptRoot)\build-nuget.ps1"
 
-### Make the nuget package
-
-msbuild /t:pack dll
 # Prepare for future installation of the nuget package by modules by adding a source pointing to the nuget package
 
-if ((nuget sources list | Select-String "ucp3-dll") -eq $null) {
-    nuget sources add -Name "ucp3-dll" -Source "$($pwd)\dll\"
-}
+## Two options here. Old thing was
+#if ((nuget sources list | Select-String "ucp3-dll") -eq $null) {
+#    nuget sources add -Name "ucp3-dll" -Source "$($pwd)\dll\"
+#}
+
+# But that pollutes the user pc (adding gynt-packages is already pollution)
+# Alternative is to use /p:RestoreAdditionalProjectSources=Path to .nupkg directory in all restore commands
+$NUPKG_DIRECTORY = Get-Item -Path "dll\*.nupkg" | Select-Object -ExpandProperty Directory
 
 # Remove old versions of nuget ucp
 Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "UnofficialCrusaderPatch*" | Remove-Item -Recurse
@@ -82,7 +73,7 @@ Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "Unoff
 # List of modules
 $modules = Get-ChildItem -Directory content\ucp\modules
 foreach($module in $modules) {  
-    & "$($PSScriptRoot)\compile-module.ps1" -Path $($module) -BUILD_CONFIGURATION $($BUILD_CONFIGURATION)
+    & "$($PSScriptRoot)\compile-module.ps1" -Path $($module) -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -UCP3_NUPKGDIRECTORY "$NUPKG_DIRECTORY"
 }
 
 ### Packaging UCP

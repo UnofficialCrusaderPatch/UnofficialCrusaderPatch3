@@ -29,18 +29,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0" developmentDependency="true">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="RPS" Version="1.3.1"/>
-    <PackageReference Include="lua" Version="5.4.4.1">
-      <IncludeAssets>All</IncludeAssets>
-      <PrivateAssets>None</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="zip" Version="0.2.0"/>
-    <!--<PackageReference Include="libyaml" Version="0.2.5.12" />-->
-    <PackageReference Include="yaml-cpp" Version="0.7.0" />
+    <!-- This package reference is here so that msbuild /t:pack works -->
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0" PrivateAssets="all" developmentDependency="true" />
 
+    <!-- lua is a dependency that should be forwarded upon those that use the nuget package -->
+    <PackageReference Include="lua" Version="5.4.6" PrivateAssets="none" ExcludeAssets="none" IncludeAssets="all" />
+    
+    <!-- These dependencies are developer dependencies (I am pretty sure developmentDependency=true doesn't do anything). They are not listed in the resulting .nuspec -->
+    <PackageReference Include="RPS" Version="1.3.1" PrivateAssets="all" developmentDependency="true" />
+    <PackageReference Include="zip" Version="0.2.0" PrivateAssets="all" developmentDependency="true" />
+    <PackageReference Include="yaml-cpp" Version="0.7.0" PrivateAssets="all" developmentDependency="true" />
+
+    <!-- This describes the content that is packed -->
     <Content Include="..\Debug\ucp.dll">
       <Pack>true</Pack>
       <PackagePath>build\native\bin\Win32\v143\Debug</PackagePath>
