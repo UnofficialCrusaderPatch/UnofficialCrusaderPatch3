@@ -1,7 +1,8 @@
 ﻿
 param (
     [Parameter(Mandatory=$true)][string]$Path,
-	[Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION
+	[Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION,
+    [Parameter(Mandatory=$true)][string]$UCP3_NUPKGDIRECTORY
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,9 +28,11 @@ $simpleBuildConfiguration=$SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
 # Build the module
 if($hasSLN) {
     pushd $hasSLN.Directory.FullName
-    msbuild /t:restore
     # This is kept in to keep compatibility with VS2019 style of nuget referencing
-    nuget restore
+    nuget restore -FallbackSource "$UCP3_NUPKGDIRECTORY"
+
+    msbuild /m /t:restore /p:RestoreAdditionalProjectSources="$UCP3_NUPKGDIRECTORY"
+
     msbuild /m /p:Configuration=$simpleBuildConfiguration
     popd
 }
