@@ -25,12 +25,12 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.3.1
 
 
     - name: Prepare signing by exporting secret to file
@@ -71,64 +71,42 @@ jobs:
         $env:UCP_VERSION = $version_string
         echo "UCP_VERSION=$version_string" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-    - name: Generate a snapshot UCP3 artifact name for dev build
+    - name: Generate a snapshot UCP3 artifact name
       shell: pwsh
-      env:
-        BUILD_CONFIGURATION: Release
       run: |
         $name = "$env:GITHUB_SHA".SubString(0, 10)
-        $type = "$env:BUILD_CONFIGURATION" #.SubString(0, 1)
-        if($env:BUILD_CONFIGURATION -eq "Debug") {
-          $type = "DevDebug"
-        }
-        if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
-          $type = "Debug"
-        }
-        if($env:BUILD_CONFIGURATION -eq "Release") {
-          $type = "DevRelease"
-        }
-        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
-          $type = "Release"
-        }
+        
+        $type1 = "DevRelease"
+        $type2 = "Release"
+        
         $version = $env:UCP_VERSION
-        $env:UCP_NAME = "UCP3-snapshot-$type-$version-$name"
-        echo "UCP_NAME=UCP3-snapshot-$type-$version-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        
+        $env:UCP_NAME_RELEASE = "UCP3-$version-$name-snapshot-Release"
+        $env:UCP_NAME_DEVRELEASE = "UCP3-$version-$name-snapshot-Developer"
+        $env:UCP_NAME_NUPKG = "UCP3-$version-$name-snapshot"
+        
+        echo "UCP_NAME_RELEASE=$($env:UCP_NAME_RELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "UCP_NAME_DEVRELEASE=$($env:UCP_NAME_DEVRELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
  
     - name: Upload UCP3 dev release as an artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ env.UCP_NAME }}
+        name: ${{ env.UCP_NAME_DEVRELEASE }}
         path: Release/ucp-package/*
         retention-days: 1
 
-    - name: Generate a snapshot UCP3 artifact name for release build
-      shell: pwsh
-      env:
-        BUILD_CONFIGURATION: ReleaseSecure
-      run: |
-        $name = "$env:GITHUB_SHA".SubString(0, 10)
-        $type = "$env:BUILD_CONFIGURATION" #.SubString(0, 1)
-        if($env:BUILD_CONFIGURATION -eq "Debug") {
-          $type = "DevDebug"
-        }
-        if($env:BUILD_CONFIGURATION -eq "DebugSecure") {
-          $type = "Debug"
-        }
-        if($env:BUILD_CONFIGURATION -eq "Release") {
-          $type = "DevRelease"
-        }
-        if($env:BUILD_CONFIGURATION -eq "ReleaseSecure") {
-          $type = "Release"
-        }
-        $version = $env:UCP_VERSION
-        $env:UCP_NAME = "UCP3-snapshot-$type-$version-$name"
-        echo "UCP_NAME=UCP3-snapshot-$type-$version-$name" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
     - name: Upload UCP3 release as an artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: ${{ env.UCP_NAME }}
+        name: ${{ env.UCP_NAME_RELEASE }}
         path: ReleaseSecure/ucp-package/*
+        retention-days: 1
+        
+    - name: Upload UCP3 nupkg for devs as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.UCP_NAME_NUPKG }}-nupkg
+        path: dll/*.nupkg
         retention-days: 1
 
   release:
