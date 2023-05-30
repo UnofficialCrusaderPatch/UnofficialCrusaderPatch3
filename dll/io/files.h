@@ -3,4 +3,5 @@
 #include <stdio.h>
 #include <string>
 
-FILE* getFileHandle(std::string filename, std::string mode, std::string& errorMsg);
+FILE* getFilePointer(std::string filename, std::string mode, std::string& errorMsg);
+int getFileDescriptor(std::string filename, int mode, std::string& errorMsg);

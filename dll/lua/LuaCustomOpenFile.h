@@ -12,6 +12,7 @@
 #include "core/Core.h"
 
 namespace LuaIO {
-	int luaIOCustomOpenFileHandle(lua_State* L);
+	int luaIOCustomOpenFilePointer(lua_State* L);
+	int luaIOCustomOpenFileDescriptor(lua_State* L);
 	int luaIOCustomOpen(lua_State* L);
 }

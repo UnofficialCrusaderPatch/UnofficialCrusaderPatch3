@@ -35,7 +35,8 @@ public:
 		this->name = name;
 	};
 
-	virtual FILE* openFile(const std::string& path, std::string& error) = 0;
+	virtual FILE* openFilePointer(const std::string& path, std::string& error) = 0;
+	virtual int openFileDescriptor(const std::string& path, std::string& error) = 0;
 	virtual std::vector<std::string> listDirectories(const std::string& path) = 0;
 
 };
@@ -53,7 +54,18 @@ public:
 	}
 
 	// Only read mode is supported for now...
-	FILE* openFile(const std::string& path, std::string& error) {
+	int openFileDescriptor(const std::string& path, std::string& error) {
+		std::filesystem::path fullPath = (this->modulePath / path);
+		if (!std::filesystem::is_regular_file(fullPath)) {
+			error = "not a regular file : " + path;
+			return NULL;
+		}
+
+		return _open(fullPath.string().c_str(), _O_RDONLY | _O_BINARY );
+	}
+
+	// Only read mode is supported for now...
+	FILE* openFilePointer(const std::string& path, std::string& error) {
 		std::filesystem::path fullPath = (this->modulePath / path);
 		if (!std::filesystem::is_regular_file(fullPath)) {
 			error = "not a regular file : " + path;
@@ -112,7 +124,7 @@ class ZipFileExtensionHandle : public virtual ExtensionHandle {
 protected:
 	zip_t* z;
 
-	FILE* setBinaryMemoryFileContents(const char* contents, size_t length, std::string& error) {
+	int getFileDescriptor(const char* contents, size_t length, std::string& error) {
 		HANDLE read;
 		HANDLE write;
 
@@ -137,7 +149,15 @@ protected:
 			throw ModuleHandleException("couldn't create handle to memory pipe");
 		}
 
-		FILE* f = _fdopen(fd, "r");
+		return fd;
+	}
+
+	int getFileDescriptor(const std::string& contents, std::string& error) {
+		return getFileDescriptor(contents.c_str(), contents.size(), error);
+	}
+
+	FILE* getFilePointer(const char* contents, size_t length, std::string & error) {
+		FILE* f = _fdopen(getFileDescriptor(contents, length, error), "r");
 		if (f == 0) {
 			throw ModuleHandleException("couldn't open memory pipe for reading");
 		}
@@ -145,13 +165,13 @@ protected:
 		return f;
 	}
 
-	FILE* setMemoryFileContents(const std::string& contents, std::string& error) {
-		return setBinaryMemoryFileContents(contents.c_str(), contents.size(), error);
+	FILE* getFilePointer(const std::string& contents, std::string& error) {
+		return getFilePointer(contents.c_str(), contents.size(), error);
 	}
 
 public:
 
-	ZipFileExtensionHandle(const std::string &modulePath, const std::string& extension) : ExtensionHandle(extension) {
+	ZipFileExtensionHandle(const std::string& modulePath, const std::string& extension) : ExtensionHandle(extension) {
 
 
 		z = zip_open(modulePath.c_str(), 0, 'r');
@@ -167,7 +187,7 @@ public:
 		z = 0;
 	}
 
-	FILE* openFile(const std::string& path, std::string& error) {
+	int openFileDescriptor(const std::string& path, std::string& error) {
 		char* buf = NULL;
 		size_t bufsize = 0;
 
@@ -181,7 +201,31 @@ public:
 
 		std::string fileError;
 
-		FILE* result = setBinaryMemoryFileContents(buf, bufsize, fileError);
+		int result = getFileDescriptor(buf, bufsize, fileError);
+		free(buf);
+
+		if (result == -1) {
+			throw ModuleHandleException("error in opening file: " + path + "\n" + fileError);
+		}
+
+		return result;
+	}
+
+	FILE* openFilePointer(const std::string& path, std::string& error) {
+		char* buf = NULL;
+		size_t bufsize = 0;
+
+		if (zip_entry_open(z, path.c_str()) != 0) {
+			error = "file does not exist in extension zip: " + this->name;
+			return NULL;
+		}
+
+		zip_entry_read(z, (void**)&buf, &bufsize);
+		zip_entry_close(z);
+
+		std::string fileError;
+
+		FILE* result = getFilePointer(buf, bufsize, fileError);
 		free(buf);
 
 		if (result == NULL) {

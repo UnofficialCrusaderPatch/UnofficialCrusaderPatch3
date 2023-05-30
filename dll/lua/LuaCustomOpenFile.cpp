@@ -61,19 +61,34 @@ namespace LuaIO {
 	  */
 
 
-	int luaIOCustomOpenFileHandle(lua_State* L) {
+	int luaIOCustomOpenFilePointer(lua_State* L) {
 		const std::string filename = luaL_checkstring(L, 1);
 		const std::string mode = luaL_optstring(L, 2, "r");
 
 		std::string errorMsg;
-		FILE* result = getFileHandle(filename, mode, errorMsg);
+		FILE* result = getFilePointer(filename, mode, errorMsg);
 
 		if (result != NULL) {
 			lua_pushinteger(L, (DWORD) result);
 			return 1;
 		}
 
-		return luaL_error(L, "Could not get file handle to path '%s'. Error message: '%s'", filename, errorMsg);
+		return luaL_error(L, "Could not get file pointer to path '%s'. Error message: '%s'", filename.c_str(), errorMsg.c_str());
+	}
+
+	int luaIOCustomOpenFileDescriptor(lua_State* L) {
+		const std::string filename = luaL_checkstring(L, 1);
+		const int mode = luaL_checkinteger(L, 2);
+
+		std::string errorMsg;
+		int result = getFileDescriptor(filename, mode, errorMsg);
+
+		if (result != -1) {
+			lua_pushinteger(L, (DWORD)result);
+			return 1;
+		}
+
+		return luaL_error(L, "Could not get file descriptor to path '%s'. Error message: '%s'", filename.c_str(), errorMsg.c_str());
 	}
 
 	int luaIOCustomOpen(lua_State* L) {
@@ -148,7 +163,7 @@ namespace LuaIO {
 
 		try {
 			std::string errorMsg;
-			FILE* f = mh->openFile(insidePath, errorMsg);
+			FILE* f = mh->openFilePointer(insidePath, errorMsg);
 			if (f == NULL) {
 				lua_pushnil(L);
 				lua_pushstring(L, errorMsg.c_str());

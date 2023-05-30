@@ -66,7 +66,11 @@ UCP3_DLL int ucp_logLevel();
 	
 	If fails, returns NULL and sets the LastErrorMessage;
 */
-UCP3_DLL FILE* ucp_getFileHandle(const char* path, const char* mode);
+UCP3_DLL FILE* ucp_getFilePointer(const char* path, const char* mode);
+/**
+	Stronghold Crusader uses _open
+*/
+UCP3_DLL int ucp_getFileDescriptor(const char* path, const char* mode);
 
 
 /**
@@ -78,7 +82,11 @@ UCP3_DLL FILE* ucp_getFileHandle(const char* path, const char* mode);
 
 	If fails, returns NULL and sets the LastErrorMessage;
 */
-UCP3_DLL FILE* ucp_getFileHandleForFileInExtension(const char * extensionName, const char* path, const char* mode);
+UCP3_DLL FILE* ucp_getFilePointerForFileInExtension(const char * extensionName, const char* path, const char* mode);
+/**
+	Stronghold Crusader uses _open
+*/
+UCP3_DLL int ucp_getFileDescriptorForFileInExtension(const char* extensionName, const char* path, const char* mode);
 
 /**
 	

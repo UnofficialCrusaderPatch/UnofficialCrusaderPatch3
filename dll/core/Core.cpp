@@ -48,8 +48,10 @@ void addIOFunctions(lua_State* L) {
 	lua_getfield(L, -1, "io");
 	lua_pushcfunction(L, LuaIO::luaIOCustomOpen);
 	lua_setfield(L, -2, "open");
-	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFileHandle);
-	lua_setfield(L, -2, "openraw");
+	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFilePointer);
+	lua_setfield(L, -2, "openFilePointer");
+	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFileDescriptor);
+	lua_setfield(L, -2, "openFileDescriptor");
 	lua_pop(L, 1); // Pop the io table
 
 
@@ -345,7 +347,7 @@ void Core::initialize() {
 
 		std::string mainPath = "main.lua";
 		std::string error;
-		FILE* f = mh->openFile(mainPath, error);
+		FILE* f = mh->openFilePointer(mainPath, error);
 
 		if (f == NULL) {
 			MessageBoxA(0, "ERROR: failed to load ucp/code/main.lua: does not exist", "FATAL", MB_OK);
