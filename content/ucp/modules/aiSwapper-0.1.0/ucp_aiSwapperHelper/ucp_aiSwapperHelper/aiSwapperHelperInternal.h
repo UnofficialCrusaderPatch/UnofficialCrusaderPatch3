@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <lua.h>
 #include <queue>
 #include <unordered_map>

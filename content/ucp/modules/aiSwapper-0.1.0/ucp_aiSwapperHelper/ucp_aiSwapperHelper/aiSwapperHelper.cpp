@@ -1,7 +1,7 @@
 
 #include "pch.h"
 
-#include <string>
+
 #include "textResourceModifierHeader.h"
 #include "aiSwapperHelperInternal.h"
 
