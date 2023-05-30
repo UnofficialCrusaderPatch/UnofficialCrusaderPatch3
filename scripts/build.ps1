@@ -62,6 +62,8 @@ if ((nuget sources list | Select-String "gynt-packages") -eq $null) {
 # Alternative is to use /p:RestoreAdditionalProjectSources=Path to .nupkg directory in all restore commands
 $NUPKG_DIRECTORY = Get-Item -Path "dll\*.nupkg" | Select-Object -ExpandProperty Directory
 
+Write-Output "NUPKG_DIRECTORY: $NUPKG_DIRECTORY"
+
 # Remove old versions of nuget ucp
 Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "UnofficialCrusaderPatch*" | Remove-Item -Recurse
 

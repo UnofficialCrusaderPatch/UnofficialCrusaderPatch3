@@ -6,4 +6,4 @@
 
 ### Make the nuget package
 
-msbuild /t:pack dll
+msbuild /t:pack dll /Verbosity:quiet

@@ -2,7 +2,8 @@
 param (
     [Parameter(Mandatory=$true)][string]$Path,
 	[Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION,
-    [Parameter(Mandatory=$true)][string]$UCP3_NUPKGDIRECTORY
+    [Parameter(Mandatory=$true)][string]$UCP3_NUPKGDIRECTORY,
+	[Parameter(Mandatory=$false)][string]$Verbosity = "quiet"  # msbuild verbosity level
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,10 +30,10 @@ $simpleBuildConfiguration=$SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
 if($hasSLN) {
     pushd $hasSLN.Directory.FullName
     # This is kept in to keep compatibility with VS2019 style of nuget referencing
-    nuget restore -FallbackSource "$UCP3_NUPKGDIRECTORY"
+    nuget restore -Source "$UCP3_NUPKGDIRECTORY"
 
-    msbuild /m /t:restore /p:RestoreAdditionalProjectSources="$UCP3_NUPKGDIRECTORY"
+    msbuild /m /t:restore /p:RestoreAdditionalProjectSources="$UCP3_NUPKGDIRECTORY" /Verbosity:$Verbosity
 
-    msbuild /m /p:Configuration=$simpleBuildConfiguration
+    msbuild /m /p:Configuration=$simpleBuildConfiguration /Verbosity:$Verbosity
     popd
 }
