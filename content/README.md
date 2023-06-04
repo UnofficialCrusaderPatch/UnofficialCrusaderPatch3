@@ -196,3 +196,18 @@ A slider has a min, max, step, and decimals property.
     type: boolean
     value: false
 ```
+
+## Choice
+```yaml
+- url: choice1
+  description: A few words about choice1 # or use '{{choice1_description}}' to use localisation
+  display: Choice
+  contents:
+    type: choice
+    choices:
+    - name: option1
+      text: "This is option 1 in the dropdown"
+    - name: option2
+      text: "This is option 2 in the dropdown"
+    value: option2 # The default value
+```
