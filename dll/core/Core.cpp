@@ -66,26 +66,27 @@ void addIOFunctions(lua_State* L) {
 	// Create ucrt subtable
 	lua_newtable(L);
 
-	lua_pushinteger(L, (DWORD) &_read); lua_setfield(L, -2, "_read");
-	lua_pushinteger(L, (DWORD)&_close); lua_setfield(L, -2, "_close");
-	lua_pushinteger(L, (DWORD)&_open); lua_setfield(L, -2, "_open");
-	lua_pushinteger(L, (DWORD)&_write); lua_setfield(L, -2, "_write");
-	lua_pushinteger(L, (DWORD)&_flushall); lua_setfield(L, -2, "_flushall");
-	lua_pushinteger(L, (DWORD)&_lseek); lua_setfield(L, -2, "_lseek");
-	lua_pushinteger(L, (DWORD)&_tell); lua_setfield(L, -2, "_tell");
-	lua_pushinteger(L, (DWORD)&_fileno); lua_setfield(L, -2, "_fileno");
-	lua_pushinteger(L, (DWORD)&_fsopen); lua_setfield(L, -2, "_fsopen");
+	lua_pushinteger(L, (DWORD) &_read); lua_setfield(L, -2, "_read"); //
+	lua_pushinteger(L, (DWORD)&_close); lua_setfield(L, -2, "_close"); //
+	lua_pushinteger(L, (DWORD)&_open); lua_setfield(L, -2, "_open"); //
+	lua_pushinteger(L, (DWORD)&_write); lua_setfield(L, -2, "_write"); //
+	lua_pushinteger(L, (DWORD)&_flushall); lua_setfield(L, -2, "_flushall"); //
+	lua_pushinteger(L, (DWORD)&_lseek); lua_setfield(L, -2, "_lseek"); //
+	lua_pushinteger(L, (DWORD)&_tell); lua_setfield(L, -2, "_tell"); //
+	lua_pushinteger(L, (DWORD)&_fileno); lua_setfield(L, -2, "_fileno"); //
+	lua_pushinteger(L, (DWORD)&_fsopen); lua_setfield(L, -2, "_fsopen"); //
 
-	lua_pushinteger(L, (DWORD)&fopen); lua_setfield(L, -2, "fopen");
-	lua_pushinteger(L, (DWORD)&fclose); lua_setfield(L, -2, "fclose");
-	lua_pushinteger(L, (DWORD)&fread); lua_setfield(L, -2, "fread");
-	lua_pushinteger(L, (DWORD)&fread_s); lua_setfield(L, -2, "fread_s");
-	lua_pushinteger(L, (DWORD)&fseek); lua_setfield(L, -2, "fseek");
-	lua_pushinteger(L, (DWORD)&ftell); lua_setfield(L, -2, "ftell");
-	lua_pushinteger(L, (DWORD)&fflush); lua_setfield(L, -2, "fflush");
-	lua_pushinteger(L, (DWORD)&fgetpos); lua_setfield(L, -2, "fgetpos");
-	lua_pushinteger(L, (DWORD)&fsetpos); lua_setfield(L, -2, "fsetpos");
-	lua_pushinteger(L, (DWORD)&getwc); lua_setfield(L, -2, "getwc");
+	lua_pushinteger(L, (DWORD)&fopen); lua_setfield(L, -2, "fopen"); //
+	lua_pushinteger(L, (DWORD)&fclose); lua_setfield(L, -2, "fclose"); //
+	lua_pushinteger(L, (DWORD)&fread); lua_setfield(L, -2, "fread"); //
+	lua_pushinteger(L, (DWORD)&fread_s); lua_setfield(L, -2, "fread_s"); //
+	lua_pushinteger(L, (DWORD)&fwrite); lua_setfield(L, -2, "fwrite");
+	lua_pushinteger(L, (DWORD)&fseek); lua_setfield(L, -2, "fseek"); //
+	lua_pushinteger(L, (DWORD)&ftell); lua_setfield(L, -2, "ftell"); //
+	lua_pushinteger(L, (DWORD)&fflush); lua_setfield(L, -2, "fflush"); //
+	lua_pushinteger(L, (DWORD)&fgetpos); lua_setfield(L, -2, "fgetpos"); //
+	lua_pushinteger(L, (DWORD)&fsetpos); lua_setfield(L, -2, "fsetpos"); //
+	lua_pushinteger(L, (DWORD)&getwc); lua_setfield(L, -2, "getwc"); //
 
 	// Set the table
 	lua_setfield(L, -2, "ucrt");
