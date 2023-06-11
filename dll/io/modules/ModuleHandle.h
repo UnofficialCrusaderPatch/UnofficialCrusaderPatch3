@@ -58,7 +58,7 @@ public:
 		std::filesystem::path fullPath = (this->modulePath / path);
 		if (!std::filesystem::is_regular_file(fullPath)) {
 			error = "not a regular file : " + path;
-			return NULL;
+			return -1;
 		}
 
 		return _open(fullPath.string().c_str(), _O_RDONLY | _O_BINARY );
@@ -72,7 +72,7 @@ public:
 			return NULL;
 		}
 
-		return fopen(fullPath.string().c_str(), "r");
+		return fopen(fullPath.string().c_str(), "rb");
 	}
 
 	std::vector<std::string> listDirectories(const std::string& path) {
@@ -124,6 +124,9 @@ class ZipFileExtensionHandle : public virtual ExtensionHandle {
 protected:
 	zip_t* z;
 
+	// BUG: seek (_lseek) is not supported breaking game files such as gm1 files because the game relies on seek for some file types.
+	// It is a strange bug because _tell and _lseek do report the right values, but _read does return the wrong data. I guess Pipes are really just that, Pipes.
+	// So, this works for files that only need read() and not seek() such as module code files (.lua files, .dll files, etc.)
 	int getFileDescriptor(const char* contents, size_t length, std::string& error) {
 		HANDLE read;
 		HANDLE write;
@@ -144,7 +147,8 @@ protected:
 			throw ModuleHandleException("couldn't write all contents to memory pipe");
 		}
 
-		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY);
+		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY | _O_BINARY);
+		
 		if (fd == -1) {
 			throw ModuleHandleException("couldn't create handle to memory pipe");
 		}
@@ -157,7 +161,7 @@ protected:
 	}
 
 	FILE* getFilePointer(const char* contents, size_t length, std::string & error) {
-		FILE* f = _fdopen(getFileDescriptor(contents, length, error), "r");
+		FILE* f = _fdopen(getFileDescriptor(contents, length, error), "rb");
 		if (f == 0) {
 			throw ModuleHandleException("couldn't open memory pipe for reading");
 		}
@@ -193,7 +197,7 @@ public:
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
 			error = "file does not exist in extension zip: " + this->name;
-			return NULL;
+			return -1;
 		}
 
 		zip_entry_read(z, (void**)&buf, &bufsize);
@@ -341,7 +345,7 @@ private:
 			throw ModuleHandleException("couldn't write all contents to memory pipe");
 		}
 
-		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY);
+		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY | _O_BINARY);
 		if (fd == -1) {
 			throw ModuleHandleException("couldn't create handle to memory pipe");
 		}

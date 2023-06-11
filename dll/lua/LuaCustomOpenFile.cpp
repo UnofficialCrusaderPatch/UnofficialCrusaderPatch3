@@ -62,33 +62,53 @@ namespace LuaIO {
 
 
 	int luaIOCustomOpenFilePointer(lua_State* L) {
+		if (lua_type(L, 1) != LUA_TSTRING) {
+			return luaL_error(L, "Expected a string for the first argument");
+		}
+		if (lua_type(L, 2) != LUA_TSTRING) {
+			return luaL_error(L, "Expected a string for the second argument");
+		}
+
 		const std::string filename = luaL_checkstring(L, 1);
 		const std::string mode = luaL_optstring(L, 2, "r");
 
 		std::string errorMsg;
-		FILE* result = getFilePointer(filename, mode, errorMsg);
+		FILE* result = getFilePointer(filename, mode, errorMsg, true);
 
-		if (result != NULL) {
+		// To keep this in line with how the game expects return values, we don't return error messages
+		//if (result != NULL) {
 			lua_pushinteger(L, (DWORD) result);
 			return 1;
-		}
+		//}
 
-		return luaL_error(L, "Could not get file pointer to path '%s'. Error message: '%s'", filename.c_str(), errorMsg.c_str());
+		//return luaL_error(L, "Could not get file pointer to path '%s'. Error message: '%s'", filename.c_str(), errorMsg.c_str());
 	}
 
 	int luaIOCustomOpenFileDescriptor(lua_State* L) {
+		if (lua_type(L, 1) != LUA_TSTRING) {
+			return luaL_error(L, "Expected a string for the first argument");
+		}
+		if (lua_type(L, 2) != LUA_TNUMBER) {
+			return luaL_error(L, "Expected an integer for the second argument");
+		}
+		if (lua_type(L, 3) != LUA_TNUMBER && lua_type(L, 3) != LUA_TNIL) {
+			return luaL_error(L, "Expected an integer for the third argument or nil");
+		}
 		const std::string filename = luaL_checkstring(L, 1);
 		const int mode = luaL_checkinteger(L, 2);
+		// Third argument: permissions when creating files.
+		const int perm = luaL_optinteger(L, 3, 0);
 
 		std::string errorMsg;
-		int result = getFileDescriptor(filename, mode, errorMsg);
+		int result = getFileDescriptor(filename, mode, perm, errorMsg, true);
 
-		if (result != -1) {
+		// To keep this in line with how the game expects return values, we don't return error messages
+		//if (result != -1) {
 			lua_pushinteger(L, (DWORD)result);
 			return 1;
-		}
+		//}
 
-		return luaL_error(L, "Could not get file descriptor to path '%s'. Error message: '%s'", filename.c_str(), errorMsg.c_str());
+		// return luaL_error(L, ("Could not get file descriptor to path '" + filename + "'. Error message: '" + errorMsg + "'").c_str());
 	}
 
 	int luaIOCustomOpen(lua_State* L) {

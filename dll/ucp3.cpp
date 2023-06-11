@@ -24,8 +24,9 @@ FILE* ucp_getFilePointer(const char * filename, const char * mode) {
 	return getFilePointer(filename, mode, errorMsg);
 }
 
-int ucp_getFileDescriptor(const char* filename, int mode) {
-	return getFileDescriptor(filename, mode, errorMsg);
+int ucp_getFileDescriptor(const char* filename, int mode, int perm) {
+	std::string fileNameString = filename;
+	return getFileDescriptor(fileNameString, mode, perm, errorMsg);
 }
 
 const char * ucp_lastErrorMessage() {

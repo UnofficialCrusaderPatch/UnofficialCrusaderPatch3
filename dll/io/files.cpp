@@ -5,13 +5,17 @@
 #include "io/modules/ModuleHandle.h"
 
 // These two functions use basically the same logic except for a minor difference.... simplify?
-FILE* getFilePointer(std::string filename, std::string mode, std::string &errorMsg) {
+FILE* getFilePointer(std::string filename, std::string mode, std::string &errorMsg, bool overridePathSanitization) {
 
 	std::string sanitizedPath;
 
 	if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
-		errorMsg = ("Invalid path: " + filename + "\n reason: " + sanitizedPath);
-		return NULL;
+		if (!overridePathSanitization) {
+			errorMsg = ("Invalid path: " + filename + "\n reason: " + sanitizedPath);
+			return NULL;
+		}
+		// Oomph, this hurts a little... but this is here because the game really wants to load from the documents folder, which is fine, but breaks our relative path rule..
+		sanitizedPath = filename;
 	}
 
 	std::string insidePath;
@@ -104,21 +108,28 @@ FILE* getFilePointer(std::string filename, std::string mode, std::string &errorM
 
 }
 
+FILE* getFilePointer(std::string filename, std::string mode, std::string& errorMsg) {
+	return getFilePointer(filename, mode, errorMsg, false);
+}
 
-int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
+int getFileDescriptor(std::string filename, int mode, int perm, std::string& errorMsg, bool overridePathSanitization) {
 
 	std::string sanitizedPath;
 
 	if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
-		errorMsg = ("Invalid path: " + filename + "\n reason: " + sanitizedPath);
-		return -1;
+		if (!overridePathSanitization) {
+			errorMsg = ("Invalid path: " + filename + "\n reason: " + sanitizedPath);
+			return -1;
+		}
+		// Oomph, this hurts a little... but this is here because the game really wants to load from the documents folder, which is fine, but breaks our relative path rule..
+		sanitizedPath = filename;
 	}
 
 	std::string insidePath;
 	ExtensionHandle* mh;
 	if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {
 
-		if ((mode & O_RDONLY) == 0) {
+		if (mode != O_RDONLY && mode != O_BINARY) {
 			errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + sanitizedPath;
 			return -1;
 		}
@@ -139,7 +150,7 @@ int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
 
 		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insidePath)) {
 
-			if ((mode & O_RDONLY) == 0) {
+			if (mode != O_RDONLY && mode != O_BINARY) {
 				errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + sanitizedPath;
 				return -1;
 			}
@@ -158,7 +169,7 @@ int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
 
 			if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insidePath)) {
 
-				if ((mode & O_RDONLY) == 0) {
+				if (mode != O_RDONLY && mode != O_BINARY) {
 					errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + sanitizedPath;
 					return -1;
 				}
@@ -175,7 +186,7 @@ int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
 			else {
 
 				// A regular file outside of the code module or modules directory
-				int f = _open(sanitizedPath.c_str(), mode);
+				int f = _open(sanitizedPath.c_str(), mode, perm);
 				if (f == -1) {
 					errorMsg = "cannot open file: " + sanitizedPath;
 					return -1;
@@ -186,7 +197,7 @@ int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
 		}
 	}
 
-	if ((mode & O_RDONLY) == 0) {
+	if (mode != O_RDONLY && mode != O_BINARY) {
 		errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + sanitizedPath;
 		return -1;
 	}
@@ -202,4 +213,8 @@ int getFileDescriptor(std::string filename, int mode, std::string& errorMsg) {
 		return -1;
 	}
 
+}
+
+int getFileDescriptor(std::string filename, int mode, int perm, std::string& errorMsg) {
+	return getFileDescriptor(filename, mode, perm, errorMsg, false);
 }
