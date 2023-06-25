@@ -84,6 +84,8 @@ Suggestions essentially serve as a new default value of an option and can be ove
 ### Example
 A module named A provides the following option in the `options.yml`
 ```yml
+specification-version: 1.0.0
+options:
 - name: option1
   url: option1
   display: slider
