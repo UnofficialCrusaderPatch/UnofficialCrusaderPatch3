@@ -104,9 +104,11 @@ else
           log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
         else
           e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.PluginLoader)
+          extensionLoaders[m.name] = e
         end
     else
         e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.ModuleLoader)
+        extensionLoaders[m.name] = e
     end
 
 
@@ -121,12 +123,14 @@ end
 
 joinedUserConfig = {}
 for k, v in pairs(fullUserConfig.modules) do
-  local key = k .. "-" .. v.version
+  local e = extensionLoaders[k]
+  local key = k .. "-" .. e.version
   local config = v.config
   joinedUserConfig[key] = config
 end
 for k, v in pairs(fullUserConfig.plugins) do
-  local key = k .. "-" .. v.version
+  local e = extensionLoaders[k]
+  local key = k .. "-" .. e.version
   local config = v.config
   joinedUserConfig[key] = config
 end

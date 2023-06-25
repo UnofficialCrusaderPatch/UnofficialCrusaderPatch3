@@ -37,7 +37,7 @@ foreach($module in $modules) {
 
 
 ## Copy over fasm dll
-Copy-Item "$($Path)\dll\vendor\fasm\source\dll\fasm.dll" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\fasm.dll"
+Copy-Item "$($Path)\dll\vendor\fasm\extensions\fasm.dll" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\fasm.dll"
 Copy-Item "$($Path)\dll\vendor\fasm\LICENSE.txt" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\code\vendor\fasm\LICENSE.txt"
 
 
