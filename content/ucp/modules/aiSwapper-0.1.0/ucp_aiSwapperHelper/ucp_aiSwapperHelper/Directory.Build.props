@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <EnableCentralPackageVersions>true</EnableCentralPackageVersions>
+    <TargetFramework>native</TargetFramework>
+    <RestoreAdditionalProjectSources>
+      <!-- for lua dependency -->
+      https://api.nuget.org/v3/index.json;       
+      
+      <!-- for RuntimePatchingSystem. Not required
+      https://nuget.pkg.github.com/gynt/index.json;
+       -->
+    
+    </RestoreAdditionalProjectSources>
+    <_NuGetTargetFallbackMoniker>$(_NuGetTargetFallbackMoniker);native,Version=v0.0</_NuGetTargetFallbackMoniker>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <!-- Required in order to export a luaopen_mymodulename function 
+    <PackageReference Include="lua" Version="5.4.6" />
+    -->
+    
+    <!-- Not strictly required -->
+    <PackageReference Include="UnofficialCrusaderPatch3" />
+    
+  </ItemGroup>
+</Project>
