@@ -64,6 +64,11 @@ $NUPKG_DIRECTORY = Get-Item -Path "dll\*.nupkg" | Select-Object -ExpandProperty 
 
 Write-Output "NUPKG_DIRECTORY: $NUPKG_DIRECTORY"
 
+if ($NUPKG_DIRECTORY -eq $null) {
+    dir dll
+    throw "NUPKG_DIRECTORY is not valid. Was the nupkg built?"
+}
+
 # Remove old versions of nuget ucp
 Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "UnofficialCrusaderPatch*" | Remove-Item -Recurse
 
