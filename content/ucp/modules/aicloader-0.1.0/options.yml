@@ -7,7 +7,7 @@ options:
   header: '{{aicFiles}}'
   text: '{{aicFiles_descr}}'
   display: List
-  url: aicFiles
+  url: aicloader.aicFiles
   contents:
     type: array
     value: []
