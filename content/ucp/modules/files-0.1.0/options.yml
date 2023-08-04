@@ -7,7 +7,7 @@ options:
   header: '{{disable-game-maps}}'
   text: '{{disable-game-maps_descr}}'
   display: UCP2Switch
-  url: disable-game-maps
+  url: files.disable-game-maps
   contents:
     type: boolean
     value: false
@@ -18,7 +18,7 @@ options:
   header: '{{disable-user-maps}}'
   text: '{{disable-user-maps_descr}}'
   display: UCP2Switch
-  url: disable-user-maps
+  url: files.disable-user-maps
   contents:
     type: boolean
     value: false
@@ -29,7 +29,7 @@ options:
   header: '{{disable-user-savs}}'
   text: '{{disable-user-savs_descr}}'
   display: UCP2Switch
-  url: disable-user-savs
+  url: files.disable-user-savs
   contents:
     type: boolean
     value: false
