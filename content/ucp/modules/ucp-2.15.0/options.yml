@@ -351,6 +351,7 @@ options:
   - Fire
   name: o_firecooldown
   header: '{{o_firecooldown}}'
+  hasHeader: true
   text: '{{o_firecooldown_descr}}'
   display: UCP2Slider
   url: ucp.o_firecooldown
