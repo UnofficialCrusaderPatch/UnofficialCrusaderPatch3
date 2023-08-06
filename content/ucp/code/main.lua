@@ -34,7 +34,6 @@ end
 core = require('core')
 utils = require('utils')
 data = require('data')
-yaml = data.yaml
 json = require('vendor.json.json')
 extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
