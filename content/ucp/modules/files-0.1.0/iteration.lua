@@ -33,7 +33,7 @@ function IterationSession:first(this, target, struct)
     if handle ~= -1 then
         return handle
     else
-        print("No files in: " .. core.readString(target) .. " moving on to extra directories")
+        log(INFO, "No files in: " .. core.readString(target) .. " moving on to extra directories")
         return CURRENT_ITERATION_SESSION:nextExtra(this, handle, struct)
     end
 end
@@ -49,7 +49,7 @@ function IterationSession:nextExtra(this, struct)
     while EXTRA_DIRS[self.target] ~= nil and EXTRA_DIRS[self.target][self.extraDirIndex] ~= nil do
         local newTarget = EXTRA_DIRS[self.target][self.extraDirIndex]
         local newHandle = FindFirstFileA(this, newTarget, struct)
-        log(DEBUG, "checking directory: " .. core.readString(newTarget))
+        log(INFO, "checking directory: " .. core.readString(newTarget))
         if newHandle ~= -1 then
             return newHandle
         else
@@ -109,6 +109,7 @@ local function FindNextFileA_hook(this, handle, struct)
 end
 
 local function registerExtraDir(target, dir)
+    log(INFO, "Registering extra directory: " .. tostring(dir))
 
     local addr = core.allocate(dir:len() + 1)
     core.writeString(addr, dir)
@@ -132,15 +133,21 @@ return {
         end
 
         if config["extra-map-directory"] then
-            local dir = config["extra-map-directory"]
+
+          local dir = config["extra-map-directory"]
             if dir:sub(-1) == "\\" then
                 dir = dir .. "*.map"
             end
             if dir:sub(-6) ~= "\\*.map" then
                 dir = dir .. "\\*.map"
             end
+
+            log(INFO, "Extra map directory found in the config: " .. tostring(dir))
+
             registerExtraDir("maps\\*.map", dir)
             registerExtraDir("mapsExtreme\\*.map", dir)
+          else
+            log(INFO, "No extra map directory found in the config")
         end
 
         if config["extra-sav-directory"] then
