@@ -75,6 +75,9 @@ Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "Unoff
 
 ### Compile modules
 
+# First make sure each extension has the right version in the directory
+& "$($PSScriptRoot)\upgrade-git-module-folders.ps1"
+
 # Build each module if required
 
 # List of modules
