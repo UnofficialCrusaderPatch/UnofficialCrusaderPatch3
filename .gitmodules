@@ -9,31 +9,31 @@
 	url = https://github.com/Konctantin/FASM
 
 [submodule "content/ucp/modules/inputHandler-0.1.0"]
-	path = content/ucp/modules/inputHandler-0.1.0
+	path = content/ucp/modules/inputHandler-0.2.0
 	url = https://github.com/TheRedDaemon/ucp_inputHandler
 	branch = main
 	ignore = dirty
 
 [submodule "content/ucp/modules/winProcHandler-0.1.0"]
-	path = content/ucp/modules/winProcHandler-0.1.0
+	path = content/ucp/modules/winProcHandler-0.2.0
 	url = https://github.com/TheRedDaemon/ucp_winProcHandler
 	branch = main
 	ignore = dirty
 
 [submodule "content/ucp/modules/graphicsApiReplacer-1.1.0"]
-	path = content/ucp/modules/graphicsApiReplacer-1.1.0
+	path = content/ucp/modules/graphicsApiReplacer-1.2.0
 	url = https://github.com/TheRedDaemon/ucp_graphicsApiReplacer
 	branch = main
 	ignore = dirty
 
 [submodule "content/ucp/modules/gmResourceModifier-0.1.0"]
-	path = content/ucp/modules/gmResourceModifier-0.1.0
+	path = content/ucp/modules/gmResourceModifier-0.2.0
 	url = https://github.com/TheRedDaemon/ucp_gmResourceModifier
 	branch = main
 	ignore  = dirty
 
 [submodule "content/ucp/modules/textResourceModifier-0.2.0"]
-	path = content/ucp/modules/textResourceModifier-0.2.0
+	path = content/ucp/modules/textResourceModifier-0.3.0
 	url = https://github.com/TheRedDaemon/ucp_textResourceModifier
 	branch = main
 	ignore = dirty
