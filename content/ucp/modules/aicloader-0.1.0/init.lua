@@ -148,7 +148,7 @@ namespace = {
         local file = io.open(aicFilePath, "rb")
         local spec = file:read("*all")
 
-        local aicSpec = json:decode(spec)
+        local aicSpec = yaml.parse(spec)
         local aics = aicSpec.AICharacters
 
         for k, aic in pairs(aics) do

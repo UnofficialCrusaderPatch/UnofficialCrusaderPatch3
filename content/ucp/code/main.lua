@@ -155,7 +155,7 @@ configFinal = joinedUserConfig
 config.ConfigHandler.normalizeContentsValues(configFinal)
 
 local handle, err = io.open(".ucp-final-config-cache", 'w')
-handle:write(json:encode(configFinal))
+handle:write(yaml.dump(configFinal))
 handle:close()
 
 ---Overwrite game menu version

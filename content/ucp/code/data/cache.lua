@@ -15,7 +15,7 @@ namespace.AOB.loadFromFile = function()
   local fdata = handle:read("*all")
   handle:close()
   
-  aobs = json:decode(fdata)
+  aobs = yaml.parse(fdata)
   
   return true
 end
@@ -48,7 +48,7 @@ namespace.AOB.dumpToFile = function()
     return false
   end  
     
-  handle:write(json:encode(aobs))
+  handle:write(yaml.dump(aobs))
   handle:close()
   
   return true
@@ -96,14 +96,14 @@ local ConfigCache = {
     local fdata = handle:read("*all")
     handle:close()
     
-    local dc = json:decode(fdata)
+    local dc = yaml.parse(fdata)
 
     self.data = dc
   end,
   
   saveToFile = function(self)
     local handle, err = io.open(self.filePath, 'w')
-    handle:write(json:encode(self.data))
+    handle:write(yaml.dump(self.data))
     handle:close()
   end,
 

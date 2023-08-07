@@ -81,7 +81,7 @@ namespace LuaYamlParser {
 		return 1;
 	}
 
-	int parseTableNode(lua_State* L, YAML::Node &node, std::string &errorMsg) {
+	int parseTableNode(lua_State* L, YAML::Node& node, std::string& errorMsg) {
 		int narr = 0;
 		int nrec = 0;
 
@@ -93,6 +93,9 @@ namespace LuaYamlParser {
 		}
 		else if (isMap) {
 			nrec = node.size();
+		}
+		else if (node.IsNull()) {
+			// Return an empty table
 		}
 		else {
 			std::stringstream output;
@@ -195,28 +198,10 @@ namespace LuaYamlParser {
 
 	}
 
-	// Should return a table representing the yaml content
-	int luaParseYamlFile(lua_State* L) {
-		std::string filePath = luaL_checkstring(L, 1);
-
-		auto path = std::filesystem::path(filePath);
-
-		if (!std::filesystem::exists(path)) {
-			return luaL_error(L, ("path does not exist: " + path.string()).c_str());
-		}
-
-		YAML::Node root = YAML::LoadFile(path.string());
-
-		std::string errorMsg;
-		int code = parseTableNode(L, root, errorMsg);
-
-		if (code == -1) {
-			return luaL_error(L, ("parsing yaml file failed: " + errorMsg).c_str());
-		}
-
-		return 1;
-	};
-
+	// TODO: try this instead of error throwing
+	/*T t;
+	if (convert<T>::decode(node, t))
+		return t;*/
 	int luaParseYamlContent(lua_State* L) {
 		std::string fileContents = luaL_checkstring(L, 1);
 

@@ -128,7 +128,6 @@
     <None Include="ucp\code\data\common.lua" />
     <None Include="ucp\code\data\structures.lua" />
     <None Include="ucp\code\data\version.lua" />
-    <None Include="ucp\code\data\yaml.lua" />
     <None Include="ucp\code\extensions\dependencies.lua" />
     <None Include="ucp\code\extensions\environment.lua" />
     <None Include="ucp\code\extensions\init.lua" />

@@ -21,7 +21,7 @@ for k, ext in pairs(extensionLoadOrder) do
     end
 end
 
-log(DEBUG, "[main]: explicitly active extensions:\n" .. json:encode_pretty(explicitlyActiveExtensions))
+log(DEBUG, "[main]: explicitly active extensions:\n" .. yaml.dump(explicitlyActiveExtensions))
 
 necessaryDependencies = {}
 for k, ext in pairs(explicitlyActiveExtensions) do
@@ -45,4 +45,4 @@ while i <= #necessaryDependencies do
     i = i + 1
 end
 
-log(DEBUG, "required dependencies:\n" .. json:encode_pretty(necessaryDependencies))
+log(DEBUG, "required dependencies:\n" .. yaml.dump(necessaryDependencies))

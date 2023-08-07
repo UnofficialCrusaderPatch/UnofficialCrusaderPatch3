@@ -8,6 +8,7 @@
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaListDirectories.h"
 #include "lua/yaml/LuaYamlParser.h"
+#include "lua/yaml/LuaYamlDumper.h"
 #include "RuntimePatchingSystem.h"
 
 #define LOGURU_WITH_STREAMS 1
@@ -103,6 +104,9 @@ void addIOFunctions(lua_State* L) {
 	lua_setfield(L, -2, "parse");
 	lua_pushcfunction(L, LuaYamlParser::luaParseYamlContent);
 	lua_setfield(L, -2, "eval"); // FOr backwards compatilibity
+
+	lua_pushcfunction(L, LuaYamlDumper::luaDumpLuaTable);
+	lua_setfield(L, -2, "dump");
 	
 	// store table as a global yaml table
 	lua_setglobal(L, "yaml");

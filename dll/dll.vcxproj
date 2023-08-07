@@ -212,6 +212,7 @@
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
     <ClInclude Include="lua\LuaListDirectories.h" />
     <ClInclude Include="lua\Preload.h" />
+    <ClInclude Include="lua\yaml\LuaYamlDumper.h" />
     <ClInclude Include="lua\yaml\LuaYamlParser.h" />
     <ClInclude Include="security\Hash.h" />
     <ClInclude Include="lua\LuaLoadLibrary.h" />
@@ -236,6 +237,7 @@
     <ClCompile Include="lua\LuaLoadLibrary.cpp" />
     <ClCompile Include="compilation\fasm.cpp" />
     <ClCompile Include="lua\LuaUtil.cpp" />
+    <ClCompile Include="lua\yaml\LuaYamlDumper.cpp" />
     <ClCompile Include="lua\yaml\LuaYamlParser.cpp" />
     <ClCompile Include="ucp3.cpp" />
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
