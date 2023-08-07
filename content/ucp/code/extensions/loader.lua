@@ -342,6 +342,39 @@ function PluginLoader:createEnvironment(allowed)
     self.env = createRestrictedEnvironment(self.name, self.path, true, allowed, false)
 end
 
+
+function PluginLoader:load()
+
+    local init_file_path = self.path .. "/init.lua"
+
+	local handle, err = io.open(init_file_path)
+	if not handle then
+        -- return empty dummy environment
+		return {
+            enable = function(self, options) end,
+            disable = function(self, options) end,
+        }
+	end
+    
+    return BaseLoader.load(self)
+end
+
+---Enable the extension
+function PluginLoader:enable(options)
+    if self.handle then
+        return self.handle:enable(options)
+    end
+    return nil
+end
+
+---Disable the extension
+function PluginLoader:disable(options)
+    if self.handle then
+        return self.handle:disable(options)
+    end
+    return nil
+end
+
 function PluginLoader:type()
     return "PluginLoader"
 end
