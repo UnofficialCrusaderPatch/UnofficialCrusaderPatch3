@@ -1,81 +1,18 @@
--- NOTE: does not capture certain types of files, mostly normal sfx
-
---[[ Constants ]]--
-
-local MAX_PATH_LENGTH = 1000
-
-local TYPE_EXTENSION = {
-  SPEECH        = "wav",
-  AIV           = "aiv",
-  BINKS         = "bik",
-  GFX           = "tgx",
-  GM            = "gm1",
-  HELP          = "hlp",
-  FX            = "wav",
-  MUSIC         = "raw",
-  MAPS          = "map",
-  MAPS_EXTREME  = "map",
-  FACES         = "bmp",
-}
-
-local RESOURCE_LOAD_ID = {
-  [0x1 ]  = "UNKNOWN",
-  [0x2 ]  = "CASTLES",    -- not used
-  [0x6 ]  = "SCENARIOS",  -- not used
-  [0xa ]  = "GM",
-  [0xb ]  = "GFX",
-  [0xc ]  = "HELP",
-  [0xd ]  = "BINKS",
-  [0xe ]  = "FX",
-  [0xf ]  = "MAPS",
-  [0x10]  = "SCORES",     -- not used?
-  [0x11]  = "GFX8",       -- not used?
-  [0x12]  = "SPEECH",
-  [0x13]  = "FACES",
-}
-
-local TYPES_HANDLED_BY_NON_EFFECT_SOUND = extensions.utils.Set:new({"raw", "wav"})
-local TYPES_HANDLED_BY_OPEN = extensions.utils.Set:new({"aiv", "tex"})
-local TYPES_HANDLED_BY_RESOURCE_LOAD = extensions.utils.Set:new({"tgx", "gm1", "bik", "map", "act", "bmp", "hlp"})
-
-
---[[ Variables ]]--
-
-local fileopen_use_address = core.AOBScan("E8 ? ? ? ? 83 c4 0c 83 f8 ff 89 86 08 0d 08 00 89 be c4 0b 00 00 75 07 5f 33 c0 5e c2 0c 00")
-local fileopen_address = core.readInteger(fileopen_use_address + 1) + fileopen_use_address + 5 -- turn into absolute address
-local resourceLoaderFuncStart = core.AOBScan("83 ec 24 a1 ? ? ? ? 33 c4 89 44 24 20 53 55", 0x400000)
-local playNonEffectSoundStreamFuncStart = core.AOBScan("56 8b f1 83 7e 08 00 0f 84 d3 01 00 00 53", 0x400000)
 
 local FILE_OVERRIDES = {}
 local FILE_OVERRIDE_FUNCTIONS = {}
 
-local resourceLoadFunc = nil
-local playNonEffectSoundStreamFunc = nil
-local stringBuffer = core.allocate(1001)
-
 local logFileAccess = nil
 
-
---[[ Funtions ]]--
-
-local function overwriteTooLong(overwrite)
-  if overwrite:len() > 1000 then
-    log(WARNING, "Path to long. Max length is 1000 chars. Can not set overwrite: " .. overwrite)
-    return true
-  end
-  return false
-end
 
 local function onOpenFile(file)
   for k, func in pairs(FILE_OVERRIDE_FUNCTIONS) do
     local fresult = func(file)
     if fresult ~= nil then
-      if not overwriteTooLong(fresult) then
-        if logFileAccess then
-          log(DEBUG, "... overridden with file: " .. override)
-        end
-        return fresult
+      if logFileAccess then
+        log(DEBUG, "... overridden with file: " .. override)
       end
+      return fresult
     end
   end
 
@@ -98,119 +35,264 @@ local function overwriteResource(filepath)
   return onOpenFile(filepath)
 end
 
+local function setupIOhooks()
+    
+    -- _open: 0x005816c3
+    local _openAddress = core.AOBScan("55 8B EC 51 6A 00 8D 45 FC")
+    -- core.writeCode(_openAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    -- core.writeCode(_openAddress, { 0xE9, core.getRelativeAddress(_openAddress, io.ucrt._open, -5) })
+    
+    local _open = core.exposeCode(io.ucrt._open, 3, 0)
+    local o_open
+    local function _openHook(fileName, mode, perm)
+      local luaFileName = core.readString(fileName)
+      log(VERBOSE, "_open: " .. luaFileName .. " mode: " .. string.format("%X", mode) .. " perm: " .. string.format("%X", perm))
 
-local function getExtension(filepath)
-  local _, _, ext = filepath.find(filepath, "%.([%a%d]+)$")
-  return ext
-end
-
--- nil extensions are ignored, since they are very likely part of a modification
-local function isHandled(handler, otherHandlers, filepath)
-  local ext = getExtension(filepath)
+      --local retValue = open(fileName, mode, perm)
+      local retValue
+      local o = overwriteResource(luaFileName)
+      if o ~= nil then
+        log(VERBOSE, "Overriding with: " .. o)
+        -- core.writeString(ovrsBuffer, o)
+        retValue = io.openFileDescriptor(o, mode, perm)
+      else
+        retValue = _open(fileName, mode, perm)
+      end
+    
   
-  if not ext then
-    if logFileAccess then
-      log(DEBUG, "Let zero extension file pass: " .. override)
+      log(VERBOSE, retValue)
+      
+      return retValue
+    
     end
-    return true
-  end
+    
+    o_open = core.hookCode(_openHook, _openAddress, 3, 0, 7)
+    
+    -- _close: 0x00580f38
+    local _closeAddress = core.AOBScan("6A 10 68 ? ? ? ? E8 ? ? ? ? 8B 45 08 83 F8 FE 75 1B E8 ? ? ? ? 83 20 00 E8 ? ? ? ? C7 ? ? ? ? ? 83 C8 FF E9 ? ? ? ? 33 FF 3B C7 7C 08 3B ? ? ? ? ? 72 21 E8 ? ? ? ? 89 38 E8 ? ? ? ? C7 ? ? ? ? ? 57 57 57 57 57 E8 ? ? ? ? 83 C4 14 EB C9 8B C8 C1 F9 05 8D ? ? ? ? ? ? 8B F0 83 E6 1F C1 E6 06 8B 0B 0F ? ? ? ? 83 E1 01 74 BF 50 E8 ? ? ? ? 59 89 7D FC 8B 03 F6 ? ? ? ? 74 0E")
+    core.writeCode(_closeAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_closeAddress, { 0xE9, core.getRelativeAddress(_closeAddress, io.ucrt._close, -5) })
+
+
+
+    -- _read: 0x005815c6
+    local _readAddress = core.AOBScan("6A 10 68 ? ? ? ? E8 ? ? ? ? 8B 45 08 83 F8 FE 75 1B E8 ? ? ? ? 83 20 00 E8 ? ? ? ? C7 ? ? ? ? ? 83 C8 FF E9 ? ? ? ? 33 F6")
+    core.writeCode(_readAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_readAddress, {0xE9, core.getRelativeAddress(_readAddress, io.ucrt._read, -5) })
+
+    -- _write: 0x00581f6f
+    local _writeAddressPre = core.AOBScan("E8 ? ? ? ? 83 C4 0C 3B C7 75 0F")
+    local _writeAddress = core.readInteger(_writeAddressPre + 1) + _writeAddressPre + 5
+    core.writeCode(0x00581f6f, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(0x00581f6f, {0xE9, core.getRelativeAddress(0x00581f6f, io.ucrt._write, -5) })
+
+ 
+    -- fopen: 0x005804cd
+    local fopenAddress = core.AOBScan("6A 40 FF 74 24 0C")
+    -- core.writeCode(fopenAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    -- core.writeCode(fopenAddress, {0xE9, core.getRelativeAddress(fopenAddress, io.ucrt.fopen, -5) })
+    
+    
+        local fopen = core.exposeCode(io.ucrt.fopen, 2, 0)
+    local o_fopen
+    local function fopenHook(fileName, mode)
+      local luaFileName = core.readString(fileName)
+      log(2, "fopen: " .. luaFileName .. " mode: " .. mode)
+
+      local retValue
+      local o = overwriteResource(luaFileName)
+      if o ~= nil then
+        log(2, "Overriding with: " .. o)
+        -- core.writeString(ovrsBuffer, o)
+        retValue = io.openFilePointer(o, mode)
+      else
+        retValue = fopen(fileName, mode)
+      end
+      
   
-  if not handler:contains(ext) then
-    local handledByOther = false
-    for index, otherHandler in pairs(otherHandlers) do
-      handledByOther = handledByOther or otherHandler:contains(ext)
+      log(2, retValue)
+      
+      return retValue
+    
     end
-    if not handledByOther then
-      log(WARNING, "Encountered file not set to be handled by any endpoint: " .. filepath)
-    end
-    return false
-  end
+    
+    o_fopen = core.hookCode(fopenHook, fopenAddress, 2, 0, 6)
 
-  return true
+    
+    -- fflush: 0x00583298
+    local fflushAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 F6 39 75 08")
+    core.writeCode(fflushAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fflushAddress, {0xE9, core.getRelativeAddress(fflushAddress, io.ucrt.fflush, -5) })
+    
+
+    -- ftell: 0x0058028f
+    local ftellAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 C0 33 F6 39 75 08 0F 95 C0 3B C6 75 1D E8 ? ? ? ? C7 ? ? ? ? ? 56 56 56 56 56 E8 ? ? ? ? 83 C4 14 83 C8 FF EB 27")
+    core.writeCode(ftellAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(ftellAddress, {0xE9, core.getRelativeAddress(ftellAddress, io.ucrt.ftell, -5) })
+    
+    -- local ftell = core.exposeCode(io.ucrt.ftell, 1, 0)
+    
+
+    -- do pipes CreatePipe actually support seek?
+    -- fseek: 0x00580384
+    local fseekAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 C0 33 F6 39 75 08 0F 95 C0 3B C6 75 1D E8 ? ? ? ? C7 ? ? ? ? ? 56 56 56 56 56 E8 ? ? ? ? 83 C4 14 83 C8 FF EB 3E")
+    core.writeCode(fseekAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fseekAddress, {0xE9, core.getRelativeAddress(fseekAddress, io.ucrt.fseek, -5) })
+    
+        
+
+    
+    -- fclose: 0x0057fcb2
+    local fcloseAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 83 4D E4 FF")
+    core.writeCode(fcloseAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fcloseAddress, {0xE9, core.getRelativeAddress(fcloseAddress, io.ucrt.fclose, -5) })
+    
+
+    -- fread_s: 0x0057ff34
+    local fread_sAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 F6 89 75 E4 39 75 10")
+    core.writeCode(fread_sAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fread_sAddress, {0xE9, core.getRelativeAddress(fread_sAddress, io.ucrt.fread_s, -5) })
+    
+    -- fwrite: 0x0058099b
+    local fwriteAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 F6 39 75 0C")
+    core.writeCode(fwriteAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fwriteAddress, {0xE9, core.getRelativeAddress(fwriteAddress, io.ucrt.fwrite, -5) })
+     
+    -- fsopen: 0x00580409
+    local fsopenAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 DB 89 5D E4 33 C0 8B 7D 08")
+    core.writeCode(fsopenAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(fsopenAddress, {0xE9, core.getRelativeAddress(fsopenAddress, io.ucrt._fsopen, -5) })
+    
+    -- -- __flush which is the same as fflush?
+    -- core.writeCode(0x0058311a, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    -- core.writeCode(0x0058311a, {0xE9, core.getRelativeAddress(0x0058311a, io.ucrt.fflush, -5) })    
+
+    -- flsall which is I assume _flushall
+    -- _flushall = 0x005831be
+    local _flushAllAddress = core.AOBScan("6A 14 68 ? ? ? ? E8 ? ? ? ? 33 FF 89 7D E4 89 7D DC")
+    core.writeCode(_flushAllAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_flushAllAddress, {0xE9, core.getRelativeAddress(_flushAllAddress, io.ucrt._flushall, -5) })        
+    
+    -- _fgetpos: 0x005833f2
+    local _fgetposAddress = core.AOBScan("57 33 FF 39 7C 24 08")
+    core.writeCode(_fgetposAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_fgetposAddress, {0xE9, core.getRelativeAddress(_fgetposAddress, io.ucrt.fgetpos, -5) })  
+
+    -- _fsetpos: 0x0058345d
+    local _fsetposAddress = core.AOBScan("56 33 F6 39 74 24 08")
+    core.writeCode(_fsetposAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_fsetposAddress, {0xE9, core.getRelativeAddress(_fsetposAddress, io.ucrt.fsetpos, -5) })  
+    
+    -- _fileno: 0x0058c4cb
+    local _filenoAddress = core.AOBScan("8B 44 24 04 56 33 F6 3B C6 75 1D E8 ? ? ? ? 56 56 56 56 56 C7 ? ? ? ? ? E8 ? ? ? ? 83 C4 14 83 C8 FF")
+    core.writeCode(_filenoAddress, {0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_filenoAddress, {0xE9, core.getRelativeAddress(_filenoAddress, io.ucrt._fileno, -5) })   
+
+    -- _fgetwc: 0x00580735
+    local _fgetwcAddress = core.AOBScan("6A 0C 68 ? ? ? ? E8 ? ? ? ? 33 C0 33 F6 39 75 08 0F 95 C0 3B C6 75 1E")
+    core.writeCode(_fgetwcAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_fgetwcAddress, {0xE9, core.getRelativeAddress(_fgetwcAddress, io.ucrt.getwc, -5) })      
+
+    -- do pipes CreatePipe actually support seek?
+    -- _lseek: 0x0058277e
+    local _lseekAddressPre = core.AOBScan("6A 01 6A 00 FF 74 24 0C")
+    local _lseekAddress = core.readInteger(_lseekAddressPre + 8 + 1) + (_lseekAddressPre + 8) + 5
+    core.writeCode(_lseekAddress, {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, })
+    core.writeCode(_lseekAddress, {0xE9, core.getRelativeAddress(_lseekAddress, io.ucrt._lseek, -5) })          
+
 end
 
-
-local function writeCString(address, str)
-  core.writeString(address, str)
-  core.writeByte(address + str:len(), 0)
-end
-
-
-local function fileOpenDetour(registers)
-  local file = core.readString(core.readInteger(registers.ESP + 4))
-
-  if not isHandled(TYPES_HANDLED_BY_OPEN, {TYPES_HANDLED_BY_RESOURCE_LOAD, TYPES_HANDLED_BY_NON_EFFECT_SOUND}, file) then
-    return
-  end
-
-  local override = overwriteResource(file)
-  if override ~= nil then
-    writeCString(stringBuffer, override)
-    core.writeInteger(registers.ESP + 4, stringBuffer)
-  end
-end
-
-
-local function resourceLoadHook(this, resourceFileType, shortFileNamePtr)
-  resourceLoadFunc(this, resourceFileType, shortFileNamePtr)
-
-  local resourceAddress = this + 0x7AEE0 + resourceFileType * 1001
-  local resourceString = core.readString(resourceAddress)
+local function setupBinkHook()
   
-  local wasGmFile = false -- they arrive without ending here
-  if string.find(resourceString, "gm\\") then
-    wasGmFile = true
-    resourceString = string.format("%s.gm1", resourceString)
-  end
-  
-  if not isHandled(TYPES_HANDLED_BY_RESOURCE_LOAD, {TYPES_HANDLED_BY_OPEN, TYPES_HANDLED_BY_NON_EFFECT_SOUND}, resourceString) then
-    return
-  end
+  -- some pre work to get the ref to the address of BinkOpen
+  local aobAddress = core.AOBScan("68 ? ? ? ? 50 FF ? ? ? ? ? 89 44 BE 50") + 8
 
-  local override = overwriteResource(resourceString)
-  if override ~= nil then
-    if wasGmFile then
-      resourceString = string.gsub(resourceString, ".gm1", "")
+  local addressOfBinkOpenRef = core.readInteger(aobAddress )
+  local addressOfBinkOpen = core.readInteger(addressOfBinkOpenRef)
+
+  local BinkOpen = core.exposeCode(addressOfBinkOpen, 2, 2)
+
+  local BinkOpen_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x08, 0x00}) --nops and return 08
+
+  local BinkOpen_hook = function(fileName, flags)
+    local luaFileName = core.readString(fileName)
+    log(2, "fopen: " .. luaFileName .. " flags: " .. flags)
+
+    local retValue
+    local o = overwriteResource(luaFileName)
+    if o ~= nil then
+      log(2, "Overriding with: " .. o)
+      -- core.writeString(ovrsBuffer, o)
+      retValue = BinkOpen(ucp.internal.registerString(o), flags)
+    else
+      retValue = BinkOpen(fileName, flags)
     end
-    writeCString(resourceAddress, override)
+  
+
+    log(2, retValue)
+    
+    return retValue
   end
+
+  core.hookCode(BinkOpen_hook, BinkOpen_stub, 2, 2, 5)
+  core.writeCode(addressOfBinkOpenRef, {BinkOpen_stub})
 end
 
-local function playNonEffectSoundStreamHook(this, sndStreamIndex, filename, flagsAndLoopCount)
-  local soundString = core.readString(filename)
 
-  if not isHandled(TYPES_HANDLED_BY_NON_EFFECT_SOUND, {TYPES_HANDLED_BY_OPEN, TYPES_HANDLED_BY_RESOURCE_LOAD}, soundString) then
-    return
+local function setupMilesHook() 
+
+  local aobAddress = core.AOBScan("8B 54 24 14 8B 46 04") + 13
+  local addressOfAILOpenStreamRef = core.readInteger(aobAddress)
+  local addressOfAILOpenStream = core.readInteger(addressOfAILOpenStreamRef)
+
+  local AIL_open_stream = core.exposeCode(addressOfAILOpenStream, 3, 2)
+
+  
+  local AIL_open_stream_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x0C, 0x00}) --nops and return 0C
+
+  local AIL_open_stream_hook = function(dig, fileName, stream_mem)
+    local luaFileName = core.readString(fileName)
+    log(2, "fopen: " .. luaFileName .. " stream_mem: " .. stream_mem)
+
+    local retValue
+    local o = overwriteResource(luaFileName)
+    if o ~= nil then
+      log(2, "Overriding with: " .. o)
+      -- core.writeString(ovrsBuffer, o)
+      retValue = AIL_open_stream(dig, ucp.internal.registerString(o), stream_mem)
+    else
+      retValue = AIL_open_stream(dig, fileName, stream_mem)
+    end
+  
+
+    log(2, retValue)
+    
+    return retValue
   end
 
-  local override = overwriteResource(soundString)
-  if override ~= nil then
-    writeCString(stringBuffer, override)
-    filename = stringBuffer
-  end
+  core.hookCode(AIL_open_stream_hook, AIL_open_stream_stub, 3, 2, 5)
+  core.writeCode(addressOfAILOpenStreamRef, {AIL_open_stream_stub})
 
-  playNonEffectSoundStreamFunc(this, sndStreamIndex, filename, flagsAndLoopCount)
 end
-
 
 return {
   enable = function(config)
+
     if config and config.logFileAccess then
       logFileAccess = true
     end
     
-    core.detourCode(fileOpenDetour, fileopen_address, 6)
-    resourceLoadFunc = core.hookCode(resourceLoadHook, resourceLoaderFuncStart, 3, 1, 8)
-    playNonEffectSoundStreamFunc = core.hookCode(playNonEffectSoundStreamHook, playNonEffectSoundStreamFuncStart, 4, 1, 7)
+    setupIOhooks()
+
+    setupBinkHook()
+
+    setupMilesHook()
+
   end,
 
   overrideFileWith = function(file, newFile)
     if logFileAccess then
       log(DEBUG, "Registering override for: " .. file .. ": " .. newFile)
-    end
-    
-    if overwriteTooLong(newFile) then
-      return
     end
     
     FILE_OVERRIDES[file] = newFile

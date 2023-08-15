@@ -2,8 +2,9 @@
 LUA_API_VERSION = "1.0.0"
 UCP_VERSION = "3.0.0"
 
+--- @deprecated
 ---Variable to indicate to show debug information
-DEBUG = true
+-- DEBUG = true
 
 ---Change the ucp working directory based on an environment variable
 ---@extrecated UCP_DIR is now handled in the dll part
