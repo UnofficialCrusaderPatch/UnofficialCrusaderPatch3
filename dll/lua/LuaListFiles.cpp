@@ -1,10 +1,10 @@
-#include "LuaListDirectories.h"
+#include "LuaListFiles.h"
 #include "io/modules/ModuleHandle.h"
 
 namespace LuaIO {
 
 	// Only for filesystem files: unchecked path!
-	int luaListFileSystemDirectories(lua_State* L, bool includeZipFiles) {
+	int luaListFileSystemFiles(lua_State* L, bool includeZipFiles) {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
@@ -14,31 +14,14 @@ namespace LuaIO {
 		if (rawPath.substr(0, 4) == "ucp/") {
 			targetPath = Core::getInstance().UCP_DIR / rawPath.substr(4);
 		}
-		
 
 		const std::filesystem::path zipExtension(".zip");
 
-
-
 		try {
 			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
-				if (entry.is_directory()) {
-					lua_pushstring(L, (entry.path().string() + "/").c_str());
+				if (entry.is_regular_file() || (entry.is_regular_file() && includeZipFiles && entry.path().extension() == ".zip")) {
+					lua_pushstring(L, (entry.path().string()).c_str());
 					count += 1;
-				}
-
-				else {
-					if (includeZipFiles) {
-						if (entry.is_regular_file() && entry.path().extension() == ".zip") {
-							const std::string p = entry.path().string();
-							size_t lastIndex = p.find_last_of(".");
-							if (lastIndex != std::string::npos) {
-								lua_pushstring(L, (p.substr(0, lastIndex) + "/").c_str());
-								count += 1;
-							}
-
-						}
-					}
 				}
 			}
 		}
@@ -51,7 +34,7 @@ namespace LuaIO {
 
 
 
-	int luaListDirectories(lua_State* L) {
+	int luaListFiles(lua_State* L) {
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
@@ -79,7 +62,7 @@ namespace LuaIO {
 				return luaL_error(L, e.what());
 			}
 
-			std::vector<std::string> entries = mh->listDirectories(rawPath);
+			std::vector<std::string> entries = mh->listFiles(rawPath);
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
 			}
@@ -97,7 +80,7 @@ namespace LuaIO {
 				return luaL_error(L, e.what());
 			}
 
-			std::vector<std::string> entries = eh->listDirectories(rawPath);
+			std::vector<std::string> entries = eh->listFiles(rawPath);
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
 			}
@@ -112,10 +95,10 @@ namespace LuaIO {
 
 
 
-			return luaListFileSystemDirectories(L, true);
+			return luaListFileSystemFiles(L, false);
 		}
 
-		return luaListFileSystemDirectories(L, false);
+		return luaListFileSystemFiles(L, true);
 	}
 
 }

@@ -7,6 +7,7 @@
 #include "lua/LuaUtil.h"
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaListDirectories.h"
+#include "lua/LuaListFiles.h"
 #include "lua/yaml/LuaYamlParser.h"
 #include "lua/yaml/LuaYamlDumper.h"
 #include "RuntimePatchingSystem.h"
@@ -54,6 +55,9 @@ void addUtilityFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaIO::luaListDirectories); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
+
+	lua_pushcfunction(L, LuaIO::luaListFiles); // [ucp, internal, luaListDirectories]
+	lua_setfield(L, -2, "listFiles"); // [ucp, internal]
 
 	lua_pushcfunction(L, LuaUtil::luaWideCharToMultiByte);
 	lua_setfield(L, -2, "WideCharToMultiByte");
