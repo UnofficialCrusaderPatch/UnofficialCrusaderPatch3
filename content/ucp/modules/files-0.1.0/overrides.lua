@@ -203,16 +203,16 @@ local function setupIOhooks()
 end
 
 local function setupBinkHook()
-  
-  -- some pre work to get the ref to the address of BinkOpen
-  local aobAddress = core.AOBScan("68 ? ? ? ? 50 FF ? ? ? ? ? 89 44 BE 50") + 8
 
-  local addressOfBinkOpenRef = core.readInteger(aobAddress )
+  local addressOfBinkOpenRef = core.readInteger(core.AOBScan("68 ? ? ? ? 50 FF ? ? ? ? ? 89 44 BE 50") + 8 )
   local addressOfBinkOpen = core.readInteger(addressOfBinkOpenRef)
 
-  local BinkOpen = core.exposeCode(addressOfBinkOpen, 2, 2)
+  local BinkOpen_callingConvention = 2
+  local BinkOpen_argCount = 2
 
-  local BinkOpen_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x08, 0x00}) --nops and return 08
+  local BinkOpen = core.exposeCode(addressOfBinkOpen, BinkOpen_argCount, BinkOpen_callingConvention)
+
+  local BinkOpen_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, BinkOpen_argCount * 4, 0x00}) --nops and return 08
 
   local BinkOpen_hook = function(fileName, flags)
     local luaFileName = core.readString(fileName)
@@ -234,21 +234,24 @@ local function setupBinkHook()
     return retValue
   end
 
-  core.hookCode(BinkOpen_hook, BinkOpen_stub, 2, 2, 5)
+  core.hookCode(BinkOpen_hook, BinkOpen_stub, BinkOpen_argCount, BinkOpen_callingConvention, 5)
   core.writeCode(addressOfBinkOpenRef, {BinkOpen_stub})
 end
 
 
 local function setupMilesHook() 
 
-  local aobAddress = core.AOBScan("8B 54 24 14 8B 46 04") + 13
-  local addressOfAILOpenStreamRef = core.readInteger(aobAddress)
+  local addressOfAILOpenStreamRef = core.readInteger(core.AOBScan("8B 54 24 14 8B 46 04") + 13)
   local addressOfAILOpenStream = core.readInteger(addressOfAILOpenStreamRef)
 
-  local AIL_open_stream = core.exposeCode(addressOfAILOpenStream, 3, 2)
+
+  local AIL_open_stream_argCount = 3
+  local AIL_open_stream_callingConvention = 2
+
+  local AIL_open_stream = core.exposeCode(addressOfAILOpenStream, AIL_open_stream_argCount, AIL_open_stream_callingConvention)
 
   
-  local AIL_open_stream_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x0C, 0x00}) --nops and return 0C
+  local AIL_open_stream_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, AIL_open_stream_argCount * 4, 0x00}) --nops and return 0C
 
   local AIL_open_stream_hook = function(dig, fileName, stream_mem)
     local luaFileName = core.readString(fileName)
@@ -270,8 +273,76 @@ local function setupMilesHook()
     return retValue
   end
 
-  core.hookCode(AIL_open_stream_hook, AIL_open_stream_stub, 3, 2, 5)
+  core.hookCode(AIL_open_stream_hook, AIL_open_stream_stub, AIL_open_stream_argCount, AIL_open_stream_callingConvention, 5)
   core.writeCode(addressOfAILOpenStreamRef, {AIL_open_stream_stub})
+
+
+  local addressOfAILFileReadRef = core.readInteger(core.AOBScan('57 8B 7C 24 0C 6A 00 57 FF ? ? ? ? ?') + 10)
+  local addressOfAILFileRead = core.readInteger(addressOfAILFileReadRef)
+
+  local AIL_file_read_argCount = 2
+  local AIL_file_read_callingConvention = 2
+
+  local AIL_file_read = core.exposeCode(addressOfAILFileRead, AIL_file_read_argCount, AIL_file_read_callingConvention)
+
+  local AIL_file_read_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, AIL_file_read_argCount * 4, 0x00})
+
+  local AIL_file_read_hook = function(fileName, dest)
+    local luaFileName = core.readString(fileName)
+    log(2, "fopen: " .. luaFileName .. " dest: " .. dest)
+
+    local retValue
+    local o = overwriteResource(luaFileName)
+    if o ~= nil then
+      log(2, "Overriding with: " .. o)
+      -- core.writeString(ovrsBuffer, o)
+      retValue = AIL_file_read(ucp.internal.registerString(o), dest)
+    else
+      retValue = AIL_file_read(fileName, dest)
+    end
+  
+
+    log(2, retValue)
+    
+    return retValue
+  end
+
+  core.hookCode(AIL_file_read_hook, AIL_file_read_stub, AIL_file_read_argCount, AIL_file_read_callingConvention, 5)
+  core.writeCode(addressOfAILFileReadRef, {AIL_file_read_stub})
+
+
+  local addressOfAILFileSizeRef = core.readInteger(core.AOBScan("8B ? ? ? ? ? 57 89 ? ? ? ? ? ? FF ? ? ? ? ?") + 16)
+  local addressOfAILFileSize = core.readInteger(addressOfAILFileSizeRef)
+
+  local AIL_file_size_argCount = 1
+  local AIL_file_size_callingConvention = 2
+
+  local AIL_file_size = core.exposeCode(addressOfAILFileSize, AIL_file_size_argCount, AIL_file_size_callingConvention)
+
+  local AIL_file_size_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, AIL_file_size_argCount * 4, 0x00})
+
+  local AIL_file_size_hook = function(fileName)
+    local luaFileName = core.readString(fileName)
+    log(2, "fopen: " .. luaFileName)
+
+    local retValue
+    local o = overwriteResource(luaFileName)
+    if o ~= nil then
+      log(2, "Overriding with: " .. o)
+      -- core.writeString(ovrsBuffer, o)
+      retValue = AIL_file_size(ucp.internal.registerString(o))
+    else
+      retValue = AIL_file_size(fileName)
+    end
+  
+
+    log(2, retValue)
+    
+    return retValue
+  end
+
+  core.hookCode(AIL_file_size_hook, AIL_file_size_stub, AIL_file_size_argCount, AIL_file_size_callingConvention, 5)
+  core.writeCode(addressOfAILFileSizeRef, {AIL_file_size_stub})
 
 end
 
