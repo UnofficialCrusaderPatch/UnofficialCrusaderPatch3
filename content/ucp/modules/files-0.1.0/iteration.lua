@@ -107,8 +107,20 @@ local function FindNextFileA_hook(handle, struct)
     end
 end
 
+
+local MAP_SUFFIX = ".map"
+
 local function registerOverridesForDirectory(dir)
-  
+
+  for k, path in ipairs(table.pack(ucp.internal.listFiles(dir))) do
+    if path:sub(-MAP_SUFFIX:len()) == MAP_SUFFIX then
+
+      local mapName = path:lower():match("([^/\\]+)[.]map$")
+
+      modules.files.overrideFileWith("maps\\" .. mapName .. ".map", path)
+    end
+  end
+
 end
 
 local function registerExtraDir(target, dir)
@@ -118,6 +130,8 @@ local function registerExtraDir(target, dir)
     core.writeString(addr, dir)
     core.writeByte(addr + dir:len(), 0)
     EXTRA_DIRS[target] = {[1] = addr}
+
+    registerOverridesForDirectory(dir)
 end
 
 return {
