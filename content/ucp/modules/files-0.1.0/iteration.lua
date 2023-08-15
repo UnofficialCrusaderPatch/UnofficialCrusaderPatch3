@@ -107,6 +107,10 @@ local function FindNextFileA_hook(handle, struct)
     end
 end
 
+local function registerOverridesForDirectory(dir)
+  
+end
+
 local function registerExtraDir(target, dir)
     log(INFO, "Registering extra directory: " .. tostring(dir))
 
@@ -134,19 +138,19 @@ return {
         if config["extra-map-directory"] then
 
           local dir = config["extra-map-directory"]
-            if dir:sub(-1) == "\\" then
-                dir = dir .. "*.map"
-            end
-            if dir:sub(-6) ~= "\\*.map" then
-                dir = dir .. "\\*.map"
-            end
+          if dir:sub(-1) == "\\" then
+              dir = dir .. "*.map"
+          end
+          if dir:sub(-6) ~= "\\*.map" then
+              dir = dir .. "\\*.map"
+          end
 
-            log(INFO, "Extra map directory found in the config: " .. tostring(dir))
+          log(INFO, "Extra map directory found in the config: " .. tostring(dir))
 
-            registerExtraDir("maps\\*.map", dir)
-            registerExtraDir("mapsExtreme\\*.map", dir)
-          else
-            log(INFO, "No extra map directory found in the config")
+          registerExtraDir("maps\\*.map", dir)
+          registerExtraDir("mapsExtreme\\*.map", dir)
+        else
+          log(INFO, "No extra map directory found in the config")
         end
 
         if config["extra-sav-directory"] then
