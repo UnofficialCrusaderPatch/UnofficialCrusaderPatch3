@@ -17,9 +17,8 @@ local IterationSession = { }
 ---@type IterationSession
 local CURRENT_ITERATION_SESSION
 
-function IterationSession:new(this, target, struct)
+function IterationSession:new( target, struct)
     local o = {
-        this = this,
         target=core.readString(target),
         struct=struct,
         extraDirIndex=0,
@@ -28,17 +27,17 @@ function IterationSession:new(this, target, struct)
     return setmetatable(o, self)
 end
 
-function IterationSession:first(this, target, struct)
-    local handle = FindFirstFileA(this, target, struct)
+function IterationSession:first( target, struct)
+    local handle = FindFirstFileA( target, struct)
     if handle ~= -1 then
         return handle
     else
         log(INFO, "No files in: " .. core.readString(target) .. " moving on to extra directories")
-        return CURRENT_ITERATION_SESSION:nextExtra(this, handle, struct)
+        return CURRENT_ITERATION_SESSION:nextExtra( handle, struct)
     end
 end
 
-function IterationSession:nextExtra(this, struct)
+function IterationSession:nextExtra( struct)
     if self.extraDirIndex == 0 then
         self.extraDirIndex = 1
     else
@@ -48,7 +47,7 @@ function IterationSession:nextExtra(this, struct)
 
     while EXTRA_DIRS[self.target] ~= nil and EXTRA_DIRS[self.target][self.extraDirIndex] ~= nil do
         local newTarget = EXTRA_DIRS[self.target][self.extraDirIndex]
-        local newHandle = FindFirstFileA(this, newTarget, struct)
+        local newHandle = FindFirstFileA( newTarget, struct)
         log(INFO, "checking directory: " .. core.readString(newTarget))
         if newHandle ~= -1 then
             return newHandle
@@ -62,46 +61,46 @@ function IterationSession:nextExtra(this, struct)
     return -1
 end
 
-function IterationSession:next(this, handle, struct)
+function IterationSession:next( handle, struct)
     if struct ~= self.struct then
         error("invalid 'struct'")
     end
 
-    local found = FindNextFileA(this, handle, struct)
+    local found = FindNextFileA( handle, struct)
     if found == TRUE then
         --There is a file lined up. Consume it, or yield it? For now, always yield
         return handle
     else
         --We ran out of files in this target, inject extra directories
-        return self:nextExtra(this, struct)
+        return self:nextExtra( struct)
     end
 
 end
 
 
-local function FindFirstFileA_hook(this, target, struct)
-    CURRENT_ITERATION_SESSION = IterationSession:new(this, target, struct)
+local function FindFirstFileA_hook(target, struct)
+    CURRENT_ITERATION_SESSION = IterationSession:new(target, struct)
 
     local targetString = core.readString(target)
     local isUserPath = targetString:find(":") or targetString:find("~")
 
     if (targetString == "maps\\*.map" or targetString == "mapsExtreme\\*.map") and DISABLE_GAME_DIR_MAPS then
-        return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
+        return CURRENT_ITERATION_SESSION:nextExtra(struct)
     elseif targetString:sub(-4) == ".map" and isUserPath ~= nil and DISABLE_GAME_DIR_USER_MAPS then
         --Trying to detect the request for user maps.
         --TODO: fully test this pattern for all languages
-        return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
+        return CURRENT_ITERATION_SESSION:nextExtra( struct)
     elseif targetString:sub(-4) == ".sav" and isUserPath ~= nil and DISABLE_GAME_DIR_USER_SAVS then
         --Trying to detect the request for user savs.
         --TODO: fully test this pattern for all languages
-        return CURRENT_ITERATION_SESSION:nextExtra(this, struct)
+        return CURRENT_ITERATION_SESSION:nextExtra( struct)
     end
 
-    return CURRENT_ITERATION_SESSION:first(this, target, struct)
+    return CURRENT_ITERATION_SESSION:first( target, struct)
 end
 
-local function FindNextFileA_hook(this, handle, struct)
-    if CURRENT_ITERATION_SESSION:next(this, handle, struct) == -1 then
+local function FindNextFileA_hook(handle, struct)
+    if CURRENT_ITERATION_SESSION:next(handle, struct) == -1 then
         return FALSE
     else
         return TRUE
@@ -156,16 +155,27 @@ return {
             print("WARNING: not implemented: 'extra-sav-directory'")
         end
 
-        FindFirstFileA = core.exposeCode(core.readInteger(0x0059e078), 3, 1) -- actually stdcall, so 2 args
-        FindNextFileA = core.exposeCode(core.readInteger(0x0059e070), 3, 1) -- actually stdcall
+        local addressOfFindFirstFileARef = core.readInteger(core.AOBScan("8D 4C 24 60 51 57") + 8)
+        local addressOfFindFirstFileA = core.readInteger(addressOfFindFirstFileARef)
+        local callingConventionFindFirstFileA = 2
+        local argCountFindFirstFileA = 2
 
-        FindFirstFileA_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x08, 0x00}) --nops and return 08
-        core.hookCode(FindFirstFileA_hook, FindFirstFileA_stub, 3, 1, 5)
-        core.writeCode(0x0059e078, {FindFirstFileA_stub})
+        FindFirstFileA = core.exposeCode(addressOfFindFirstFileA, argCountFindFirstFileA, callingConventionFindFirstFileA) -- actually stdcall, so 2 args
 
-        FindNextFileA_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, 0x08, 0x00}) --nops and return 08
-        core.hookCode(FindNextFileA_hook, FindNextFileA_stub, 3, 1, 5)
-        core.writeCode(0x0059e070, {FindNextFileA_stub})
+        FindFirstFileA_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, argCountFindFirstFileA * 4, 0x00}) --nops and return 08
+        core.hookCode(FindFirstFileA_hook, FindFirstFileA_stub, argCountFindFirstFileA, callingConventionFindFirstFileA, 5)
+        core.writeCode(addressOfFindFirstFileARef, {FindFirstFileA_stub})
+
+        local addressOfFindNextFileARef = core.readInteger(core.AOBScan("8D 4C 24 60 51 52") + 8)
+        local addressOfFindNextFileA = core.readInteger(addressOfFindNextFileARef)
+        local callingConventionFindNextFileA = 2
+        local argCountFindNextFileA = 2
+
+        FindNextFileA = core.exposeCode(addressOfFindNextFileA, argCountFindNextFileA, callingConventionFindNextFileA) -- actually stdcall
+
+        FindNextFileA_stub = core.allocateCode({0x90, 0x90, 0x90, 0x90, 0xC2, argCountFindNextFileA * 4, 0x00}) --nops and return 08
+        core.hookCode(FindNextFileA_hook, FindNextFileA_stub, argCountFindNextFileA, callingConventionFindNextFileA, 5)
+        core.writeCode(addressOfFindNextFileARef, {FindNextFileA_stub})
     end
 
 }
