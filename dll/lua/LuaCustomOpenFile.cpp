@@ -121,6 +121,12 @@ namespace LuaIO {
 			return luaL_error(L, ("Invalid path: " + filename + "\n reason: " + sanitizedPath).c_str());
 		}
 
+
+		if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
+			Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
+		}
+
+
 		std::string insidePath;
 		ExtensionHandle* mh;
 		if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {

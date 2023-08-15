@@ -75,6 +75,9 @@ public:
 
 	bool sanitizePath(const std::string& path, std::string& result);
 
+	std::map<std::string, std::string> aliasedPaths;
+	bool resolveAliasedPath(std::string& path);
+
 	bool pathIsInPluginDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
 	bool pathIsInModuleDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
 	bool moduleExists(const std::string moduleName, bool& asZip, bool& asFolder);

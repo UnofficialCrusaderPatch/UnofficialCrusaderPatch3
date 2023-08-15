@@ -21,6 +21,32 @@
 #include "lua/Preload.h"
 #include "io/modules/ModuleHandle.h"
 
+int luaRegisterPathAlias(lua_State* L) {
+	std::string alias = luaL_checkstring(L, 1);
+	std::string target = luaL_checkstring(L, 2);
+
+	bool overwrite = false;
+
+	if (lua_gettop(L) == 3) {
+		luaL_checktype(L, 3, LUA_TBOOLEAN);
+		overwrite = lua_toboolean(L, 3);
+	}
+
+	if (Core::getInstance().aliasedPaths.count(alias) > 0) {
+		if (!overwrite) {
+			return luaL_error(L, ("cannot overwrite alias registratrion for path: " + alias + " with: " + target + ". use overwrite = true").c_str());
+		}
+
+		Core::getInstance().log(1, "alias registration overwritten for alias: " + alias + " new target: " + target);
+	}
+
+	Core::getInstance().aliasedPaths[alias] = target;
+
+	Core::getInstance().log(2, "alias registered for: " + alias + " target: " + target);
+
+	return 0;
+}
+
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
 	lua_getglobal(L, "ucp"); // [ucp]
@@ -37,6 +63,9 @@ void addUtilityFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaUtil::luaGetCurrentThreadID);
 	lua_setfield(L, -2, "GetCurrentThreadID");
+
+	lua_pushcfunction(L, luaRegisterPathAlias);
+	lua_setfield(L, -2, "registerPathAlias");
 
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
@@ -276,6 +305,23 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	std::replace(result.begin(), result.end(), '\\', '/');
 
 	return true;
+}
+
+
+
+bool Core::resolveAliasedPath(std::string& path) {
+
+	for (auto const& [alias, resolvedPath] : aliasedPaths) {
+		int loc = path.rfind(alias, 0);
+		if (loc == 0) {
+			path = resolvedPath + path.substr(0 + alias.size());
+
+			return true;
+		}
+		
+	}
+
+	return false;
 }
 
 bool Core::pathIsInPluginDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath) {

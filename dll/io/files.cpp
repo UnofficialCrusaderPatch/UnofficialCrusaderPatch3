@@ -18,6 +18,10 @@ FILE* getFilePointer(std::string filename, std::string mode, std::string &errorM
 		sanitizedPath = filename;
 	}
 
+	if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
+		Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
+	}
+
 	std::string insidePath;
 	ExtensionHandle* mh;
 	if (Core::getInstance().pathIsInInternalCodeDirectory(sanitizedPath, insidePath)) {
@@ -124,6 +128,12 @@ int getFileDescriptor(std::string filename, int mode, int perm, std::string& err
 		// Oomph, this hurts a little... but this is here because the game really wants to load from the documents folder, which is fine, but breaks our relative path rule..
 		sanitizedPath = filename;
 	}
+
+
+	if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
+		Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
+	}
+
 
 	std::string insidePath;
 	ExtensionHandle* mh;
