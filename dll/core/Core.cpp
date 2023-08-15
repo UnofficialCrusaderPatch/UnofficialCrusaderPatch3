@@ -199,13 +199,14 @@ static const struct luaL_Reg printlib[] = {
 };
 
 void initializeLogger(int logLevel) {
-	// Put every log message in "everything.log":
+	// Put every log message of at least logLevel in ucp3.log
 	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
 
-	// Only log WARNING, ERROR and FATAL to "latest_readable.log":
+	// Only log WARNING, ERROR and FATAL to "error.log":
 	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
 
-	loguru::add_callback("stdout", logToStdOut, NULL, loguru::Verbosity_0);
+	// Also log logLevel and higher to the console
+	loguru::add_callback("stdout", logToStdOut, NULL, logLevel);
 
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
