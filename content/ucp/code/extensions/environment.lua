@@ -145,7 +145,19 @@ end
 ---@private
 local function prefixedPrintFunction(moduleName)
     return function(...)
-        print("[" .. moduleName .. "]: ", ...)
+      local logLevel = LOG_LEVELS.INFO
+
+      ucp.internal.log(logLevel, "[" .. moduleName .. "]: ", ...)
+    end
+end
+
+---Prefixes the module name to a print when the module calls 'print'
+---@param moduleName string the name of the module
+---@see print
+---@private
+local function prefixedLogFunction(moduleName)
+    return function(logLevel, msg)
+        ucp.internal.log(logLevel, "[" .. moduleName .. "]: " .. tostring(msg))
     end
 end
 
@@ -161,6 +173,7 @@ local function createRestrictedEnvironment(name, path, forbidsGlobalAssignment, 
         end
     end
 
+    env.log = prefixedLogFunction(name)
     env.print = prefixedPrintFunction(name)
     env.require = restrictedRequireFunction(path, env, allowBinary)
 

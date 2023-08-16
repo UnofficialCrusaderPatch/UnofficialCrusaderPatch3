@@ -12,3 +12,5 @@ void RunUserInputLoop();
 void ConsoleThread();
 void initializeConsole();
 void teardownConsole();
+
+void logToConsole(const int verbosity, const std::string& message);

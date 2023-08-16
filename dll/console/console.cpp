@@ -85,6 +85,86 @@ void RunUserInputLoop()
 }
 
 
+
+
+bool consoleColoredMode = false;
+
+void trySetColoredConsole() {
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING  0x0004
+#endif
+
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut != INVALID_HANDLE_VALUE) {
+		DWORD dwMode = 0;
+		GetConsoleMode(hOut, &dwMode);
+		dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+		consoleColoredMode = SetConsoleMode(hOut, dwMode) != 0;
+	}
+}
+
+
+const std::string loggingVerbosityNames[] = {
+	"FATAL", 
+	"ERROR", 
+	"WARNING", 
+	"INFO", 
+	"DEBUG", 
+	"VERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE", 
+	"VVERBOSE",
+};
+
+
+const std::string logErrorColor("\033[0;91m");
+const std::string logWarningColor("\033[0;93m");
+const std::string logInfoColor("\033[0;97m");
+const std::string logDebugColor("\033[0m");
+const std::string logVerboseColor("\033[0;90m");
+const std::string logColorReset("\033[0m");
+
+const std::string loggingVerbosityColors[] = {
+	logErrorColor, // -3
+	logErrorColor,  // -2
+	logWarningColor,  // -1
+	logInfoColor,  // 0
+	logVerboseColor,
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, 
+	logVerboseColor, // 9
+};
+
+
+void logToConsole(const int verbosity, const std::string& message) {
+	
+	if (verbosity < -3) {
+		std::cout << ": " << message << std::endl;
+	}
+	else {
+		const int zeroBasedVerbosity = verbosity + 3;
+
+		if (consoleColoredMode) {
+			std::cout << loggingVerbosityColors[zeroBasedVerbosity] << loggingVerbosityNames[zeroBasedVerbosity] << ": " << message << logColorReset << std::endl;
+		}
+		else {
+			std::cout << loggingVerbosityNames[zeroBasedVerbosity] << ": " << message << std::endl;
+		}
+
+	}
+
+}
+
+
 void initializeConsole() {
 	// debug info initialize
 	AllocConsole();
@@ -102,6 +182,8 @@ void initializeConsole() {
 	if (user_in == 0) {
 		std::cout << "Could not open user input.\n";
 	}
+
+	trySetColoredConsole();
 
 	//if (::AllocConsole())
 	//{

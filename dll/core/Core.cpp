@@ -176,8 +176,11 @@ void addUCPInternalFunctions(lua_State* L) {
 	lua_setglobal(L, "ucp");
 }
 
+
 void logToStdOut(void* user_data, const loguru::Message& message) {
-	std::cout << message.message << std::endl;
+	
+	logToConsole(message.verbosity, message.message);
+
 }
 
 static int luaPrint(lua_State* L) {
@@ -202,7 +205,7 @@ static const struct luaL_Reg printlib[] = {
   {NULL, NULL} /* end of array */
 };
 
-void initializeLogger(int logLevel) {
+void initializeLogger(int logLevel, int consoleLogLevel) {
 	// Put every log message of at least logLevel in ucp3.log
 	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
 
@@ -210,7 +213,7 @@ void initializeLogger(int logLevel) {
 	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
 
 	// Also log logLevel and higher to the console
-	loguru::add_callback("stdout", logToStdOut, NULL, logLevel);
+	loguru::add_callback("stdout", logToStdOut, NULL, consoleLogLevel);
 
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
@@ -406,8 +409,19 @@ void Core::initialize() {
 		s >> verbosity; // We don't care about errors at this point.
 	}
 
+	int consoleVerbosity = 0;
+	char* ENV_UCP_CONSOLE_VERBOSITY = std::getenv("UCP_CONSOLE_VERBOSITY");
+	if (ENV_UCP_CONSOLE_VERBOSITY == NULL) {
+		consoleVerbosity = 0;
+	}
+	else {
+		std::istringstream s(ENV_UCP_CONSOLE_VERBOSITY);
+		s >> consoleVerbosity; // We don't care about errors at this point.
+	}
+
+	this->consoleLogLevel = consoleVerbosity;
 	this->logLevel = verbosity;
-	initializeLogger(this->logLevel);
+	initializeLogger(this->logLevel, this->consoleLogLevel);
 
 #if !defined(_DEBUG) && defined(COMPILED_MODULES)
 	// No Console

@@ -56,6 +56,7 @@ private:
 	};
 
 public:
+	int consoleLogLevel = 0;
 	int logLevel = 0;
 
 	bool isInitialized = false;
