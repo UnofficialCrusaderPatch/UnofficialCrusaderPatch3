@@ -6,7 +6,7 @@ config.merger = require('config.merger')
 
 local checkKey = function(config, name)
   if config[name] == nil then
-    log(ERROR, "config is missing key: '" .. name .. "'")
+    log(ERROR, "[config/init]: config is missing key: '" .. name .. "'")
   end      
 end
 
@@ -40,7 +40,7 @@ normalizeContentsValues = function(config)
         
         config[k] = value -- this is allowed in lua as long as k already existed in config
       else
-        log(ERROR, "config file specified 'contents' in an illegal way, expected a value of type table, but received: '" .. tostring(v) .. "'")
+        log(ERROR, "[config/init]: config file specified 'contents' in an illegal way, expected a value of type table, but received: '" .. tostring(v) .. "'")
       end
     end
 
@@ -51,8 +51,8 @@ config.ConfigHandler = {
     loadDefaultConfig = function() 
         local f, message = io.open(CONFIG_DEFAULTS_FILE)
         if not f then
-            log(WARNING, "[main]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
-            log(WARNING, "[main]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
+            log(WARNING, "[config/init]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
+            log(WARNING, "[config/init]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
             return { modules = {} }
         end
         local data = f:read("*all")
@@ -60,7 +60,7 @@ config.ConfigHandler = {
     
         local result, err = yaml.eval(data)
         if not result then
-            log(ERROR, "failed to parse '" .. CONFIG_DEFAULTS_FILE .. "':\n" .. err)
+            log(ERROR, "[config/init]: failed to parse '" .. CONFIG_DEFAULTS_FILE .. "':\n" .. err)
         end
         if not result.plugins then result.plugins = {} end
         if not result.modules then result.modules = {} end
@@ -68,11 +68,11 @@ config.ConfigHandler = {
     end,
 
     loadUserConfig = function()
-        log(DEBUG, "opening user config file at path: " .. CONFIG_FILE)
+        log(DEBUG, "[config/init]: opening user config file at path: " .. CONFIG_FILE)
         local f, message = io.open(CONFIG_FILE)
         if not f then
-            log(WARNING, "[main]: Could not read ucp-config.yml. Reason: " .. message)
-            log(WARNING, "[main]: Treating ucp-config.yml as empty file")
+            log(WARNING, "[config/init]: Could not read ucp-config.yml. Reason: " .. message)
+            log(WARNING, "[config/init]: Treating ucp-config.yml as empty file")
             return { modules = {}, plugins = {} }
         end
         local data = f:read("*all")
@@ -80,7 +80,7 @@ config.ConfigHandler = {
     
         local result, err = yaml.eval(data)
         if not result then
-            log(ERROR, "failed to parse ucp-config.yml:\n" .. err)
+            log(ERROR, "[config/init]: failed to parse ucp-config.yml:\n" .. err)
         end
 
         return result
@@ -103,7 +103,7 @@ config.ConfigHandler = {
         checkKey(config['config-full'], 'plugins')
         checkKey(config['config-sparse'], 'plugins')
       else
-        log(ERROR, "config specified an unknown 'specification-version': " .. config['specification-version'])
+        log(ERROR, "[config/init]: config specified an unknown 'specification-version': " .. config['specification-version'])
       end
 
     end,

@@ -144,10 +144,10 @@ end
 ---@see print
 ---@private
 local function prefixedPrintFunction(moduleName)
-    return function(...)
+    return function(msg, ...)
       local logLevel = LOG_LEVELS.INFO
 
-      ucp.internal.log(logLevel, "[" .. moduleName .. "]: ", ...)
+      ucp.internal.log(logLevel, "[" .. moduleName .. "]: " .. tostring(msg), ...)
     end
 end
 
@@ -156,9 +156,24 @@ end
 ---@see print
 ---@private
 local function prefixedLogFunction(moduleName)
-    return function(logLevel, msg)
-        ucp.internal.log(logLevel, "[" .. moduleName .. "]: " .. tostring(msg))
+
+    local log = log
+    
+    local cv = os.getenv("UCP_CONSOLE_VERBOSITY")
+    local c = os.getenv("UCP_VERBOSITY")
+
+    if tonumber(cv) > 0 or tonumber(c) > 0 then
+      return function(logLevel, msg, ...)
+        local info = debug.getinfo(2)
+
+        ucp.internal.log(logLevel, "[" .. tostring(info.source) .. ":" .. tostring(info.currentline) .. "]: (" .. tostring(info.name) .. "): " .. tostring(msg), ...)
+      end
+    else
+      return function(logLevel, msg, ...)
+        ucp.internal.log(logLevel, "[" .. moduleName .. "]: " .. tostring(msg), ...)
+      end
     end
+    
 end
 
 ---This function creates the module environment in which module code is evaluated. It provides the environment with custom require and print functions

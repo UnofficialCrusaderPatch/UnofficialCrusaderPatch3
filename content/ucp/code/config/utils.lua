@@ -5,10 +5,10 @@ local data = require('data')
 function utils.parseExtensionsFolder(folder)
     
 ---Dynamic extensions discovery
-    local subFolders, err = table.pack(ucp.internal.listDirectories(BASEDIR .. "/" .. folder))
+    local subFolders, err = table.pack(ucp.internal.listDirectories(folder))
 
 	if not subFolders then
-		log(ERROR, "no subfolders detected for path: " .. BASEDIR .. "/" .. folder)
+		log(ERROR, "[config/utils]: no subfolders detected for path: " .. folder)
 		error(err)
 	end
 
@@ -19,13 +19,13 @@ function utils.parseExtensionsFolder(folder)
 		if subFolder:sub(-1) == "/" then
 			subFolder = subFolder:sub(1, -2)
 		end
-		if subFolder:match("(-[0-9\\.]+)$") == nil then error("invalid extension folder name: " .. subFolder) end
+		if subFolder:match("(-[0-9\\.]+)$") == nil then error("[config/utils]: invalid extension folder name: " .. subFolder) end
         local version = subFolder:match("(-[0-9\\.]+)$"):sub(2)
         local name = subFolder:sub(1, string.len(subFolder)-(string.len(version)+1)):match("[/\\]*([a-zA-Z0-9-]+)$")
 
         local fullName = name .. "-" .. version
 
-        table.insert(result, { name = name, version = version, fullName = fullName, fullPath = BASEDIR .. "/" .. folder .. "/" .. subFolder,})
+        table.insert(result, { name = name, version = version, fullName = fullName, fullPath = folder .. "/" .. subFolder,})
      end
 
      return result
@@ -42,11 +42,11 @@ function utils.loadExtensionsFromFolder(extensionLoaders, folder, cls)
         local version = parsedSubFolder.version
         local fullName = parsedSubFolder.fullName
 
-        log(INFO, "[main]: Creating extension loader for: " .. name .. " version: " .. version)
+        log(INFO, "[config/utils]: Creating extension loader for: " .. name .. " version: " .. version)
 
 
         if extensionLoaders[fullName] ~= nil then 
-            log(WARNING, "extension with name already exists: " .. name) 
+            log(WARNING, "[config/utils]: extension with name already exists: " .. name) 
         end
 
         local e = utils.loadExtensionFromFolder(name, version, cls)

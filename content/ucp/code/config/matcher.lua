@@ -7,7 +7,7 @@ local matcher = {}
 function matcher.findMatchForExtensionRequirement(extensions, requirementString)
   local req = version.VersionRequirement:fromString(requirementString)
   local m
-  log(DEBUG, "finding extension for requirement: " .. requirementString)
+  log(DEBUG, "[config/matcher]: finding extension for requirement: " .. requirementString)
   for extensionName, extensionObject in pairs(extensions) do
       if extensionObject.name == req.name then
           if req.equality == "==" then
@@ -48,7 +48,7 @@ function matcher.findMatchForExtensionRequirement(extensions, requirementString)
   end
 
   if m ~= nil then
-    log(DEBUG, "found required extension: " .. m.name)
+    log(DEBUG, "[config/matcher]: found required extension: " .. m.name)
   end
 
   return m
@@ -60,7 +60,7 @@ end
 function matcher.findPreMatchForExtensionRequirement(preExtensions, requirementString)
   local req = version.VersionRequirement:fromString(requirementString)
   local m
-  log(DEBUG, "finding extension for requirement: " .. requirementString)
+  log(DEBUG, "[config/matcher]: finding extension for requirement: " .. requirementString)
   for k, preExtension in pairs(preExtensions) do
       if preExtension.name == req.name then
           if req.equality == "==" then
@@ -101,7 +101,7 @@ function matcher.findPreMatchForExtensionRequirement(preExtensions, requirementS
   end
 
   if m ~= nil then
-    log(DEBUG, "found required extension: " .. m.name)
+    log(DEBUG, "[config/matcher]: found required extension: " .. m.name)
   end
 
   return m

@@ -28,10 +28,10 @@ end
 
 ---Load the init.lua file for this module.
 ---
----@return table the module API, as defined by the `init.lua` file of this module.
+---@return table the module API, as defined by the `CONST_INIT_FILE` file of this module.
 function BaseLoader:load()
-    if self.env == nil then error("no valid 'env' specified") end
-    local init_file_path = self.path .. "/init.lua"
+    if self.env == nil then error("[extensions/loader]: no valid 'env' specified") end
+    local init_file_path = self.path .. "/" .. CONST_INIT_FILE
 
 	local handle, err = io.open(init_file_path)
 	if not handle then
@@ -54,7 +54,7 @@ function BaseLoader:load()
     end
 
     if not self.handle then
-        print("WARNING: " .. init_file_path .. " did not return a valid handle: " .. self.handle)
+        log(WARNING, "[extensions/loader]: " .. init_file_path .. " did not return a valid handle: " .. self.handle)
     end
 
     return self.handle
@@ -67,10 +67,10 @@ end
 function BaseLoader:loadDefinition()
     if self.definition ~= nil then return end
 
-    local path = self.path .. "/definition.yml"
+    local path = self.path .. "/" .. CONST_DEFINITION_FILE
     local handle, status, e = io.open(path, 'r')
     if not handle then
-        log(WARNING, "could not get a handle to file "  .. path .. " status: " .. tostring(status))
+        log(WARNING, "[extensions/loader]: could not get a handle to file "  .. path .. " status: " .. tostring(status))
         self.definition = false
         return nil
     end
@@ -79,14 +79,14 @@ function BaseLoader:loadDefinition()
     handle:close()
 
     if data:len() == 0 then
-        log(WARNING, "the definition.yml file of " .. self.name .. " is empty")
+        log(WARNING, "[extensions/loader]: the definition file of " .. self.name .. " is empty")
         self.definition = false
         return nil
     end
 
     local result, err = yaml.eval(data)
     if not result then
-        log(ERROR, "error trying to load definition.yml of: " .. self.path .. "\nreason: " .. err)
+        log(ERROR, "[extensions/loader]: error trying to load definition of: " .. self.path .. "\nreason: " .. err)
         self.definition = {}
     else
         self.definition = result
@@ -140,7 +140,7 @@ end
 
 ---Read the demanded config
 function BaseLoader:config()
-    local handle, status, e = io.open(self.path .. "/config.yml", 'r')
+    local handle, status, e = io.open(self.path .. "/" .. CONST_CONFIG_FILE, 'r')
     if not handle then
         return { }
     end
@@ -155,7 +155,7 @@ function BaseLoader:config()
     local y, err = yaml.eval(data)
 
     if not y then
-        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+        log(ERROR, "[extensions/loader]: failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
     end
 
     postProcess(self.path, y)
@@ -180,7 +180,7 @@ function BaseLoader:ui()
     local y, err = yaml.eval(data)
 
     if not y then
-        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+        log(ERROR, "[extensions/loader]: failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
     end
 
     return y
@@ -188,7 +188,7 @@ end
 
 ---Read the options
 function BaseLoader:options()
-    local handle, status, e = io.open(self.path .. "/options.yml", 'r')
+    local handle, status, e = io.open(self.path .. "/" .. CONST_OPTIONS_FILE, 'r')
     if not handle then
         return { }
     end
@@ -203,7 +203,7 @@ function BaseLoader:options()
     local y, err = yaml.eval(data)
 
     if not y then
-        log(ERROR, "failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
+        log(ERROR, "[extensions/loader]: failed to parse config.yml for: " .. self.path .. "\nreason: " .. err)
     end
 
     return y
@@ -230,7 +230,7 @@ function BaseLoader:defaults()
   if table.length(ui) == 0 then
     local options = self:options()
     if table.length(options) == 0 then
-      log(WARNING, "this extension '" .. self.name .. "' does not have any way to detect defaults")
+      log(WARNING, "[extensions/loader]: this extension '" .. self.name .. "' does not have any way to detect defaults")
       return {}
     end
 
@@ -284,17 +284,17 @@ function BaseLoader:verifyVersion()
     self:loadDefinition()
 
     if not self.definition then
-        error("cannot verify version, empty definition.yml")
+        error("[extensions/loader]: cannot verify version, empty definition.yml")
     end
 
     if not self.definition.version then
-        error("Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
+        error("[extensions/loader]: Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
     else
         self.definition.version = self.definition.version:gsub(" ", "") -- remove whitespace
     end
 
     if self.definition.version ~= self.version then
-        error("Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
+        error("[extensions/loader]: Version mismatch between assumed version: '" .. self.version .. "' and defined version: '" .. self.definition.version .. "'")
     end
 
     return true
@@ -318,7 +318,7 @@ end
 local ModuleLoader = BaseLoader:new()
 
 function ModuleLoader:create(name, version)
-    local path = BASEDIR .. "/modules/" .. name .. "-" .. version
+    local path = CONST_MODULES_FOLDER .. name .. "-" .. version
     return ModuleLoader:new{name=name, version=version, path=path, env=nil}
 end
 
@@ -334,7 +334,7 @@ end
 local PluginLoader = BaseLoader:new()
 
 function PluginLoader:create(name, version)
-    local path = BASEDIR .. "/plugins/" .. name .. "-" .. version
+    local path = CONST_PLUGINS_FOLDER .. name .. "-" .. version
     return PluginLoader:new{name=name, version=version, path=path, env=nil}
 end
 
@@ -345,7 +345,7 @@ end
 
 function PluginLoader:load()
 
-    local init_file_path = self.path .. "/init.lua"
+    local init_file_path = self.path .. "/" .. CONST_INIT_FILE
 
 	local handle, err = io.open(init_file_path)
 	if not handle then

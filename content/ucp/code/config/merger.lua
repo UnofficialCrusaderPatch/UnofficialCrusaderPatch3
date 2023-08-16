@@ -30,7 +30,7 @@ function namespace.mergeConfiguration(c1, c2)
                 if type(v1) == "table" and type(v2) == "table" then
                   namespace.mergeConfiguration(v1, v2)
                 elseif type(v1) ~= type(v2) then
-                    error("incompatible types in key: " .. k)
+                    error("[config/merger]: incompatible types in key: " .. k)
                 else
                     c1[k] = v2
                 end
@@ -51,7 +51,7 @@ function namespace.resolveToFinalConfig(extensions, master, slave)
       local extConfig = ext:config()
       local conflicts = namespace.compareConfiguration(configMaster, extConfig)
       if #conflicts > 0 then
-          local msg = "failed to merge configuration of user and: " .. ext .. ".\ndifferences: "
+          local msg = "[config/merger]: failed to merge configuration of user and: " .. ext .. ".\ndifferences: "
           for k2, conflict in pairs(conflicts) do
               msg = "\n\tpath: " .. conflict.path .. ", value 1" .. conflict.value1 .. ", " .. conflict.value2
           end

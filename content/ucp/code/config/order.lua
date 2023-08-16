@@ -1,6 +1,6 @@
 
 --- Temporarily put here
-log(INFO, "[main]: solving load order")
+log(INFO, "[config/order]: solving load order")
 
 extensionDependencies = {}
 for name, ext in pairs(extensionLoaders) do

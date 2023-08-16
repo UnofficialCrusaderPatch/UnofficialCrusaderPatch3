@@ -1,5 +1,4 @@
 
-log = ucp.internal.log
 
 FATAL = -3
 ERROR = -2
@@ -26,3 +25,19 @@ LOG_LEVEL_NAME = {
   [2] = "VERBOSE",
   [3] = "VVERBOSE",
 }
+
+log = ucp.internal.log
+
+function traceLog(logLevel, ...)
+  
+  local info = debug.getinfo(2, 'nSl')
+
+  ucp.internal.log(logLevel, "[" .. tostring(info.source) .. ":" .. tostring(info.currentline) .. "]: (" .. tostring(info.name) .. "): ", ...)
+end
+
+local cv = os.getenv("UCP_CONSOLE_VERBOSITY")
+local c = os.getenv("UCP_VERBOSITY")
+
+if tonumber(cv) > 0 or tonumber(c) > 0 then
+  log = traceLog
+end

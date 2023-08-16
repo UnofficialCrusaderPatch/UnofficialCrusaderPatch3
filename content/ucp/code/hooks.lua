@@ -18,8 +18,7 @@ end
 local afterInit = core.scanForAOB("e8 ? ? ? ? 39 1d ? ? ? ? 89 2d ? ? ? ? 89 1d ? ? ? ? 0f 85 ? ? ? ?")
 
 local function onAfterInit(registers)
-    print("")
-    print("[hooks]: firing afterInit callbacks")
+    log(DEBUG, "[hooks]: firing afterInit callbacks")
 
     local status, message = pcall(fireCallbacksForHook, "afterInit")
     if not status then

@@ -1,14 +1,14 @@
 local namespace = {}
 
-local AOB_CACHE_FILENAME = ".ucp-aob-cache"
+local AOB_CACHE_FILENAME = "ucp/.ucp-aob-cache"
 
 local aobs = {}
 namespace.AOB = {}
 namespace.AOB.loadFromFile = function()
-  log(DEBUG, "[cache]: loading cache from file")
+  log(DEBUG, "[data/cache]: loading cache from file")
   local handle, err = io.open(AOB_CACHE_FILENAME, "r")
   if not handle then
-    log(WARNING, "[cache]: startup might be slower, no cache was found")
+    log(WARNING, "[data/cache]: startup might be slower, no cache was found")
     return false
   end
   
@@ -34,17 +34,17 @@ namespace.AOB.retrieve = function(aob)
   
   aobs[aob] = core.scanForAOB(aob)
   if aobs[aob] == nil then
-    error("AOB could not be found: " .. aob)
+    error("[data/cache]: AOB could not be found: " .. aob)
   end
   
   return aobs[aob]
 end
 
 namespace.AOB.dumpToFile = function()
-  log(DEBUG, "[cache]: dumping cache to file")
+  log(DEBUG, "[data/cache]: dumping cache to file")
   local handle, err = io.open(AOB_CACHE_FILENAME, "w")
   if not handle then
-    log(WARNING, "[cache]: could not store cache")
+    log(WARNING, "[data/cache]: could not store cache")
     return false
   end  
     
@@ -86,10 +86,10 @@ local ConfigCache = {
   end,
 
   loadFromFile = function (self)
-    log(DEBUG, "[cache]: loading defaults config cache from file")
+    log(DEBUG, "[data/cache]: loading defaults config cache from file")
     local handle, err = io.open(self.filePath, "r")
     if not handle then
-      log(WARNING, "[config cache]: startup might be slower, no config cache was found")
+      log(WARNING, "[data/cache]: startup might be slower, no config cache was found")
       return false
     end
     
@@ -109,6 +109,6 @@ local ConfigCache = {
 
 }
 
-namespace.DefaultConfigCache = ConfigCache:new('.ucp-default-config-cache')
+namespace.DefaultConfigCache = ConfigCache:new('ucp/.ucp-default-config-cache')
 
 return namespace

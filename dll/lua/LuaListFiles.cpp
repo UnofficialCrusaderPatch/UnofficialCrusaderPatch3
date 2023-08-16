@@ -91,7 +91,7 @@ namespace LuaIO {
 		lua_pushstring(L, sanitizedPath.c_str());
 		lua_replace(L, 1); // Replace the path 
 
-		if (rawPath == "ucp/modules") {
+		if (rawPath == "ucp/modules" || rawPath == "ucp/modules/") {
 
 
 

@@ -58,7 +58,7 @@ local UCP_VERSION_FILE_PATH = "ucp/ucp-version.yml"
 namespace.initialize = function()
     local f, message = io.open(UCP_VERSION_FILE_PATH)
     if not f then
-        print("Could not read '" .. UCP_VERSION_FILE_PATH .. "'. Reason: " .. message)
+        print("[data/version]: Could not read '" .. UCP_VERSION_FILE_PATH .. "'. Reason: " .. message)
         namespace.known_version_string = ""
     else
         local data = f:read("*all")
@@ -108,7 +108,7 @@ namespace.initialize = function()
 			if not start then
 				start, stop, maj, min = oString:find("V([0-9]+)[.]([0-9]+)")	
 				if not start then
-					error("Cannot parse game version: " .. oString)
+					error("[data/version]: Cannot parse game version: " .. oString)
 				end
 			end
 		end
@@ -158,10 +158,10 @@ end
 
 namespace.assertEnglishVersion = function()
     if namespace.isNonEnglish() then
-        error("This version is a non-English version")
+        error("[data/version]: This version is a non-English version")
     end
     if namespace.getGameLanguage() ~= "english" then
-        error("This version is non english")
+        error("[data/version]: This version is non english")
     end
     return true
 end
@@ -187,7 +187,7 @@ namespace.setMenuVersion = function(fstring)
     local d = table.pack(string.byte(fstring, 1, -1))
     table.insert(d, 0) -- null termination
     if #d > 64 then
-        error("too long")
+        error("[data/version]: too long")
     end
     core.writeBytes(namespace.custom_menu_version_space, d)
 end
@@ -220,7 +220,7 @@ namespace.verifyGameDependency = function(ext, extensionLoaders)
 
     extension:loadDefinition()
     if not extension.definition or not extension.definition.game then
-        error("cannot determine game dependency for: " .. ext)
+        error("[data/version]: cannot determine game dependency for: " .. ext)
     end
 
     for k, v in pairs(extension.definition.game) do
@@ -228,7 +228,7 @@ namespace.verifyGameDependency = function(ext, extensionLoaders)
         if name == gameName then
             local comp = COMPARATORS[eq]
             if comp == nil then
-                error("illegal comparator: " .. comp)
+                error("[data/version]: illegal comparator: " .. comp)
             end
 
             if comp(versionString, version) then
@@ -237,7 +237,7 @@ namespace.verifyGameDependency = function(ext, extensionLoaders)
         end
     end
 
-    log(ERROR, "Dependency version conflict for extension \"" .. ext .. "\": does not work for game: \"" .. gameName .. "\" version " .. versionString)
+    log(ERROR, "[data/version]: Dependency version conflict for extension \"" .. ext .. "\": does not work for game: \"" .. gameName .. "\" version " .. versionString)
     -- error("Game dependency check failed for \"" .. ext .. "\"")
     return false
 end
@@ -253,8 +253,8 @@ namespace.verifyDependencies = function(extension, extensionLoaders)
         local versionEqualityDemanded = dep.equality
 
         if extensionLoaders[dep.name] == nil then 
-            log(ERROR, "Dependency not found: Extension " .. extension .. " requires module " .. dep.name) 
-            error("Dependency check failed for \"" .. extension .. "\"")
+            log(ERROR, "[data/version]: Dependency not found: Extension " .. extension .. " requires module " .. dep.name) 
+            error("[data/version]: Dependency check failed for \"" .. extension .. "\"")
             return false
         end
 
@@ -267,14 +267,14 @@ namespace.verifyDependencies = function(extension, extensionLoaders)
                 versionConflict = false
             end
         else
-            log(ERROR, "Version operator malformed inside definition.yml")
-            error("Dependency check failed for \"" .. extension .. "\"")
+            log(ERROR, "[data/version]: Version operator malformed inside definition.yml")
+            error("[data/version]: Dependency check failed for \"" .. extension .. "\"")
             return false
         end
 
         if versionConflict then
-            log(ERROR, "Dependency version conflict for extension \"" .. extension .. "\": Demanded module \"" .. dep.name .. "\" version " .. versionEqualityDemanded .. " " .. dep.version .. ", found " .. extensionLoaders[dep.name].version)
-            error("Dependency check failed for \"" .. extension .. "\"")
+            log(ERROR, "[data/version]: Dependency version conflict for extension \"" .. extension .. "\": Demanded module \"" .. dep.name .. "\" version " .. versionEqualityDemanded .. " " .. dep.version .. ", found " .. extensionLoaders[dep.name].version)
+            error("[data/version]: Dependency check failed for \"" .. extension .. "\"")
             return false
         end
 

@@ -5,9 +5,6 @@ UCP_VERSION = "3.0.0"
 ---Variable to indicate to show debug information
 DEBUG = true
 
----UCP base directory configuration
-BASEDIR = "ucp"
-
 ---Change the ucp working directory based on an environment variable
 ---@extrecated UCP_DIR is now handled in the dll part
 ---@param UCP_DIR string path to the ucp directory
@@ -18,12 +15,14 @@ else
   print("[main]: Using the default UCP_DIR")
 end
 
+require("constants")
+
 ---Config file configuration
-CONFIG_FILE = "ucp-config.yml"
+CONFIG_FILE = CONST_DEFAULT_CONFIG_FILE
 
 ---Change the config path based on an environment variable
 ---@param UCP_CONFIG string full path to the config file
-UCP_CONFIG = os.getenv("UCP_CONFIG")
+UCP_CONFIG = os.getenv(CONST_ENV_UCP_CONFIG)
 
 if UCP_CONFIG then
     print("[main]: Setting UCP_CONFIG to " .. UCP_CONFIG)
@@ -72,8 +71,11 @@ config.utils.loadExtensionsFromFolder(extensionLoaders, "plugins", extensions.Pl
 So for now we use the following logic:
 --]]
 
-moduleFolders = config.utils.parseExtensionsFolder("modules")
-pluginFolders = config.utils.parseExtensionsFolder("plugins")
+moduleFolders = config.utils.parseExtensionsFolder(CONST_MODULES_FOLDER)
+pluginFolders = config.utils.parseExtensionsFolder(CONST_PLUGINS_FOLDER)
+
+log(DEBUG, "[main]: module folder count: " .. tostring(#moduleFolders))
+log(DEBUG, "[main]: plugin folder count: " .. tostring(#pluginFolders))
 
 fullUserConfig = userConfig['config-full']
 
@@ -82,7 +84,7 @@ loadOrder = fullUserConfig['load-order']
 extensionsInLoadOrder = {}
 
 if loadOrder == nil then
-    log(FATAL, "user config does not contain 'load-order'")    
+    log(FATAL, "[main]: user config does not contain 'load-order'")    
 else
   for k, req in pairs(loadOrder) do
   --[[
@@ -91,7 +93,7 @@ else
     local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
   --]]  
   
-  log(INFO, "iterating through load order, trying: " .. req)
+  log(DEBUG, "[main]: iterating through load order, trying: " .. req)
   
     local m = config.matcher.findPreMatchForExtensionRequirement(moduleFolders, req)
     local e
@@ -100,16 +102,16 @@ else
         m = config.matcher.findPreMatchForExtensionRequirement(pluginFolders, req)
 
         if m == nil then
-          log(ERROR, "Could not find a matching extension for requirement: " .. tostring(req))
+          log(FATAL, "[main]: Could not find a matching extension for requirement: " .. tostring(req))
         else
           e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.PluginLoader)
           extensionLoaders[m.name] = e
-          ucp.internal.registerPathAlias("ucp/plugins/" .. m.name .. "/", "ucp/plugins/" .. m.name .. "-" .. m.version .. "/")
+          ucp.internal.registerPathAlias(CONST_PLUGINS_FOLDER .. m.name .. "/", CONST_PLUGINS_FOLDER .. m.name .. "-" .. m.version .. "/")
         end
     else
         e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.ModuleLoader)
         extensionLoaders[m.name] = e
-        ucp.internal.registerPathAlias("ucp/modules/" .. m.name .. "/", "ucp/modules/" .. m.name .. "-" .. m.version .. "/")
+        ucp.internal.registerPathAlias(CONST_MODULES_FOLDER .. m.name .. "/", CONST_MODULES_FOLDER .. m.name .. "-" .. m.version .. "/")
     end
 
 
@@ -156,7 +158,7 @@ allActiveExtensions = extensionsInLoadOrder
 configFinal = joinedUserConfig
 config.ConfigHandler.normalizeContentsValues(configFinal)
 
-local handle, err = io.open(".ucp-final-config-cache", 'w')
+local handle, err = io.open(CONST_FINAL_CONFIG_CACHE_FILE, 'w')
 handle:write(yaml.dump(configFinal))
 handle:close()
 
@@ -194,7 +196,7 @@ for k, ext in pairs(allActiveExtensions) do
         ext:createEnvironment(pluginEnv)
         plugins[ext.name] = ext:load(pluginEnv)
     else
-        error("unknown extension type for: " .. ext.name)
+        error("[main]: unknown extension type for: " .. ext.name)
     end
 end
 
@@ -211,23 +213,23 @@ for k, ext in pairs(allActiveExtensions) do
         ext:enable(o)
         plugins[ext.name] = extensions.createRecursiveReadOnlyTable(plugins[ext.name])
     else
-        error("unknown extension type for: " .. ext.name)
+        error("[main]: unknown extension type for: " .. ext.name)
     end
 end
 
 (function() 
-  local f = io.open("ucp/code/dev.lua", 'r')
+  local f = io.open(CONST_DEVCODE_PATH, 'r')
   if not f then return end
   
-  print("loading 'ucp/code/dev.lua'")
+  log(INFO, "loading " .. CONST_DEVCODE_PATH)
   
-  local f, err = load(f:read("*all"), "ucp/code/dev.lua")
+  local f, err = load(f:read("*all"), CONST_DEVCODE_PATH)
   if not f then
-    print("\t" .. err)
+    log(INFO, "\t" .. err)
   end
   local success, result = pcall(f)
   if not success then
-    print("\t" .. result)
+    log(INFO, "\t" .. result)
   end
 end)()
 
