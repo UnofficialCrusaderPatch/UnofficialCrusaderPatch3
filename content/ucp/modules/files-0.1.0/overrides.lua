@@ -1,4 +1,5 @@
 
+--- Keys in this dictionary are lower case. Values have their original case.
 local FILE_OVERRIDES = {}
 local FILE_OVERRIDE_FUNCTIONS = {}
 
@@ -6,21 +7,21 @@ local logFileAccess = nil
 
 
 local function onOpenFile(file)
+
+  local override = nil
+
   for k, func in pairs(FILE_OVERRIDE_FUNCTIONS) do
-    local fresult = func(file)
-    if fresult ~= nil then
-      if logFileAccess then
-        log(DEBUG, "... overridden with file: " .. override)
-      end
-      return fresult
+    override = func(file)
+    if override ~= nil then
+      return override
     end
   end
 
-  if FILE_OVERRIDES[file] ~= nil then
-    if logFileAccess then
-      log(DEBUG, "... overridden with file: " .. override)
-    end
-    return FILE_OVERRIDES[file]
+  file = file:lower()
+
+  override = FILE_OVERRIDES[file]
+  if override ~= nil then
+    return override
   end
 
   return nil
@@ -29,10 +30,21 @@ end
 
 local function overwriteResource(filepath)
   if logFileAccess then
-    log(DEBUG, "Game opened file: " .. filepath)
+    log(DEBUG, "Game opened file: " .. tostring(filepath))
   end
 
-  return onOpenFile(filepath)
+  local override = onOpenFile(filepath)
+  if override == nil then
+    if logFileAccess then
+      log(DEBUG, "No override found for: '" .. tostring(filepath) .. "'")
+    end
+  else
+    if logFileAccess then
+      log(DEBUG, "File '" .. tostring(filepath) .. "' overriden with: " .. tostring(override))
+    end
+  end
+  
+  return override
 end
 
 local function setupIOhooks()
@@ -46,21 +58,23 @@ local function setupIOhooks()
     local o_open
     local function _openHook(fileName, mode, perm)
       local luaFileName = core.readString(fileName)
-      log(VERBOSE, "_open: " .. luaFileName .. " mode: " .. string.format("%X", mode) .. " perm: " .. string.format("%X", perm))
+      -- log(VERBOSE, "_open: " .. luaFileName .. " mode: " .. string.format("%X", mode) .. " perm: " .. string.format("%X", perm))
 
       --local retValue = open(fileName, mode, perm)
       local retValue
       local o = overwriteResource(luaFileName)
       if o ~= nil then
-        log(VERBOSE, "Overriding with: " .. o)
+        -- log(VERBOSE, "Overriding with: " .. o)
         -- core.writeString(ovrsBuffer, o)
         retValue = io.openFileDescriptor(o, mode, perm)
+        -- retValue = _open(ucp.internal.registerString(o), mode, perm)
       else
+        -- log(VERBOSE, "Not overriding : " .. luaFileName)
         retValue = _open(fileName, mode, perm)
       end
     
   
-      log(VERBOSE, retValue)
+      -- log(VERBOSE, retValue)
       
       return retValue
     
@@ -93,16 +107,16 @@ local function setupIOhooks()
     -- core.writeCode(fopenAddress, {0xE9, core.getRelativeAddress(fopenAddress, io.ucrt.fopen, -5) })
     
     
-        local fopen = core.exposeCode(io.ucrt.fopen, 2, 0)
+    local fopen = core.exposeCode(io.ucrt.fopen, 2, 0)
     local o_fopen
     local function fopenHook(fileName, mode)
       local luaFileName = core.readString(fileName)
-      log(2, "fopen: " .. luaFileName .. " mode: " .. mode)
+      -- log(2, "fopen: " .. luaFileName .. " mode: " .. mode)
 
       local retValue
       local o = overwriteResource(luaFileName)
       if o ~= nil then
-        log(2, "Overriding with: " .. o)
+        -- log(2, "Overriding with: " .. o)
         -- core.writeString(ovrsBuffer, o)
         retValue = io.openFilePointer(o, mode)
       else
@@ -110,7 +124,7 @@ local function setupIOhooks()
       end
       
   
-      log(2, retValue)
+      -- log(2, retValue)
       
       return retValue
     
@@ -216,20 +230,15 @@ local function setupBinkHook()
 
   local BinkOpen_hook = function(fileName, flags)
     local luaFileName = core.readString(fileName)
-    log(2, "fopen: " .. luaFileName .. " flags: " .. flags)
 
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
-      log(2, "Overriding with: " .. o)
       -- core.writeString(ovrsBuffer, o)
       retValue = BinkOpen(ucp.internal.registerString(o), flags)
     else
       retValue = BinkOpen(fileName, flags)
     end
-  
-
-    log(2, retValue)
     
     return retValue
   end
@@ -255,20 +264,14 @@ local function setupMilesHook()
 
   local AIL_open_stream_hook = function(dig, fileName, stream_mem)
     local luaFileName = core.readString(fileName)
-    log(2, "fopen: " .. luaFileName .. " stream_mem: " .. stream_mem)
 
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
-      log(2, "Overriding with: " .. o)
-      -- core.writeString(ovrsBuffer, o)
       retValue = AIL_open_stream(dig, ucp.internal.registerString(o), stream_mem)
     else
       retValue = AIL_open_stream(dig, fileName, stream_mem)
     end
-  
-
-    log(2, retValue)
     
     return retValue
   end
@@ -289,20 +292,14 @@ local function setupMilesHook()
 
   local AIL_file_read_hook = function(fileName, dest)
     local luaFileName = core.readString(fileName)
-    log(2, "fopen: " .. luaFileName .. " dest: " .. dest)
 
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
-      log(2, "Overriding with: " .. o)
-      -- core.writeString(ovrsBuffer, o)
       retValue = AIL_file_read(ucp.internal.registerString(o), dest)
     else
       retValue = AIL_file_read(fileName, dest)
     end
-  
-
-    log(2, retValue)
     
     return retValue
   end
@@ -323,20 +320,14 @@ local function setupMilesHook()
 
   local AIL_file_size_hook = function(fileName)
     local luaFileName = core.readString(fileName)
-    log(2, "fopen: " .. luaFileName)
 
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
-      log(2, "Overriding with: " .. o)
-      -- core.writeString(ovrsBuffer, o)
       retValue = AIL_file_size(ucp.internal.registerString(o))
     else
       retValue = AIL_file_size(fileName)
     end
-  
-
-    log(2, retValue)
     
     return retValue
   end
@@ -361,11 +352,13 @@ return {
 
   end,
 
-  overrideFileWith = function(file, newFile)
-    if logFileAccess then
-      log(DEBUG, "Registering override for: " .. file .. ": " .. newFile)
-    end
-    
+  overrideFileWith = function(file, newFile)    
+    file = file:lower()
+
+    newFile = newFile:gsub("/+", "\\")
+
+    log(DEBUG, "Registering override for: " .. file .. ": " .. newFile)
+
     FILE_OVERRIDES[file] = newFile
   end,
 

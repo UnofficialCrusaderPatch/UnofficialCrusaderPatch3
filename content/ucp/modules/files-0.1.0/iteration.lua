@@ -32,7 +32,7 @@ function IterationSession:first( target, struct)
     if handle ~= -1 then
         return handle
     else
-        log(INFO, "No files in: " .. core.readString(target) .. " moving on to extra directories")
+        log(DEBUG, "No files in: " .. core.readString(target) .. " moving on to extra directories")
         return CURRENT_ITERATION_SESSION:nextExtra( handle, struct)
     end
 end
@@ -48,7 +48,7 @@ function IterationSession:nextExtra( struct)
     while EXTRA_DIRS[self.target] ~= nil and EXTRA_DIRS[self.target][self.extraDirIndex] ~= nil do
         local newTarget = EXTRA_DIRS[self.target][self.extraDirIndex]
         local newHandle = FindFirstFileA( newTarget, struct)
-        log(INFO, "checking directory: " .. core.readString(newTarget))
+        log(DEBUG, "checking directory: " .. core.readString(newTarget))
         if newHandle ~= -1 then
             return newHandle
         else
@@ -63,6 +63,7 @@ end
 
 function IterationSession:next( handle, struct)
     if struct ~= self.struct then
+      log(FATAL, 'IterationSession:next : invalid struct' .. tostring(struct))
         error("invalid 'struct'")
     end
 
@@ -112,12 +113,16 @@ local MAP_SUFFIX = ".map"
 
 local function registerOverridesForDirectory(dir)
 
+  log(DEBUG, "Registering map files in: " .. tostring(dir))
+
   for k, path in ipairs(table.pack(ucp.internal.listFiles(dir))) do
     if path:sub(-MAP_SUFFIX:len()) == MAP_SUFFIX then
 
-      local mapName = path:lower():match("([^/\\]+)[.]map$")
+      local mapName = path:match("([^/\\]+)[.]map$")
 
-      modules.files.overrideFileWith("maps\\" .. mapName .. ".map", path)
+      local trigger = "maps\\" .. mapName .. ".map"
+      log(DEBUG, "Registering " ..  tostring(trigger) .. " => " .. tostring(path))
+      modules.files:overrideFileWith(trigger, path)
     end
   end
 
@@ -131,7 +136,6 @@ local function registerExtraDir(target, dir)
     core.writeByte(addr + dir:len(), 0)
     EXTRA_DIRS[target] = {[1] = addr}
 
-    registerOverridesForDirectory(dir)
 end
 
 return {
@@ -152,19 +156,26 @@ return {
         if config["extra-map-directory"] then
 
           local dir = config["extra-map-directory"]
-          if dir:sub(-1) == "\\" then
-              dir = dir .. "*.map"
+
+          -- FindNextFile Directory should end with *.map
+          local fnfDir = dir
+          
+          if dir:sub(-1) == "\\" or dir:sub(-1) == "/" then
+              fnfDir = dir .. "*.map"
           end
-          if dir:sub(-6) ~= "\\*.map" then
-              dir = dir .. "\\*.map"
+          if fnfDir:sub(-6) ~= "\\*.map" and fnfDir:sub(-6) ~= "/*.map" then
+              fnfDir = fnfDir .. "\\*.map"
           end
 
-          log(INFO, "Extra map directory found in the config: " .. tostring(dir))
+          log(VERBOSE, "Extra map directory found in the config: " .. tostring(dir))
 
-          registerExtraDir("maps\\*.map", dir)
-          registerExtraDir("mapsExtreme\\*.map", dir)
+          registerExtraDir("maps\\*.map", fnfDir)
+          registerExtraDir("mapsExtreme\\*.map", fnfDir)
+          
+          
+          registerOverridesForDirectory(dir)
         else
-          log(INFO, "No extra map directory found in the config")
+          log(VERBOSE, "No extra map directory found in the config")
         end
 
         if config["extra-sav-directory"] then
