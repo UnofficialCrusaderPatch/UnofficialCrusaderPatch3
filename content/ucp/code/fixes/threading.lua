@@ -25,7 +25,7 @@ namespace.removeMusicThread = function()
     0x6a, 0x00, 
     0x6a, 0x00, -- call has 5 arguments it does not use, so I push 0's
     
-    0xE8, core.relTo(SndSystemTimeCallbackAddress, -4),
+    core.callTo(SndSystemTimeCallbackAddress),
     0x59, -- pop ecx
   }
 

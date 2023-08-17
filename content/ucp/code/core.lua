@@ -329,6 +329,24 @@ function core.shortRelTo(dst, offset)
     end, 2)
 end
 
+---Creates a lambda function to compute the relative distance to a call in memory (doing the necessary offset of -4 to adjust).
+---@param dst number the address to compute the relative distance to
+---@param offset number an offset that is added to the result
+---@return function a function that can be used in a code table
+function core.relToCall(dst)
+    return core.relTo(dst, -4)
+end
+
+---Creates a lambda function to represent in machine code a call to a function.
+---@param dst number the address to compute the relative distance to
+---@param offset number an offset that is added to the result
+---@return function a function that can be used in a code table
+function core.callTo(dst)
+  return core.Lambda:new(function(address, index, labels)
+    return { 0xE8, table.unpack(core.relTo(dst, -5)(address), 1, 4) }
+  end, 5)
+end
+
 ---Calculates the size of `code` if it would be compiled. It does not call functions or Lambda's,
 ---but determines their size by assuming 4 bytes, or looking at the `size` property of a Lambda.
 ---@param code table the code to compile. Can contain byte values, integers, tables, labels (strings), functions and Lambda's.
