@@ -1,6 +1,9 @@
 
 #include "framework.h"
 #include "ucp3.h"
+#include <thread>
+#include <iostream>
+#include <sstream>
 
 DWORD entryFunction = 0x00591049;
 
@@ -77,10 +80,28 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD  ul_reason_for_call, LPVOID lpReserved
 		// And reapply the protection.
 		VirtualProtect((LPVOID)entryPoint, 5, oldProtect, &oldProtect);
 
-
+		break;
 	}
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
+	case DLL_THREAD_ATTACH: {
+		//std::stringstream stream;
+		//stream << "New thread attached to process: " << std::hex << std::hash<std::thread::id>{}(std::this_thread::get_id());
+		//std::string result(stream.str());
+
+		//ucp_log(Verbosity_1, stream.str().c_str());
+
+		break;
+	}
+
+	case DLL_THREAD_DETACH: {
+		//std::stringstream stream;
+		//stream << "New thread detached from process: " << std::hex << std::hash<std::thread::id>{}(std::this_thread::get_id());
+		//std::string result(stream.str());
+
+		//ucp_log(Verbosity_1, stream.str().c_str());
+
+		break;
+	}
+
 	case DLL_PROCESS_DETACH:
 		break;
 	}

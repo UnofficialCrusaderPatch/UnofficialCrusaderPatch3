@@ -217,6 +217,8 @@ void initializeLogger(int logLevel, int consoleLogLevel) {
 
 	// Only show most relevant things on stderr:
 	loguru::g_stderr_verbosity = loguru::Verbosity_MAX;
+
+	loguru::set_thread_name("(main thread)");
 }
 
 void deinitializeLogger() {

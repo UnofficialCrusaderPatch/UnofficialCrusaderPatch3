@@ -16,66 +16,26 @@ namespace LuaYamlParser {
 
 	int parseScalarNode(lua_State* L, YAML::Node &node, std::string &errorMsg) {
 
-		bool isBool = false;
-		try {
-			bool value = node.as<bool>();
-			isBool = true;
-		}
-		catch (YAML::InvalidNode e) {
-			
-		}
-		catch (YAML::TypedBadConversion<bool> e) {
-			
-		}
+		bool boolValue;
+		int integerValue;
+		double doubleValue;
 
-		bool isInteger = false;
-		try {
-			int value = node.as<int>();
-			isInteger = true;
-		}
-		catch (YAML::InvalidNode e) {
-		}
-		catch (YAML::TypedBadConversion<int> e) {
-
-		}
-
-		bool isDouble = false;
-		try {
-			double value = node.as<double>();
-			isDouble = true;
-		}
-		catch (YAML::InvalidNode e) {
-		}
-		catch (YAML::TypedBadConversion<double> e) {
-
-		}
-
-		bool isString = false;
-		try {
-			std::string value = node.as<std::string>();
-			isString = true;
-		}
-		catch (YAML::InvalidNode e) {
-			errorMsg = e.what();
-		}
-		catch (YAML::TypedBadConversion<std::string> e) {
-			errorMsg = e.what();
-		}
-
-		if (isBool) {
-			lua_pushboolean(L, node.as<bool>());
-		}
-		else if (isInteger) {
-			lua_pushinteger(L, node.as<int>()); // not sure if yaml can distinguish
-		}
-		else if (isDouble) {
-			lua_pushnumber(L, node.as<double>());
-		}
-		else if (isString) {
-			lua_pushstring(L, node.as<std::string>().c_str());
+		if (!YAML::convert<bool>::decode(node, boolValue)) {
+			if (!YAML::convert<int>::decode(node, integerValue)) {
+				if (!YAML::convert<double>::decode(node, doubleValue)) {
+					// We tried all options, it must be a string
+					lua_pushstring(L, node.Scalar().c_str());
+				}
+				else {
+					lua_pushnumber(L, doubleValue);
+				}
+			}
+			else {
+				lua_pushinteger(L, integerValue);
+			}
 		}
 		else {
-			return -1;
+			lua_pushboolean(L, boolValue);
 		}
 
 		return 1;

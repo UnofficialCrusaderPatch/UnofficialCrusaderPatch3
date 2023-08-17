@@ -35,9 +35,9 @@ function traceLog(logLevel, ...)
   ucp.internal.log(logLevel, "[" .. tostring(info.source) .. ":" .. tostring(info.currentline) .. "]: (" .. tostring(info.name) .. "): ", ...)
 end
 
-local cv = os.getenv("UCP_CONSOLE_VERBOSITY")
-local c = os.getenv("UCP_VERBOSITY")
+local cv = tonumber(os.getenv("UCP_CONSOLE_VERBOSITY"))
+local c = tonumber(os.getenv("UCP_VERBOSITY"))
 
-if tonumber(cv) > 0 or tonumber(c) > 0 then
+if (cv ~= nil and cv > 0) or (c ~= nil and c > 0) then
   log = traceLog
 end
