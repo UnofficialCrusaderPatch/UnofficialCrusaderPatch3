@@ -58,7 +58,7 @@ public:
 	int openFileDescriptor(const std::string& path, std::string& error) {
 		std::filesystem::path fullPath = (this->modulePath / path);
 		if (!std::filesystem::is_regular_file(fullPath)) {
-			error = "not a regular file : " + path;
+			error = "file '" + path + "'does not exist in extension: " + this->name;
 			return -1;
 		}
 
@@ -69,7 +69,7 @@ public:
 	FILE* openFilePointer(const std::string& path, std::string& error) {
 		std::filesystem::path fullPath = (this->modulePath / path);
 		if (!std::filesystem::is_regular_file(fullPath)) {
-			error = "not a regular file : " + path;
+			error = "file '" + path + "'does not exist in extension: " + this->name;
 			return NULL;
 		}
 
@@ -224,7 +224,7 @@ public:
 		size_t bufsize = 0;
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
-			error = "file does not exist in extension zip: " + this->name;
+			error = "file '" + path + "'does not exist in extension zip: " + this->name;
 			return -1;
 		}
 
@@ -248,7 +248,7 @@ public:
 		size_t bufsize = 0;
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
-			error = "file does not exist in extension zip: " + this->name;
+			error = "file '" + path + "' does not exist in extension zip: " + this->name;
 			return NULL;
 		}
 
