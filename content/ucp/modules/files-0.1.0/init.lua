@@ -6,8 +6,8 @@ local iteration = require('iteration')
 
 return {
     enable = function(self, config)
-        iteration.enable(config)
         overrides.enable(config)
+        iteration.enable(config)
     end,
     disable = function(self, config)
     end,
