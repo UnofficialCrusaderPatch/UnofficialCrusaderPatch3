@@ -42,6 +42,9 @@ version = require('version')
 
 require("logging")
 
+fixes = require('fixes')
+fixes.applyAll()
+
 data.version.initialize()
 data.cache.AOB.loadFromFile()
 -- data.cache.DefaultConfigCache:loadFromFile()
