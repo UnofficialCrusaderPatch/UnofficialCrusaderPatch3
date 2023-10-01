@@ -87,6 +87,10 @@ namespace LuaYamlParser {
 						code = LuaYamlParser::parseScalarNode(L, second, errorMsg);
 						
 					}
+					else if (second.IsNull()) {
+						code = 1;
+						lua_pushnil(L);
+					}
 					else {
 						lua_pop(L, 1); // pop the created table
 						std::stringstream output;
