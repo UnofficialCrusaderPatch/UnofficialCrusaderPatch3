@@ -7,7 +7,7 @@ options:
   header: '{{aic_rat}}'
   text: '{{aic_rat_descr}}'
   display: Text
-  url: rat
+  url: aivloader.rat
   contents:
     type: string
     value: ""
@@ -18,7 +18,7 @@ options:
   header: '{{aic_snake}}'
   text: '{{aic_snake_descr}}'
   display: Text
-  url: snake
+  url: aivloader.snake
   contents:
     type: string
     value: ""
@@ -29,7 +29,7 @@ options:
   header: '{{aic_wolf}}'
   text: '{{aic_wolf_descr}}'
   display: Text
-  url: wolf
+  url: aivloader.wolf
   contents:
     type: string
     value: ""
@@ -40,7 +40,7 @@ options:
   header: '{{aic_pig}}'
   text: '{{aic_pig_descr}}'
   display: Text
-  url: pig
+  url: aivloader.pig
   contents:
     type: string
     value: ""
