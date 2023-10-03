@@ -184,7 +184,7 @@ void addUCPInternalFunctions(lua_State* L) {
 
 void logToStdOut(void* user_data, const loguru::Message& message) {
 	
-	logToConsole(message.verbosity, message.message);
+	Console::logToConsole(message.verbosity, message.message);
 
 }
 
@@ -398,37 +398,104 @@ bool Core::pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::
 	return false;
 }
 
-void Core::initialize() {
+void Core::setArgsFromCommandLine() {
 
-	if (this->isInitialized) {
-		MessageBoxA(NULL, "UCP3 dll was already initialized", "FATAL: already initialized", MB_OK);
-		LOG_S(FATAL) << "UCP3 dll was already initialized";
+	// Fetch arguments
+
+	LPWSTR* szArglist;
+	int nArgs = 0;
+
+	szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+
+	if (NULL == szArglist)
+	{
 		return;
 	}
 
+	for (int i = 0; i < nArgs; i++) {
+		LPWSTR arg = szArglist[i];
+
+		std::string narrow = io::utf8_encode(arg);
+		/*std::wstring wide = converter.from_bytes(narrow_utf8_source_string);*/
+
+		this->argv.push_back(narrow);
+		this->argc += 1;
+	}
+
+	// Free memory allocated for CommandLineToArgvW arguments.
+
+	LocalFree(szArglist);
+}
+
+void Core::setArgsAsGlobalVarInLua() {
+
+	int nArgs = this->argc;
+
+	lua_createtable(this->L, nArgs, 0);
+
+	for (int i = 0; i < nArgs; i++) {
+
+		lua_pushstring(this->L, this->argv[i].c_str());
+		lua_seti(this->L, -2, i + 1); // lua is 1-based
+	}
+
+	lua_setglobal(this->L, "arg");
+
+}
+
+bool Core::findArg(std::string& result, const std::string argName) {
+	for (int i = 0; i < (this->argc - 1); i++) {
+		std::string& candidate = this->argv[i];
+		if (candidate == argName) {
+			result = this->argv[i + 1];
+			return true;
+		}
+	}
+	result = "";
+	return false;
+}
+
+void Core::setVerbosities() {
+
 	int verbosity = 0;
-	char* ENV_UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
-	if (ENV_UCP_VERBOSITY == NULL) {
-		verbosity = 0;
+	const char* UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
+	std::string CMD_UCP_VERBOSITY;
+	if (!this->findArg(CMD_UCP_VERBOSITY, "--ucp-verbosity")) {
+		if (UCP_VERBOSITY == NULL) {
+			verbosity = 0;
+		}
 	}
 	else {
-		std::istringstream s(ENV_UCP_VERBOSITY);
+		UCP_VERBOSITY = CMD_UCP_VERBOSITY.c_str();
+	}
+	if (UCP_VERBOSITY != NULL) {
+		std::istringstream s(UCP_VERBOSITY);
 		s >> verbosity; // We don't care about errors at this point.
 	}
 
 	int consoleVerbosity = 0;
-	char* ENV_UCP_CONSOLE_VERBOSITY = std::getenv("UCP_CONSOLE_VERBOSITY");
-	if (ENV_UCP_CONSOLE_VERBOSITY == NULL) {
-		consoleVerbosity = 0;
+	const char* UCP_CONSOLE_VERBOSITY = std::getenv("UCP_CONSOLE_VERBOSITY");
+	std::string CMD_CONSOLE_VERBOSITY;
+	if (!this->findArg(CMD_CONSOLE_VERBOSITY, "--ucp-console-verbosity")) {
+		if (UCP_CONSOLE_VERBOSITY == NULL) {
+			consoleVerbosity = 0;
+		}
+		
+
 	}
 	else {
-		std::istringstream s(ENV_UCP_CONSOLE_VERBOSITY);
+		UCP_VERBOSITY = CMD_CONSOLE_VERBOSITY.c_str();
+	}
+	if (UCP_CONSOLE_VERBOSITY != NULL){
+		std::istringstream s(UCP_CONSOLE_VERBOSITY);
 		s >> consoleVerbosity; // We don't care about errors at this point.
 	}
 
 	this->consoleLogLevel = consoleVerbosity;
 	this->logLevel = verbosity;
-	initializeLogger(this->logLevel, this->consoleLogLevel);
+}
+
+void Core::initializeConsole() {
 
 #if !defined(_DEBUG) && defined(COMPILED_MODULES)
 	// No Console
@@ -436,38 +503,40 @@ void Core::initialize() {
 #else
 	// In principle yes, unless explicitly not
 	this->hasConsole = true;
-	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
-	if (ENV_UCP_CONSOLE != NULL) {
-		if (std::string(ENV_UCP_CONSOLE) == "0") {
+	const char* UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+	std::string CMD_UCP_CONSOLE;
+
+	if (!this->findArg(CMD_UCP_CONSOLE, "--ucp-console")) {
+		if (UCP_CONSOLE == NULL) {
+			this->hasConsole = true;
+		}
+	}
+	else {
+		UCP_CONSOLE = CMD_UCP_CONSOLE.c_str();
+	}
+
+	if (UCP_CONSOLE != NULL) {
+		if (std::string(UCP_CONSOLE) == "0") {
 			this->hasConsole = false;
 		}
 	}
 	if (this->hasConsole) {
-		initializeConsole();
+		Console::initializeConsole();
 	}
-//#elif !defined(COMPILED_MODULES)
-//	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
-//	if (ENV_UCP_CONSOLE != NULL) {
-//		if (std::string(ENV_UCP_CONSOLE) == "1") {
-//			this->hasConsole = true;
-//		}
-//	}
-//	if (this->hasConsole) {
-//		initializeConsole();
-//	}
+	//#elif !defined(COMPILED_MODULES)
+	//	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+	//	if (ENV_UCP_CONSOLE != NULL) {
+	//		if (std::string(ENV_UCP_CONSOLE) == "1") {
+	//			this->hasConsole = true;
+	//		}
+	//	}
+	//	if (this->hasConsole) {
+	//		initializeConsole();
+	//	}
 #endif
-		
-	RPS_initializeLua();
-	this->L = RPS_getLuaState();
-	
-	RPS_initializeLuaOpenLibs();
+}
 
-	// Install the print redirect to logger
-
-	addUCPInternalFunctions(this->L);
-	addLoggingFunctions(this->L);
-	addUtilityFunctions(this->L);
-	addIOFunctions(this->L);
+void Core::executeLuaMain() {
 
 	ModuleHandle* mh;
 
@@ -502,34 +571,9 @@ void Core::initialize() {
 
 				}
 
-				// Fetch arguments
-
-				LPWSTR* szArglist;
-				int nArgs = 0;
-
-				szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-				
-				if (NULL == szArglist)
-				{
-					nArgs = 0;
-				}
-
-				for (int i = 0; i < nArgs; i++) {
-					LPWSTR arg = szArglist[i];
-
-					std::string narrow = io::utf8_encode(arg);
-					/*std::wstring wide = converter.from_bytes(narrow_utf8_source_string);*/
-
-					lua_pushstring(L, narrow.c_str());
-					// lua_seti(L, -2, i + 1); // lua is 1-based
-				}
-
-				// Free memory allocated for CommandLineToArgvW arguments.
-
-				LocalFree(szArglist);
 
 				// Don't expect return values
-				if (lua_pcall(this->L, nArgs, 0, 0) != LUA_OK) {
+				if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
 					std::string errorMsg = std::string(lua_tostring(this->L, -1));
 					lua_pop(this->L, 1);
 					MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
@@ -549,9 +593,11 @@ void Core::initialize() {
 		MessageBoxA(0, errorMsg.c_str(), "FATAL", MB_OK);
 		LOG_S(FATAL) << errorMsg;
 	}
-	
+}
+
+void Core::startConsoleThread() {
 	if (this->hasConsole) {
-		consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ConsoleThread, NULL, 0, nullptr);
+		consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)Console::ConsoleThread, NULL, 0, nullptr);
 
 		if (consoleThread == INVALID_HANDLE_VALUE) {
 			MessageBoxA(NULL, std::string("Could not start thread").c_str(), std::string("...").c_str(), MB_OK);
@@ -563,9 +609,8 @@ void Core::initialize() {
 			CloseHandle(consoleThread);
 		}
 	}
-
-	this->isInitialized = true;
 }
+
 
 bool Core::moduleExists(const std::string moduleFullName, bool& asZip, bool& asFolder) {
 
@@ -586,4 +631,42 @@ bool Core::codeLocationExists(bool& asZip, bool& asFolder) {
 
 Store Core::getModuleHashStore() {
 	return *this->moduleHashStore;
+}
+
+
+void Core::initialize() {
+
+	if (this->isInitialized) {
+		MessageBoxA(NULL, "UCP3 dll was already initialized", "FATAL: already initialized", MB_OK);
+		LOG_S(FATAL) << "UCP3 dll was already initialized";
+		return;
+	}
+
+	this->setArgsFromCommandLine();
+
+	this->setVerbosities();
+	initializeLogger(this->logLevel, this->consoleLogLevel);
+
+	this->initializeConsole();
+		
+	// Start of lua related initialization
+	RPS_initializeLua();
+	this->L = RPS_getLuaState();
+	
+	RPS_initializeLuaOpenLibs();
+
+	addUCPInternalFunctions(this->L);
+	addLoggingFunctions(this->L);
+	addUtilityFunctions(this->L);
+	addIOFunctions(this->L);
+
+	this->setArgsAsGlobalVarInLua();
+
+	this->executeLuaMain();
+
+	// End of lua related initialization
+	
+	this->startConsoleThread();
+
+	this->isInitialized = true;
 }

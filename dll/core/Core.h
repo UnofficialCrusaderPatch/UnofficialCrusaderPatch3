@@ -55,7 +55,18 @@ private:
 
 	};
 
+	void setArgsAsGlobalVarInLua();
+	void setArgsFromCommandLine();
+	void setVerbosities();
+	void initializeConsole();
+	bool findArg(std::string& result, const std::string argName);
+	void executeLuaMain();
+	void startConsoleThread();
+
 public:
+	std::vector<std::string> argv;
+	int argc = 0;
+
 	int consoleLogLevel = 0;
 	int logLevel = 0;
 
