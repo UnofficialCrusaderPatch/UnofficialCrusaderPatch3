@@ -1,7 +1,12 @@
+#include <framework.h>
+#include <shellapi.h>
 #include <string>
 #include <filesystem>
 #include <sstream>
 #include <fstream>
+
+#include "io/strings.h"
+
 #include "Core.h"
 #include "lua/LuaLoadLibrary.h"
 #include "lua/LuaUtil.h"
@@ -497,8 +502,34 @@ void Core::initialize() {
 
 				}
 
+				// Fetch arguments
+
+				LPWSTR* szArglist;
+				int nArgs = 0;
+
+				szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+				
+				if (NULL == szArglist)
+				{
+					nArgs = 0;
+				}
+
+				for (int i = 0; i < nArgs; i++) {
+					LPWSTR arg = szArglist[i];
+
+					std::string narrow = io::utf8_encode(arg);
+					/*std::wstring wide = converter.from_bytes(narrow_utf8_source_string);*/
+
+					lua_pushstring(L, narrow.c_str());
+					// lua_seti(L, -2, i + 1); // lua is 1-based
+				}
+
+				// Free memory allocated for CommandLineToArgvW arguments.
+
+				LocalFree(szArglist);
+
 				// Don't expect return values
-				if (lua_pcall(this->L, 0, 0, 0) != LUA_OK) {
+				if (lua_pcall(this->L, nArgs, 0, 0) != LUA_OK) {
 					std::string errorMsg = std::string(lua_tostring(this->L, -1));
 					lua_pop(this->L, 1);
 					MessageBoxA(0, ("Failed to run main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);
