@@ -33,3 +33,15 @@ options:
   contents:
     type: boolean
     value: false
+- category:
+  - Advanced
+  - Files
+  name: extra-map-directory
+  header: '{{extra-map-directory}}'
+  text: '{{extra-map-directory_descr}}'
+  display: FileInput
+  url: files.extra-map-directory
+  generalizeExtensionPaths: true
+  contents:
+    type: string
+    value: ''
