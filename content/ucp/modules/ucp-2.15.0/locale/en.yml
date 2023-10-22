@@ -313,14 +313,14 @@ o_wasd: Enable using WASD to move around
 o_wasd_descr: WASD can be used to move around in addition to the existing arrow keys
 o_xtreme: Remove the magic bar in Extreme
 o_xtreme_descr: Removes the magic bar in Crusader Extreme.
-u_ArabWall: Arabic Swordsmen destroy walls faster
-u_ArabWall_descr: 'In Vanilla, arabic swordsmen destroy walls slower than any other
+u_arabwall: Arabic Swordsmen destroy walls faster
+u_arabwall_descr: 'In Vanilla, arabic swordsmen destroy walls slower than any other
   melee unit. &
 
   With this option, the tear down speed against walls is about doubled for them, &
 
   putting them slightly above Spearmen.'
-u_ArabXBow: Increased armor of Arabic Swordsmen against crossbows
+u_arabxbow: Increased armor of Arabic Swordsmen against crossbows
 u_arabxbow_descr: ' - Arabic Swordsmen only die after 6 crossbow hits intead of 3'
 u_ballistamonk: Fire ballistas shoot monks
 u_ballistamonk_descr: Fire ballistas shoot automatically at monks with this setting.
