@@ -95,6 +95,23 @@ local ReadOnlyTable = {
     end
 }
 
+local function createLazyRecursiveReadOnlyTable(o)
+  return setmetatable({}, {
+    __index = function(self, k)
+        local v = o[k]
+
+        if type(v) == "table" then
+          return createLazyRecursiveReadOnlyTable(v)
+        end
+
+        return v
+    end,
+    __newindex = function(self, k, v)
+        return error("setting values in this object is not allowed: " .. k)
+    end
+  })
+end
+
 ---Change a table to a read-only table. Affects all nested tables too.
 ---@param o table the table to change into a read-only table
 ---@return table a read-only table
@@ -110,6 +127,7 @@ end
 
 return {
     createRecursiveReadOnlyTable = createRecursiveReadOnlyTable,
+    createLazyRecursiveReadOnlyTable = createLazyRecursiveReadOnlyTable,
     ReadOnlyTable = ReadOnlyTable,
     Set = Set,
     sizeOfTable = sizeOfTable,

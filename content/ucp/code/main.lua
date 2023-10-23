@@ -111,11 +111,13 @@ else
           e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.PluginLoader)
           extensionLoaders[m.name] = e
           ucp.internal.registerPathAlias(CONST_PLUGINS_FOLDER .. m.name .. "/", CONST_PLUGINS_FOLDER .. m.name .. "-" .. m.version .. "/")
+          ucp.internal.registerPathAlias(CONST_PLUGINS_FOLDER .. m.name .. "-*" .. "/", CONST_PLUGINS_FOLDER .. m.name .. "-" .. m.version .. "/")
         end
     else
         e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.ModuleLoader)
         extensionLoaders[m.name] = e
         ucp.internal.registerPathAlias(CONST_MODULES_FOLDER .. m.name .. "/", CONST_MODULES_FOLDER .. m.name .. "-" .. m.version .. "/")
+        ucp.internal.registerPathAlias(CONST_MODULES_FOLDER .. m.name .. "-*" .. "/", CONST_MODULES_FOLDER .. m.name .. "-" .. m.version .. "/")
     end
 
 
