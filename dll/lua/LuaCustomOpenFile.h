@@ -15,4 +15,5 @@ namespace LuaIO {
 	int luaIOCustomOpenFilePointer(lua_State* L);
 	int luaIOCustomOpenFileDescriptor(lua_State* L);
 	int luaIOCustomOpen(lua_State* L);
+	int luaResolveAliasedPath(lua_State* L);
 }

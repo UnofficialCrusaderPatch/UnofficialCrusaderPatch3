@@ -76,6 +76,9 @@ void addUtilityFunctions(lua_State* L) {
 	lua_pushcfunction(L, luaRegisterPathAlias);
 	lua_setfield(L, -2, "registerPathAlias");
 
+	lua_pushcfunction(L, LuaIO::luaResolveAliasedPath);
+	lua_setfield(L, -2, "resolveAliasedPath");
+
 	lua_pop(L, 2); // pop table "internal" and pop table "ucp": []
 }
 

@@ -60,6 +60,15 @@ namespace LuaIO {
 	  *
 	  */
 
+	int luaResolveAliasedPath(lua_State* L) {
+		std::string path = luaL_checkstring(L, 1);
+
+		Core::getInstance().resolveAliasedPath(path);
+
+		lua_pushstring(L, path.c_str());
+
+		return 1;
+	}
 
 	int luaIOCustomOpenFilePointer(lua_State* L) {
 		if (lua_type(L, 1) != LUA_TSTRING) {

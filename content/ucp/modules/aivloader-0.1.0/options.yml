@@ -6,7 +6,7 @@ options:
   name: aic_rat
   header: '{{aic_rat}}'
   text: '{{aic_rat_descr}}'
-  display: Text
+  display: File
   url: aivloader.rat
   contents:
     type: string
@@ -17,19 +17,8 @@ options:
   name: aic_snake
   header: '{{aic_snake}}'
   text: '{{aic_snake_descr}}'
-  display: Text
+  display: File
   url: aivloader.snake
-  contents:
-    type: string
-    value: ""
-- category:
-  - Advanced
-  - AIC
-  name: aic_wolf
-  header: '{{aic_wolf}}'
-  text: '{{aic_wolf_descr}}'
-  display: Text
-  url: aivloader.wolf
   contents:
     type: string
     value: ""
@@ -39,8 +28,20 @@ options:
   name: aic_pig
   header: '{{aic_pig}}'
   text: '{{aic_pig_descr}}'
-  display: Text
+  display: File
   url: aivloader.pig
   contents:
     type: string
     value: ""
+- category:
+  - Advanced
+  - AIC
+  name: aic_wolf
+  header: '{{aic_wolf}}'
+  text: '{{aic_wolf_descr}}'
+  display: File
+  url: aivloader.wolf
+  contents:
+    type: string
+    value: ""
+

@@ -34,6 +34,9 @@ local function overwriteResource(filepath)
   end
 
   local override = onOpenFile(filepath)
+
+  override = ucp.internal.resolveAliasedPath(override)
+
   if override == nil then
     if logFileAccess then
       log(DEBUG, "No override found for: '" .. tostring(filepath) .. "'")
