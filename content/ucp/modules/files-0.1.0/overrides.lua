@@ -35,13 +35,12 @@ local function overwriteResource(filepath)
 
   local override = onOpenFile(filepath)
 
-  override = ucp.internal.resolveAliasedPath(override)
-
   if override == nil then
     if logFileAccess then
       log(DEBUG, "No override found for: '" .. tostring(filepath) .. "'")
     end
   else
+    override = ucp.internal.resolveAliasedPath(override)
     if logFileAccess then
       log(DEBUG, "File '" .. tostring(filepath) .. "' overriden with: " .. tostring(override))
     end
@@ -62,6 +61,8 @@ local function setupIOhooks()
     local function _openHook(fileName, mode, perm)
       local luaFileName = core.readString(fileName)
       -- log(VERBOSE, "_open: " .. luaFileName .. " mode: " .. string.format("%X", mode) .. " perm: " .. string.format("%X", perm))
+
+      luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
 
       --local retValue = open(fileName, mode, perm)
       local retValue
@@ -115,6 +116,8 @@ local function setupIOhooks()
     local function fopenHook(fileName, mode)
       local luaFileName = core.readString(fileName)
       -- log(2, "fopen: " .. luaFileName .. " mode: " .. mode)
+
+      luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
 
       local retValue
       local o = overwriteResource(luaFileName)
@@ -234,6 +237,8 @@ local function setupBinkHook()
   local BinkOpen_hook = function(fileName, flags)
     local luaFileName = core.readString(fileName)
 
+    luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
+
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
@@ -268,6 +273,8 @@ local function setupMilesHook()
   local AIL_open_stream_hook = function(dig, fileName, stream_mem)
     local luaFileName = core.readString(fileName)
 
+    luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
+
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
@@ -296,6 +303,8 @@ local function setupMilesHook()
   local AIL_file_read_hook = function(fileName, dest)
     local luaFileName = core.readString(fileName)
 
+    luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
+
     local retValue
     local o = overwriteResource(luaFileName)
     if o ~= nil then
@@ -323,6 +332,8 @@ local function setupMilesHook()
 
   local AIL_file_size_hook = function(fileName)
     local luaFileName = core.readString(fileName)
+
+    luaFileName = ucp.internal.resolveAliasedPath(luaFileName)
 
     local retValue
     local o = overwriteResource(luaFileName)
