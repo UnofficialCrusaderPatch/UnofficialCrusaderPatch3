@@ -146,7 +146,7 @@ end
 local function applyAIOptions(indexToReplace)
   if options.ai[indexToReplace] then
     for aiName, aiOptions in pairs(options.ai[indexToReplace]) do
-      setAI(indexToReplace, aiName, aiOptions.control)
+      setAI(indexToReplace, aiName, aiOptions.control, aiOptions.root)
     end
   end
 end

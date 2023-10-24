@@ -153,7 +153,7 @@ return {
             DISABLE_GAME_DIR_USER_SAVS = true
         end
 
-        if config["extra-map-directory"] then
+        if config["extra-map-directory"] and config["extra-map-directory"]:len() > 0 then
 
           local dir = config["extra-map-directory"]
 
