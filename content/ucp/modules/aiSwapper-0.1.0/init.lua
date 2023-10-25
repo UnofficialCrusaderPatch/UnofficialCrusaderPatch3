@@ -79,7 +79,7 @@ local function setAI(lordToReplace, aiName, control, pathroot)
     return
   end
   
-  pathroot = pathroot or AI_ROOT_FOLDER
+  pathroot = ucp.internal.resolveAliasedPath(pathroot or AI_ROOT_FOLDER)
 
   local meta, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, aiName, DATA_PATH_META))
   if meta == nil then
@@ -146,6 +146,7 @@ end
 local function applyAIOptions(indexToReplace)
   if options.ai[indexToReplace] then
     for aiName, aiOptions in pairs(options.ai[indexToReplace]) do
+      aiOptions.root = ucp.internal.resolveAliasedPath(aiOptions.root)
       setAI(indexToReplace, aiName, aiOptions.control, aiOptions.root)
     end
   end
