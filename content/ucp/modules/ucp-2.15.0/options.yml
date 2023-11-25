@@ -45,10 +45,10 @@ options:
   text: '{{ai_attacklimit_descr}}'
   hasHeader: true
   display: UCP2Slider
-  url: ucp.ai_attacklimit.value
+  url: ucp.ai_attacklimit
   contents:
     min: 0
-    max: 500
+    max: 3000
     step: 1
     decimals: 0
     type: number

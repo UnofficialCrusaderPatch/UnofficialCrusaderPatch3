@@ -347,6 +347,17 @@ function core.callTo(dst)
   end, 5)
 end
 
+---Creates a lambda function to represent in machine code a jmp to a function.
+---@param dst number the address to compute the relative distance to
+---@param offset number an offset that is added to the result
+---@return function a function that can be used in a code table
+function core.jmpTo(dst)
+  return core.Lambda:new(function(address, index, labels)
+    return { 0xE9, table.unpack(core.relTo(dst, -5)(address), 1, 4) }
+  end, 5)
+end
+
+
 ---Calculates the size of `code` if it would be compiled. It does not call functions or Lambda's,
 ---but determines their size by assuming 4 bytes, or looking at the `size` property of a Lambda.
 ---@param code table the code to compile. Can contain byte values, integers, tables, labels (strings), functions and Lambda's.

@@ -164,6 +164,9 @@ allActiveExtensions = extensionsInLoadOrder
 configFinal = joinedUserConfig
 config.ConfigHandler.normalizeContentsValues(configFinal)
 
+log(INFO, "Final config (normalized): ")
+log(INFO, "\n" .. tostring(yaml.dump(configFinal)))
+
 local handle, err = io.open(CONST_FINAL_CONFIG_CACHE_FILE, 'w')
 handle:write(yaml.dump(configFinal))
 handle:close()

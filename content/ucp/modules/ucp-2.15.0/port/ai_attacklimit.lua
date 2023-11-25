@@ -25,7 +25,12 @@ return {
 
     init = function(self, config)
         self.value = config.sliderValue
-        if self.value == nil then self.value = 200 end
+        if self.value == nil then 
+          log(WARNING, "Missing value for ai_attacklimit")
+          self.value = 200 
+        else
+          log(DEBUG, "Configuring ai_attacklimit to: " .. tostring(self.value))
+        end
         
         self.ai_attacklimit_edit = AOBScan("C8 00 00 00 39 86 ? ? ? ? 7E 06 89 86 ? ? ? ? 5E 5D C2 04 00 53 57 8B 7C 24 0C 69 FF F4")
     end,
@@ -36,6 +41,7 @@ return {
         local code = {
             itob(self.value), 
         }
+        log(DEBUG, "Setting ai_attacklimit to: " .. tostring(self.value))
         writeCode(self.ai_attacklimit_edit, code)
     end,
 
