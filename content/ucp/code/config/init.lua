@@ -30,11 +30,11 @@ normalizeContentsValues = function(config)
       elseif type(contents) == "table" then
         local value = nil
 
-        if contents["value"] then
+        if contents["value"] ~= nil then
           value = contents["value"]
-        elseif contents["required-value"] then
+        elseif contents["required-value"] ~= nil then
           value = contents["required-value"]
-        elseif contents["suggested-value"] then
+        elseif contents["suggested-value"] ~= nil then
           value = contents["suggested-value"]
         end
         
