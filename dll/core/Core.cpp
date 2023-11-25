@@ -487,7 +487,7 @@ void Core::setVerbosities() {
 
 	}
 	else {
-		UCP_VERBOSITY = CMD_CONSOLE_VERBOSITY.c_str();
+		UCP_CONSOLE_VERBOSITY = CMD_CONSOLE_VERBOSITY.c_str();
 	}
 	if (UCP_CONSOLE_VERBOSITY != NULL){
 		std::istringstream s(UCP_CONSOLE_VERBOSITY);
