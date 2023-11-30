@@ -1,5 +1,7 @@
 # UnofficialCrusaderPatch3
-Development for the new UCP DLL Injection approach.
+Development for the new UCP runtime patching approach.
+
+Issues that involve feature requests will be resolved according to feasibility and amount of votes: `is:issue is:open priority sort:reactions-+1-desc`
 
 ## Quick start
 1. Go to Actions and download the latest build (Release or DevRelease)
