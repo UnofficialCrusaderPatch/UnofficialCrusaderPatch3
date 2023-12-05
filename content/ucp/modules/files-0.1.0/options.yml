@@ -41,7 +41,8 @@ options:
   text: '{{extra-map-directory_descr}}'
   display: FileInput
   url: files.extra-map-directory
-  generalizeExtensionPaths: true
   contents:
+    generalizeExtensionPaths: true
+    filter: folders
     type: string
     value: ''
