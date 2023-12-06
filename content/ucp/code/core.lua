@@ -337,6 +337,14 @@ function core.relToCall(dst)
     return core.relTo(dst, -4)
 end
 
+function core.jeTo(dst)
+  return core.Lambda:new(function(address, index, labels)
+    return { 0x0F, 0x84, table.unpack(core.relTo(dst, -6)(address), 1, 4) }
+  end, 6)
+end
+
+core.jzTo = jeTo
+
 ---Creates a lambda function to represent in machine code a call to a function.
 ---@param dst number the address to compute the relative distance to
 ---@param offset number an offset that is added to the result
