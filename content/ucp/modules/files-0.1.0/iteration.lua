@@ -36,8 +36,15 @@ local FindFirstFileA, FindNextFileA, FindFirstFileA_stub, FindNextFileA_stub, Fi
 local DISABLE_GAME_DIR_MAPS = false
 local DISABLE_USER_DIR_MAPS = false
 local DISABLE_USER_DIR_SAVS = false
+local DISABLE_GAME_DIR_MAPS_EXTREME = false
+local DISABLE_USER_DIR_MAPS_EXTREME = false
+local DISABLE_USER_DIR_SAVS_EXTREME = false
 local EXTRA_GAME_MAP_DIRECTORIES = nil
 local EXTRA_USER_MAP_DIRECTORIES = nil
+local EXTRA_USER_SAV_DIRECTORIES = nil
+local EXTRA_GAME_MAP_DIRECTORIES_EXTREME = nil
+local EXTRA_USER_MAP_DIRECTORIES_EXTREME = nil
+local EXTRA_USER_SAV_DIRECTORIES_EXTREME = nil
 
 ---Table to hold 'target' extra dirs pairs.
 ---@type table<string, table<string>>
@@ -254,27 +261,48 @@ local function FindFirstFileA_hook(target, struct)
    
     log(VERBOSE, string.format("FindFirstFileA_hook: targetString: %s", targetString))
    
-    if targetString:reverse():sub(1, ("\\*.map"):len()) == ("\\*.map"):reverse() then
+    if targetString:reverse():sub(1, ("\\*.map"):len()):lower() == ("\\*.map"):reverse() then
       -- maps
       log(VERBOSE, string.format("FindFirstFileA_hook: maps: %s", targetString))
-      if targetString:sub(1, ("maps\\*.map"):len()) == "maps\\*.map" then
+      if targetString:sub(1, ("maps\\*.map"):len()):lower() == "maps\\*.map" then
         -- game folder maps
         log(VERBOSE, string.format("FindFirstFileA_hook: game folder maps: %s", targetString))
         CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_GAME_DIR_MAPS, EXTRA_GAME_MAP_DIRECTORIES)
-      elseif targetString:sub(1, ("mapsExtreme\\*.map"):len()) == "mapsExtreme\\*.map" then
+      elseif targetString:sub(1, ("mapsExtreme\\*.map"):len()):lower() == "mapsextreme\\*.map" then
         -- game folder maps: extreme
         log(VERBOSE, string.format("FindFirstFileA_hook: game folder maps extreme: %s", targetString))
-        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_GAME_DIR_MAPS, EXTRA_GAME_MAP_DIRECTORIES)
+        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_GAME_DIR_MAPS_EXTREME, EXTRA_GAME_MAP_DIRECTORIES_EXTREME)
       else
-        -- user folder maps
-        log(VERBOSE, string.format("FindFirstFileA_hook: user folder maps: %s", targetString))
-        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_MAPS, EXTRA_USER_MAP_DIRECTORIES)
+        if targetString:reverse():sub(1, ("maps\\*.map"):len()):lower() == ("maps\\*.map"):reverse() then
+          -- user folder maps
+          log(VERBOSE, string.format("FindFirstFileA_hook: user folder maps: %s", targetString))
+          CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_MAPS, EXTRA_USER_MAP_DIRECTORIES)  
+        elseif targetString:reverse():sub(1, ("mapsExtreme\\*.map"):len()):lower() == ("mapsextreme\\*.map"):reverse() then
+          -- user folder maps extreme
+          log(VERBOSE, string.format("FindFirstFileA_hook: user folder maps extreme: %s", targetString))
+          CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_MAPS_EXTREME, EXTRA_USER_MAP_DIRECTORIES_EXTREME)
+        else
+          log(WARNING, string.format("FindFirstFileA_hook: unknown: %s", targetString))
+          CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, false, nil)
+        end
+        
       end
       
-    elseif targetString:reverse():sub(1, ("\\*.sav"):len()) == ("\\*.sav"):reverse() then
+    elseif targetString:reverse():sub(1, ("\\*.sav"):len()):lower() == ("\\*.sav"):reverse() then
       -- savs
       log(VERBOSE, string.format("FindFirstFileA_hook: savs: %s", targetString))
-      CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_SAVS, nil)
+      if targetString:reverse():sub(1, ("saves\\*.sav"):len()):lower() == ("saves\\*.sav"):reverse() then
+        -- user folder savs
+        log(VERBOSE, string.format("FindFirstFileA_hook: user folder savs: %s", targetString))
+        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_SAVS, EXTRA_USER_SAV_DIRECTORIES)  
+      elseif targetString:reverse():sub(1, ("SavesExtreme\\*.sav"):len()):lower() == ("savesextreme\\*.sav"):reverse() then
+        -- user folder savs extreme
+        log(VERBOSE, string.format("FindFirstFileA_hook: user folder savs extreme: %s", targetString))
+        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, DISABLE_USER_DIR_SAVS_EXTREME, EXTRA_USER_SAV_DIRECTORIES_EXTREME)
+      else
+        log(WARNING, string.format("FindFirstFileA_hook: unknown: %s", targetString))
+        CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, false, nil)
+      end
     else
       log(VERBOSE, string.format("FindFirstFileA_hook: handle like normal: %s", targetString))
       CURRENT_ITERATION_SESSION = IterationSession:new(target, struct, false, nil)
@@ -306,7 +334,7 @@ end
 
 local MAP_SUFFIX = ".map"
 
-local function registerOverridesForDirectory(dir)
+local function registerOverridesForDirectory(dir, extreme)
 
   log(DEBUG, "Registering map files in: " .. tostring(dir))
   
@@ -326,6 +354,9 @@ local function registerOverridesForDirectory(dir)
       local mapName = path:match("([^/\\]+)[.]map$")
 
       local trigger = "maps\\" .. mapName .. ".map"
+      if extreme then
+        trigger = "mapsExtreme\\" .. mapName .. ".map"
+      end
       log(DEBUG, "Registering " ..  tostring(trigger) .. " => " .. tostring(path))
       modules.files:overrideFileWith(trigger, path)
     end
@@ -343,6 +374,22 @@ local function registerExtraDir(target, dir)
 
 end
 
+local function prepareDir(dir, ext)
+  -- FindNextFile Directory should end with *.map
+  local fnfDir = dir
+  
+  if dir:sub(-1) == "\\" or dir:sub(-1) == "/" then
+      fnfDir = dir .. string.format("*.%s", ext)
+  end
+  if fnfDir:sub(-6) ~= string.format("\\*.%s", ext) and fnfDir:sub(-6) ~= string.format("/*.%s", ext) then
+      fnfDir = fnfDir .. string.format("\\*.%s", ext)
+  end
+  
+  fnfDir = ucp.internal.resolveAliasedPath(fnfDir)
+  
+  return fnfDir
+end
+
 return {
     enable = function(config)
 
@@ -350,15 +397,30 @@ return {
             DISABLE_GAME_DIR_MAPS = true
             log(DEBUG, string.format('DISABLE_GAME_DIR_MAPS: %s', DISABLE_GAME_DIR_MAPS))
         end
+        
+        if config["disable-game-maps-extreme"] == true then
+            DISABLE_GAME_DIR_MAPS_EXTREME = true
+            log(DEBUG, string.format('DISABLE_GAME_DIR_MAPS: %s', DISABLE_GAME_DIR_MAPS_EXTREME))
+        end
 
         if config["disable-user-maps"] == true then
             DISABLE_USER_DIR_MAPS = true
             log(DEBUG, string.format('DISABLE_USER_DIR_MAPS: %s', DISABLE_USER_DIR_MAPS))
         end
 
+        if config["disable-user-maps-extreme"] == true then
+            DISABLE_USER_DIR_MAPS_EXTREME = true
+            log(DEBUG, string.format('DISABLE_USER_DIR_MAPS: %s', DISABLE_USER_DIR_MAPS_EXTREME))
+        end
+
         if config["disable-user-savs"] == true then
             DISABLE_USER_DIR_SAVS = true
             log(DEBUG, string.format('DISABLE_USER_DIR_SAVS: %s', DISABLE_USER_DIR_SAVS))
+        end
+        
+        if config["disable-user-savs-extreme"] == true then
+            DISABLE_USER_DIR_SAVS_EXTREME = true
+            log(DEBUG, string.format('DISABLE_USER_DIR_SAVS: %s', DISABLE_USER_DIR_SAVS_EXTREME))
         end
 
         if config["extra-map-directory"] and config["extra-map-directory"]:len() > 0 then
@@ -367,26 +429,38 @@ return {
           log(DEBUG, string.format('extra-map-directory: %s', dir))
 
           -- FindNextFile Directory should end with *.map
-          local fnfDir = dir
-          
-          if dir:sub(-1) == "\\" or dir:sub(-1) == "/" then
-              fnfDir = dir .. "*.map"
-          end
-          if fnfDir:sub(-6) ~= "\\*.map" and fnfDir:sub(-6) ~= "/*.map" then
-              fnfDir = fnfDir .. "\\*.map"
-          end
+          local fnfDir = prepareDir(dir, "map")
 
           log(DEBUG, "Registering extra map dir: " .. tostring(fnfDir))
 
           EXTRA_GAME_MAP_DIRECTORIES = {fnfDir}
 
           registerExtraDir("maps\\*.map", fnfDir)
-          registerExtraDir("mapsExtreme\\*.map", fnfDir)
+          -- registerExtraDir("mapsExtreme\\*.map", fnfDir)
           
-          
-          registerOverridesForDirectory(dir)
+          registerOverridesForDirectory(dir, false)
         else
           log(DEBUG, "No extra map directory found in the config")
+        end
+
+        if config["extra-map-extreme-directory"] and config["extra-map-extreme-directory"]:len() > 0 then
+
+          local dir = config["extra-map-extreme-directory"]
+          log(DEBUG, string.format('extra-map-extreme-directory: %s', dir))
+
+          -- FindNextFile Directory should end with *.map
+          local fnfDir = prepareDir(dir, "map")
+
+          log(DEBUG, "Registering extra map extreme dir: " .. tostring(fnfDir))
+
+          EXTRA_GAME_MAP_DIRECTORIES_EXTREME = {fnfDir}
+
+          -- registerExtraDir("maps\\*.map", fnfDir)
+          registerExtraDir("mapsExtreme\\*.map", fnfDir)
+          
+          registerOverridesForDirectory(dir, true)
+        else
+          log(DEBUG, "No extra map extreme directory found in the config")
         end
 
         if config["extra-sav-directory"] then

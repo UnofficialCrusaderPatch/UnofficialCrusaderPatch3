@@ -36,11 +36,57 @@ options:
 - category:
   - Advanced
   - Files
+  name: disable-game-maps-extreme
+  header: '{{disable-game-maps-extreme}}'
+  text: '{{disable-game-maps-extreme_descr}}'
+  display: UCP2Switch
+  url: files.disable-game-maps-extreme
+  contents:
+    type: boolean
+    value: false
+- category:
+  - Advanced
+  - Files
+  name: disable-user-maps-extreme
+  header: '{{disable-user-maps-extreme}}'
+  text: '{{disable-user-maps-extreme_descr}}'
+  display: UCP2Switch
+  url: files.disable-user-maps-extreme
+  contents:
+    type: boolean
+    value: false
+- category:
+  - Advanced
+  - Files
+  name: disable-user-savs-extreme
+  header: '{{disable-user-savs-extreme}}'
+  text: '{{disable-user-savs-extreme_descr}}'
+  display: UCP2Switch
+  url: files.disable-user-savs-extreme
+  contents:
+    type: boolean
+    value: false
+- category:
+  - Advanced
+  - Files
   name: extra-map-directory
   header: '{{extra-map-directory}}'
   text: '{{extra-map-directory_descr}}'
   display: FileInput
   url: files.extra-map-directory
+  contents:
+    generalizeExtensionPaths: true
+    filter: folders
+    type: string
+    value: ''
+- category:
+  - Advanced
+  - Files
+  name: extra-map-extreme-directory
+  header: '{{extra-map-extreme-directory}}'
+  text: '{{extra-map-extreme-directory_descr}}'
+  display: FileInput
+  url: files.extra-map-extreme-directory
   contents:
     generalizeExtensionPaths: true
     filter: folders
