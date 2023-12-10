@@ -124,7 +124,7 @@ local function setupIOhooks()
       if o ~= nil then
         -- log(2, "Overriding with: " .. o)
         -- core.writeString(ovrsBuffer, o)
-        retValue = io.openFilePointer(o, mode)
+        retValue = io.openFilePointer(o, core.readString(mode))
       else
         retValue = fopen(fileName, mode)
       end
