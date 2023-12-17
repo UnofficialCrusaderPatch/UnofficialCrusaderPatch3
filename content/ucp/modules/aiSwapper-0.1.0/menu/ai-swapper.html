@@ -1,0 +1,103 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Ai Swapper Custom Menu</title>
+  <meta name="description" content="The menu is used to configure the ai swapper.">
+  <meta name="author" content="TheRedDaemon">
+</head>
+
+<body>
+  <div class="ai-swapper">
+      <dialog class="ai-swapper__change-menu">
+          <button tabindex="0" class="ai-swapper__change-menu__close">
+              &#10006;
+          </button>
+          <div class="ai-swapper__change-menu__ai">
+              <h2 class="slot-name"></h2>
+              <div class="ai-swapper__change-menu__header">
+                  <div>
+                      <p class="current-name"></p>
+                      <img class="ai-image" />
+                  </div>
+                  <div>
+                      <button class="ai-swapper__change-menu__select">
+                          SELECT
+                      </button>
+                  </div>
+              </div>
+              <table class="ai-swapper__change-menu__table">
+                  <thead class="ai-swapper__change-menu__table__header">
+                      <tr>
+                          <th class="small-column index">INDEX</th>
+                          <th class="name">NAME</th>
+                          <th class="path">PATH</th>
+                          <th class="language">LANGUAGE</th>
+                          <th class="small-column binks">BINKS</th>
+                          <th class="small-column speech">SPEECH</th>
+                          <th class="small-column lines">LINES</th>
+                          <th class="small-column portrait">PORTRAIT</th>
+                          <th class="small-column aic">AIC</th>
+                          <th class="small-column aiv">AIV</th>
+                          <th class="small-column lord">LORD</th>
+                          <th class="small-column start-troops">START_TROOPS</th>
+                          <th class="priority">PRIORITY</th>
+                          <th class="small-column remove">REMOVE</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr class="ai-swapper__change-menu__table__row--current">
+                          <td>-</td>
+                          <td>CURRENT</td>
+                          <td>-</td>
+                          <td>-</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>"index"</td>
+                          <td>-</td>
+                          <td>-</td>
+                      </tr>
+                      <tr>
+                          <td>INDEX</td>
+                          <td>NAME</td>
+                          <td>PATH</td>
+                          <td>LANGUAGE</td>
+                          <td>BINKS</td>
+                          <td>SPEECH</td>
+                          <td>LINES</td>
+                          <td>PORTRAIT</td>
+                          <td>AIC</td>
+                          <td>AIV</td>
+                          <td>LORD</td>
+                          <td>START_TROOPS</td>
+                          <td>PRIORITY</td>
+                          <td>REMOVE</td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+      </dialog>
+
+      <div class="ai-swapper__overview">
+      </div>
+  </div>
+
+  <template class="template--ai-overview-slot">
+      <div class="ai-swapper__overview__ai">
+          <p class="slot-name"></p>
+          <img class="ai-image" />
+          <p class="ai-name">Test</p>
+      </div>
+  </template>
+</body>
+
+</html>
