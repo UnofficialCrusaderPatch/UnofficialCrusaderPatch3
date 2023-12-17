@@ -68,10 +68,18 @@ class AiMeta {
     possibleSettings;
     root;
 
-    static fromMetaRootPath(path) {
-        const metaPath = `${aiSetting.root}/meta.json`; // TODO
-        // for paths
-        // TODO: load meta file an verify
+    static META_FILE = "meta.json";
+
+    static async fromMetaRootPath(root) {
+        return this.fromMetaPath(`${root}/${AiMeta.META_FILE}`);
+    }
+
+    static async fromMetaPath(path) {
+        const loadedFile = await (HOST_FUNCTIONS.getTextFile(path).catch(() => null));
+        if (!loadedFile) {
+            return null;
+        }
+        const metaObj = JSON.parse(loadedFile);
 
         const aiMeta = new AiMeta();
         aiMeta.name = receiveStringOrFallback(metaObj.name);
@@ -82,9 +90,7 @@ class AiMeta {
         aiMeta.defaultLang = receiveStringOrFallback(metaObj.defaultLang, null);
         aiMeta.supportedLang = Array.isArray(metaObj.supportedLang) ? metaObj.supportedLang : [];
         aiMeta.possibleSettings = new AiControl(metaObj.possibleSettings ?? {});
-
-        // TODO
-        aiMeta.root = metaPath;
+        aiMeta.root = path.replace(AiMeta.META_FILE, "");
 
         return aiMeta;
     }
@@ -98,7 +104,7 @@ class AiSetting {
     aiMeta;
 
     // if received from a present config
-    static fromSettingObject(name, settingObj) {
+    static async fromSettingObject(settingObj) {
         const aiSetting = new AiSetting();
 
         aiSetting.root = receiveStringOrFallback(settingObj.root);
@@ -106,12 +112,12 @@ class AiSetting {
             return null; // does not exist
         }
 
-        aiSetting.aiMeta = AiMeta.fromMetaPath(aiSetting.root);
+        aiSetting.aiMeta = await AiMeta.fromMetaRootPath(aiSetting.root);
         if (!aiSetting.aiMeta) {
             return null; // does not exist
         }
 
-        aiSetting.name = receiveStringOrFallback(name);
+        aiSetting.name = receiveStringOrFallback(settingObj.name);
         aiSetting.language = receiveStringOrFallback(settingObj.language, null);
         aiSetting.control = new AiControl(settingObj.control ?? {});
 
@@ -139,11 +145,12 @@ class AiSetting {
 
     toSettingNameAndObject() {
         const settingObj = {
+            name: this.name,
             language: this.language,
             root: this.root,
             control: this.control.toControlObject(),
         };
-        return [this.name, settingObj];
+        return settingObj;
     }
 }
 
@@ -171,9 +178,69 @@ const AI_PORTRAIT_DATA = {
 
 const AI_SETTINGS = new Map(AI_SLOTS.map((ai) => [ai, []]));
 
+// TEMP: TODO: make more dynamic, currently, if a baseline is set, the ai can not be changed
+const AI_SETTINGS_LOCKED = Object.fromEntries(AI_SLOTS.map((ai) => [ai, false]));
+
+const AI_QUERY_RESULT = [];
+
+async function receiveAllAvailableAi() {
+    const foundAis = await HOST_FUNCTIONS.receivePluginPaths("ai", `**/${AiMeta.META_FILE}`);
+    for (const foundAi of foundAis) {
+        (await Promise.all(foundAi.paths.map(AiMeta.fromMetaPath))).filter((meta) => !!meta).forEach((meta) => AI_QUERY_RESULT.push(meta));
+    }
+}
+
+async function receiveCurrentConfig() {
+    const { baseline, user } = await HOST_FUNCTIONS.getCurrentConfig();
+
+    for (const [ai, configArray] of Object.entries(baseline)) {
+        (await Promise.all(configArray.map(AiSetting.fromSettingObject))).filter((aiSetting) => !!aiSetting).forEach((aiSetting) => {
+            AI_SETTINGS_LOCKED[ai] = true; // TEMP: lock those set by plugins for now
+            AI_SETTINGS[ai].push(aiSetting);
+        });
+    }
+
+    for (const [ai, configArray] of Object.entries(user)) {
+        if (AI_SETTINGS_LOCKED[ai]) { // TEMP: settings from user are discarded if a plugin takes control
+            continue;
+        }
+        (await Promise.all(configArray.map(AiSetting.fromSettingObject))).filter((aiSetting) => !!aiSetting).forEach((aiSetting) => AI_SETTINGS[ai].push(aiSetting));
+    }
+}
+
+function createResultConfig() {
+    const configState = {};
+    for (const [ai, settings] of AI_SETTINGS) {
+        if (!settings.length) {
+            continue;
+        }
+
+        configState[ai] = {
+            contents: {
+                value: {}
+            }
+        }
+
+        // currently only one ai for override
+        // the aiSwapper lacks real override support currently anyway, since the original thought
+        // during module creation were no overlaps in the "true" settings of the used ais
+        const setting = settings[0].toSettingNameAndObject();
+        configState[ai].contents.value = [setting];
+    }
+    return configState;
+}
+
+function activateEditDialog(event) {
+    const slotName = Array.from(event.currentTarget.classList).find((cssClass) => cssClass.startsWith("slot--")).replace("slot--", "");
+
+    CHANGE_MENU.querySelector(".slot-name").textContent = slotName.toUpperCase();
+    CHANGE_MENU.querySelector(".ai-image").src = AI_PORTRAIT_DATA[slotName];
+    CHANGE_MENU.showModal();
+}
+
 function initMainElements() {
-    const OVERVIEW = document.querySelector(".ai-swapper__overview");
-    const CHANGE_MENU = document.querySelector(".ai-swapper__change-menu");
+    OVERVIEW = document.querySelector(".ai-swapper__overview");
+    CHANGE_MENU = document.querySelector(".ai-swapper__change-menu");
 
     // general init change menu
     CHANGE_MENU.querySelector(".ai-swapper__change-menu__close").addEventListener("click", () => CHANGE_MENU.close());
@@ -200,28 +267,6 @@ function initMainElements() {
 
         OVERVIEW.appendChild(clone);
     }
-
-    const createResultConfig = function () {
-        const configState = {};
-        for (const [ai, settings] of AI_SETTINGS) {
-            if (!settings.length) {
-                continue;
-            }
-
-            configState[ai] = {
-                contents: {
-                    value: {}
-                }
-            }
-
-            // currently only one ai for override
-            // the aiSwapper lacks real override support currently anyway, since the original thought
-            // during module creation were no overlaps in the "true" settings of the used ais
-            const [name, setting] = settings[0].toSettingNameAndObject();
-            configState[ai].contents.value[name] = setting;
-        }
-        return configState;
-    }
 }
 
 /** INIT **/
@@ -229,15 +274,10 @@ function initMainElements() {
 addEventListener(
     DONE_EVENT_NAME,
     async () => {
-        // dummy:
-        HOST_FUNCTIONS.getCurrentConfig = async () => ({
-            "CONTROL+B": "ALT+H",
-            "K": "Hi",
-        });
-
-
+        await receiveAllAvailableAi();
+        await receiveCurrentConfig();
         initMainElements();
-        // SANDBOX_FUNCTIONS.getConfig = () => Object.fromEntries(CURRENT_KEY_COMBINATIONS.entries());
+        SANDBOX_FUNCTIONS.getConfig = createResultConfig;
     },
     { once: true }
 );
