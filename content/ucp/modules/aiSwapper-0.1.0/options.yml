@@ -13,3 +13,4 @@ options:
       html: ai-swapper.html
       css: ai-swapper.css
       js: ai-swapper.js
+    value: {}
