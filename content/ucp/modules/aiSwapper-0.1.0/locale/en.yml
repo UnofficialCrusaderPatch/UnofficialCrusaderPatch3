@@ -1,0 +1,18 @@
+ai_swapper: AI Swapper
+ai_swapper_descr: Modify the AI slots of the game.
+slot.name.rat: Rat
+slot.name.snake: Snake
+slot.name.pig: Pig
+slot.name.wolf: Wolf
+slot.name.saladin: Saladin
+slot.name.caliph: Caliph
+slot.name.sultan: Sultan
+slot.name.lionheart: Lionheart
+slot.name.frederick: Frederick
+slot.name.phillip: Phillip
+slot.name.wazir: Wazir
+slot.name.emir: Emir
+slot.name.nizar: Nizar
+slot.name.sheriff: Sheriff
+slot.name.marshal: Marshal
+slot.name.abbot: Abbot

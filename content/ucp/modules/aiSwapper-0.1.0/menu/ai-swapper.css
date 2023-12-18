@@ -12,6 +12,8 @@ body {
     display: grid;
     grid-template-rows: repeat(2, 1fr);
     grid-template-columns: repeat(8, 1fr);
+    padding: 10px;
+    gap: 10px;
     height: 100%;
     width: 100%;
 }
@@ -21,6 +23,9 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    color: white;
+    min-width: 0;
+    min-height: 0;
 }
 
 .ai-swapper__change-menu {
@@ -109,4 +114,22 @@ body {
 .ai-image {
     width: 72px;
     height: 72px;
+    cursor: pointer;
+    margin: 10px 0 10px 0;
+}
+
+.ai-image:hover {
+    filter: drop-shadow(0 0 3px white);
+}
+
+.ai-image:active {
+    filter: brightness(50%);
+}
+
+.slot-name, .ai-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    width: 100%;
 }
