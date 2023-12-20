@@ -16,3 +16,16 @@ slot.name.nizar: Nizar
 slot.name.sheriff: Sheriff
 slot.name.marshal: Marshal
 slot.name.abbot: Abbot
+select.img: Image
+select.name: Name
+select.root: Path
+select.defaultlang: Default Language
+select.supportedlang: Supported Languages
+select.binks: Binks
+select.speech: Speech
+select.lines: Lines
+select.portrait: Portrait
+select.aic: AIC
+select.aiv: AIV
+select.lord: Lord
+select.starttroops: Start Troops
