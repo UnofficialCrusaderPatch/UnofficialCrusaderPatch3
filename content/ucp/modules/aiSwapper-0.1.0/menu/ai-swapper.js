@@ -153,7 +153,7 @@ class AiMeta {
     this.#dataRow.appendChild(createTextCell(this.name));
     this.#dataRow.appendChild(createTextCell(this.root));
     this.#dataRow.appendChild(createTextCell(this.defaultLang));
-    this.#dataRow.appendChild(createTextCell(this.supportedLang));
+    this.#dataRow.appendChild(createTextCell(this.supportedLang.join(', ')));
     this.#dataRow.appendChild(createBooleanCell(this.switched.binks));
     this.#dataRow.appendChild(createBooleanCell(this.switched.speech));
     this.#dataRow.appendChild(createBooleanCell(this.switched.lines));
@@ -215,18 +215,13 @@ class AiSetting {
   aiMeta;
 
   // if received from a present config
-  static async fromSettingObject(settingObj) {
+  static fromMetaAndSettings(meta, settingObj) {
+    if (meta.root !== receiveStringOrFallback(settingObj.root)) {
+      return null; // something went wrong, just ignore it for now
+    }
+
     const aiSetting = new AiSetting();
-
-    aiSetting.root = receiveStringOrFallback(settingObj.root);
-    if (!aiSetting.root) {
-      return null; // does not exist
-    }
-
-    aiSetting.aiMeta = await AiMeta.fromMetaRootPath(aiSetting.root);
-    if (!aiSetting.aiMeta) {
-      return null; // does not exist
-    }
+    aiSetting.aiMeta = meta;
 
     aiSetting.name = receiveStringOrFallback(settingObj.name);
     aiSetting.language = receiveStringOrFallback(settingObj.language, null);
@@ -404,14 +399,23 @@ class AiSlot {
 
 const AI_SLOTS = new Map();
 
-const AI_QUERY_RESULT = [];
+const FOUND_AI_META = new Map();
+
+let DEFAULT_LANGUAGE = "";
 
 
 /** RESULT FUNCTIONS **/
 
 function createResultConfig() {
-  const configState = {};
-  AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState));
+  const configState = {
+    ai: {},
+  };
+
+  if (DEFAULT_LANGUAGE) {
+    configState.defaultLanguage = DEFAULT_LANGUAGE;
+  }
+
+  AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState.ai));
   return configState;
 }
 
@@ -430,29 +434,37 @@ async function receiveAllAvailableAi() {
   for (const foundAi of foundAis) {
     (await Promise.all(foundAi.paths.map(AiMeta.fromMetaPath)))
       .filter((meta) => !!meta)
-      .forEach((meta) => AI_QUERY_RESULT.push(meta));
+      .forEach((meta) => FOUND_AI_META.set(meta.root, meta));
   }
 
   // no sort for now
   const selectTable = document.querySelector(".ai-swapper__select-menu__table__body");
-  AI_QUERY_RESULT.forEach((meta) => meta.appendRowToParent(selectTable));
+  FOUND_AI_META.forEach((meta) => meta.appendRowToParent(selectTable));
 }
 
 async function receiveCurrentConfig() {
   const { baseline, user } = await HOST_FUNCTIONS.getCurrentConfig();
+  const { ai: baselineAI = {} } = baseline;  // ignore baseline default language
+  const { ai: userAi = {}, defaultLanguage } = user;
 
-  for (const [ai, configArray] of Object.entries(baseline)) {
-    (await Promise.all(configArray.map(AiSetting.fromSettingObject)))
+  if (defaultLanguage) {
+    DEFAULT_LANGUAGE = defaultLanguage;
+  }
+
+  for (const [ai, configArray] of Object.entries(baselineAI)) {
+    configArray.filter((config) => FOUND_AI_META.has(config.root))
+      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root, config)))
       .filter((aiSetting) => !!aiSetting)
       .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(aiSetting));
   }
 
-  for (const [ai, configArray] of Object.entries(user)) {
+  for (const [ai, configArray] of Object.entries(userAi)) {
     const slot = AI_SLOTS.get(ai);
     if (slot.isLocked()) { // TEMP: settings from user are discarded if a plugin takes control
       continue;
     }
-    (await Promise.all(configArray.map(AiSetting.fromSettingObject)))
+    configArray.filter((config) => FOUND_AI_META.has(config.root))
+      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root, config)))
       .filter((aiSetting) => !!aiSetting)
       .forEach((aiSetting) => slot.pushUserSetting(aiSetting));
   }
@@ -471,6 +483,25 @@ function initMainElements() {
     slot.updateStatus();
     slot.appendAsChildTo(overviewElem);
   }
+
+  const defaultLanguageSelect = document.querySelector(".ai-swapper__default-language__select");
+   // collect and order all languages
+  const allLangs = new Set();
+  FOUND_AI_META.forEach((meta) => {
+    meta.supportedLang.forEach((lang) => allLangs.add(lang));
+  });
+  if (!allLangs.has(DEFAULT_LANGUAGE)) {
+    DEFAULT_LANGUAGE = ""; // remove if not present
+  }
+  [...allLangs].sort().forEach((lang) => {
+    const option = document.createElement("option");
+    option.value = lang;
+    option.textContent = lang;
+    defaultLanguageSelect.appendChild(option);
+  });
+  defaultLanguageSelect.value = DEFAULT_LANGUAGE;
+
+  document.querySelector(".ai-swapper").hidden = false;
 }
 
 
