@@ -85,9 +85,18 @@ select {
 }
 
 .ai-swapper__change-menu__header {
+  color: whitesmoke;
   display: flex;
   justify-content: space-around;
   width: 100%;
+}
+
+.ai-swapper__change-menu__select {
+  color: black;
+  margin: 10px 0 10px 0;
+  padding: 5px;
+  background-color: var(--ucp-main-grey);
+  cursor: pointer;
 }
 
 .ai-swapper__change-menu[open],
@@ -113,6 +122,12 @@ select {
 .ai-swapper__select-menu__table {
   width: 100%;
   color: whitesmoke;
+}
+
+.ai-swapper__change-menu__table tr>:is(th, td):first-child {
+  position: sticky;
+  left: 0;
+  text-wrap: nowrap;
 }
 
 .ai-swapper__change-menu__table__body,
@@ -172,6 +187,5 @@ tr .ai-image {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-align: center;
-  width: 100%;
   margin: 10px 0 10px 0;
 }

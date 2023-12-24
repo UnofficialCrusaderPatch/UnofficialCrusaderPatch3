@@ -26,6 +26,23 @@ const AI_PORTRAIT_DATA = {
 };
 
 const AI_SELECT_EVENT = "ai_select_event";
+const AI_CHANGE_UPDATE_EVENT = "ai_change_update_event";
+
+const DEFAULT_VALUE_MARKER = "";
+
+/** DYNAMIC GLOBALS **/
+
+const GENERAL_LOCALIZATION = {
+  "change.language.default": null,
+  "change.language.default.ai": null,
+  "change.button.locked": null
+};
+
+const AI_SLOTS = new Map();
+
+const FOUND_AI_META = new Map();
+
+let DEFAULT_LANGUAGE = DEFAULT_VALUE_MARKER;
 
 
 /** HELPER **/
@@ -34,7 +51,7 @@ function receiveBooleanOrFallback(bool, fallback = false) {
   return typeof bool === "boolean" ? bool : fallback;
 }
 
-function receiveStringOrFallback(str, fallback = "") {
+function receiveStringOrFallback(str, fallback = DEFAULT_VALUE_MARKER) {
   return typeof str === "string" ? str : fallback;
 }
 
@@ -55,7 +72,14 @@ function createTextCell(text) {
 }
 
 function createBooleanCell(bool) {
-  return createTextCell(bool ? "\u2714" : "\u2716");
+  return createTextCell(typeof bool === "boolean" ? (bool ? "\u2714" : "\u2716") : "-");
+}
+
+function createSimpleOptionElement(value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label ?? value;
+  return option;
 }
 
 /** CLASSES **/
@@ -70,29 +94,16 @@ class AiControl {
   lord;
   startTroops;
 
-  static fromControlObject(controlObj) {
+  static fromControlObject(controlObj, fallback) {
     const aiControl = new AiControl();
-    aiControl.binks = receiveBooleanOrFallback(controlObj.binks);
-    aiControl.speech = receiveBooleanOrFallback(controlObj.speech);
-    aiControl.lines = receiveBooleanOrFallback(controlObj.lines);
-    aiControl.portrait = receiveBooleanOrFallback(controlObj.portrait);
-    aiControl.aic = receiveBooleanOrFallback(controlObj.aic);
-    aiControl.aiv = receiveBooleanOrFallback(controlObj.aiv);
-    aiControl.lord = receiveBooleanOrFallback(controlObj.lord);
-    aiControl.startTroops = receiveBooleanOrFallback(controlObj.startTroops);
-    return aiControl;
-  }
-
-  clone() {
-    const aiControl = new AiControl();
-    aiControl.binks = this.binks;
-    aiControl.speech = this.speech;
-    aiControl.lines = this.lines;
-    aiControl.portrait = this.portrait;
-    aiControl.aic = this.aic;
-    aiControl.aiv = this.aiv;
-    aiControl.lord = this.lord;
-    aiControl.startTroops = this.startTroops;
+    aiControl.binks = receiveBooleanOrFallback(controlObj.binks, fallback);
+    aiControl.speech = receiveBooleanOrFallback(controlObj.speech, fallback);
+    aiControl.lines = receiveBooleanOrFallback(controlObj.lines, fallback);
+    aiControl.portrait = receiveBooleanOrFallback(controlObj.portrait, fallback);
+    aiControl.aic = receiveBooleanOrFallback(controlObj.aic, fallback);
+    aiControl.aiv = receiveBooleanOrFallback(controlObj.aiv, fallback);
+    aiControl.lord = receiveBooleanOrFallback(controlObj.lord, fallback);
+    aiControl.startTroops = receiveBooleanOrFallback(controlObj.startTroops, fallback);
     return aiControl;
   }
 
@@ -173,7 +184,7 @@ class AiMeta {
     this.defaultLang = receiveStringOrFallback(metaObj.defaultLang, null);
     this.supportedLang = Array.isArray(metaObj.supportedLang) ? metaObj.supportedLang : [];
     this.switched = AiControl.fromControlObject(metaObj.switched ?? {});
-    this.root = metaPath.replace(AiMeta.META_FILE, "");
+    this.root = metaPath.replace(AiMeta.META_FILE, DEFAULT_VALUE_MARKER);
 
     this.#createDataRow();
   }
@@ -214,39 +225,168 @@ class AiSetting {
   control;
   aiMeta;
 
-  // if received from a present config
-  static fromMetaAndSettings(meta, settingObj) {
-    if (meta.root !== receiveStringOrFallback(settingObj.root)) {
-      return null; // something went wrong, just ignore it for now
-    }
+  #dataRow;
+  #controlCell;
+  #binksCell;
+  #speechCell;
+  #linesCell;
+  #portraitCell;
+  #aicCell;
+  #aivCell;
+  #lordCell;
+  #startTroopsCell;
 
-    const aiSetting = new AiSetting();
-    aiSetting.aiMeta = meta;
-
-    aiSetting.name = receiveStringOrFallback(settingObj.name);
-    aiSetting.language = receiveStringOrFallback(settingObj.language, null);
-    aiSetting.control = AiControl.fromControlObject(settingObj.control ?? {});
-
-    // updating state based on meta, in case invalid settings are present
-    if (aiSetting.name !== aiSetting.aiMeta.name) {
-      aiSetting.name = aiSetting.aiMeta.name;
-    }
-
-    if (aiSetting.language !== null && !aiSetting.aiMeta.supportedLang.includes(aiSetting.language)) {
-      aiSetting.language = aiSetting.aiMeta.defaultLang;
-    }
-
-    return aiSetting;
+  #appendDataRowControl() {
+    const newCell = document.createElement("td")
+    // TODO
+    this.#dataRow.appendChild(newCell);
   }
 
-  static fromMeta(meta) {
-    const aiSetting = new AiSetting();
-    aiSetting.name = meta.name;
-    aiSetting.root = meta.root;
-    aiSetting.language = meta.defaultLang;
-    aiSetting.control = meta.switched.clone();
-    aiSetting.aiMeta = meta;
-    return aiSetting;
+  #appendDataRowImg() {
+    const newCell = document.createElement("td");
+    const img = document.createElement("img");
+    img.classList.add("ai-image");
+    img.src = this.aiMeta.portraitAssetPath ?? AI_PORTRAIT_MISSING;
+    newCell.appendChild(img);
+    this.#dataRow.appendChild(newCell);
+  }
+
+  #appendDataRowLanguage() {
+    const newCell = document.createElement("td")
+    const newSelect = document.createElement("select");
+
+    newSelect.appendChild(createSimpleOptionElement(DEFAULT_VALUE_MARKER, GENERAL_LOCALIZATION["change.language.default"]));
+    newSelect.appendChild(createSimpleOptionElement("default", GENERAL_LOCALIZATION["change.language.default.ai"]));
+    this.aiMeta.supportedLang.forEach((lang) => newSelect.appendChild(createSimpleOptionElement(lang)));
+
+    if (this.language === DEFAULT_VALUE_MARKER) {
+      newSelect.value = DEFAULT_VALUE_MARKER;
+    } else if (this.language === this.aiMeta.defaultLang) {
+      newSelect.value = "default";
+    } else {
+      newSelect.value = this.language;
+    }
+
+    newSelect.onchange = () => {
+      const newValue = newSelect.value;
+      if (newValue === DEFAULT_VALUE_MARKER) {
+        this.language = undefined;
+      } else if (newValue === "default") {
+        this.language = this.aiMeta.defaultLang;
+      } else {
+        this.language = newValue;
+      }
+    }
+
+    newCell.appendChild(newSelect);
+    this.#dataRow.appendChild(newCell);
+  }
+
+  #setDataRowBooleanClass(element, statusBool) {
+    if (typeof statusBool !== "boolean") {
+      element.classList.add("ignored");
+      element.classList.remove("active", "inactive");
+    } else if (statusBool) {
+      element.classList.add("active");
+      element.classList.remove("ignored", "inactive");
+    } else {
+      element.classList.add("inactive");
+      element.classList.remove("ignored", "active");
+    }
+  }
+
+  #appendDataRowBoolean(setting, thisElemName) {
+    const newCell = createBooleanCell(this.control[setting]);
+    this[thisElemName] = newCell;
+    newCell.classList.add("ai-setting-bool");
+
+    const metaSettingExists = this.aiMeta.switched[setting];
+    if (metaSettingExists) {
+      newCell.classList.add("no-setting");
+    }
+    newCell.onclick = () => {
+      const currentValue = this.control[setting];
+      if (typeof currentValue !== "boolean") {
+        this.control[setting] = metaSettingExists;
+      } else if (currentValue) {
+        this.control[setting] = false;
+      } else {
+        this.control[setting] = undefined;
+      }
+      this.#setDataRowBooleanClass(newCell, this.control[setting]);
+
+      // will be pretty heavy
+      document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT));
+    };
+
+    this.#setDataRowBooleanClass(newCell, this.control[setting]);
+    this.#dataRow.appendChild(newCell);
+  }
+
+  #createDataRow() {
+    this.#dataRow = document.createElement("tr");
+    this.#dataRow.classList.add("ai-setting-row");
+
+    this.#appendDataRowControl();
+    this.#appendDataRowImg();
+
+    this.#dataRow.appendChild(createTextCell(this.name));
+    this.#dataRow.appendChild(createTextCell(this.root));
+
+    this.#appendDataRowLanguage();
+
+    this.#appendDataRowBoolean("binks", "#binksCell");
+    this.#appendDataRowBoolean("speech", "#speechCell");
+    this.#appendDataRowBoolean("lines", "#linesCell");
+    this.#appendDataRowBoolean("portrait", "#portraitCell");
+    this.#appendDataRowBoolean("aic", "#aicCell");
+    this.#appendDataRowBoolean("aiv", "#aivCell");
+    this.#appendDataRowBoolean("lord", "#lordCell");
+    this.#appendDataRowBoolean("startTroops", "#startTroopsCell");
+  }
+
+  #verifyAiControlSetting(currentSetting, metaSetting) {
+    // unsets if control stops being available
+    return currentSetting && metaSetting ? currentSetting : undefined;
+  }
+
+  #verifyAiControl() {
+    const aiMetaSwitched = this.aiMeta.switched;
+    const aiControl = this.control;
+
+    aiControl.binks = this.#verifyAiControlSetting(aiControl.binks, aiMetaSwitched.binks);
+    aiControl.speech = this.#verifyAiControlSetting(aiControl.speech, aiMetaSwitched.speech);
+    aiControl.lines = this.#verifyAiControlSetting(aiControl.lines, aiMetaSwitched.lines);
+    aiControl.portrait = this.#verifyAiControlSetting(aiControl.portrait, aiMetaSwitched.portrait);
+    aiControl.aic = this.#verifyAiControlSetting(aiControl.aic, aiMetaSwitched.aic);
+    aiControl.aiv = this.#verifyAiControlSetting(aiControl.aiv, aiMetaSwitched.aiv);
+    aiControl.lord = this.#verifyAiControlSetting(aiControl.lord, aiMetaSwitched.lord);
+    aiControl.startTroops = this.#verifyAiControlSetting(aiControl.startTroops, aiMetaSwitched.startTroops);
+  }
+
+  constructor(meta, settingObj) {
+    this.aiMeta = meta;
+
+    this.name = receiveStringOrFallback(this.aiMeta.name);
+    this.root = receiveStringOrFallback(this.aiMeta.root);
+    this.language = receiveStringOrFallback(settingObj.language);
+    this.control = AiControl.fromControlObject(settingObj.control ?? {}, undefined);
+    this.#verifyAiControl();
+
+    // updating state based on meta, in case invalid settings are present
+    if (this.name !== this.aiMeta.name) {
+      this.name = this.aiMeta.name;
+    }
+
+    if (this.language && !this.aiMeta.supportedLang.includes(this.language)) {
+      this.language = undefined;
+    }
+
+    this.#createDataRow();
+  }
+
+  appendRowToParent(parent) {
+    parent.appendChild(this.#dataRow);
   }
 
   toSettingNameAndObject() {
@@ -258,6 +398,31 @@ class AiSetting {
     };
     return settingObj;
   }
+
+  // if received from a present config
+  static fromMetaAndSettings(meta, settingObj) {
+    if (meta.root !== receiveStringOrFallback(settingObj.root)) {
+      return null; // something went wrong, just ignore it for now
+    }
+    return new AiSetting(meta, settingObj);
+  }
+
+  // sets everything present to true by default, others is undefined
+  static fromMeta(meta) {
+    const settingsObj = {
+      control: {
+        binks: meta.switched.binks ? true : undefined,
+        speech: meta.switched.speech ? true : undefined,
+        lines: meta.switched.lines ? true : undefined,
+        portrait: meta.switched.portrait ? true : undefined,
+        aic: meta.switched.aic ? true : undefined,
+        aiv: meta.switched.aiv ? true : undefined,
+        lord: meta.switched.lord ? true : undefined,
+        startTroops: meta.switched.startTroops ? true : undefined,
+      }
+    };
+    return new AiSetting(meta, settingsObj);
+  }
 }
 
 class AiSelectMenu {
@@ -265,33 +430,51 @@ class AiSelectMenu {
 
   constructor(mainElem) {
     this.#mainElem = mainElem;
-    addEnterAndClickListener(this.#mainElem.querySelector(".ai-swapper__select-menu__close"), () => this.#mainElem.close());
+
+    const closeButton = this.#mainElem.querySelector(".ai-swapper__select-menu__close");
+    addEnterAndClickListener(closeButton, () => this.#mainElem.close());
+    document.addEventListener(AI_SELECT_EVENT, () => closeButton.click());
   }
 }
 
 class AiChangeMenu {
   #mainElem;
   #currentSlotName = null;
+  #currentSlot = null;
 
+  #tableBodyElement;
   #slotNameElem;
-  #imgElem;
+  #selectAiElem;
+  #selectMainText;
+
+  #updateTable() {
+    this.#currentSlot.appendAllAiSettings(this.#tableBodyElement)
+  }
 
   constructor(mainElem, selectMenu) {
     this.#mainElem = mainElem;
 
+    this.#tableBodyElement = this.#mainElem.querySelector(".ai-swapper__change-menu__table__body");
     this.#slotNameElem = this.#mainElem.querySelector(".slot-name");
-    this.#imgElem = this.#mainElem.querySelector(".ai-image");
+    this.#selectAiElem = this.#mainElem.querySelector(".ai-swapper__change-menu__select");
+    this.#selectMainText = this.#selectAiElem.textContent;
 
     addEnterAndClickListener(this.#mainElem.querySelector(".ai-swapper__change-menu__close"), () => this.#mainElem.close());
-    addEnterAndClickListener(this.#mainElem.querySelector(".ai-swapper__change-menu__select"), () => selectMenu.showModal());
+    addEnterAndClickListener(this.#selectAiElem, () => selectMenu.showModal());
+
+    document.addEventListener(AI_SELECT_EVENT, (event) => this.#currentSlot.receiveNewAiSetting(event.detail.meta).appendRowToParent(this.#tableBodyElement));
   }
 
-  activateEditDialog(slotName, localizedSlotName) {
+  activateEditDialog(aiSlot, slotName, localizedSlotName) {
     this.#currentSlotName = slotName;
+    this.#slotNameElem.textContent = localizedSlotName ?? this.#currentSlotName;
+    this.#currentSlot = aiSlot;
 
-    this.#slotNameElem.textContent = localizedSlotName;
-    this.#imgElem.src = AI_PORTRAIT_DATA[this.#currentSlotName];
+    const isLocked = this.#currentSlot.isLocked()
+    this.#selectAiElem.disabled = isLocked;
+    this.#selectAiElem.textContent = isLocked ? GENERAL_LOCALIZATION["change.button.locked"] : this.#selectMainText;
 
+    this.#updateTable();
     this.#mainElem.showModal();
   }
 }
@@ -299,7 +482,7 @@ class AiChangeMenu {
 class AiSlot {
   #slotName;
   #aiSettings = [];
-  #aiLocked; // TEMP, will lock the ai, so that no edits are possible
+  #aiLocked = false; // TEMP, will lock the ai, so that no edits are possible
 
   #localizedSlotName;
   #changeMenu;
@@ -328,18 +511,7 @@ class AiSlot {
     if (!this.#aiSettings.length) {
       return;
     }
-
-    config[this.#slotName] = {
-      contents: {
-        value: {}
-      }
-    }
-
-    // currently only one ai for override
-    // the aiSwapper lacks real override support currently anyway, since the original thought
-    // during module creation were no overlaps in the "true" settings of the used ais
-    const setting = this.#aiSettings[0].toSettingNameAndObject();
-    config[ai].contents.value = [setting];
+    config[this.#slotName] = this.#aiSettings.map((setting) => setting.toSettingNameAndObject());
   }
 
   getAiSlotName() {
@@ -352,17 +524,23 @@ class AiSlot {
 
   getAiImgSource() {
     for (const aiSetting of this.#aiSettings) {
-      if (aiSetting.aiMeta.portraitAssetPath) {
+      if (aiSetting.control.portrait && aiSetting.aiMeta.portraitAssetPath) {
         return aiSetting.aiMeta.portraitAssetPath;
       }
     }
     return AI_PORTRAIT_DATA[this.#slotName];
   }
 
+  receiveNewAiSetting(aiMeta) {
+    const newAiSetting = AiSetting.fromMeta(aiMeta);
+    this.#aiSettings.push(newAiSetting);
+    return newAiSetting;
+  }
+
 
 
   #activateEditDialog() {
-    this.#changeMenu.activateEditDialog(this.#slotName, this.#localizedSlotName);
+    this.#changeMenu.activateEditDialog(this, this.#slotName, this.#localizedSlotName);
   }
 
   async loadLocalizedSlotName() {
@@ -389,19 +567,15 @@ class AiSlot {
     parent?.appendChild(this.#mainElem);
   }
 
+  appendAllAiSettings(parent) {
+    this.#aiSettings.forEach((setting) => setting.appendRowToParent(parent));
+  }
+
   updateStatus() {
     this.#imgElem.src = this.getAiImgSource();
     this.#aiNameElem.textContent = this.getAiSlotName();
   }
 }
-
-/** DYNAMIC GLOBALS **/
-
-const AI_SLOTS = new Map();
-
-const FOUND_AI_META = new Map();
-
-let DEFAULT_LANGUAGE = "";
 
 
 /** RESULT FUNCTIONS **/
@@ -411,10 +585,8 @@ function createResultConfig() {
     ai: {},
   };
 
-  if (DEFAULT_LANGUAGE) {
-    configState.defaultLanguage = DEFAULT_LANGUAGE;
-  }
-
+  // TODO: check how config overwrite works, also, why required values?
+  configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : null;
   AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState.ai));
   return configState;
 }
@@ -426,6 +598,10 @@ async function initData() {
   AI_SLOTS_NAMES.forEach((slotName) => AI_SLOTS.set(slotName, new AiSlot(slotName)));
   for (const [, slot] of AI_SLOTS) {
     await slot.loadLocalizedSlotName();
+  }
+
+  for (const key of Object.keys(GENERAL_LOCALIZATION)) {
+    GENERAL_LOCALIZATION[key] = await HOST_FUNCTIONS.getLocalizedString(key) ?? key;
   }
 }
 
@@ -451,9 +627,10 @@ async function receiveCurrentConfig() {
     DEFAULT_LANGUAGE = defaultLanguage;
   }
 
+  // TODO: set what is received as baseline
   for (const [ai, configArray] of Object.entries(baselineAI)) {
     configArray.filter((config) => FOUND_AI_META.has(config.root))
-      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root, config)))
+      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
       .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(aiSetting));
   }
@@ -464,7 +641,7 @@ async function receiveCurrentConfig() {
       continue;
     }
     configArray.filter((config) => FOUND_AI_META.has(config.root))
-      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root, config)))
+      .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
       .forEach((aiSetting) => slot.pushUserSetting(aiSetting));
   }
@@ -485,21 +662,17 @@ function initMainElements() {
   }
 
   const defaultLanguageSelect = document.querySelector(".ai-swapper__default-language__select");
-   // collect and order all languages
+  // collect and order all languages
   const allLangs = new Set();
   FOUND_AI_META.forEach((meta) => {
     meta.supportedLang.forEach((lang) => allLangs.add(lang));
   });
   if (!allLangs.has(DEFAULT_LANGUAGE)) {
-    DEFAULT_LANGUAGE = ""; // remove if not present
+    DEFAULT_LANGUAGE = DEFAULT_VALUE_MARKER; // remove if not present
   }
-  [...allLangs].sort().forEach((lang) => {
-    const option = document.createElement("option");
-    option.value = lang;
-    option.textContent = lang;
-    defaultLanguageSelect.appendChild(option);
-  });
+  [...allLangs].sort().forEach((lang) => defaultLanguageSelect.appendChild(createSimpleOptionElement(lang)));
   defaultLanguageSelect.value = DEFAULT_LANGUAGE;
+  defaultLanguageSelect.onchange = () => DEFAULT_LANGUAGE = defaultLanguageSelect.value;
 
   document.querySelector(".ai-swapper").hidden = false;
 }
@@ -518,6 +691,8 @@ addEventListener(
   },
   { once: true }
 );
+
+// TODO: could in the end use maybe a little rework regarding which calls what...
 
 // allows to find file for debugging
 //# sourceURL=ai-swapper.js
