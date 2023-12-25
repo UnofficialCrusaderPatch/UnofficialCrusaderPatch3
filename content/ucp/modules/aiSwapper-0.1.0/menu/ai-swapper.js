@@ -25,6 +25,8 @@ const AI_PORTRAIT_DATA = {
   "abbot": "data:image/png;base64,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",
 };
 
+const AI_CONTROL_SETTINGS = ["binks", "speech", "lines", "portrait", "aic", "aiv", "lord", "startTroops"];
+
 const AI_SELECT_EVENT = "ai_select_event";
 const AI_CHANGE_UPDATE_EVENT = "ai_change_update_event";
 
@@ -47,8 +49,12 @@ let DEFAULT_LANGUAGE = DEFAULT_VALUE_MARKER;
 
 /** HELPER **/
 
+function isPrimitiveBool(bool) {
+  return typeof bool === "boolean";
+}
+
 function receiveBooleanOrFallback(bool, fallback = false) {
-  return typeof bool === "boolean" ? bool : fallback;
+  return isPrimitiveBool(bool) ? bool : fallback;
 }
 
 function receiveStringOrFallback(str, fallback = DEFAULT_VALUE_MARKER) {
@@ -71,8 +77,12 @@ function createTextCell(text) {
   return cell;
 }
 
+function createBooleanText(bool) {
+  return isPrimitiveBool(bool) ? (bool ? "\u2714" : "\u2716") : "-";
+}
+
 function createBooleanCell(bool) {
-  return createTextCell(typeof bool === "boolean" ? (bool ? "\u2714" : "\u2716") : "-");
+  return createTextCell(createBooleanText(bool));
 }
 
 function createSimpleOptionElement(value, label) {
@@ -96,28 +106,14 @@ class AiControl {
 
   static fromControlObject(controlObj, fallback) {
     const aiControl = new AiControl();
-    aiControl.binks = receiveBooleanOrFallback(controlObj.binks, fallback);
-    aiControl.speech = receiveBooleanOrFallback(controlObj.speech, fallback);
-    aiControl.lines = receiveBooleanOrFallback(controlObj.lines, fallback);
-    aiControl.portrait = receiveBooleanOrFallback(controlObj.portrait, fallback);
-    aiControl.aic = receiveBooleanOrFallback(controlObj.aic, fallback);
-    aiControl.aiv = receiveBooleanOrFallback(controlObj.aiv, fallback);
-    aiControl.lord = receiveBooleanOrFallback(controlObj.lord, fallback);
-    aiControl.startTroops = receiveBooleanOrFallback(controlObj.startTroops, fallback);
+    AI_CONTROL_SETTINGS.forEach((setting) => aiControl[setting] = receiveBooleanOrFallback(controlObj[setting], fallback));
     return aiControl;
   }
 
   toControlObject() {
-    return {
-      binks: this.binks,
-      speech: this.speech,
-      lines: this.lines,
-      portrait: this.portrait,
-      aic: this.aic,
-      aiv: this.aiv,
-      lord: this.lord,
-      startTroops: this.startTroops,
-    };
+    const controlObj = {};
+    AI_CONTROL_SETTINGS.forEach((setting) => controlObj[setting] = this[setting]);
+    return controlObj;
   }
 }
 
@@ -165,14 +161,8 @@ class AiMeta {
     this.#dataRow.appendChild(createTextCell(this.root));
     this.#dataRow.appendChild(createTextCell(this.defaultLang));
     this.#dataRow.appendChild(createTextCell(this.supportedLang.join(', ')));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.binks));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.speech));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.lines));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.portrait));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.aic));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.aiv));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.lord));
-    this.#dataRow.appendChild(createBooleanCell(this.switched.startTroops));
+
+    AI_CONTROL_SETTINGS.forEach((setting) => this.#dataRow.appendChild(createBooleanCell(this.switched[setting])));
   }
 
   constructor(metaPath, metaObj) {
@@ -227,19 +217,12 @@ class AiSetting {
 
   #dataRow;
   #controlCell;
-  #binksCell;
-  #speechCell;
-  #linesCell;
-  #portraitCell;
-  #aicCell;
-  #aivCell;
-  #lordCell;
-  #startTroopsCell;
+  #boolCells = {};
 
   #appendDataRowControl() {
-    const newCell = document.createElement("td")
+    this.#controlCell = document.createElement("td")
     // TODO
-    this.#dataRow.appendChild(newCell);
+    this.#dataRow.appendChild(this.#controlCell);
   }
 
   #appendDataRowImg() {
@@ -259,7 +242,7 @@ class AiSetting {
     newSelect.appendChild(createSimpleOptionElement("default", GENERAL_LOCALIZATION["change.language.default.ai"]));
     this.aiMeta.supportedLang.forEach((lang) => newSelect.appendChild(createSimpleOptionElement(lang)));
 
-    if (this.language === DEFAULT_VALUE_MARKER) {
+    if (!this.language) {
       newSelect.value = DEFAULT_VALUE_MARKER;
     } else if (this.language === this.aiMeta.defaultLang) {
       newSelect.value = "default";
@@ -283,7 +266,7 @@ class AiSetting {
   }
 
   #setDataRowBooleanClass(element, statusBool) {
-    if (typeof statusBool !== "boolean") {
+    if (!isPrimitiveBool(statusBool)) {
       element.classList.add("ignored");
       element.classList.remove("active", "inactive");
     } else if (statusBool) {
@@ -295,25 +278,20 @@ class AiSetting {
     }
   }
 
-  #appendDataRowBoolean(setting, thisElemName) {
+  #appendDataRowBoolean(setting) {
     const newCell = createBooleanCell(this.control[setting]);
-    this[thisElemName] = newCell;
     newCell.classList.add("ai-setting-bool");
 
     const metaSettingExists = this.aiMeta.switched[setting];
-    if (metaSettingExists) {
+    if (!metaSettingExists) {
       newCell.classList.add("no-setting");
     }
     newCell.onclick = () => {
       const currentValue = this.control[setting];
-      if (typeof currentValue !== "boolean") {
-        this.control[setting] = metaSettingExists;
-      } else if (currentValue) {
-        this.control[setting] = false;
-      } else {
-        this.control[setting] = undefined;
-      }
-      this.#setDataRowBooleanClass(newCell, this.control[setting]);
+      const newValue = !isPrimitiveBool(currentValue) ? metaSettingExists : (currentValue ? false : undefined);
+      this.control[setting] = newValue;
+      this.#setDataRowBooleanClass(newCell, newValue);
+      newCell.textContent = createBooleanText(newValue);
 
       // will be pretty heavy
       document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT));
@@ -321,6 +299,7 @@ class AiSetting {
 
     this.#setDataRowBooleanClass(newCell, this.control[setting]);
     this.#dataRow.appendChild(newCell);
+    this.#boolCells[setting] = newCell;
   }
 
   #createDataRow() {
@@ -335,14 +314,7 @@ class AiSetting {
 
     this.#appendDataRowLanguage();
 
-    this.#appendDataRowBoolean("binks", "#binksCell");
-    this.#appendDataRowBoolean("speech", "#speechCell");
-    this.#appendDataRowBoolean("lines", "#linesCell");
-    this.#appendDataRowBoolean("portrait", "#portraitCell");
-    this.#appendDataRowBoolean("aic", "#aicCell");
-    this.#appendDataRowBoolean("aiv", "#aivCell");
-    this.#appendDataRowBoolean("lord", "#lordCell");
-    this.#appendDataRowBoolean("startTroops", "#startTroopsCell");
+    AI_CONTROL_SETTINGS.forEach((setting) => this.#appendDataRowBoolean(setting));
   }
 
   #verifyAiControlSetting(currentSetting, metaSetting) {
@@ -354,14 +326,7 @@ class AiSetting {
     const aiMetaSwitched = this.aiMeta.switched;
     const aiControl = this.control;
 
-    aiControl.binks = this.#verifyAiControlSetting(aiControl.binks, aiMetaSwitched.binks);
-    aiControl.speech = this.#verifyAiControlSetting(aiControl.speech, aiMetaSwitched.speech);
-    aiControl.lines = this.#verifyAiControlSetting(aiControl.lines, aiMetaSwitched.lines);
-    aiControl.portrait = this.#verifyAiControlSetting(aiControl.portrait, aiMetaSwitched.portrait);
-    aiControl.aic = this.#verifyAiControlSetting(aiControl.aic, aiMetaSwitched.aic);
-    aiControl.aiv = this.#verifyAiControlSetting(aiControl.aiv, aiMetaSwitched.aiv);
-    aiControl.lord = this.#verifyAiControlSetting(aiControl.lord, aiMetaSwitched.lord);
-    aiControl.startTroops = this.#verifyAiControlSetting(aiControl.startTroops, aiMetaSwitched.startTroops);
+    AI_CONTROL_SETTINGS.forEach((setting) => aiControl[setting] = this.#verifyAiControlSetting(aiControl[setting], aiMetaSwitched[setting]));
   }
 
   constructor(meta, settingObj) {
@@ -369,7 +334,7 @@ class AiSetting {
 
     this.name = receiveStringOrFallback(this.aiMeta.name);
     this.root = receiveStringOrFallback(this.aiMeta.root);
-    this.language = receiveStringOrFallback(settingObj.language);
+    this.language = receiveStringOrFallback(settingObj.language, undefined);
     this.control = AiControl.fromControlObject(settingObj.control ?? {}, undefined);
     this.#verifyAiControl();
 
@@ -378,11 +343,15 @@ class AiSetting {
       this.name = this.aiMeta.name;
     }
 
-    if (this.language && !this.aiMeta.supportedLang.includes(this.language)) {
+    if ((this.language && !this.aiMeta.supportedLang.includes(this.language)) || this.language === DEFAULT_VALUE_MARKER) {
       this.language = undefined;
     }
 
     this.#createDataRow();
+  }
+
+  setBoolCellCurrent(controlName, isCurrent) {
+    this.#boolCells[controlName].classList.toggle("current", isCurrent);
   }
 
   appendRowToParent(parent) {
@@ -410,17 +379,9 @@ class AiSetting {
   // sets everything present to true by default, others is undefined
   static fromMeta(meta) {
     const settingsObj = {
-      control: {
-        binks: meta.switched.binks ? true : undefined,
-        speech: meta.switched.speech ? true : undefined,
-        lines: meta.switched.lines ? true : undefined,
-        portrait: meta.switched.portrait ? true : undefined,
-        aic: meta.switched.aic ? true : undefined,
-        aiv: meta.switched.aiv ? true : undefined,
-        lord: meta.switched.lord ? true : undefined,
-        startTroops: meta.switched.startTroops ? true : undefined,
-      }
+      control: {},
     };
+    AI_CONTROL_SETTINGS.forEach((setting) => settingsObj.control[setting] = meta.switched[setting] ? true : undefined);
     return new AiSetting(meta, settingsObj);
   }
 }
@@ -448,6 +409,8 @@ class AiChangeMenu {
   #selectMainText;
 
   #updateTable() {
+    this.#tableBodyElement.replaceChildren();
+    this.#currentSlot.updateAiSettingsCellStatus();
     this.#currentSlot.appendAllAiSettings(this.#tableBodyElement)
   }
 
@@ -459,10 +422,18 @@ class AiChangeMenu {
     this.#selectAiElem = this.#mainElem.querySelector(".ai-swapper__change-menu__select");
     this.#selectMainText = this.#selectAiElem.textContent;
 
-    addEnterAndClickListener(this.#mainElem.querySelector(".ai-swapper__change-menu__close"), () => this.#mainElem.close());
+    addEnterAndClickListener(this.#mainElem.querySelector(".ai-swapper__change-menu__close"), () => {
+      this.#currentSlot.updateStatus();
+      this.#mainElem.close();
+    });
     addEnterAndClickListener(this.#selectAiElem, () => selectMenu.showModal());
 
-    document.addEventListener(AI_SELECT_EVENT, (event) => this.#currentSlot.receiveNewAiSetting(event.detail.meta).appendRowToParent(this.#tableBodyElement));
+    document.addEventListener(AI_SELECT_EVENT, (event) => {
+      this.#currentSlot.receiveNewAiSetting(event.detail.meta).appendRowToParent(this.#tableBodyElement);
+      document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT));
+    });
+
+    document.addEventListener(AI_CHANGE_UPDATE_EVENT, () => this.#updateTable());
   }
 
   activateEditDialog(aiSlot, slotName, localizedSlotName) {
@@ -518,8 +489,13 @@ class AiSlot {
     if (!this.#aiSettings.length) {
       return this.#localizedSlotName;
     }
-    // first has prio
-    return this.#aiSettings[0].name ?? this.#localizedSlotName;
+    // using first that has any kind of setting
+    for (const aiSetting of this.#aiSettings) {
+      if (AI_CONTROL_SETTINGS.map((setting) => aiSetting.control[setting]).some(isPrimitiveBool)) {
+        return aiSetting.name;
+      }
+    }
+    return this.#localizedSlotName;
   }
 
   getAiImgSource() {
@@ -574,6 +550,20 @@ class AiSlot {
   updateStatus() {
     this.#imgElem.src = this.getAiImgSource();
     this.#aiNameElem.textContent = this.getAiSlotName();
+  }
+
+  updateAiSettingsCellStatus() {
+    AI_CONTROL_SETTINGS.forEach((controlSetting) => {
+      let discoveredActive = false;
+      this.#aiSettings.forEach((aiSetting) => {
+        if (discoveredActive) {
+          aiSetting.setBoolCellCurrent(controlSetting, false);
+          return;
+        }
+        discoveredActive = isPrimitiveBool(aiSetting.control[controlSetting]);
+        aiSetting.setBoolCellCurrent(controlSetting, discoveredActive);
+      });
+    });
   }
 }
 
