@@ -98,6 +98,20 @@ local function getPathForLocale(root, locale, dataPath)
   end
 end
 
+-- TODO: one day refactor address getter to use this utils function (or put it into the core)
+local function getAddress(aob, scriptIdentifier, errorMsg, modifierFunc)
+  local address = core.AOBScan(aob, 0x400000)
+  if address == nil then
+    log(ERROR, string.format(errorMsg, scriptIdentifier))
+    error(string.format("'%s' can not be initialized.", scriptIdentifier))
+  end
+  if modifierFunc == nil then
+    return address;
+  end
+  return modifierFunc(address)
+end
+
+
 return {
   createTableWithTransformedKeys = createTableWithTransformedKeys,
   isTableEmpty                   = isTableEmpty,
@@ -109,4 +123,5 @@ return {
   loadByteDataFromFile           = loadByteDataFromFile,
   loadDataFromJSON               = loadDataFromJSON,
   getPathForLocale               = getPathForLocale,
+  getAddress                     = getAddress,
 }
