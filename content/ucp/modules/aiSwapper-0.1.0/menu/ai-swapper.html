@@ -23,6 +23,8 @@
             <tr>
               <th>{{select.img}}</th>
               <th>{{select.name}}</th>
+              <th>{{select.version}}</th>
+              <th>{{select.author}}</th>
               <th>{{select.root}}</th>
               <th>{{select.defaultlang}}</th>
               <th>{{select.supportedlang}}</th>
@@ -56,7 +58,12 @@
         <table class="ai-swapper__change-menu__table">
           <thead class="ai-swapper__change-menu__table__header">
             <tr>
-              <th>{{change.controls}}</th>
+              <th>
+                <div class="ai-setting-control-header">
+                  <span>{{change.controls.priority}}</span>
+                  <span>{{change.controls.remove}}</span>
+                </div>
+              </th>
               <th>{{change.image}}</th>
               <th>{{change.name}}</th>
               <th>{{change.path}}</th>
@@ -90,7 +97,7 @@
   <template class="template--ai-overview-slot">
     <div class="ai-swapper__overview__ai">
       <p class="slot-name"></p>
-      <img class="ai-image selectable" />
+      <img tabindex="0" class="ai-image selectable" />
       <p class="ai-name">Test</p>
     </div>
   </template>

@@ -35,13 +35,18 @@ thead {
 th,
 td {
   text-align: center;
-  padding: 5px;
+  padding: 0.5em;
   border: 1px solid var(--ucp-main-grey);
 }
 
 select {
   background-color: var(--ucp-main-grey);
   color: black;
+  cursor: pointer;
+}
+
+select:disabled {
+  pointer-events: none;
 }
 
 .ai-swapper {
@@ -97,6 +102,10 @@ select {
   padding: 5px;
   background-color: var(--ucp-main-grey);
   cursor: pointer;
+}
+
+.ai-swapper__change-menu__select:disabled {
+  pointer-events: none;
 }
 
 .ai-swapper__change-menu[open],
@@ -190,10 +199,71 @@ tr .ai-image {
   margin: 10px 0 10px 0;
 }
 
+.ai-setting-bool {
+  cursor: pointer;
+}
+
 .ai-setting-bool.current.active {
   background-color: forestgreen;
 }
 
 .ai-setting-bool.current.inactive {
   background-color: darkred;
+}
+
+.ai-setting-bool[tabIndex="-1"] {
+  pointer-events: none;
+  filter: brightness(50%);
+}
+
+.ai-setting-control-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.ai-setting-control-header>span {
+  margin: 0.5em;
+}
+
+.ai-setting-control {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 1.5em;
+}
+
+.ai-setting-control .priority {
+  cursor: pointer;
+}
+
+.ai-setting-control .remove {
+  cursor: pointer;
+  color: lightcoral;
+}
+
+.ai-setting-control .priority:hover {
+  filter: drop-shadow(0 0 3px whitesmoke);
+}
+
+.ai-setting-control .remove:hover {
+  filter: drop-shadow(0 0 3px lightcoral);
+}
+
+.ai-setting-control .priority:active,
+.ai-setting-control .remove:active {
+  filter: brightness(50%);
+}
+
+.ai-setting-control :is(.priority, .remove)[tabIndex="-1"] {
+  pointer-events: none;
+  filter: brightness(50%);
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row:first-child .ai-setting-control .priority.up {
+  visibility: hidden;
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row:last-child .ai-setting-control .priority.down {
+  visibility: hidden;
 }

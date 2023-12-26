@@ -53,11 +53,11 @@ function isPrimitiveBool(bool) {
   return typeof bool === "boolean";
 }
 
-function receiveBooleanOrFallback(bool, fallback = false) {
+function receiveBooleanOrFallback(bool, fallback = undefined) {
   return isPrimitiveBool(bool) ? bool : fallback;
 }
 
-function receiveStringOrFallback(str, fallback = DEFAULT_VALUE_MARKER) {
+function receiveStringOrFallback(str, fallback = undefined) {
   return typeof str === "string" ? str : fallback;
 }
 
@@ -104,7 +104,7 @@ class AiControl {
   lord;
   startTroops;
 
-  static fromControlObject(controlObj, fallback) {
+  static fromControlObject(controlObj, fallback = undefined) {
     const aiControl = new AiControl();
     AI_CONTROL_SETTINGS.forEach((setting) => aiControl[setting] = receiveBooleanOrFallback(controlObj[setting], fallback));
     return aiControl;
@@ -140,6 +140,7 @@ class AiMeta {
     this.#dataRowImg = document.createElement("img");
     this.#dataRowImg.classList.add("ai-image", "selectable");
     this.#dataRowImg.src = AI_PORTRAIT_MISSING;
+    this.#dataRowImg.tabIndex = 0;
     newCell.appendChild(this.#dataRowImg);
     this.#dataRow.appendChild(newCell);
 
@@ -158,6 +159,8 @@ class AiMeta {
     this.#appendDataRowImg();
 
     this.#dataRow.appendChild(createTextCell(this.name));
+    this.#dataRow.appendChild(createTextCell(this.version));
+    this.#dataRow.appendChild(createTextCell(this.author));
     this.#dataRow.appendChild(createTextCell(this.root));
     this.#dataRow.appendChild(createTextCell(this.defaultLang));
     this.#dataRow.appendChild(createTextCell(this.supportedLang.join(', ')));
@@ -166,14 +169,14 @@ class AiMeta {
   }
 
   constructor(metaPath, metaObj) {
-    this.name = receiveStringOrFallback(metaObj.name);
-    this.description = receiveStringOrFallback(metaObj.description);
-    this.author = receiveStringOrFallback(metaObj.author);
-    this.link = receiveStringOrFallback(metaObj.link);
-    this.version = receiveStringOrFallback(metaObj.version);
-    this.defaultLang = receiveStringOrFallback(metaObj.defaultLang, null);
+    this.name = receiveStringOrFallback(metaObj.name, DEFAULT_VALUE_MARKER);
+    this.description = receiveStringOrFallback(metaObj.description, DEFAULT_VALUE_MARKER);
+    this.author = receiveStringOrFallback(metaObj.author, DEFAULT_VALUE_MARKER);
+    this.link = receiveStringOrFallback(metaObj.link, DEFAULT_VALUE_MARKER);
+    this.version = receiveStringOrFallback(metaObj.version, DEFAULT_VALUE_MARKER);
+    this.defaultLang = receiveStringOrFallback(metaObj.defaultLang);
     this.supportedLang = Array.isArray(metaObj.supportedLang) ? metaObj.supportedLang : [];
-    this.switched = AiControl.fromControlObject(metaObj.switched ?? {});
+    this.switched = AiControl.fromControlObject(metaObj.switched ?? {}, false);
     this.root = metaPath.replace(AiMeta.META_FILE, DEFAULT_VALUE_MARKER);
 
     this.#createDataRow();
@@ -220,8 +223,48 @@ class AiSetting {
   #boolCells = {};
 
   #appendDataRowControl() {
-    this.#controlCell = document.createElement("td")
-    // TODO
+    this.#controlCell = document.createElement("td");
+
+    const controlDiv = this.#controlCell.appendChild(document.createElement("div"));
+    controlDiv.classList.add("ai-setting-control");
+
+    const prioDiv = controlDiv.appendChild(document.createElement("div"));
+
+    const prioUpDiv = prioDiv.appendChild(document.createElement("div"));
+    prioUpDiv.textContent = "\u2B99";
+    prioUpDiv.classList.add("priority", "up");
+    prioUpDiv.tabIndex = 0;
+    addEnterAndClickListener(prioUpDiv, () => document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT, {
+      detail: {
+        type: "priority",
+        aiSetting: this,
+        priority: -1,
+      }
+    })));
+
+    const prioDownDiv = prioDiv.appendChild(document.createElement("div"));
+    prioDownDiv.textContent = "\u2B9B";
+    prioDownDiv.classList.add("priority", "down");
+    prioDownDiv.tabIndex = 0;
+    addEnterAndClickListener(prioDownDiv, () => document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT, {
+      detail: {
+        type: "priority",
+        aiSetting: this,
+        priority: +1,
+      }
+    })));
+
+    const removeDiv = controlDiv.appendChild(document.createElement("div"));
+    removeDiv.textContent = "\u2716";
+    removeDiv.classList.add("remove");
+    removeDiv.tabIndex = 0;
+    addEnterAndClickListener(removeDiv, () => document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT, {
+      detail: {
+        type: "remove",
+        aiSetting: this,
+      }
+    })));
+
     this.#dataRow.appendChild(this.#controlCell);
   }
 
@@ -281,12 +324,13 @@ class AiSetting {
   #appendDataRowBoolean(setting) {
     const newCell = createBooleanCell(this.control[setting]);
     newCell.classList.add("ai-setting-bool");
+    newCell.tabIndex = 0; // does not really work, since the redraw of the table removes focus
 
     const metaSettingExists = this.aiMeta.switched[setting];
     if (!metaSettingExists) {
       newCell.classList.add("no-setting");
     }
-    newCell.onclick = () => {
+    addEnterAndClickListener(newCell, () => {
       const currentValue = this.control[setting];
       const newValue = !isPrimitiveBool(currentValue) ? metaSettingExists : (currentValue ? false : undefined);
       this.control[setting] = newValue;
@@ -295,7 +339,7 @@ class AiSetting {
 
       // will be pretty heavy
       document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT));
-    };
+    });
 
     this.#setDataRowBooleanClass(newCell, this.control[setting]);
     this.#dataRow.appendChild(newCell);
@@ -319,7 +363,7 @@ class AiSetting {
 
   #verifyAiControlSetting(currentSetting, metaSetting) {
     // unsets if control stops being available
-    return currentSetting && metaSetting ? currentSetting : undefined;
+    return currentSetting && !metaSetting ? undefined : currentSetting;
   }
 
   #verifyAiControl() {
@@ -332,10 +376,10 @@ class AiSetting {
   constructor(meta, settingObj) {
     this.aiMeta = meta;
 
-    this.name = receiveStringOrFallback(this.aiMeta.name);
-    this.root = receiveStringOrFallback(this.aiMeta.root);
-    this.language = receiveStringOrFallback(settingObj.language, undefined);
-    this.control = AiControl.fromControlObject(settingObj.control ?? {}, undefined);
+    this.name = receiveStringOrFallback(this.aiMeta.name, DEFAULT_VALUE_MARKER);
+    this.root = receiveStringOrFallback(this.aiMeta.root, DEFAULT_VALUE_MARKER);
+    this.language = receiveStringOrFallback(settingObj.language);
+    this.control = AiControl.fromControlObject(settingObj.control ?? {});
     this.#verifyAiControl();
 
     // updating state based on meta, in case invalid settings are present
@@ -348,6 +392,11 @@ class AiSetting {
     }
 
     this.#createDataRow();
+  }
+
+  setInteractionStatus(active) {
+    this.#dataRow.querySelectorAll(active ? '[tabIndex="-1"]' : '[tabIndex="0"]').forEach((elem) => elem.tabIndex = active ? 0 : -1);
+    this.#dataRow.querySelectorAll(active ? 'select[disabled]' : 'select').forEach((elem) => elem.disabled = !active);
   }
 
   setBoolCellCurrent(controlName, isCurrent) {
@@ -370,7 +419,7 @@ class AiSetting {
 
   // if received from a present config
   static fromMetaAndSettings(meta, settingObj) {
-    if (meta.root !== receiveStringOrFallback(settingObj.root)) {
+    if (meta.root !== receiveStringOrFallback(settingObj.root, DEFAULT_VALUE_MARKER)) {
       return null; // something went wrong, just ignore it for now
     }
     return new AiSetting(meta, settingObj);
@@ -411,7 +460,21 @@ class AiChangeMenu {
   #updateTable() {
     this.#tableBodyElement.replaceChildren();
     this.#currentSlot.updateAiSettingsCellStatus();
-    this.#currentSlot.appendAllAiSettings(this.#tableBodyElement)
+    this.#currentSlot.appendAllAiSettings(this.#tableBodyElement);
+  }
+
+  #changeEvent(detail) {
+    switch (detail.type) {
+      case "remove": {
+        this.#currentSlot.removeAiSetting(detail.aiSetting);
+        break;
+      }
+      case "priority": {
+        this.#currentSlot.changePriority(detail.aiSetting, detail.priority);
+        break;
+      }
+    }
+    this.#updateTable();
   }
 
   constructor(mainElem, selectMenu) {
@@ -433,7 +496,7 @@ class AiChangeMenu {
       document.dispatchEvent(new CustomEvent(AI_CHANGE_UPDATE_EVENT));
     });
 
-    document.addEventListener(AI_CHANGE_UPDATE_EVENT, () => this.#updateTable());
+    document.addEventListener(AI_CHANGE_UPDATE_EVENT, (event) => this.#changeEvent(event.detail ?? {}));
   }
 
   activateEditDialog(aiSlot, slotName, localizedSlotName) {
@@ -443,7 +506,7 @@ class AiChangeMenu {
 
     const isLocked = this.#currentSlot.isLocked()
     this.#selectAiElem.disabled = isLocked;
-    this.#selectAiElem.textContent = isLocked ? GENERAL_LOCALIZATION["change.button.locked"] : this.#selectMainText;
+    this.#selectAiElem.textContent = isLocked ? [GENERAL_LOCALIZATION["change.button.locked"], this.#currentSlot.getLockingExtension()].join(" ") : this.#selectMainText;
 
     this.#updateTable();
     this.#mainElem.showModal();
@@ -453,7 +516,10 @@ class AiChangeMenu {
 class AiSlot {
   #slotName;
   #aiSettings = [];
-  #aiLocked = false; // TEMP, will lock the ai, so that no edits are possible
+
+  // TEMP?, will lock the ai, so that no edits are possible
+  #aiLocked = false;
+  #lockingExtension;
 
   #localizedSlotName;
   #changeMenu;
@@ -465,8 +531,9 @@ class AiSlot {
     this.#slotName = slotName;
   }
 
-  pushBaselineSetting(aiSetting) {
+  pushBaselineSetting(lockingExtension, aiSetting) {
     this.#aiLocked = true;
+    this.#lockingExtension = lockingExtension;
     this.#aiSettings.push(aiSetting);
   }
 
@@ -478,11 +545,21 @@ class AiSlot {
     return this.#aiLocked;
   }
 
+  getLockingExtension() {
+    return this.#lockingExtension;
+  }
+
   appendSlotExportSettingsToConfig(config) {
-    if (!this.#aiSettings.length) {
+    if (this.isLocked()) {
       return;
     }
-    config[this.#slotName] = this.#aiSettings.map((setting) => setting.toSettingNameAndObject());
+
+    const configKey = `ai.${this.#slotName}`;
+    if (!this.#aiSettings.length || this.isLocked()) {
+      config[configKey] = undefined; // deleting old setting
+      return;
+    }
+    config[configKey] = this.#aiSettings.map((setting) => setting.toSettingNameAndObject());
   }
 
   getAiSlotName() {
@@ -564,6 +641,23 @@ class AiSlot {
         aiSetting.setBoolCellCurrent(controlSetting, discoveredActive);
       });
     });
+    this.#aiSettings.forEach((aiSetting) => aiSetting.setInteractionStatus(!this.isLocked()));
+  }
+
+  removeAiSetting(aiSetting) {
+    const index = this.#aiSettings.indexOf(aiSetting);
+    if (index < 0) {
+      return; // nothing found
+    }
+    this.#aiSettings.splice(index, 1);
+  }
+
+  changePriority(aiSetting, priorityChange) {
+    const index = this.#aiSettings.indexOf(aiSetting);
+    if (index < 0) {
+      return; // nothing found
+    }
+    this.#aiSettings.splice(index + priorityChange, 0, ...this.#aiSettings.splice(index, 1));
   }
 }
 
@@ -571,13 +665,10 @@ class AiSlot {
 /** RESULT FUNCTIONS **/
 
 function createResultConfig() {
-  const configState = {
-    ai: {},
-  };
+  const configState = {};
 
-  // TODO: check how config overwrite works, also, why required values?
-  configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : null;
-  AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState.ai));
+  configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : undefined;
+  AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState));
   return configState;
 }
 
@@ -610,22 +701,28 @@ async function receiveAllAvailableAi() {
 
 async function receiveCurrentConfig() {
   const { baseline, user } = await HOST_FUNCTIONS.getCurrentConfig();
-  const { ai: baselineAI = {} } = baseline;  // ignore baseline default language
-  const { ai: userAi = {}, defaultLanguage } = user;
+  // ignore baseline default language
+
+  const { defaultLanguage, ...userAi } = user;
 
   if (defaultLanguage) {
     DEFAULT_LANGUAGE = defaultLanguage;
   }
 
-  // TODO: set what is received as baseline
-  for (const [ai, configArray] of Object.entries(baselineAI)) {
+  const baseLineAiArray = Object.entries(baseline).map(([key, value]) => [key, value.modifications.value.extension, value.modifications.value.content]);
+  for (const [aiUrl, extension, configArray] of baseLineAiArray) {
+    const ai = aiUrl.replace("ai.", "");
+
     configArray.filter((config) => FOUND_AI_META.has(config.root))
       .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
-      .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(aiSetting));
+      .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(extension, aiSetting));
   }
 
-  for (const [ai, configArray] of Object.entries(userAi)) {
+  // filter to handle keys set to undefined
+  for (const [aiUrl, configArray] of Object.entries(userAi).filter(([, configArray]) => !!configArray)) {
+    const ai = aiUrl.replace("ai.", "");
+
     const slot = AI_SLOTS.get(ai);
     if (slot.isLocked()) { // TEMP: settings from user are discarded if a plugin takes control
       continue;

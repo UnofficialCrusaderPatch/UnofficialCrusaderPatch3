@@ -18,6 +18,8 @@ slot.name.marshal: Marshal
 slot.name.abbot: Abbot
 select.img: Image
 select.name: Name
+select.version: Version
+select.author: Author
 select.root: Path
 select.defaultlang: Default Language
 select.supportedlang: Supported Languages
@@ -31,7 +33,8 @@ select.lord: Lord
 select.starttroops: Start Troops
 language.default: "Language to use as default if not set for slot:"
 language.default.default: Default
-change.controls: Index - Priority - Remove
+change.controls.priority: Priority
+change.controls.remove: Remove
 change.image: Image
 change.name: Name
 change.path: Path
@@ -47,4 +50,4 @@ change.starttroops: Start Troops
 change.language.default: Default
 change.language.default.ai: AI Default
 change.button.select: Add AI to Configuration
-change.button.locked: Locked by other plugin
+change.button.locked: "Locked by plugin:"
