@@ -1,6 +1,5 @@
 -- starting troops get loaded for example here: SHC 0044211c
 
-
 local util = require("scripts.util")
 
 --[[ IDs and Constants ]]--
@@ -8,40 +7,40 @@ local util = require("scripts.util")
 local DATA_PATH_CHARACTER = "character.json"
 
 local START_TROOPS_INDEX = {
-  EuropArcher     = 0  ,
-  Crossbowman     = 1  ,
-  Spearman        = 2  ,
-  Pikeman         = 3  ,
-  Maceman         = 4  ,
-  Swordsman       = 5  ,
-  Knight          = 6  ,
-  Unknown         = 7  , -- missing 7? -> nothing spawns? -> keep it supported, maybe someone wants to test something
-  Engineer        = 8  ,
-  Monk            = 9  ,
-  ArabArcher      = 10 ,
-  Slave           = 11 ,
-  Slinger         = 12 ,
-  Assassin        = 13 ,
-  HorseArcher     = 14 ,
-  ArabSwordsman   = 15 ,
-  FireThrower     = 16 ,
-  FireBallista    = 17 , -- unmanned, maybe it is not used? Why no catapults?
-  
+  EuropArcher   = 0,
+  Crossbowman   = 1,
+  Spearman      = 2,
+  Pikeman       = 3,
+  Maceman       = 4,
+  Swordsman     = 5,
+  Knight        = 6,
+  Unknown       = 7,     -- missing 7? -> nothing spawns? -> keep it supported, maybe someone wants to test something
+  Engineer      = 8,
+  Monk          = 9,
+  ArabArcher    = 10,
+  Slave         = 11,
+  Slinger       = 12,
+  Assassin      = 13,
+  HorseArcher   = 14,
+  ArabSwordsman = 15,
+  FireThrower   = 16,
+  FireBallista  = 17,    -- unmanned, maybe it is not used? Why no catapults?
+
   --[[
     - spawns two waves max (18), using the "default" start troops at least in normal match
     - nature (europe, arab) of the troops in singleplayer is those of the player lord
     - they do not count separately, having more than 18 spawns a bugged archer
     NOT TESTED: other modes, multiplayer, leave it at that
-  ]]--
+  ]] --
   --SimpleStart1    = 18 ,
   --SimpleStart2    = 19 ,
 }
 -- I am kinda wondering, if some of the values are actually not used as int? The lack of catapults...
 
 local GAME_MODE_INDEX = {
-  normal      = 0,
-  crusader    = 1,
-  deathmatch  = 2,
+  normal     = 0,
+  crusader   = 1,
+  deathmatch = 2,
 }
 
 
@@ -97,10 +96,28 @@ end
 
 local function resolveValueTable(source)
   local valueTable = {
-    [0] = 0, [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0,
-    [10] = 0, [11] = 0, [12] = 0, [13] = 0, [14] = 0, [15] = 0, [16] = 0, [17] = 0, [18] = 0, [19] = 0,
+    [0] = 0,
+    [1] = 0,
+    [2] = 0,
+    [3] = 0,
+    [4] = 0,
+    [5] = 0,
+    [6] = 0,
+    [7] = 0,
+    [8] = 0,
+    [9] = 0,
+    [10] = 0,
+    [11] = 0,
+    [12] = 0,
+    [13] = 0,
+    [14] = 0,
+    [15] = 0,
+    [16] = 0,
+    [17] = 0,
+    [18] = 0,
+    [19] = 0,
   }
-  
+
   for troopName, troopValue in pairs(source) do
     local troopIndex = START_TROOPS_INDEX[troopName]
     if troopIndex == nil then
@@ -109,21 +126,21 @@ local function resolveValueTable(source)
       valueTable[troopIndex] = troopValue
     end
   end
-    
+
   return valueTable
 end
 
 
 local function setStartTroops(indexToReplace, pathroot, aiName, loadedCharacterJson)
   if loadedCharacterJson == nil then
-    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, aiName, DATA_PATH_CHARACTER))
+    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, DATA_PATH_CHARACTER))
     if not loadedJson then
       log(WARNING, string.format("Could not load character file of AI '%s': %s", aiName, err))
       return
     end
     loadedCharacterJson = loadedJson
   end
-  
+
   if not loadedCharacterJson.startTroops then
     log(WARNING, string.format("Could not load start troops data of AI '%s': No troop data found.", aiName))
     return
@@ -143,6 +160,6 @@ end
 
 
 return {
-  resetStartTroops  = resetStartTroops,
-  setStartTroops    = setStartTroops,
+  resetStartTroops = resetStartTroops,
+  setStartTroops   = setStartTroops,
 }

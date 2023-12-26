@@ -1,4 +1,3 @@
-
 -- returns new table containing the value references of the source, but with transformed keys
 -- collisions in the transformed keys lead to overwrites
 -- "nil" returns for the key will not add the value to the new table
@@ -16,6 +15,11 @@ local function createTableWithTransformedKeys(source, transformer, recursive)
   return newTable
 end
 
+local next = next -- apperantly faster due to local context
+local function isTableEmpty(tableToCheck)
+  return next(tableToCheck) == nil
+end
+
 -- source https://stackoverflow.com/a/33511163 (1. comment)
 local function containsValue(tableToCheck, value)
   for key, val in pairs(tableToCheck) do
@@ -27,15 +31,15 @@ local function containsValue(tableToCheck, value)
 end
 
 
-local function getAiDataPath(root, aiName, dataPath)
-  return string.format("%s/%s/%s", root, aiName, dataPath)
+local function getAiDataPath(root, dataPath)
+  return string.format("%s/%s", root, dataPath)
 end
 
-local function getAiDataPathWithLocale(root, aiName, locale, dataPath)
+local function getAiDataPathWithLocale(root, locale, dataPath)
   if locale == nil then -- save against nil
-    return getAiDataPath(root, aiName, dataPath)
+    return getAiDataPath(root, dataPath)
   end
-  return string.format("%s/%s/lang/%s/%s", root, aiName, locale, dataPath)
+  return string.format("%s/lang/%s/%s", root, locale, dataPath)
 end
 
 
@@ -85,23 +89,24 @@ end
 
 -- checks locale path, else returns default
 -- at the moment, the default language is also checked this way
-local function getPathForLocale(root, aiName, locale, dataPath)
-  local localePath = getAiDataPathWithLocale(root, aiName, locale, dataPath)
+local function getPathForLocale(root, locale, dataPath)
+  local localePath = getAiDataPathWithLocale(root, locale, dataPath)
   if doesFileExist(localePath) then
     return localePath
   else
-    return getAiDataPath(root, aiName, dataPath)
+    return getAiDataPath(root, dataPath)
   end
 end
 
 return {
-  createTableWithTransformedKeys  = createTableWithTransformedKeys,
-  containsValue                   = containsValue,
-  getAiDataPath                   = getAiDataPath,
-  getAiDataPathWithLocale         = getAiDataPathWithLocale,
-  openFileForByteRead             = openFileForByteRead,
-  doesFileExist                   = doesFileExist,
-  loadByteDataFromFile            = loadByteDataFromFile,
-  loadDataFromJSON                = loadDataFromJSON,
-  getPathForLocale                = getPathForLocale,
+  createTableWithTransformedKeys = createTableWithTransformedKeys,
+  isTableEmpty                   = isTableEmpty,
+  containsValue                  = containsValue,
+  getAiDataPath                  = getAiDataPath,
+  getAiDataPathWithLocale        = getAiDataPathWithLocale,
+  openFileForByteRead            = openFileForByteRead,
+  doesFileExist                  = doesFileExist,
+  loadByteDataFromFile           = loadByteDataFromFile,
+  loadDataFromJSON               = loadDataFromJSON,
+  getPathForLocale               = getPathForLocale,
 }

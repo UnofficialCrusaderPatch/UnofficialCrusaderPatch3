@@ -1,4 +1,3 @@
-
 -- get addresses
 
 local setMessageForAiFuncStart = core.AOBScan("55 56 8b 74 24 10 8d 46 ff 83 f8 0f", 0x400000)
@@ -40,7 +39,7 @@ local function getPathFromStringAddress(removePattern, addressString)
       return core.readString(tonumber(testString))
     end
   end
-  
+
   return nil
 end
 
@@ -49,11 +48,11 @@ modules.files:registerOverrideFunction(function(resourcePath)
   if realPath == nil then
     realPath = getPathFromStringAddress(BINK_BASE, resourcePath)
   end
-  
+
   if realPath then -- else nil
     return realPath
   end
-  
+
   if not ratComplain and string.find(resourcePath, "Genie_13") then
     return ""
   elseif not sultanComplain and string.find(resourcePath, "Genie_14") then
@@ -77,45 +76,45 @@ local requireTable = require("aiSwapperHelper.dll") -- loads the dll in memory a
 -- write the jmp to the own function
 core.writeCode(
   setMessageForAiFuncStart,
-  {0xE9, requireTable.funcAddress_DetouredSetMessageForAi - setMessageForAiFuncStart - 5}  -- call to func
+  { 0xE9, requireTable.funcAddress_DetouredSetMessageForAi - setMessageForAiFuncStart - 5 } -- call to func
 )
 
 -- set func address
 core.writeCode(
   requireTable.address_PrepareAiMsgFunc,
-  {prepareAiMsgFunc}
+  { prepareAiMsgFunc }
 )
 
 -- set all array addresses
 core.writeCode(
   requireTable.address_AMessageFromArray,
-  {messageFromArray}
+  { messageFromArray }
 )
 core.writeCode(
   requireTable.address_AiBinkArray,
-  {aiBinkArray}
+  { aiBinkArray }
 )
 core.writeCode(
   requireTable.address_AiSfxArray,
-  {aiSfxArray}
+  { aiSfxArray }
 )
 
 -- write the jmp to the own function
 core.writeCode(
   menuAiSelectSfxFuncStart,
-  {0xE9, requireTable.funcAddress_PlayMenuSelectSFX - menuAiSelectSfxFuncStart - 5}  -- call to func
+  { 0xE9, requireTable.funcAddress_PlayMenuSelectSFX - menuAiSelectSfxFuncStart - 5 } -- call to func
 )
 
 -- set func address
 core.writeCode(
   requireTable.address_PlaySFXFunc,
-  {playSFXFunc}
+  { playSFXFunc }
 )
 
 -- write ptr
 core.writeCode(
   requireTable.address_ObjPtrForPlaySFX,
-  {playSFXFuncThisPtr}
+  { playSFXFuncThisPtr }
 )
 
 

@@ -1,4 +1,3 @@
-
 local util = require("scripts.util")
 
 --[[ IDs and Constants ]]--
@@ -6,28 +5,28 @@ local util = require("scripts.util")
 local DATA_PATH_CHARACTER = "character.json"
 
 local LORD_TYPE_VANILLA = {
-  [0 ]   =   0,
-  [1 ]   =   0,
-  [2 ]   =   0,
-  [3 ]   =   0,
-  [4 ]   =   1,
-  [5 ]   =   1,
-  [6 ]   =   1,
-  [7 ]   =   0,
-  [8 ]   =   0,
-  [9 ]   =   0,
-  [10]   =   1,
-  [11]   =   1,
-  [12]   =   1,
-  [13]   =   0,
-  [14]   =   0,
-  [15]   =   0,
+  [0]  = 0,
+  [1]  = 0,
+  [2]  = 0,
+  [3]  = 0,
+  [4]  = 1,
+  [5]  = 1,
+  [6]  = 1,
+  [7]  = 0,
+  [8]  = 0,
+  [9]  = 0,
+  [10] = 1,
+  [11] = 1,
+  [12] = 1,
+  [13] = 0,
+  [14] = 0,
+  [15] = 0,
 }
 
 local LORD_DOT = {
-  None    = 0,
-  Blue    = { 1, 2, 3, 4, 5 },
-  Yellow  = { 6, 7, 8, 9, 10 },
+  None   = 0,
+  Blue   = { 1, 2, 3, 4, 5 },
+  Yellow = { 6, 7, 8, 9, 10 },
 }
 
 local LORD_TYPE = {
@@ -65,7 +64,7 @@ end
 -- first add a ret
 core.writeCode(
   ptrToLordTypeDetour,
-  {0xc2, 0x04, 0x00}  -- ret 0x4
+  { 0xc2, 0x04, 0x00 } -- ret 0x4
 )
 -- then detour
 core.detourCode(function(registers)
@@ -103,11 +102,11 @@ local function resolveDot(color, count)
   if color == nil or count == nil or LORD_DOT[color] == nil or count < 0 or count > 5 then
     return nil
   end
-  
+
   if color == "None" or count == 0 then
     return 0
   end
-  return LORD_DOT[color][count] 
+  return LORD_DOT[color][count]
 end
 
 local function resolveType(lordType)
@@ -137,14 +136,14 @@ end
 
 local function setLord(indexToReplace, pathroot, aiName, loadedCharacterJson)
   if loadedCharacterJson == nil then
-    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, aiName, DATA_PATH_CHARACTER))
+    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, DATA_PATH_CHARACTER))
     if not loadedJson then
       log(WARNING, string.format("Could not load character file of AI '%s': %s", aiName, err))
       return
     end
     loadedCharacterJson = loadedJson
   end
-  
+
   if not loadedCharacterJson.lord then
     log(WARNING, string.format("Could not load lord data of AI '%s': No lord data found.", aiName))
     return
@@ -152,10 +151,11 @@ local function setLord(indexToReplace, pathroot, aiName, loadedCharacterJson)
 
   local lordType = resolveType(loadedCharacterJson.lord.Type)
   if not lordType then
-    log(WARNING, string.format("Could not set type of AI lord '%s': Wrong value: %s", aiName, loadedCharacterJson.lord.Type))
+    log(WARNING,
+      string.format("Could not set type of AI lord '%s': Wrong value: %s", aiName, loadedCharacterJson.lord.Type))
     lordType = LORD_TYPE_VANILLA[indexToReplace]
   end
-  
+
   local lordDot = resolveDot(loadedCharacterJson.lord.DotColour, loadedCharacterJson.lord.DotCount)
   if not lordDot then
     log(WARNING, string.format("Could not set dot of AI lord '%s': At least one wrong value: %s, %d", aiName,
@@ -178,6 +178,6 @@ end
 
 
 return {
-  resetLord  = resetLord,
-  setLord    = setLord,
+  resetLord = resetLord,
+  setLord   = setLord,
 }

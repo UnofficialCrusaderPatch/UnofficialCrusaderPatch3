@@ -15,7 +15,7 @@ local troops = nil
 
 --[[ IDs and Constants ]]--
 
-local AI_ROOT_FOLDER = "ucp/resources/ai"
+local AI_ROOT_FOLDER = "ucp/resources/ai/"
 
 local DATA_PATH_META = "meta.json"
 
@@ -38,20 +38,15 @@ local function getLordIndex(input)
   end
 end
 
-local function determineLanguage(indexToReplace, aiName, meta)
-  local aiLang = nil
-  if options.ai[indexToReplace] and options.ai[indexToReplace][aiName] then
-    aiLang = options.ai[indexToReplace][aiName].language
-  end
-  
+local function determineOrVerifyLanguage(aiLang, meta)
   if aiLang == nil then
     aiLang = options.defaultLanguage
   end
-    
+
   if aiLang == nil then
     aiLang = meta.defaultLang
   end
-  
+
   if meta.supportedLang ~= nil and not util.containsValue(meta.supportedLang, aiLang) then
     log(WARNING, string.format("Language '%s' is not supported. Using fallback.", aiLang))
     aiLang = meta.defaultLang -- may or may not be default folder
@@ -64,7 +59,7 @@ local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPositi
   if shouldModify == nil then -- if nil, nothing is done
     return nil
   end
-  if shouldModify and dataPresent then  -- silently resets if the data is missing
+  if shouldModify and dataPresent then -- silently resets if the data is missing
     return setFunc(aiPosition, pathroot, ...)
   else
     return resetFunc(aiPosition) -- resets if shouldModify false or no data present
@@ -72,31 +67,31 @@ local function setAiPart(setFunc, resetFunc, shouldModify, dataPresent, aiPositi
 end
 
 
-local function setAI(lordToReplace, aiName, control, pathroot)
+local function setAI(lordToReplace, aiName, control, pathroot, aiLang)
   local positionToReplace = getLordIndex(lordToReplace)
   if not util.containsValue(enums.LORD_ID, positionToReplace) then
     log(WARNING, string.format("Unable to set AI '%s'. Invalid lord to replace given.", aiName))
     return
   end
-  
-  pathroot = ucp.internal.resolveAliasedPath(pathroot or AI_ROOT_FOLDER)
 
-  local meta, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, aiName, DATA_PATH_META))
+  pathroot = ucp.internal.resolveAliasedPath(pathroot or (AI_ROOT_FOLDER .. aiName))
+
+  local meta, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, DATA_PATH_META))
   if meta == nil then
     log(WARNING, string.format("Unable to set AI '%s'. Issues with meta file: %s", aiName, err))
     return
   end
-  
-  local aiLang = determineLanguage(positionToReplace, aiName, meta)
-  
+
+  aiLang = determineOrVerifyLanguage(aiLang, meta)
+
   if meta.switched == nil then
     log(WARNING, string.format("Unable to set AI '%s'. No switch settings in meta file found.", aiName))
     return
   end
-  
-  
+
+
   -- all parts take care of their own reset, otherwise they are not usable on their own
-  
+
   control = control or {
     binks = true,
     speech = true,
@@ -109,24 +104,24 @@ local function setAI(lordToReplace, aiName, control, pathroot)
   }
 
   setAiPart(portrait.loadAndSetPortrait, portrait.resetPortrait, control.portrait,
-      meta.switched.portrait, positionToReplace, pathroot, aiName)
+    meta.switched.portrait, positionToReplace, pathroot, aiName)
   setAiPart(text.setAiTexts, text.resetAiTexts, control.lines, meta.switched.lines,
-      positionToReplace, pathroot, aiName, aiLang)
-  
+    positionToReplace, pathroot, aiName, aiLang)
+
   local loadedCharacterJson = nil
   loadedCharacterJson = setAiPart(aic.setAIC, aic.resetAIC, control.aic, meta.switched.aic,
-      positionToReplace, pathroot, aiName, loadedCharacterJson)
+    positionToReplace, pathroot, aiName, loadedCharacterJson)
   loadedCharacterJson = setAiPart(lord.setLord, lord.resetLord, control.lord, meta.switched.lord,
-      positionToReplace, pathroot, aiName, loadedCharacterJson)
+    positionToReplace, pathroot, aiName, loadedCharacterJson)
   loadedCharacterJson = setAiPart(troops.setStartTroops, troops.resetStartTroops, control.startTroops,
-      meta.switched.startTroops, positionToReplace, pathroot, aiName, loadedCharacterJson)
-  
+    meta.switched.startTroops, positionToReplace, pathroot, aiName, loadedCharacterJson)
+
   setAiPart(bink.setAiBinks, bink.resetAiBinks, control.binks, meta.switched.binks,
-      positionToReplace, pathroot, aiName, aiLang)
+    positionToReplace, pathroot, aiName, aiLang)
   setAiPart(sfx.setAiSfx, sfx.resetAiSfx, control.speech, meta.switched.speech,
-      positionToReplace, pathroot, aiName, aiLang)
+    positionToReplace, pathroot, aiName, aiLang)
   setAiPart(aiv.setAIV, aiv.resetAIV, control.aiv, meta.switched.aiv,
-      positionToReplace, pathroot, aiName)
+    positionToReplace, pathroot, aiName)
 end
 
 
@@ -142,16 +137,32 @@ local function resetAI(positionToReset)
   troops.resetStartTroops(positionToReset)
 end
 
+local function generateApplyOptionsControl(aiControl, alreadyPlaced)
+  local result = {}
+  for optionKey, optionValue in pairs(aiControl) do
+    if not alreadyPlaced:contains(optionKey) then
+      alreadyPlaced:add(optionKey)
 
-local function applyAIOptions(indexToReplace)
-  if options.ai[indexToReplace] then
-    for aiName, aiOptions in pairs(options.ai[indexToReplace]) do
-      aiOptions.root = ucp.internal.resolveAliasedPath(aiOptions.root)
-      setAI(indexToReplace, aiName, aiOptions.control, aiOptions.root)
+      -- false would trigger reset, which we do not need for initial ai placement
+      if optionValue then
+        result[optionKey] = optionValue
+      end
     end
   end
+  return result
 end
 
+local function applyAIOptions(indexToReplace)
+  if not options.ai[indexToReplace] then
+    return
+  end
+
+  local alreadyPlaced = extensions.utils.Set:new()
+  for _, aiOption in ipairs(options.ai[indexToReplace]) do
+    local aiControl = generateApplyOptionsControl(aiOption.control, alreadyPlaced)
+    setAI(indexToReplace, aiOption.name, aiControl, aiOption.root, aiOption.language)
+  end
+end
 
 local function resetAIWithOptions(lordToReplace, toVanilla)
   local positionToReset = getLordIndex(lordToReplace)
@@ -161,7 +172,7 @@ local function resetAIWithOptions(lordToReplace, toVanilla)
   end
 
   resetAI(positionToReset)
-  
+
   if not toVanilla then
     applyAIOptions(positionToReset)
   end
@@ -209,17 +220,18 @@ exports.enable = function(self, moduleConfig, globalConfig)
       end,
       false)
   end
-  
+
   -- set functions
-  
+
   self.SetAI = setAI
   self.ResetAI = resetAIWithOptions
   self.ResetAllAI = resetAllAIWithOptions
-  
+
   hooks.registerHookCallback("afterInit", function()
     for index, _ in pairs(options.ai) do
       applyAIOptions(index)
     end
+    log(INFO, "Applied AI Options.")
   end)
 end
 
