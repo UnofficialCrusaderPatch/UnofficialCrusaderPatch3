@@ -1,0 +1,53 @@
+ai_swapper: AI Swapper
+ai_swapper_descr: Modify the AI slots of the game.
+slot.name.rat: Rat
+slot.name.snake: Snake
+slot.name.pig: Pig
+slot.name.wolf: Wolf
+slot.name.saladin: Saladin
+slot.name.caliph: Caliph
+slot.name.sultan: Sultan
+slot.name.lionheart: Lionheart
+slot.name.frederick: Frederick
+slot.name.phillip: Phillip
+slot.name.wazir: Wazir
+slot.name.emir: Emir
+slot.name.nizar: Nizar
+slot.name.sheriff: Sheriff
+slot.name.marshal: Marshal
+slot.name.abbot: Abbot
+select.img: Image
+select.name: Name
+select.version: Version
+select.author: Author
+select.root: Path
+select.defaultlang: Default Language
+select.supportedlang: Supported Languages
+select.binks: Binks
+select.speech: Speech
+select.lines: Lines
+select.portrait: Portrait
+select.aic: AIC
+select.aiv: AIV
+select.lord: Lord
+select.starttroops: Start Troops
+language.default: "Language to use as default if not set for slot:"
+language.default.default: Default
+change.controls.priority: Priority
+change.controls.remove: Remove
+change.image: Image
+change.name: Name
+change.path: Path
+change.language: Language
+change.binks: Binks
+change.speech: Speech
+change.lines: Lines
+change.portrait: Portrait
+change.aic: AIC
+change.aiv: AIV
+change.lord: Lord
+change.starttroops: Start Troops
+change.language.default: Default
+change.language.default.ai: AI Default
+change.button.select: Add AI to Configuration
+change.button.locked: "Locked by plugin:"

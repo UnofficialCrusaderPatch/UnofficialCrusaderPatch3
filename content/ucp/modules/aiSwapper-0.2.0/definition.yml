@@ -1,11 +1,11 @@
 # The name of your module
 name: aiSwapper
 # The version of your module
-version: 0.1.0
+version: 0.2.0
 # The date of this version
-date: 2022
+date: 2023
 # The author
-author: TheRedDaemon
+author: [TheRedDaemon, gynt]
 # Tags to categorize a module in a list
 tags: [feature, utility]
 # Or maybe better, a category (Code-modification, Resources/map, Resources/gfx, ...)

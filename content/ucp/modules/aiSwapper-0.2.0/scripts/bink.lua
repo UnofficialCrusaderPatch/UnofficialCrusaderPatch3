@@ -1,4 +1,3 @@
-
 local util = require("scripts.util")
 local helper = require("scripts.helperWrapper")
 local enums = require("scripts.enums")
@@ -15,7 +14,7 @@ local SKRIMISH_BINK_ID = enums.SKRIMISH_MESSAGE_ID
 --[[ Functions ]]--
 
 local function performBinkSet(aiIndex, source)
-  source = source or {} -- to avoid error
+  source = source or {}                               -- to avoid error
   for binkName, binkId in pairs(SKRIMISH_BINK_ID) do
     helper.SetBink(aiIndex, binkId, source[binkName]) -- nil will auto reset
   end
@@ -26,14 +25,15 @@ local function resetAiBinks(aiIndexToReset)
 end
 
 local function setAiBinks(aiIndexToReplace, pathroot, aiName, aiLang)
-  local mappingPath = util.getPathForLocale(pathroot, aiName, aiLang, string.format("%s/%s", DATA_PATH_BINKS, DATA_PATH_MAPPING_FILE))
+  local mappingPath = util.getPathForLocale(pathroot, aiLang,
+    string.format("%s/%s", DATA_PATH_BINKS, DATA_PATH_MAPPING_FILE))
   local mappingData, msg = util.loadDataFromJSON(mappingPath)
-  
+
   if mappingData == nil then
     log(WARNING, string.format("Unable to read bink mappings file of AI '%s'. %s.", aiName, msg))
     return
   end
-  
+
   local binkRootPath = string.gsub(mappingPath, "/" .. DATA_PATH_MAPPING_FILE, "")
   local transformedIndexMappingData = util.createTableWithTransformedKeys(mappingData, string.upper)
   for typeName, binkPath in pairs(transformedIndexMappingData) do
@@ -50,6 +50,6 @@ end
 
 
 return {
-  resetAiBinks  = resetAiBinks,
-  setAiBinks    = setAiBinks,
+  resetAiBinks = resetAiBinks,
+  setAiBinks   = setAiBinks,
 }

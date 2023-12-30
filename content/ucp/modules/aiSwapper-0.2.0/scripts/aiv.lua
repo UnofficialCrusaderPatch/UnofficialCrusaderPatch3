@@ -1,4 +1,3 @@
-
 local util = require("scripts.util")
 
 local aivModule = modules.aivloader
@@ -11,7 +10,7 @@ local DATA_PATH_MAPPING_FILE = "mapping.json"
 
 local CASTLE_ID_PATTERN = "CASTLE_%d"
 local CASTLE_FIRST_ID = 1
-local CASTLE_LAST_ID = 8 
+local CASTLE_LAST_ID = 8
 
 
 --[[ Functions ]]--
@@ -21,17 +20,17 @@ local function resetAIV(indexToReset)
 end
 
 local function setAIV(aiIndexToReplace, pathroot, aiName)
-  local mappingPath = util.getAiDataPath(pathroot, aiName, string.format("%s/%s", DATA_PATH_AIVS, DATA_PATH_MAPPING_FILE))
+  local mappingPath = util.getAiDataPath(pathroot, string.format("%s/%s", DATA_PATH_AIVS, DATA_PATH_MAPPING_FILE))
   local mappingData, msg = util.loadDataFromJSON(mappingPath)
-  
+
   if mappingData == nil then
     log(WARNING, string.format("Unable to read aiv mappings file of AI '%s'. %s.", aiName, msg))
     return
   end
-  
+
   local aivRootPath = string.gsub(mappingPath, "/" .. DATA_PATH_MAPPING_FILE, "")
   local transformedIndexMappingData = util.createTableWithTransformedKeys(mappingData, string.upper)
-  
+
   local castlesToSet = {}
   for i = CASTLE_FIRST_ID, CASTLE_LAST_ID do
     local castleId = string.format(CASTLE_ID_PATTERN, i)
@@ -52,6 +51,6 @@ local function setAIV(aiIndexToReplace, pathroot, aiName)
 end
 
 return {
-  resetAIV  = resetAIV,
-  setAIV    = setAIV,
+  resetAIV = resetAIV,
+  setAIV   = setAIV,
 }

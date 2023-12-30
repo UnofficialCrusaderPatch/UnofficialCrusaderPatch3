@@ -1,4 +1,3 @@
-
 local util = require("scripts.util")
 local helper = require("scripts.helperWrapper")
 local enums = require("scripts.enums")
@@ -16,7 +15,7 @@ local SKRIMISH_SFX_ID = enums.SKRIMISH_MESSAGE_ID
 --[[ Functions ]]--
 
 local function performSfxSet(aiIndex, source)
-  source = source or {} -- to avoid error
+  source = source or {}                            -- to avoid error
   for sfxName, sfxId in pairs(SKRIMISH_SFX_ID) do
     helper.SetSfx(aiIndex, sfxId, source[sfxName]) -- nil will auto reset
   end
@@ -27,7 +26,7 @@ local function resetAiSfx(aiIndexToReset)
   local dllAiIndex = aiIndexToReset + 1
   performSfxSet(dllAiIndex, nil)
   helper.SetMessageFrom(dllAiIndex, nil)
-  
+
   if aiIndexToReset == enums.LORD_ID.RAT then
     helper.SetRatComplain(true)
   elseif aiIndexToReset == enums.LORD_ID.SULTAN then
@@ -36,14 +35,15 @@ local function resetAiSfx(aiIndexToReset)
 end
 
 local function setAiSfx(aiIndexToReplace, pathroot, aiName, aiLang)
-  local mappingPath = util.getPathForLocale(pathroot, aiName, aiLang, string.format("%s/%s", DATA_PATH_SPEECH, DATA_PATH_MAPPING_FILE))
+  local mappingPath = util.getPathForLocale(pathroot, aiLang,
+    string.format("%s/%s", DATA_PATH_SPEECH, DATA_PATH_MAPPING_FILE))
   local mappingData, msg = util.loadDataFromJSON(mappingPath)
-  
+
   if mappingData == nil then
     log(WARNING, string.format("Unable to read sfx mappings file of AI '%s'. %s.", aiName, msg))
     return
   end
-  
+
   local sfxRootPath = string.gsub(mappingPath, "/" .. DATA_PATH_MAPPING_FILE, "")
   local transformedIndexMappingData = util.createTableWithTransformedKeys(mappingData, string.upper)
   for typeName, sfxPath in pairs(transformedIndexMappingData) do
@@ -56,7 +56,7 @@ local function setAiSfx(aiIndexToReplace, pathroot, aiName, aiLang)
     end
   end
   performSfxSet(aiIndexToReplace + 1, transformedIndexMappingData) -- index + 1, because cpp module uses proper start value (Rat = 1)
-  
+
   -- this ignores if it is just a modified Rat, but I think this is ok
   if aiIndexToReplace == enums.LORD_ID.RAT then
     helper.SetRatComplain(false)
@@ -67,6 +67,6 @@ end
 
 
 return {
-  resetAiSfx  = resetAiSfx,
-  setAiSfx    = setAiSfx,
+  resetAiSfx = resetAiSfx,
+  setAiSfx   = setAiSfx,
 }

@@ -1,0 +1,269 @@
+body {
+  width: 100%;
+  height: 100%;
+  color: whitesmoke;
+}
+
+dialog {
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  border: 0;
+  background-color: var(--ucp-main-brown);
+}
+
+table {
+  border-spacing: 0;
+}
+
+td {
+  background-color: var(--ucp-main-brown);
+}
+
+th {
+  background-color: var(--ucp-main-grey);
+  color: black;
+}
+
+thead {
+  z-index: 1;
+  position: sticky;
+  top: 0;
+}
+
+th,
+td {
+  text-align: center;
+  padding: 0.5em;
+  border: 1px solid var(--ucp-main-grey);
+}
+
+select {
+  background-color: var(--ucp-main-grey);
+  color: black;
+  cursor: pointer;
+}
+
+select:disabled {
+  pointer-events: none;
+}
+
+.ai-swapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.ai-swapper[hidden] {
+  display: none;
+}
+
+.ai-swapper__default-language {
+  display: flex;
+  justify-content: end;
+  padding: 10px;
+}
+
+.ai-swapper__default-language__select {
+  margin-left: 1em;
+}
+
+.ai-swapper__overview {
+  flex-grow: 1;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(8, 1fr);
+  padding: 10px;
+  gap: 10px;
+  width: 100%;
+}
+
+.ai-swapper__overview__ai {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ai-swapper__change-menu__header {
+  color: whitesmoke;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.ai-swapper__change-menu__select {
+  color: black;
+  margin: 10px 0 10px 0;
+  padding: 5px;
+  background-color: var(--ucp-main-grey);
+  cursor: pointer;
+}
+
+.ai-swapper__change-menu__select:disabled {
+  pointer-events: none;
+}
+
+.ai-swapper__change-menu[open],
+.ai-swapper__select-menu[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-swapper__change-menu__container {
+  flex-grow: 1;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ai-swapper__select-menu__container {
+  flex-grow: 1;
+  width: 100%;
+  margin-top: 30px;
+  overflow-x: auto;
+}
+
+.ai-swapper__change-menu__table,
+.ai-swapper__select-menu__table {
+  width: 100%;
+  color: whitesmoke;
+}
+
+.ai-swapper__change-menu__table tr>:is(th, td):first-child {
+  position: sticky;
+  left: 0;
+  text-wrap: nowrap;
+}
+
+.ai-swapper__change-menu__table__body,
+.ai-swapper__select-menu__table__body {
+  overflow-y: auto;
+}
+
+.ai-swapper__change-menu__ai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.ai-swapper__change-menu__close,
+.ai-swapper__select-menu__close {
+  position: absolute;
+  text-align: center;
+  line-height: 16px;
+  color: var(--ucp-main-brown);
+  right: 0;
+  top: 0;
+  height: 20px;
+  width: 20px;
+  margin: 5px;
+  padding: 0;
+  background-color: var(--ucp-main-grey);
+  cursor: pointer;
+}
+
+.ai-image {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
+tr .ai-image {
+  margin: auto;
+}
+
+.ai-image.selectable {
+  cursor: pointer;
+}
+
+.ai-image.selectable:hover {
+  filter: drop-shadow(0 0 3px whitesmoke);
+}
+
+.ai-image.selectable:active {
+  filter: brightness(50%);
+}
+
+.slot-name,
+.ai-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  margin: 10px 0 10px 0;
+}
+
+.ai-setting-bool {
+  cursor: pointer;
+}
+
+.ai-setting-bool.current.active {
+  background-color: forestgreen;
+}
+
+.ai-setting-bool.current.inactive {
+  background-color: darkred;
+}
+
+.ai-setting-bool[tabIndex="-1"] {
+  pointer-events: none;
+  filter: brightness(50%);
+}
+
+.ai-setting-control-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.ai-setting-control-header>span {
+  margin: 0.5em;
+}
+
+.ai-setting-control {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-size: 1.5em;
+}
+
+.ai-setting-control .priority {
+  cursor: pointer;
+}
+
+.ai-setting-control .remove {
+  cursor: pointer;
+  color: lightcoral;
+}
+
+.ai-setting-control .priority:hover {
+  filter: drop-shadow(0 0 3px whitesmoke);
+}
+
+.ai-setting-control .remove:hover {
+  filter: drop-shadow(0 0 3px lightcoral);
+}
+
+.ai-setting-control .priority:active,
+.ai-setting-control .remove:active {
+  filter: brightness(50%);
+}
+
+.ai-setting-control :is(.priority, .remove)[tabIndex="-1"] {
+  pointer-events: none;
+  filter: brightness(50%);
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row:first-child .ai-setting-control .priority.up {
+  visibility: hidden;
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row:last-child .ai-setting-control .priority.down {
+  visibility: hidden;
+}

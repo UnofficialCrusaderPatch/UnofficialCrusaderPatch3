@@ -6,6 +6,8 @@
     <file src="*.lua" target="." />
     <file src="scripts/*.lua" target="./scripts" />
     <file src="*.yml" target="." />
+    <file src="menu/*" target="./menu" />
+    <file src="locale/*" target="./locale" />
   </files>
   
   <files build="Debug">
@@ -14,5 +16,7 @@
     <file src="*.lua" target="." />
     <file src="scripts/*.lua" target="./scripts" />
     <file src="*.yml" target="." />
+    <file src="menu/*" target="./menu" />
+    <file src="locale/*" target="./locale" />
   </files>
 </module>

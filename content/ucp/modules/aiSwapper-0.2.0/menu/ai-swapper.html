@@ -1,0 +1,106 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Ai Swapper Custom Menu</title>
+  <meta name="description" content="The menu is used to configure the ai swapper.">
+  <meta name="author" content="TheRedDaemon">
+</head>
+
+<body>
+  <div class="ai-swapper" hidden>
+    <dialog class="ai-swapper__select-menu">
+      <button tabindex="0" class="ai-swapper__select-menu__close">
+        &#10006;
+      </button>
+      <div class="ai-swapper__select-menu__container">
+        <table class="ai-swapper__select-menu__table">
+          <thead class="ai-swapper__select-menu__table__header">
+            <tr>
+              <th>{{select.img}}</th>
+              <th>{{select.name}}</th>
+              <th>{{select.version}}</th>
+              <th>{{select.author}}</th>
+              <th>{{select.root}}</th>
+              <th>{{select.defaultlang}}</th>
+              <th>{{select.supportedlang}}</th>
+              <th>{{select.binks}}</th>
+              <th>{{select.speech}}</th>
+              <th>{{select.lines}}</th>
+              <th>{{select.portrait}}</th>
+              <th>{{select.aic}}</th>
+              <th>{{select.aiv}}</th>
+              <th>{{select.lord}}</th>
+              <th>{{select.starttroops}}</th>
+            </tr>
+          </thead>
+          <tbody class="ai-swapper__select-menu__table__body">
+
+          </tbody>
+        </table>
+      </div>
+    </dialog>
+    <dialog class="ai-swapper__change-menu">
+      <button tabindex="0" class="ai-swapper__change-menu__close">
+        &#10006;
+      </button>
+      <div class="ai-swapper__change-menu__header">
+        <h2 class="slot-name"></h2>
+        <button class="ai-swapper__change-menu__select">
+          {{change.button.select}}
+        </button>
+      </div>
+      <div class="ai-swapper__change-menu__container">
+        <table class="ai-swapper__change-menu__table">
+          <thead class="ai-swapper__change-menu__table__header">
+            <tr>
+              <th>
+                <div class="ai-setting-control-header">
+                  <span>{{change.controls.priority}}</span>
+                  <span>{{change.controls.remove}}</span>
+                </div>
+              </th>
+              <th>{{change.image}}</th>
+              <th>{{change.name}}</th>
+              <th>{{change.path}}</th>
+              <th>{{change.language}}</th>
+              <th>{{change.binks}}</th>
+              <th>{{change.speech}}</th>
+              <th>{{change.lines}}</th>
+              <th>{{change.portrait}}</th>
+              <th>{{change.aic}}</th>
+              <th>{{change.aiv}}</th>
+              <th>{{change.lord}}</th>
+              <th>{{change.starttroops}}</th>
+            </tr>
+          </thead>
+          <tbody class="ai-swapper__change-menu__table__body">
+          </tbody>
+        </table>
+      </div>
+    </dialog>
+
+    <div class="ai-swapper__default-language">
+      <p>{{language.default}}</p>
+      <select class="ai-swapper__default-language__select">
+        <option value="">{{language.default.default}}</option>
+      </select>
+    </div>
+    <div class="ai-swapper__overview">
+    </div>
+  </div>
+
+  <template class="template--ai-overview-slot">
+    <div class="ai-swapper__overview__ai">
+      <p class="slot-name"></p>
+      <img tabindex="0" class="ai-image selectable" />
+      <p class="ai-name">Test</p>
+    </div>
+  </template>
+</body>
+
+</html>

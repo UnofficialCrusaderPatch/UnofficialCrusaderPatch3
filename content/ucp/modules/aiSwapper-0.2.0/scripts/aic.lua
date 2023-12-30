@@ -1,4 +1,3 @@
-
 local util = require("scripts.util")
 
 local aicModule = modules.aicloader
@@ -17,25 +16,25 @@ end
 
 local function setAIC(indexToReplace, pathroot, aiName, loadedCharacterJson)
   if loadedCharacterJson == nil then
-    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, aiName, DATA_PATH_CHARACTER))
+    local loadedJson, err = util.loadDataFromJSON(util.getAiDataPath(pathroot, DATA_PATH_CHARACTER))
     if not loadedJson then
       log(WARNING, string.format("Could not load character file of AI '%s': %s", aiName, err))
       return
     end
     loadedCharacterJson = loadedJson
   end
-  
+
   if not loadedCharacterJson.aic then
     log(WARNING, string.format("Could not load AIC data of AI '%s': No aic data found.", aiName))
     return
   end
-  
+
   aicModule.overwriteAIC(indexToReplace + 1, loadedCharacterJson.aic) -- uses ai ids
   return loadedCharacterJson
 end
 
 
 return {
-  resetAIC  = resetAIC,
-  setAIC    = setAIC,
+  resetAIC = resetAIC,
+  setAIC   = setAIC,
 }
