@@ -53,7 +53,7 @@ config.ConfigHandler = {
         if not f then
             log(WARNING, "[config/init]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
             log(WARNING, "[config/init]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
-            return { modules = {} }
+            return { ['specification-version'] = '1.0.0', active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
         end
         local data = f:read("*all")
         f:close()
@@ -73,7 +73,7 @@ config.ConfigHandler = {
         if not f then
             log(WARNING, "[config/init]: Could not read ucp-config.yml. Reason: " .. message)
             log(WARNING, "[config/init]: Treating ucp-config.yml as empty file")
-            return { modules = {}, plugins = {} }
+            return { ['specification-version'] = '1.0.0', active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
         end
         local data = f:read("*all")
         f:close()
