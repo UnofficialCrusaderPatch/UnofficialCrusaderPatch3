@@ -67,6 +67,14 @@ Copy-Item "$($Path)\installer\rename-dlls.bat" "$($Path)\$BUILD_CONFIGURATION\uc
 mkdir "$($Path)\$BUILD_CONFIGURATION\ucp-package\gameseeds"
 
 
+$ENDUSER_CONFIG_MAPPING = @{
+    "DebugSecure" = "Debug";
+    "ReleaseSecure" = "";
+    "Debug" = "DebugDeveloper";
+    "Release" = "Developer";
+}
+
+
 $f = Get-Content -Path "$($Path)\version.yml" -Raw
 $vyml = ConvertFrom-Yaml $f
 
@@ -77,7 +85,7 @@ $versionInfo = [ordered]@{
     minor = $vyml.minor;
     patch = $vyml.patch;
     sha = "$GITHUB_SHA";
-    build = "$BUILD_CONFIGURATION";
+    build = $ENDUSER_CONFIG_MAPPING["$BUILD_CONFIGURATION"];
 }
 $y = ConvertTo-Yaml $versionInfo
 Set-Content -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\ucp-version.yml" -Value $y
