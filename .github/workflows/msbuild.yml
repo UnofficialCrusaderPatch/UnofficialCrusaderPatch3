@@ -135,16 +135,13 @@ jobs:
         
         popd
       
-      
-    - uses: ncipollo/release-action@v1
+    - uses: 'marvinpinto/action-automatic-releases@latest'
       with:
-        artifacts: "artifacts/*.zip"
-        token: "${{ secrets.GITHUB_TOKEN }}"      
-        tag: "latest"
-        commit: "main"
-        allowUpdates: true
-        name: "Development Build"
+        repo_token: '${{ secrets.GITHUB_TOKEN }}'
+        automatic_release_tag: 'latest'
         prerelease: true
-        replacesArtifacts: true
-        removeArtifacts: true
+        draft: false
+        title: 'Development Build'
+        files: |
+          artifacts/*.zip
          
