@@ -425,9 +425,12 @@ void Core::setArgsFromCommandLine() {
 		std::string narrow = io::utf8_encode(arg);
 		/*std::wstring wide = converter.from_bytes(narrow_utf8_source_string);*/
 
-		this->argvString.push_back(narrow);
-		this->argv.push_back(this->argvString[this->argc].c_str());
+		this->argvString.push_back(std::string(narrow));
 		this->argc += 1;
+	}
+
+	for (int i = 0; i < this->argc; i++) {
+		this->argv.push_back(this->argvString[i].c_str());
 	}
 
 	// Free memory allocated for CommandLineToArgvW arguments.
@@ -593,8 +596,8 @@ void Core::processCommandLineArguments() {
 	options.add_options()
 		("ucp-console", "Enable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
 		("ucp-no-console", "Disable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
-		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value(0))
-		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value(0))
+		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value("0"))
+		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
