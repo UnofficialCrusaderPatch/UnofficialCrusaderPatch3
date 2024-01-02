@@ -27,6 +27,10 @@
 #include "lua/Preload.h"
 #include "io/modules/ModuleHandle.h"
 
+
+// Option parsing
+#include <vendor/cxxopts/include/cxxopts.hpp>
+
 int luaRegisterPathAlias(lua_State* L) {
 	std::string alias = luaL_checkstring(L, 1);
 	std::string target = luaL_checkstring(L, 2);
@@ -421,7 +425,8 @@ void Core::setArgsFromCommandLine() {
 		std::string narrow = io::utf8_encode(arg);
 		/*std::wstring wide = converter.from_bytes(narrow_utf8_source_string);*/
 
-		this->argv.push_back(narrow);
+		this->argvString.push_back(narrow);
+		this->argv.push_back(this->argvString[this->argc].c_str());
 		this->argc += 1;
 	}
 
@@ -438,7 +443,7 @@ void Core::setArgsAsGlobalVarInLua() {
 
 	for (int i = 0; i < nArgs; i++) {
 
-		lua_pushstring(this->L, this->argv[i].c_str());
+		lua_pushstring(this->L, this->argv[i]);
 		lua_seti(this->L, -2, i + 1); // lua is 1-based
 	}
 
@@ -446,97 +451,10 @@ void Core::setArgsAsGlobalVarInLua() {
 
 }
 
-bool Core::findArg(std::string& result, const std::string argName) {
-	for (int i = 0; i < (this->argc - 1); i++) {
-		std::string& candidate = this->argv[i];
-		if (candidate == argName) {
-			result = this->argv[i + 1];
-			return true;
-		}
-	}
-	result = "";
-	return false;
-}
-
-void Core::setVerbosities() {
-
-	int verbosity = 0;
-	const char* UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
-	std::string CMD_UCP_VERBOSITY;
-	if (!this->findArg(CMD_UCP_VERBOSITY, "--ucp-verbosity")) {
-		if (UCP_VERBOSITY == NULL) {
-			verbosity = 0;
-		}
-	}
-	else {
-		UCP_VERBOSITY = CMD_UCP_VERBOSITY.c_str();
-	}
-	if (UCP_VERBOSITY != NULL) {
-		std::istringstream s(UCP_VERBOSITY);
-		s >> verbosity; // We don't care about errors at this point.
-	}
-
-	int consoleVerbosity = 0;
-	const char* UCP_CONSOLE_VERBOSITY = std::getenv("UCP_CONSOLE_VERBOSITY");
-	std::string CMD_CONSOLE_VERBOSITY;
-	if (!this->findArg(CMD_CONSOLE_VERBOSITY, "--ucp-console-verbosity")) {
-		if (UCP_CONSOLE_VERBOSITY == NULL) {
-			consoleVerbosity = 0;
-		}
-		
-
-	}
-	else {
-		UCP_CONSOLE_VERBOSITY = CMD_CONSOLE_VERBOSITY.c_str();
-	}
-	if (UCP_CONSOLE_VERBOSITY != NULL){
-		std::istringstream s(UCP_CONSOLE_VERBOSITY);
-		s >> consoleVerbosity; // We don't care about errors at this point.
-	}
-
-	this->consoleLogLevel = consoleVerbosity;
-	this->logLevel = verbosity;
-}
-
 void Core::initializeConsole() {
-
-#if !defined(_DEBUG) && defined(COMPILED_MODULES)
-	// No Console
-	this->hasConsole = false;
-#else
-	// In principle yes, unless explicitly not
-	this->hasConsole = true;
-	const char* UCP_CONSOLE = std::getenv("UCP_CONSOLE");
-	std::string CMD_UCP_CONSOLE;
-
-	if (!this->findArg(CMD_UCP_CONSOLE, "--ucp-console")) {
-		if (UCP_CONSOLE == NULL) {
-			this->hasConsole = true;
-		}
-	}
-	else {
-		UCP_CONSOLE = CMD_UCP_CONSOLE.c_str();
-	}
-
-	if (UCP_CONSOLE != NULL) {
-		if (std::string(UCP_CONSOLE) == "0") {
-			this->hasConsole = false;
-		}
-	}
 	if (this->hasConsole) {
 		Console::initializeConsole();
 	}
-	//#elif !defined(COMPILED_MODULES)
-	//	char* ENV_UCP_CONSOLE = std::getenv("UCP_CONSOLE");
-	//	if (ENV_UCP_CONSOLE != NULL) {
-	//		if (std::string(ENV_UCP_CONSOLE) == "1") {
-	//			this->hasConsole = true;
-	//		}
-	//	}
-	//	if (this->hasConsole) {
-	//		initializeConsole();
-	//	}
-#endif
 }
 
 void Core::executeLuaMain() {
@@ -599,7 +517,7 @@ void Core::executeLuaMain() {
 }
 
 void Core::startConsoleThread() {
-	if (this->hasConsole) {
+	if (this->hasConsole && this->interactiveConsole) {
 		consoleThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)Console::ConsoleThread, NULL, 0, nullptr);
 
 		if (consoleThread == INVALID_HANDLE_VALUE) {
@@ -636,6 +554,64 @@ Store Core::getModuleHashStore() {
 	return *this->moduleHashStore;
 }
 
+void Core::processEnvironmentVariables() {
+
+	const char* UCP_CONSOLE = std::getenv("UCP_CONSOLE");
+	std::string CMD_UCP_CONSOLE;
+
+	if (UCP_CONSOLE != NULL) {
+		if (std::string(UCP_CONSOLE) == "0" || std::string(UCP_CONSOLE) == "false") {
+			this->hasConsole = false;
+		}
+		else if (std::string(UCP_CONSOLE) == "1" || std::string(UCP_CONSOLE) == "true") {
+			this->hasConsole = true;
+		}
+	}
+
+
+
+	int verbosity = 0;
+	const char* UCP_VERBOSITY = std::getenv("UCP_VERBOSITY");
+	if (UCP_VERBOSITY != NULL) {
+		std::istringstream s(UCP_VERBOSITY);
+		s >> verbosity; // We don't care about errors at this point.
+	}
+
+	int consoleVerbosity = 0;
+	const char* UCP_CONSOLE_VERBOSITY = std::getenv("UCP_CONSOLE_VERBOSITY");
+	if (UCP_CONSOLE_VERBOSITY != NULL) {
+		std::istringstream s(UCP_CONSOLE_VERBOSITY);
+		s >> consoleVerbosity; // We don't care about errors at this point.
+	}
+
+	this->consoleLogLevel = consoleVerbosity;
+	this->logLevel = verbosity;
+}
+
+void Core::processCommandLineArguments() {
+	cxxopts::Options options("Stronghold Crusader (UCP)", "Command line arguments for UCP");
+	options.add_options()
+		("ucp-console", "Enable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
+		("ucp-no-console", "Disable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
+		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value(0))
+		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value(0))
+		;
+
+	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
+	auto result = options.allow_unrecognised_options().parse(this->argc, this->argv.data());
+
+	bool consoleYes = result["ucp-console"].as<bool>();
+	bool consoleNo = result["ucp-no-console"].as<bool>();
+
+#if !defined(_DEBUG) && defined(COMPILED_MODULES)
+	this->hasConsole = consoleYes && !consoleNo;
+#else
+	this->hasConsole = !consoleNo;
+#endif
+	
+	this->consoleLogLevel = result["ucp-console-verbosity"].as<int>();
+	this->logLevel = result["ucp-verbosity"].as<int>();
+}
 
 void Core::initialize() {
 
@@ -646,8 +622,9 @@ void Core::initialize() {
 	}
 
 	this->setArgsFromCommandLine();
+	this->processEnvironmentVariables();
+	this->processCommandLineArguments();
 
-	this->setVerbosities();
 	initializeLogger(this->logLevel, this->consoleLogLevel);
 
 	this->initializeConsole();

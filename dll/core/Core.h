@@ -57,14 +57,15 @@ private:
 
 	void setArgsAsGlobalVarInLua();
 	void setArgsFromCommandLine();
-	void setVerbosities();
+	void processCommandLineArguments();
+	void processEnvironmentVariables();
 	void initializeConsole();
-	bool findArg(std::string& result, const std::string argName);
 	void executeLuaMain();
 	void startConsoleThread();
 
 public:
-	std::vector<std::string> argv;
+	std::vector<std::string> argvString;
+	std::vector<const char *> argv;
 	int argc = 0;
 
 	int consoleLogLevel = 0;
@@ -85,6 +86,12 @@ public:
 
 	bool hasConsole = false;
 
+#if !defined(_DEBUG) && defined(COMPILED_MODULES)
+	const bool interactiveConsole = false;
+#else
+	const bool interactiveConsole = true;
+#endif
+
 	bool sanitizePath(const std::string& path, std::string& result);
 
 	std::map<std::string, std::string> aliasedPaths;
@@ -96,6 +103,8 @@ public:
 
 	bool pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::string& insideCodePath);
 	bool codeLocationExists(bool& asZip, bool& asFolder);
+
+	
 
 	Store getModuleHashStore();
 
