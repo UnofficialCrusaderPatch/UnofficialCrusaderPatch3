@@ -217,7 +217,20 @@ static const struct luaL_Reg printlib[] = {
   {NULL, NULL} /* end of array */
 };
 
+const char* verbosityToName(loguru::Verbosity verbosity) {
+	if (verbosity == loguru::Verbosity_1) {
+		return "DEBUG";
+	}
+	if (verbosity == loguru::Verbosity_2) {
+		return "VERBOSE";
+	}
+	return nullptr;
+}
+
 void initializeLogger(int logLevel, int consoleLogLevel) {
+
+	loguru::set_verbosity_to_name_callback(verbosityToName);
+
 	// Put every log message of at least logLevel in ucp3.log
 	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
 
