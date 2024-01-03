@@ -16,6 +16,8 @@
 #include "zip.h"
 #include "security/Store.h"
 
+#include <core/Core-fwd.h>
+
 class Core
 {
 

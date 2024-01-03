@@ -200,8 +200,13 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core\Core-fwd.h" />
     <ClInclude Include="core\Core.h" />
     <ClInclude Include="console\console.h" />
+    <ClInclude Include="core\initialization\io.h" />
+    <ClInclude Include="core\initialization\logging.h" />
+    <ClInclude Include="core\Core-path.h" />
+    <ClInclude Include="core\initialization\ucp-internal.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
@@ -229,6 +234,10 @@
   <ItemGroup>
     <ClCompile Include="core\Core.cpp" />
     <ClCompile Include="console\console.cpp" />
+    <ClCompile Include="core\initialization\io.cpp" />
+    <ClCompile Include="core\initialization\logging.cpp" />
+    <ClCompile Include="core\Core-path.cpp" />
+    <ClCompile Include="core\initialization\ucp-internal.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="io\files.cpp" />
     <ClCompile Include="io\modules\module_utils.cpp" />
