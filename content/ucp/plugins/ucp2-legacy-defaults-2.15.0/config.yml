@@ -1,6 +1,6 @@
 config-sparse:
   modules:
-    ucp:
+    ucp2-legacy:
       config:
         ai_attacklimit:
           contents:

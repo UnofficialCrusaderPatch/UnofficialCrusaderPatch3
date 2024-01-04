@@ -7,7 +7,7 @@ options:
   header: '{{ai_access}}'
   text: '{{ai_access_descr}}'
   display: UCP2Switch
-  url: ucp.ai_access.enabled
+  url: ucp2-legacy.ai_access.enabled
   contents:
     type: boolean
     value: false
@@ -16,7 +16,7 @@ options:
   display: UCP2SliderChoice
   hasHeader: true
   header: '{{ai_addattack}}'
-  url: ucp.ai_addattack
+  url: ucp2-legacy.ai_addattack
   contents:
     value:
       enabled: false
@@ -45,7 +45,7 @@ options:
   text: '{{ai_attacklimit_descr}}'
   hasHeader: true
   display: UCP2Slider
-  url: ucp.ai_attacklimit
+  url: ucp2-legacy.ai_attacklimit
   contents:
     min: 0
     max: 3000
@@ -62,7 +62,7 @@ options:
   header: '{{ai_assaultswitch}}'
   text: '{{ai_assaultswitch_descr}}'
   display: UCP2Switch
-  url: ucp.ai_assaultswitch.enabled
+  url: ucp2-legacy.ai_assaultswitch.enabled
   contents:
     value: false
     type: boolean
@@ -74,7 +74,7 @@ options:
   text: '{{ai_attacktarget_weakest_descr}}'
   hasHeader: true
   display: UCP2RadioGroup
-  url: ucp.ai_attacktarget
+  url: ucp2-legacy.ai_attacktarget
   contents:
     choices:
     - name: nearest
@@ -93,7 +93,7 @@ options:
   header: '{{ai_attackwave}}'
   text: '{{ai_attackwave_descr}}'
   display: UCP2Switch
-  url: ucp.ai_attackwave.enabled
+  url: ucp2-legacy.ai_attackwave.enabled
   contents:
     value: false
     type: boolean
@@ -104,7 +104,7 @@ options:
   header: '{{ai_buywood}}'
   text: '{{ai_buywood_descr}}'
   display: UCP2Switch
-  url: ucp.ai_buywood.enabled
+  url: ucp2-legacy.ai_buywood.enabled
   contents:
     value: false
     type: boolean
@@ -115,7 +115,7 @@ options:
   header: '{{ai_defense}}'
   text: '{{ai_defense_descr}}'
   display: UCP2Switch
-  url: ucp.ai_defense.enabled
+  url: ucp2-legacy.ai_defense.enabled
   contents:
     value: false
     type: boolean
@@ -132,21 +132,21 @@ options:
   - name: ai_demolish_walls
     display: UCP2Switch
     header: '{{ai_demolish_walls}}'
-    url: ucp.ai_demolish.ai_demolish_walls.enabled
+    url: ucp2-legacy.ai_demolish.ai_demolish_walls.enabled
     contents:
       value: false
       type: boolean
   - name: ai_demolish_trapped
     display: UCP2Switch
     header: '{{ai_demolish_trapped}}'
-    url: ucp.ai_demolish.ai_demolish_trapped.enabled
+    url: ucp2-legacy.ai_demolish.ai_demolish_trapped.enabled
     contents:
       value: false
       type: boolean
   - name: ai_demolish_eco
     display: UCP2Switch
     header: '{{ai_demolish_eco}}'
-    url: ucp.ai_demolish.ai_demolish_eco.enabled
+    url: ucp2-legacy.ai_demolish.ai_demolish_eco.enabled
     contents:
       value: false
       type: boolean 
@@ -157,7 +157,7 @@ options:
   header: '{{ai_fix_crusader_archers_pitch}}'
   text: '{{ai_fix_crusader_archers_pitch_descr}}'
   display: UCP2Switch
-  url: ucp.ai_fix_crusader_archers_pitch.enabled
+  url: ucp2-legacy.ai_fix_crusader_archers_pitch.enabled
   contents:
     value: false
     type: boolean
@@ -168,7 +168,7 @@ options:
   header: '{{ai_fix_laddermen_with_enclosed_keep}}'
   text: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
   display: UCP2Switch
-  url: ucp.ai_fix_laddermen_with_enclosed_keep.enabled
+  url: ucp2-legacy.ai_fix_laddermen_with_enclosed_keep.enabled
   contents:
     value: false
     type: boolean
@@ -185,7 +185,7 @@ options:
     text: '{{build_housing_descr}}'
     header: Set limit on houses
     hasHeader: true
-    url: ucp.ai_housing.build_housing
+    url: ucp2-legacy.ai_housing.build_housing
     contents:
       min: 0
       max: 100
@@ -199,7 +199,7 @@ options:
     text: '{{campfire_housing_descr}}'
     header: Set limit on idle paesants
     hasHeader: true
-    url: ucp.ai_housing.campfire_housing
+    url: ucp2-legacy.ai_housing.campfire_housing
     contents:
       min: 0
       max: 25
@@ -212,7 +212,7 @@ options:
     name: delete_housing
     header: '{{delete_housing}}'
     text: '{{delete_housing_descr}}'
-    url: ucp.ai_housing.delete_housing.enabled
+    url: ucp2-legacy.ai_housing.delete_housing.enabled
     contents:
       value: false
       type: boolean
@@ -223,7 +223,7 @@ options:
   header: '{{ai_nosleep}}'
   text: '{{ai_nosleep_descr}}'
   display: UCP2Switch
-  url: ucp.ai_nosleep.enabled
+  url: ucp2-legacy.ai_nosleep.enabled
   contents:
     value: false
     type: boolean
@@ -234,7 +234,7 @@ options:
   header: '{{ai_rebuild}}'
   text: '{{ai_rebuild_descr}}'
   display: UCP2Switch
-  url: ucp.ai_rebuild.enabled
+  url: ucp2-legacy.ai_rebuild.enabled
   contents:
     value: false
     type: boolean
@@ -245,7 +245,7 @@ options:
   header: '{{ai_recruitinterval}}'
   text: '{{ai_recruitinterval_descr}}'
   display: UCP2Switch
-  url: ucp.ai_recruitinterval.enabled
+  url: ucp2-legacy.ai_recruitinterval.enabled
   contents:
     value: false
     type: boolean
@@ -256,7 +256,7 @@ options:
   header: '{{ai_recruitstate_initialtimer}}'
   text: '{{ai_recruitstate_initialtimervalue_descr}}'
   display: UCP2Slider
-  url: ucp.ai_recruitstate_initialtimer
+  url: ucp2-legacy.ai_recruitstate_initialtimer
   hasHeader: true
   contents:
     min: 0
@@ -273,7 +273,7 @@ options:
   header: '{{ai_tethers}}'
   text: '{{ai_tethers_descr}}'
   display: UCP2Switch
-  url: ucp.ai_tethers.enabled
+  url: ucp2-legacy.ai_tethers.enabled
   contents:
     value: false
     type: boolean
@@ -284,7 +284,7 @@ options:
   header: '{{ai_towerengines}}'
   text: '{{ai_towerengines_descr}}'
   display: UCP2Switch
-  url: ucp.ai_towerengines.enabled
+  url: ucp2-legacy.ai_towerengines.enabled
   contents:
     value: false
     type: boolean
@@ -295,7 +295,7 @@ options:
   header: '{{fix_apple_orchard_build_size}}'
   text: '{{fix_apple_orchard_build_size_descr}}'
   display: UCP2Switch
-  url: ucp.fix_apple_orchard_build_size.enabled
+  url: ucp2-legacy.fix_apple_orchard_build_size.enabled
   contents:
     value: false
     type: boolean
@@ -306,7 +306,7 @@ options:
   header: '{{o_armory_marketplace_weapon_order_fix}}'
   text: '{{o_armory_marketplace_weapon_order_fix_descr}}'
   display: UCP2Switch
-  url: ucp.o_armory_marketplace_weapon_order_fix.enabled
+  url: ucp2-legacy.o_armory_marketplace_weapon_order_fix.enabled
   contents:
     value: false
     type: boolean
@@ -316,7 +316,7 @@ options:
   header: '{{o_change_siege_engine_spawn_position_catapult}}'
   text: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
   display: UCP2Switch
-  url: ucp.o_change_siege_engine_spawn_position_catapult.enabled
+  url: ucp2-legacy.o_change_siege_engine_spawn_position_catapult.enabled
   contents:
     value: false
     type: boolean
@@ -327,7 +327,7 @@ options:
   text: '{{o_default_multiplayer_speed_descr}}'
   display: UCP2Slider
   hasHeader: true
-  url: ucp.o_default_multiplayer_speed
+  url: ucp2-legacy.o_default_multiplayer_speed
   contents:
     min: 20
     max: 90
@@ -342,7 +342,7 @@ options:
   header: '{{o_engineertent}}'
   text: '{{o_engineertent_descr}}'
   display: UCP2Switch
-  url: ucp.o_engineertent.enabled
+  url: ucp2-legacy.o_engineertent.enabled
   contents:
     value: false
     type: boolean
@@ -354,7 +354,7 @@ options:
   hasHeader: true
   text: '{{o_firecooldown_descr}}'
   display: UCP2Slider
-  url: ucp.o_firecooldown
+  url: ucp2-legacy.o_firecooldown
   contents:
     min: 0
     max: 20000
@@ -370,7 +370,7 @@ options:
   header: '{{o_fix_baker_disappear}}'
   text: '{{o_fix_baker_disappear_descr}}'
   display: UCP2Switch
-  url: ucp.o_fix_baker_disappear.enabled
+  url: ucp2-legacy.o_fix_baker_disappear.enabled
   contents:
     value: false
     type: boolean
@@ -381,7 +381,7 @@ options:
   header: '{{o_fix_fletcher_bug}}'
   text: '{{o_fix_fletcher_bug_descr}}'
   display: UCP2Switch
-  url: ucp.o_fix_fletcher_bug.enabled
+  url: ucp2-legacy.o_fix_fletcher_bug.enabled
   contents:
     value: false
     type: boolean
@@ -392,7 +392,7 @@ options:
   header: '{{o_fix_ladderclimb}}'
   text: '{{o_fix_ladderclimb_descr}}'
   display: UCP2Switch
-  url: ucp.o_fix_ladderclimb.enabled
+  url: ucp2-legacy.o_fix_ladderclimb.enabled
   contents:
     value: false
     type: boolean
@@ -403,7 +403,7 @@ options:
   header: '{{o_fix_moat_digging_unit_disappearing}}'
   text: '{{o_fix_moat_digging_unit_disappearing_descr}}'
   display: UCP2Switch
-  url: ucp.o_fix_moat_digging_unit_disappearing.enabled
+  url: ucp2-legacy.o_fix_moat_digging_unit_disappearing.enabled
   contents:
     value: false
     type: boolean
@@ -414,7 +414,7 @@ options:
   header: '{{o_freetrader}}'
   text: '{{o_freetrader_descr}}'
   display: UCP2Switch
-  url: ucp.o_freetrader.enabled
+  url: ucp2-legacy.o_freetrader.enabled
   contents:
     value: false
     type: boolean
@@ -425,7 +425,7 @@ options:
   header: '{{o_gamespeed}}'
   text: '{{o_gamespeed_descr}}'
   display: UCP2Switch
-  url: ucp.o_gamespeed.enabled
+  url: ucp2-legacy.o_gamespeed.enabled
   contents:
     value: false
     type: boolean
@@ -436,7 +436,7 @@ options:
   header: '{{o_healer}}'
   text: '{{o_healer_descr}}'
   display: UCP2Switch
-  url: ucp.o_healer.enabled
+  url: ucp2-legacy.o_healer.enabled
   contents:
     value: false
     type: boolean
@@ -446,7 +446,7 @@ options:
   header: '{{o_increase_path_update_tick_rate}}'
   text: '{{o_increase_path_update_tick_rate_descr}}'
   display: UCP2Switch
-  url: ucp.o_increase_path_update_tick_rate.enabled
+  url: ucp2-legacy.o_increase_path_update_tick_rate.enabled
   contents:
     value: false
     type: boolean
@@ -456,7 +456,7 @@ options:
   header: '{{o_keys}}'
   text: '{{o_keys_descr}}'
   display: UCP2Switch
-  url: ucp.o_keys.enabled
+  url: ucp2-legacy.o_keys.enabled
   contents:
     value: false
     type: boolean
@@ -466,7 +466,7 @@ options:
   header: '{{o_moatvisibility}}'
   text: '{{o_moatvisibility_descr}}'
   display: UCP2Switch
-  url: ucp.o_moatvisibility.enabled
+  url: ucp2-legacy.o_moatvisibility.enabled
   contents:
     value: false
     type: boolean
@@ -475,14 +475,14 @@ options:
   header: '{{o_onlyai}}'
   text: '{{o_onlyai_descr}}'
   display: UCP2Switch
-  url: ucp.o_onlyai.enabled
+  url: ucp2-legacy.o_onlyai.enabled
   contents:
     value: false
     type: boolean
 - category:
   - UI
   name: o_override_identity_menu
-  url: ucp.o_override_identity_menu.enabled
+  url: ucp2-legacy.o_override_identity_menu.enabled
   contents:
     value: false
     type: boolean
@@ -496,7 +496,7 @@ options:
   text: '{{o_playercolor_descr}}'
   display: UCP2RadioGroup
   hasHeader: true
-  url: ucp.o_playercolor 
+  url: ucp2-legacy.o_playercolor 
   contents:
     choices:
     - name: 'red'
@@ -525,7 +525,7 @@ options:
   header: '{{o_responsivegates}}'
   text: '{{o_responsivegates_descr}}'
   display: UCP2Switch
-  url: ucp.o_responsivegates.enabled
+  url: ucp2-legacy.o_responsivegates.enabled
   contents:
     value: false
     type: boolean
@@ -535,7 +535,7 @@ options:
   header: '{{o_restore_arabian_engineer_speech}}'
   text: '{{o_restore_arabian_engineer_speech_descr}}'
   display: UCP2Switch
-  url: ucp.o_restore_arabian_engineer_speech.enabled
+  url: ucp2-legacy.o_restore_arabian_engineer_speech.enabled
   contents:
     value: false
     type: boolean
@@ -551,7 +551,7 @@ options:
     header: '{{o_seed_modification_possibility_title}}'
     hasHeader: true
     display: UCP2RadioGroup
-    url: ucp.o_seed_modification_possibility_title
+    url: ucp2-legacy.o_seed_modification_possibility_title
     contents:
       choices:
       - name: o_seed_modification_possibility_only_set
@@ -574,28 +574,28 @@ options:
   - name: o_shfy_beer
     header: '{{o_shfy_beer}}'
     display: UCP2Switch
-    url: ucp.o_shfy.o_shfy_beer.enabled
+    url: ucp2-legacy.o_shfy.o_shfy_beer.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_religion
     header: '{{o_shfy_religion}}'
     display: UCP2Switch
-    url: ucp.o_shfy.o_shfy_religion.enabled
+    url: ucp2-legacy.o_shfy.o_shfy_religion.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_peasantspawnrate
     header: '{{o_shfy_peasantspawnrate}}'
     display: UCP2Switch
-    url: ucp.o_shfy.o_shfy_peasantspawnrate.enabled
+    url: ucp2-legacy.o_shfy.o_shfy_peasantspawnrate.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_resourcequantity
     header: '{{o_shfy_resourcequantity}}'
     display: UCP2Switch
-    url: ucp.o_shfy.o_shfy_resourcequantity.enabled
+    url: ucp2-legacy.o_shfy.o_shfy_resourcequantity.enabled
     contents:
       value: false
       type: boolean
@@ -606,7 +606,7 @@ options:
   header: '{{o_stop_player_keep_rotation}}'
   text: '{{o_stop_player_keep_rotation_descr}}'
   display: UCP2Switch
-  url: ucp.o_stop_player_keep_rotation.enabled
+  url: ucp2-legacy.o_stop_player_keep_rotation.enabled
   contents:
     value: false
     type: boolean
@@ -616,7 +616,7 @@ options:
   header: '{{o_xtreme}}'
   text: '{{o_xtreme_descr}}'
   display: UCP2Switch
-  url: ucp.o_xtreme.enabled
+  url: ucp2-legacy.o_xtreme.enabled
   contents:
     value: false
     type: boolean
@@ -627,7 +627,7 @@ options:
   header: '{{u_arabwall}}'
   text: '{{u_arabwall_descr}}'
   display: UCP2Switch
-  url: ucp.u_arabwall.enabled
+  url: ucp2-legacy.u_arabwall.enabled
   contents:
     value: false
     type: boolean
@@ -638,7 +638,7 @@ options:
   header: '{{u_arabxbow}}'
   text: '{{u_arabxbow_descr}}'
   display: UCP2Switch
-  url: ucp.u_arabxbow.enabled
+  url: ucp2-legacy.u_arabxbow.enabled
   contents:
     value: false
     type: boolean
@@ -649,7 +649,7 @@ options:
   header: '{{u_fireballistafix}}'
   text: '{{u_fireballistafix_descr}}'
   display: UCP2Switch
-  url: ucp.u_fireballistafix.enabled
+  url: ucp2-legacy.u_fireballistafix.enabled
   contents:
     value: false
     type: boolean
@@ -660,7 +660,7 @@ options:
   header: '{{u_fix_applefarm_blocking}}'
   text: '{{u_fix_applefarm_blocking_descr}}'
   display: UCP2Switch
-  url: ucp.u_fix_applefarm_blocking.enabled
+  url: ucp2-legacy.u_fix_applefarm_blocking.enabled
   contents:
     value: false
     type: boolean
@@ -671,7 +671,7 @@ options:
   header: '{{u_fix_lord_animation_stuck_movement}}'
   text: '{{u_fix_lord_animation_stuck_movement_descr}}'
   display: UCP2Switch
-  url: ucp.u_fix_lord_animation_stuck_movement.enabled
+  url: ucp2-legacy.u_fix_lord_animation_stuck_movement.enabled
   contents:
     value: false
     type: boolean
@@ -682,7 +682,7 @@ options:
   header: '{{u_laddermen}}'
   text: '{{u_laddermen_descr}}'
   display: UCP2Switch
-  url: ucp.u_laddermen.enabled
+  url: ucp2-legacy.u_laddermen.enabled
   contents:
     value: 
     type: boolean
@@ -693,7 +693,7 @@ options:
   header: '{{u_spearmen}}'
   text: '{{u_spearmen_descr}}'
   display: UCP2Switch
-  url: ucp.u_spearmen.enabled
+  url: ucp2-legacy.u_spearmen.enabled
   contents:
     value: false
     type: boolean
@@ -704,7 +704,7 @@ options:
   header: '{{u_spearmen_run}}'
   text: '{{u_spearmen_run_descr}}'
   display: UCP2Switch
-  url: ucp.u_spearmen_run.enabled
+  url: ucp2-legacy.u_spearmen_run.enabled
   contents:
     value: false
     type: boolean
@@ -715,7 +715,7 @@ options:
   header: '{{u_tanner_fix}}'
   text: '{{u_tanner_fix_descr}}'
   display: UCP2Switch
-  url: ucp.u_tanner_fix.enabled
+  url: ucp2-legacy.u_tanner_fix.enabled
   contents:
     value: false
     type: boolean
