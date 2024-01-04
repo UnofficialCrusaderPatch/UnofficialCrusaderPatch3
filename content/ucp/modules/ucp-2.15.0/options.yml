@@ -461,7 +461,7 @@ options:
     value: false
     type: boolean
 - category:
-  - Changes
+  - UI
   name: o_moatvisibility
   header: '{{o_moatvisibility}}'
   text: '{{o_moatvisibility_descr}}'
