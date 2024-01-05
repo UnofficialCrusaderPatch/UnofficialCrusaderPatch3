@@ -20,7 +20,7 @@ options:
   contents:
     value:
       enabled: false
-      choice: ''
+      choice: 'absolute'
       choices:
         absolute:
           slider: 5
