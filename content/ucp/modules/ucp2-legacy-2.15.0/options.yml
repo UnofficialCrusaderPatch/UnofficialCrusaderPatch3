@@ -684,7 +684,7 @@ options:
   display: UCP2Switch
   url: ucp2-legacy.u_laddermen.enabled
   contents:
-    value: 
+    value: false
     type: boolean
 - category:
   - Changes
