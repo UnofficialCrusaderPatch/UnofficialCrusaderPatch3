@@ -158,6 +158,7 @@ jobs:
 
         $latest = @{
           'version' = "$env:UCP_VERSION"
+          'sha' = "$env:GITHUB_SHA".SubString(0, 10)
           'notes' = "$env:RELEASE_BODY"
           'pub_date' = Get-Date -Format "o"
           'base_url' = "https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases/download/$($tag)/"
