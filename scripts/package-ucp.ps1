@@ -78,6 +78,8 @@ $ENDUSER_CONFIG_MAPPING = @{
 $f = Get-Content -Path "$($Path)\version.yml" -Raw
 $vyml = ConvertFrom-Yaml $f
 
+$date = $(git log -1 --format=%cd --date=iso-strict)
+
 # Create the ucp-version.yml
 #Import-Module powershell-yaml
 $versionInfo = [ordered]@{
@@ -86,6 +88,7 @@ $versionInfo = [ordered]@{
     patch = $vyml.patch;
     sha = "$GITHUB_SHA";
     build = $ENDUSER_CONFIG_MAPPING["$BUILD_CONFIGURATION"];
+    date = "$date";
 }
 $y = ConvertTo-Yaml $versionInfo
 Set-Content -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\ucp-version.yml" -Value $y
