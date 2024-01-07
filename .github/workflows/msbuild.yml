@@ -160,7 +160,7 @@ jobs:
           'version' = "$env:UCP_VERSION"
           'notes' = "$env:RELEASE_BODY"
           'pub_date' = Get-Date -Format "o"
-          'base_url' = 'https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases/download/$tag/'
+          'base_url' = 'https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases/download/$($tag)/'
         }
   
         ConvertTo-Json $latest | Set-Content -Path latest.json
