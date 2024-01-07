@@ -687,7 +687,7 @@ async function initData() {
 }
 
 async function receiveAllAvailableAi() {
-  const foundAis = await HOST_FUNCTIONS.receivePluginPaths("ai", `**/${AiMeta.META_FILE}`);
+  const foundAis = await HOST_FUNCTIONS.receivePluginPaths("resources/ai", `**/${AiMeta.META_FILE}`);
   for (const foundAi of foundAis) {
     (await Promise.all(foundAi.paths.map(AiMeta.fromMetaPath)))
       .filter((meta) => !!meta)
