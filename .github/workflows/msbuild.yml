@@ -1,25 +1,23 @@
-name: Build
+name: 'Build & Release UCP3 backend'
 
 on:
-  # Trigger the workflow on push or pull request
-  push:
-    branches:
-      - main
-      - feature-testing
-  pull_request:
-    branches:
-      - main
-      - feature-testing
-  # Also trigger on page_build, as well as release created events
-  page_build:
-  release:
-    types: # This configuration does not affect the page_build event above
-      - created
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release_message:
+        description: 'Message to write in the release'
+        required: true
+        type: string
+        default: '[Changelog](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/wiki/Changelog#)'
+      pre_release:
+        description: 'Pre release?'
+        required: true
+        default: true
+        type: boolean
 
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: .
+  RELEASE_BODY: ''
 
 jobs:
   build:
@@ -110,11 +108,6 @@ jobs:
         path: dll/*.nupkg
         retention-days: 1
 
-  release:
-    if: github.event_name == 'workflow_dispatch'
-    needs: build
-    runs-on: windows-latest
-    steps:
     - name: Download all workflow run artifacts
       uses: actions/download-artifact@v3
       with:
@@ -134,14 +127,62 @@ jobs:
         }
         
         popd
-      
-    - uses: 'marvinpinto/action-automatic-releases@latest'
+
+    - name: Create changelog URL
+      run: |
+        $m = "${{ inputs.release_message }}"
+        $t = "[Changelog](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/wiki/Changelog#)"
+        if ( $m.Contains($t) ) {
+
+          ## Get the version
+          $v = $env:UCP_VERSION
+          $vm = $v.Replace(".", "") # Needed this way for pound urls
+
+          ## Create the version URL
+          $url = $t.Replace("#", "#v$vm")
+          $n = $m.Replace($t, $url)
+
+          ## Write the url
+          echo "RELEASE_BODY=$n" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        } else {
+          echo "RELEASE_BODY=$m" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        }
+      shell: pwsh
+
+    - name: Create latest.json
+      shell: pwsh
+      run: |
+        $url = ${{ steps.auto_update.outputs.upload_url }}
+
+        $tag = 'v${{ env.UCP_VERSION }}'
+
+        $latest = @{
+          'version' = "$env:UCP_VERSION"
+          'notes' = "$env:RELEASE_BODY"
+          'pub_date' = Get-Date -Format "o"
+          'base_url' = 'https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases/download/$tag/'
+        }
+  
+        ConvertTo-Json $latest | Set-Content -Path latest.json
+
+    - name: Create GitHub release
+      uses: 'marvinpinto/action-automatic-releases@latest'
+      id: auto_update
       with:
         repo_token: '${{ secrets.GITHUB_TOKEN }}'
-        automatic_release_tag: 'latest'
-        prerelease: true
+        automatic_release_tag: 'v${{ env.UCP_VERSION }}'
+        prerelease: ${{ inputs.pre_release }}
         draft: false
-        title: 'Development Build'
+        title: 'UCP3: v${{ env.UCP_VERSION }}'
         files: |
           artifacts/*.zip
-         
+          latest.json
+        
+    - name: Push release to auto updater
+      if: ${{ inputs.pre_release == false }}
+      uses: exuanbo/actions-deploy-gist@v1
+      with:
+        token: '${{ secrets.UCP3_MACHINE_GIST_TOKEN }}'
+        gist_id: 6a7c1de585ed6d60d9ce318c1825d9a7
+        file_path: latest.json
+        file_type: text
