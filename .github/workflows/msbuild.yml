@@ -56,21 +56,6 @@ jobs:
       run: |
         .\scripts\build.ps1 -Build "ReleaseSecure" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
 
-
-    - name: Add commit date to version.yml
-      shell: pwsh
-      run: |
-        $date = $(git log -1 --format=%cd --date=iso-strict)
-
-        Import-Module powershell-yaml
-        
-        $f = Get-Content -Path "version.yml" -Raw
-        $vyml = ConvertFrom-Yaml $f
-
-        $vyml.date = "$date";
-
-        ConvertTo-Yaml $vyml | Set-Content -Path "version.yml" -Force
-
     - name: Add UCP3 version to the github environment
       shell: pwsh
       run: |
