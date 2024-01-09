@@ -175,7 +175,7 @@ jobs:
 
         $latest = @{
           'version' = "$env:UCP_VERSION"
-          'sha' = "$env:GITHUB_SHA".SubString(0, 10)
+          'sha' = "$env:GITHUB_SHA"
           'notes' = "$env:RELEASE_BODY"
           'pub_date' = Get-Date -Format "o"
           'build_date' = "$(git log -1 --format=%cd --date=iso-strict)"
