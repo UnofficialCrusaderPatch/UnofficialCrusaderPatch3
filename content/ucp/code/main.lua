@@ -43,10 +43,23 @@ version = require('version')
 
 require("logging")
 
+-- Arg parsing
+if #arg > 0 then
+  log(DEBUG, "Passed raw arguments: \n", yaml.dump(arg))
+end
+
+log(DEBUG, "Processed arguments: \n", yaml.dump(processedArg))
+
+if processedArg["ucp-config-file"] ~= nil then
+  CONFIG_FILE = processedArg["ucp-config-file"]
+end
+
+-- Fixes threading issue in the original game
 fixes = require('fixes')
 fixes.applyAll()
 
 data.version.initialize()
+
 data.cache.AOB.loadFromFile()
 -- data.cache.DefaultConfigCache:loadFromFile()
 

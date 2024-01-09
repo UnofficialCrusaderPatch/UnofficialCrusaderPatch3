@@ -214,6 +214,10 @@ void Core::setArgsFromCommandLine() {
 	LocalFree(szArglist);
 }
 
+
+cxxopts::Options options("Stronghold Crusader (UCP)", "Command line arguments for UCP");
+cxxopts::ParseResult optionsResult;
+
 void Core::setArgsAsGlobalVarInLua() {
 
 	int nArgs = this->argc;
@@ -228,6 +232,14 @@ void Core::setArgsAsGlobalVarInLua() {
 
 	lua_setglobal(this->L, "arg");
 
+
+	lua_createtable(this->L, 0, optionsResult.arguments().size());
+	for (cxxopts::KeyValue kv : optionsResult.arguments()) {
+		lua_pushstring(this->L, kv.value().c_str());
+		lua_setfield(this->L, -2, kv.key().c_str());
+	}
+
+	lua_setglobal(this->L, "processedArg");
 }
 
 
@@ -265,20 +277,21 @@ void Core::processEnvironmentVariables() {
 	this->logLevel = verbosity;
 }
 
+
 void Core::processCommandLineArguments() {
-	cxxopts::Options options("Stronghold Crusader (UCP)", "Command line arguments for UCP");
 	options.add_options()
 		("ucp-console", "Enable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
 		("ucp-no-console", "Disable the console", cxxopts::value<bool>()->default_value("false")) // a bool parameter
 		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value("0"))
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
+		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
-	auto result = options.allow_unrecognised_options().parse(this->argc, this->argv.data());
+	optionsResult = options.allow_unrecognised_options().parse(this->argc, this->argv.data());
 
-	bool consoleYes = result["ucp-console"].as<bool>();
-	bool consoleNo = result["ucp-no-console"].as<bool>();
+	bool consoleYes = optionsResult["ucp-console"].as<bool>();
+	bool consoleNo = optionsResult["ucp-no-console"].as<bool>();
 
 #if !defined(_DEBUG) && defined(COMPILED_MODULES)
 	this->hasConsole = consoleYes && !consoleNo;
@@ -286,8 +299,8 @@ void Core::processCommandLineArguments() {
 	this->hasConsole = !consoleNo;
 #endif
 
-	this->consoleLogLevel = result["ucp-console-verbosity"].as<int>();
-	this->logLevel = result["ucp-verbosity"].as<int>();
+	this->consoleLogLevel = optionsResult["ucp-console-verbosity"].as<int>();
+	this->logLevel = optionsResult["ucp-verbosity"].as<int>();
 }
 
 void Core::initialize() {
