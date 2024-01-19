@@ -30,4 +30,5 @@ conflicts-config: []
 depends-config: []
 # State actual dependencies: (I need to clean this file someday.)
 depends: [gmResourceModifier>=0.1.0, textResourceModifier>=0.1.0, aicloader>=0.1.0, aivloader>=0.0.1, files>=0.1.0]
-specification-version: 1.0.0
+meta:
+  version: 1.0.0

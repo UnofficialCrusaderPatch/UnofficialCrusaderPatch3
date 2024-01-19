@@ -4,4 +4,5 @@ author: gynt
 version: 2.15.0
 dependencies:
   - ucp2-legacy == 2.15.0
-specification-version: 1.0.0
+meta:
+  version: 1.0.0

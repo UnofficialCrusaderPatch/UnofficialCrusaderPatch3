@@ -84,7 +84,8 @@ Suggestions essentially serve as a new default value of an option and can be ove
 ### Example
 A module named A provides the following option in the `options.yml`
 ```yml
-specification-version: 1.0.0
+meta: 
+  version: 1.0.0
 options:
 - name: option1
   url: option1
@@ -127,7 +128,8 @@ A `sparse` and `full` configuration is included in the same file. Manual changes
 The final configuration of the example from the previous section would look like so:
 ```yml
 active: true
-specification-version: 1.0.0
+meta: 
+  version: 1.0.0
 config-sparse:
   other-extensions-forbidden: true
   # If there would be user customisations they would be listed here

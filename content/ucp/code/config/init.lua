@@ -53,7 +53,7 @@ config.ConfigHandler = {
         if not f then
             log(WARNING, "[config/init]: Could not read '" .. CONFIG_DEFAULTS_FILE .. "'.yml. Reason: " .. message)
             log(WARNING, "[config/init]: Treating '" .. CONFIG_DEFAULTS_FILE .. "' as empty file")
-            return { ['specification-version'] = '1.0.0', active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
+            return { ['meta'] = {['version'] = '1.0.0'}, active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
         end
         local data = f:read("*all")
         f:close()
@@ -73,7 +73,7 @@ config.ConfigHandler = {
         if not f then
             log(WARNING, "[config/init]: Could not read ucp-config.yml. Reason: " .. message)
             log(WARNING, "[config/init]: Treating ucp-config.yml as empty file")
-            return { ['specification-version'] = '1.0.0', active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
+            return { ['meta'] = {['version'] = '1.0.0'}, active = true, ['config-full'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, ['config-sparse'] = { modules = {}, plugins = {}, ['load-order'] = {}, }, }
         end
         local data = f:read("*all")
         f:close()
@@ -89,9 +89,9 @@ config.ConfigHandler = {
 
 
     validateUserConfig = function(config)
-      checkKey(config, 'specification-version')
+      -- checkKey(config, 'specification-version')
       checkKey(config, 'active')
-      if config['specification-version'] == '1.0.0' then
+      if config['specification-version'] == '1.0.0' or (config['meta'] ~= nil and config['meta']['version'] == '1.0.0') or config['specification-version'] == nil then
         checkKey(config, 'config-sparse')
         checkKey(config, 'config-full')
         -- checkKey(config['config-full'], 'other-extensions-forbidden')
@@ -103,7 +103,7 @@ config.ConfigHandler = {
         checkKey(config['config-full'], 'plugins')
         checkKey(config['config-sparse'], 'plugins')
       else
-        log(ERROR, "[config/init]: config specified an unknown 'specification-version': " .. config['specification-version'])
+        log(ERROR, "[config/init]: config specified an unknown 'meta.version': " .. tostring((config['meta'] or {['version'] = 'unknown'}).version))
       end
 
     end,

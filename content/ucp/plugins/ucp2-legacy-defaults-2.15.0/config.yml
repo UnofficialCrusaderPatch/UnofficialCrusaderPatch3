@@ -133,4 +133,5 @@ config-sparse:
             contents:
               suggested-value: true
   plugins: {}
-specification-version: 1.0.0
+meta:
+  version: 1.0.0
