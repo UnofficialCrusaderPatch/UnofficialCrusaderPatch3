@@ -64,6 +64,58 @@ $simpleBuildConfiguration=$SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
       Copy-Item ($module.FullName + "\" + $srcFile) -Destination $destinationFolder -Recurse
     }
   } else {
-    # TODO: avoid this wildcard. Include .lua .yml and ... only?
-    Copy-Item ($module.FullName + "\*") -Destination $moduleDir -Recurse
+
+    $filesYmlPath = ($module.FullName + "\files.yml")
+    $hasFilesList = Test-Path -Path $filesYmlPath
+
+    if ($hasFilesList) {
+      $filesYml = Get-Content -Path $filesYmlPath | ConvertFrom-Yaml
+
+      if (($filesYml.meta -ne $null) -and ($filesYml.meta.version -ne $null) -and ($filesYml.meta.version -ne "1.0.0")) {
+        throw "Unsupported files.yml version"
+      }
+
+      $bcKey = "files-$simpleBuildConfiguration"
+
+      $files = $null
+
+      if ($filesYml[$bcKey]) {
+        $files = $filesYml[$bcKey]        
+      } elseif ($filesYml.files) {
+        $files = $filesYml.files
+      } 
+
+
+      if ($files) {
+        $files | ForEach-Object {
+
+          # To allow specification of $(Configuration) in "src" in module.files, we substitute it with the right value here
+          if ($src -eq $null) {
+            throw ".src attribute cannot be empty"
+          }
+
+          $srcFile = $_.src.Replace("`$(Configuration)", "$simpleBuildConfiguration")
+
+          $t = "."
+          if($_.target -ne $null) {
+            $t = $_.target
+          }
+          
+          # create dest if not exist
+          $destinationFolder = $moduleDir + "\" + $t + "\"
+          if (!(Test-Path -path $destinationFolder)) {
+            New-Item $destinationFolder -Type Directory
+          }
+          
+          # Copy the file, can include wildcards
+          Copy-Item ($module.FullName + "\" + $srcFile) -Destination $destinationFolder -Recurse
+        }
+      }
+
+    } else {
+
+      # TODO: avoid this wildcard. Include .lua .yml and ... only?
+      Copy-Item ($module.FullName + "\*") -Destination $moduleDir -Recurse
+    }
+
   }
