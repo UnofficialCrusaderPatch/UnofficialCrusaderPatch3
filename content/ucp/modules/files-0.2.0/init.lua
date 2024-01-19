@@ -16,5 +16,8 @@ return {
     end,
     registerOverrideFunction = function(self, func)
         overrides.registerOverrideFunction(func)
-    end
+    end,
+    setIterationOption = function(self, key, value)
+        iteration.setOption(key, value)
+    end,
 }

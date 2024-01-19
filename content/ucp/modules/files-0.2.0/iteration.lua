@@ -391,41 +391,59 @@ local function prepareDir(dir, ext)
 end
 
 return {
-    enable = function(config)
 
-        if config["disable-game-maps"] == true then
-            DISABLE_GAME_DIR_MAPS = true
-            log(DEBUG, string.format('DISABLE_GAME_DIR_MAPS: %s', DISABLE_GAME_DIR_MAPS))
+    setOption = function(key, value)
+      if key == "disable-game-maps" then
+        if value == true then
+          DISABLE_GAME_DIR_MAPS = true
+        else
+          DISABLE_GAME_DIR_MAPS = false
         end
-        
-        if config["disable-game-maps-extreme"] == true then
-            DISABLE_GAME_DIR_MAPS_EXTREME = true
-            log(DEBUG, string.format('DISABLE_GAME_DIR_MAPS: %s', DISABLE_GAME_DIR_MAPS_EXTREME))
-        end
+      end
 
-        if config["disable-user-maps"] == true then
-            DISABLE_USER_DIR_MAPS = true
-            log(DEBUG, string.format('DISABLE_USER_DIR_MAPS: %s', DISABLE_USER_DIR_MAPS))
+      if key == "disable-game-maps-extreme" then
+        if value == true then
+          DISABLE_GAME_DIR_MAPS_EXTREME = true
+        else
+          DISABLE_GAME_DIR_MAPS_EXTREME = false
         end
+      end
 
-        if config["disable-user-maps-extreme"] == true then
-            DISABLE_USER_DIR_MAPS_EXTREME = true
-            log(DEBUG, string.format('DISABLE_USER_DIR_MAPS: %s', DISABLE_USER_DIR_MAPS_EXTREME))
+      if key == "disable-user-maps" then
+        if value == true then
+          DISABLE_USER_DIR_MAPS = true
+        else
+          DISABLE_USER_DIR_MAPS = false
         end
+      end
 
-        if config["disable-user-savs"] == true then
-            DISABLE_USER_DIR_SAVS = true
-            log(DEBUG, string.format('DISABLE_USER_DIR_SAVS: %s', DISABLE_USER_DIR_SAVS))
+      if key == "disable-user-maps-extreme" then
+        if value == true then
+          DISABLE_USER_DIR_MAPS_EXTREME = true
+        else
+          DISABLE_USER_DIR_MAPS_EXTREME = false
         end
-        
-        if config["disable-user-savs-extreme"] == true then
-            DISABLE_USER_DIR_SAVS_EXTREME = true
-            log(DEBUG, string.format('DISABLE_USER_DIR_SAVS: %s', DISABLE_USER_DIR_SAVS_EXTREME))
+      end
+
+      if key == "disable-user-savs" then
+        if value == true then
+          DISABLE_USER_DIR_SAVS = true
+        else
+          DISABLE_USER_DIR_SAVS = false
         end
+      end
 
-        if config["extra-map-directory"] and config["extra-map-directory"]:len() > 0 then
+      if key == "disable-user-savs-extreme" then
+        if value == true then
+          DISABLE_USER_DIR_SAVS_EXTREME = true
+        else
+          DISABLE_USER_DIR_SAVS_EXTREME = false
+        end
+      end
 
-          local dir = config["extra-map-directory"]
+      if key == "extra-map-directory" then
+        if value:len() > 0 then
+          local dir = value
           log(DEBUG, string.format('extra-map-directory: %s', dir))
 
           -- FindNextFile Directory should end with *.map
@@ -442,10 +460,11 @@ return {
         else
           log(DEBUG, "No extra map directory found in the config")
         end
+      end
 
-        if config["extra-map-extreme-directory"] and config["extra-map-extreme-directory"]:len() > 0 then
-
-          local dir = config["extra-map-extreme-directory"]
+      if key == "extra-map-extreme-directory" then
+        if value:len() > 0 then
+          local dir = value
           log(DEBUG, string.format('extra-map-extreme-directory: %s', dir))
 
           -- FindNextFile Directory should end with *.map
@@ -462,12 +481,16 @@ return {
         else
           log(DEBUG, "No extra map extreme directory found in the config")
         end
+      end
 
-        if config["extra-sav-directory"] then
-            --TODO: how to know the target? We don't know the user username and the documents path?
-            --registerExtraDir("maps\\*.map", config["extra-sav-directory"])
-            print("WARNING: not implemented: 'extra-sav-directory'")
-        end
+      if key == "extra-sav-directory" then
+          --TODO: how to know the target? We don't know the user username and the documents path?
+          --registerExtraDir("maps\\*.map", config["extra-sav-directory"])
+          print("WARNING: not implemented: 'extra-sav-directory'")
+      end
+    end,
+
+    enable = function(config)
 
         local addressOfFindFirstFileARef = core.readInteger(core.AOBScan("8D 4C 24 60 51 57") + 8)
         local addressOfFindFirstFileA = core.readInteger(addressOfFindFirstFileARef)
