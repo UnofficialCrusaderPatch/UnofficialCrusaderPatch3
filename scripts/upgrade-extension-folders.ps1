@@ -9,9 +9,7 @@ $pluginDirs = Get-ChildItem -Path "content/ucp/plugins" -Directory
 
 $extensionDirs = $moduleDirs + $pluginDirs
 
-$gitExtensionDirs = $extensionDirs | Where-Object {Test-Path -Path "$($_.FullName)\.git"}
-
-foreach($extensionDir in $gitExtensionDirs) {
+foreach($extensionDir in $extensionDirs) {
     $isGit = Test-Path -Path "$($extensionDir.FullName)\.git"
 
     $defRaw = Get-Content -Raw -Path "$($extensionDir.FullName)\definition.yml"
