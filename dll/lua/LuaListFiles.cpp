@@ -62,7 +62,7 @@ namespace LuaIO {
 				return luaL_error(L, e.what());
 			}
 
-			std::vector<std::string> entries = mh->listFiles(rawPath);
+			std::vector<std::string> entries = mh->listFiles(sanitizedPath);
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
 			}
@@ -80,7 +80,7 @@ namespace LuaIO {
 				return luaL_error(L, e.what());
 			}
 
-			std::vector<std::string> entries = eh->listFiles(rawPath);
+			std::vector<std::string> entries = eh->listFiles(sanitizedPath);
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
 			}
