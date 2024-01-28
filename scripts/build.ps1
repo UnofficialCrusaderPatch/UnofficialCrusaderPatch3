@@ -55,7 +55,9 @@ try {
     Write-Output "Cleaning"
 
     # Remove old versions of nuget ucp
-    Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "UnofficialCrusaderPatch*" | Remove-Item -Recurse
+    if ( Test-Path -Path "$env:UserProfile\.nuget\packages" ) {
+      Get-ChildItem -Path "$env:UserProfile\.nuget\packages" -Directory -Filter "UnofficialCrusaderPatch*" | Remove-Item -Recurse
+    }
 
     ## Set up directories
     foreach ($bc in $BUILD_CONFIGURATIONS) {
@@ -155,7 +157,7 @@ try {
     foreach($module in $modules) {
         & "$($PSScriptRoot)\build-module.ps1" -Path $($module) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
     }
-    
+
     Write-Output "Building modules complete"
 
     return
