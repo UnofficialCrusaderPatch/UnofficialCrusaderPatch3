@@ -11,7 +11,6 @@ $ErrorActionPreference = "Stop"
 if ( $What.Contains("all") ) {
   # [string[]]$What = "setup","nuget","modules","plugins","ucp"
 
-  & "$($PSScriptRoot)\build.ps1" -Path $Path -What "clean"
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "setup" -NugetToken $NugetToken
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "nuget"
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "modules" -BuildType $BuildType
