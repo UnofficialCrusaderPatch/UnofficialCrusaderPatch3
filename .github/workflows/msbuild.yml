@@ -46,7 +46,7 @@ jobs:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
       shell: pwsh
       run: |
-        .\scripts\build.ps1 -Build "Release" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
+        .\scripts\build.ps1 -What all -BuildType Release -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
 
     - name: Run build script release build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -54,7 +54,7 @@ jobs:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
       shell: pwsh
       run: |
-        .\scripts\build.ps1 -Build "ReleaseSecure" -NugetToken "$env:UCP3_READ_PACKAGES" -SigningCertificatePath "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
+        .\scripts\build.ps1 -What all -BuildType ReleaseSecure -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
 
     - name: Add UCP3 version to the github environment
       shell: pwsh
