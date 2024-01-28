@@ -1,8 +1,8 @@
 ﻿
 param (
-    [Parameter(Mandatory=$true)][string]$Path,
+  [Parameter(Mandatory=$true)][string]$Path,
 	[Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION,
-    [Parameter(Mandatory=$true)][string]$UCP3_NUPKGDIRECTORY,
+  [Parameter(Mandatory=$true)][string]$UCP3_NUPKGDIRECTORY,
 	[Parameter(Mandatory=$false)][string]$Verbosity = "quiet"  # msbuild verbosity level
 )
 
