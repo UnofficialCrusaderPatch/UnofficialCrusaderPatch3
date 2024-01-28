@@ -709,7 +709,7 @@ async function receiveCurrentConfig() {
     DEFAULT_LANGUAGE = defaultLanguage;
   }
 
-  const baseLineAiArray = Object.entries(baseline).map(([key, value]) => [key, value.modifications.value.extension, value.modifications.value.content]);
+  const baseLineAiArray = Object.entries(baseline).map(([key, value]) => [key, value.modifications.value.entity, value.modifications.value.content]);
   for (const [aiUrl, extension, configArray] of baseLineAiArray) {
     const ai = aiUrl.replace("ai.", "");
 
