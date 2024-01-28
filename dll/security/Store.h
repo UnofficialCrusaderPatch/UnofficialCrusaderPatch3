@@ -96,10 +96,6 @@ public:
 			throw ModuleStoreException("invalid store file");
 		}
 
-		if (root["ucp-build"].as<std::string>() != "3.0.0") {
-			throw ModuleStoreException("store file's ucp version does not match ucp build version");
-		}
-
 		if (!root["extensions"]) {
 			throw ModuleStoreException("extensions field in store file is not a sequence but NULL");
 		}

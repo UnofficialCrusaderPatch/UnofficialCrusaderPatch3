@@ -6,14 +6,22 @@
 std::string errorMsg;
 
 void ucp_initialize() {
-	if (!Core::getInstance().isInitialized) {
-		Core::getInstance().initialize();
+	try {
+		if (!Core::getInstance().isInitialized) {
+			Core::getInstance().initialize();
+		}
+		else {
+			MessageBoxA(NULL, "Cannot initialize UCP Core twice", "FATAL", MB_OK);
+			ucp_log(Verbosity_FATAL, "Cannot initialize UCP Core twice");
+		}
 	}
-	else {
-		MessageBoxA(NULL, "Cannot initialize UCP Core twice", "FATAL", MB_OK);
-		ucp_log(Verbosity_FATAL, "Cannot initialize UCP Core twice");
+	catch (ModuleStoreException mse) {
+		MessageBoxA(NULL, mse.what(), "FATAL: Extension Store Exception", MB_OK);
 	}
- 	
+	catch (std::exception& e) {
+		MessageBoxA(NULL, e.what(), "FATAL", MB_OK);
+	}
+	
 }
 
 void ucp_log(ucp_NamedVerbosity logLevel, const char * logMessage) {

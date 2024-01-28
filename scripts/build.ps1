@@ -14,13 +14,13 @@ if ( $What.Contains("all") ) {
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "setup" -NugetToken $NugetToken
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "nuget"
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "modules" -BuildType $BuildType
-  & "$($PSScriptRoot)\build.ps1" -Path $Path -What "plugins"
+  & "$($PSScriptRoot)\build.ps1" -Path $Path -What "plugins" -BuildType $BuildType
   & "$($PSScriptRoot)\build.ps1" -Path $Path -What "ucp" -BuildType $BuildType -Certificate $Certificate
 
   return
 }
 
-if ( $What.Contains("modules") ) {
+if ( $What.Contains("modules") -or $What.Contains("plugins") ) {
 
   if ( $BuildType -eq "" ) {
     throw "-BuildType not specified"
