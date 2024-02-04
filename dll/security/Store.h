@@ -33,61 +33,10 @@ public:
 
 		if (!secureMode) return;
 
-		if (!std::filesystem::is_regular_file(path)) {
-
-			std::string error = "file does not exist: " + path.string();
-
-			MessageBoxA(NULL, error.c_str(), "failure to load store", MB_OK);
-
-			throw ModuleStoreException(error);
-		}
-
-		std::ifstream store_file_input(path.string(), std::ios::binary);
-
-		std::vector<char> store_file_bytes(
-			(std::istreambuf_iterator<char>(store_file_input)),
-			(std::istreambuf_iterator<char>()));
-
-		store_file_input.close();
-
-		std::string sigPath = path.string() + ".sig";
-
-		if (!std::filesystem::is_regular_file(sigPath)) {
-			throw ModuleStoreException("signature not found: '" + sigPath + "'");
-		}
-
-		std::ifstream signature_file_input(sigPath, std::ios::binary);
-
-		std::string signature;
-
-		signature_file_input >> signature;
-
-		signature_file_input.close();
-
-		size_t first_space = signature.find(' ');
-		if (first_space != std::string::npos && first_space >= 0) {
-			signature = signature.substr(0, first_space);
-		}
-
-		if (signature.size() != 1024) {
-			throw ModuleStoreException("hash in '" + sigPath + " ' is not of the correct length: '" + std::to_string(signature.size()) + "'");
-		}
-
-		std::vector<unsigned char> signature_file_bytes = HexToBytes(signature);
-
-		std::reverse(signature_file_bytes.begin(), signature_file_bytes.end());
-
-		std::string error = "";
-		if (!SignatureVerifier::getInstance().verify(
-			(unsigned char*)store_file_bytes.data(),
-			store_file_bytes.size(),
-			(unsigned char*)signature_file_bytes.data(),
-			signature_file_bytes.size(), error)) {
-
-			std::string msg = "failed to verify module store signature:\n" + error;
-			MessageBoxA(NULL, msg.c_str(), "failed to verify module store", MB_OK);
-
-			throw ModuleStoreException(msg);
+		std::string errorMsg;
+		if (!SignatureVerifier::getInstance().verifyFile(path, path.string() + ".sig", errorMsg)) {
+			MessageBoxA(NULL, errorMsg.c_str(), "store could not be verified", MB_OK);
+			throw ModuleStoreException("store could not be verified: " + errorMsg);
 		}
 
 		YAML::Node root = YAML::LoadFile(path.string());

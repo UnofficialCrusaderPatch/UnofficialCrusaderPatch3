@@ -491,6 +491,13 @@ private:
 			return true;
 		}
 
+		std::string sigPath = path + ".sig";
+		if (std::filesystem::is_regular_file(sigPath)) {
+			if (SignatureVerifier::getInstance().verifyFile(path, sigPath, errorMsg)) {
+				return true;
+			}
+		}
+
 		errorMsg = "hash does not match hash from store: " + name;
 		return false;
 	}

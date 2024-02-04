@@ -1,13 +1,13 @@
 Param(
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)][string]$UCPPath,
-    [Parameter(Mandatory=$true, ValueFromPipeline=$false)][string]$Certificate
+  [Parameter(Mandatory = $true, ValueFromPipeline = $true)][string]$UCPPath,
+  [Parameter(Mandatory = $true, ValueFromPipeline = $false)][string]$Certificate
 )
 
 
 $ErrorActionPreference = "Stop"
 
 
-Write-Output "Signing extensions. Generating extension store"
+Write-Output "Signing extension store"
 
 
 if ((Test-Path -Path "$Certificate") -ne $true ) {
@@ -17,4 +17,4 @@ if ((Test-Path -Path "$Certificate") -ne $true ) {
 
 Write-Output "Signing extension store file"
 # ucp3-module-signing-key.pem 
-(openssl dgst -sign "$Certificate" -keyform PEM -sha256 -out "$($UCPPath)\extension-store.yml.sig" -hex -r "$($UCPPath)\extension-store.yml")
+& "$($PSScriptRoot)\sign-file.ps1" -Path "$($UCPPath)\extension-store.yml" -Destination "$($UCPPath)\extension-store.yml.sig" -Certificate "$Certificate"

@@ -151,5 +151,74 @@ public:
 		return status;
 	}
 	
+	bool verifyFile(std::filesystem::path path, std::filesystem::path sigPath, std::string& errorMsg) {
+		if (!std::filesystem::is_regular_file(path)) {
 
+			std::string error = "file does not exist: " + path.string();
+
+			MessageBoxA(NULL, error.c_str(), "failure to verify file", MB_OK);
+
+			// throw SignatureVerificationException(error);
+
+			errorMsg = "failure to verify file: " + error;
+			return false;
+		}
+
+		std::ifstream store_file_input(path.string(), std::ios::binary);
+
+		std::vector<char> store_file_bytes(
+			(std::istreambuf_iterator<char>(store_file_input)),
+			(std::istreambuf_iterator<char>()));
+
+		store_file_input.close();
+
+		if (!std::filesystem::is_regular_file(sigPath)) {
+			// throw SignatureVerificationException("signature not found: '" + sigPath + "'");
+			std::string error = "signature not found: '" + sigPath.string() + "'";
+			errorMsg = ("failure to verify file: " + error);
+			return false;
+		}
+
+		std::ifstream signature_file_input(sigPath, std::ios::binary);
+
+		std::string signature;
+
+		signature_file_input >> signature;
+
+		signature_file_input.close();
+
+		size_t first_space = signature.find(' ');
+		if (first_space != std::string::npos && first_space >= 0) {
+			signature = signature.substr(0, first_space);
+		}
+
+		if (signature.size() != 1024) {
+			// throw SignatureVerificationException("hash in '" + sigPath + " ' is not of the correct length: '" + std::to_string(signature.size()) + "'");
+			std::string error = "hash in '" + sigPath.string() + " ' is not of the correct length: '" + std::to_string(signature.size()) + "'";
+			errorMsg = ("failure to verify file: " + error);
+			return false;
+		}
+
+		std::vector<unsigned char> signature_file_bytes = HexToBytes(signature);
+
+		std::reverse(signature_file_bytes.begin(), signature_file_bytes.end());
+
+		std::string error = "";
+		if (!this->verify(
+			(unsigned char*)store_file_bytes.data(),
+			store_file_bytes.size(),
+			(unsigned char*)signature_file_bytes.data(),
+			signature_file_bytes.size(), error)) {
+
+		/*	std::string msg = "failed to verify file signature:\n" + error;
+			MessageBoxA(NULL, msg.c_str(), "failed to verify file signature", MB_OK);
+
+			throw SignatureVerificationException(msg);*/
+
+			errorMsg = "failed to verify file signature: " + error;
+			return false;
+		}
+
+		return true;
+	}
 };
