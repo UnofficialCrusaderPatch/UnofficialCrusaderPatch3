@@ -1,300 +1,197 @@
 Name: Unofficial Crusader Patcher
 ai_access: No demolishing of inaccessible buildings
-ai_access_descr: 'Prevents the AI from demolishing buildings without access. This
-  should &
-
-  stop the AI from continuously demolishing and rebuilding buildings where no &
-
-  access is available.'
-ai_addattack: Increase of the rate of additional attack troops
-ai_addattack_alt_descr: 'Alternatively, the additional troop count can be made dependent
-  on the &
-
-  troop count of the first attack. Since this value is different for each AI, &
-
-  the following attacks will also scale, instead of increasing by the same value &
-
-  for each AI lord.
-
+ai_access_descr: |
+  The AI will no longer demolish and rebuild its buildings continuously, when it cannot be reached by a worker.
+ai_addattack: change the increase of army per attack wave
+ai_addattack_descr: |
+  In the Vanilla game each AI lord increases their army by 5 additional units for each main attack. You can adjust the amount here.
+ai_addattack_alt_descr: |
+  Alternatively, you can let the AI lords increase their army by a percentage of their initial army size, which is unique for each lord.
   Example: Scale factor = 0.5
-
-  Sultan''s attack troops = 10, 15, 20, 25, ...
-
-  Saladin''s attack troops = 50, 75, 100, 125, ...'
-ai_addattack_descr: 'In Vanilla the attack troop number is increased after each attack
-  by 5 &
-
-  units on average. This value is the same for all AI lords and can be changed &
-
-  here.'
-ai_assaultswitch: No AI target change during sieges
-ai_assaultswitch_descr: 'AI lords which attack the mightiest oder weakest enemy sometimes
-  &
-
-  switch their target in the middle of an ongoing assault and send their &
-
-  troops to a different castle. This is prevented with this setting, as soon &
-
-  as the assault has started, i.e. during the troop gathering phase in front of &
-
-  a castle a change can still happen.'
-ai_attacklimit: Increase of the attacking troops limit of the AIs
-ai_attacklimit_descr: 'The number of additional units which are added after the first
-  attack is &
-
-  limited to 200 in Vanilla. Here you can change this limit.'
-ai_attacktarget: Set AI attack target
+  Sultan's attack troops = 10, 15, 20, 25, ... 
+  Saladin's attack troops = 50, 75, 100, 125, ...
+ai_assaultswitch: Disable AI switching attack targets during a siege
+ai_assaultswitch_descr: |
+  AIs with the target choice set to gold or weakest were sometimes reevaluating who they would attack in the midst of a siege, running their troops across the whole map. With this fix, the AI will stick with their previously chosen target.
+ai_attacklimit: Adjust AI limit for recruiting attack troops
+ai_attacklimit_descr: |
+  In Vanilla the number of main army units is capped at the size of the AI's first attack plus 200. After reaching this limit, the AI stops recruiting troops and no longer sends out attacks.
+  NOTE: Very high values can cause the global unit limit to be reached in longer games, resulting in peasants being unable to spawn.
+ai_attacktarget: Override AI attack targets
 ai_attacktarget_nearest: Nearest enemy
-ai_attacktarget_nearest_descr: ' '
+ai_attacktarget_nearest_descr: |
+  ' '
 ai_attacktarget_richest: Richest Enemy
-ai_attacktarget_richest_descr: ' '
+ai_attacktarget_richest_descr: |
+  ' '
 ai_attacktarget_weakest: Weakest Enemy
-ai_attacktarget_weakest_descr: 'With this setting, all AI lords will chose their next
-  attack target in &
-
-  the same way. This prevents troops switching targets during a castle assault &
-
-  as well as sending them past other enemies'' castles to gather.'
-ai_attackwave: Improve attack waves
-ai_attackwave_descr: 'The AI in an attack in vanilla only sends as many troops at
-  once as &
-
-  there are wall parts reachable. This causes units to drop in in small waves &
-
-  when the target castle has a lot of buildings directly at its walls.
-
-  This option makes units also attack civil and fortification buildings, as &
-
-  well as wall parts which are already being attacked by one unit. Moreover,
-
-  the AI sends more troops to the enemy lord as soon as it detects a breach.'
-ai_buywood: Buy enough wood
-ai_buywood_descr: 'To prevent thievish fletchers from stealing wood which the AI just
-  bought for &
-
-  buildings, 2 extra wood will now be bought for each building.'
-ai_defense: Fix reinforcement of defense troops
-ai_defense_descr: 'Fixes a bug which stopped the AI from reinforcing missing troops
-  &
-
-  on walls and towers, as long as defensive patrols were still around.'
-ai_demolish: Deactivate demolishing for money of the AI lords
-ai_demolish_eco: econonmy buildings
-ai_demolish_eco_descr: 'If the AI feels pressured, it likes to demolishes its economy
-  or &
-
-  fortification buildings to get quick money for troops. This feature sometimes &
-
-  seems to be triggered without any visible reason and thus can be disabled here.'
-ai_demolish_trapped: If enclosed
-ai_demolish_trapped_descr: ' '
-ai_demolish_walls: fortification buildings
-ai_demolish_walls_descr: ' '
-ai_fix_crusader_archers_pitch: Fix AI's crusader archers not lighting pitch
-ai_fix_crusader_archers_pitch_descr: AI's European archers light pitch the same way
-  arabian archers do, defending against enemy units.
-ai_fix_laddermen_with_enclosed_keep: Fix AI not using laddermen if they are enclosed
-ai_fix_laddermen_with_enclosed_keep_descr: AI (notably Snake) no longer stops using
-  Laddermen with their sieging units if their keep is enclosed.
-ai_housing: Let the AI build houses smarter
-ai_noflour_maxtime_descr: Time in 1/12th of months until the AI restocks 2 flour.
-ai_noiron_maxtime_descr: Time in 1/12th of months until the AI restocks 2 iron.
-ai_nosleep: Disable sleeping mode for lack of resources
-ai_nosleep_descr: 'The AI usually puts its processing buildings to sleep, as soon
-  &
-
-  as the needed resource is missing. This is done without the regard for &
-
-  losing products which are just on the way f.e. to the weapon chamber.
-
-  This feature can be completely disabled here.'
-ai_nowood_maxtime_descr: Time in 1/12th of months until the AI restocks 5 wood.
-ai_rebuild: Improved AI repairs
-ai_rebuild_descr: 'The AI will repair tower ruins, slightly damaged walls, as well
-  as &
-
-  destroyed engineer''s and tunneler''s guilds and oil smelters, of which the gathering
-  place &
-
-  still exists. Furthermore, the AI can now build over the collection platform &
-
-  of quarries.'
-ai_recruitinterval: Increased recruitment speed
-ai_recruitinterval_descr: Sets the recruitment interval of all AIs to the lowest value
-  (Rat/Richard niveau)
-ai_recruitstate_initialtimer: Set AIs initial time until they recruit by the AIC parameters
-ai_recruitstate_initialtimervalue_descr: Set this value to number of months for which
-  the AI will exclusively recruit defence troops, unless it has already filled up
-  its defence total
+ai_attacktarget_weakest_descr: |
+  You can override how all AI lords choose their attack targets.
+  NOTE: There is a more granular way to set individual attack target behaviour for AIs inside the AIC by using the ai-swapper module.
+ai_attackwave: More active AI attacking behaviour
+ai_attackwave_descr: |
+  The AI in an attack in vanilla only sends as many troops at once as there are wall parts reachable. This causes units to drop in in small waves when the target castle has a lot of buildings directly at its walls. This option makes units also attack civil and fortification buildings, as well as wall parts which are already being attacked by one unit. Moreover, the AI sends more troops to the enemy lord as soon as it detects a breach.
+# we are adding two suboptiosn here for army part split off to attack economy!
+ai_buywood: Buy additional wood
+ai_buywood_descr: |
+  In vanilla, the AI only buys enough wood to construct the building its trying to place, this can result in either not enough wood to be presesent to be used in weapon production or weapon production picking up a piece of wood before the building was placed, resulting in the AI not being able to build the structure. To prevent this issue, 2 additional wood are purchased each time the AI buys wood for construction purposes.
+ai_defense: More reliable repleneshing of castle defenders
+ai_defense_descr: |
+  Fixes a bug which stopped the AI from replacing missing troops on walls and towers, as long as defensive patrols were still around.
+# ai_demolish: Deactivate demolishing for money of the AI lords
+# need localized category
+ai_demolish_eco_descr: |
+  If the AI feels pressured, it demolishes its economy or fortification buildings to get quick money for troops. This feature sometimes seems to be triggered without any visible reason and is often not a good strategic move. The following types of demolishing buildings for money can be disabled.
+ai_demolish_eco: Econonmy buildings
+ai_demolish_trapped: Inaccessible buildings
+#ai_demolish_trapped_descr: |
+ai_demolish_walls: Fortification buildings
+#ai_demolish_walls_descr: |
+ai_fix_crusader_archers_pitch: Enable European archers to light pitch
+ai_fix_crusader_archers_pitch_descr: |
+ AI's European archers light pitch the same way arabian archers do, when defending against enemy units.
+ai_fix_laddermen_with_enclosed_keep: Enable enclosed AIs to deploy laddermen
+ai_fix_laddermen_with_enclosed_keep_descr: |
+  AIs no longer stop assaulting enemy walls with their Laddermen if their own keep is enclosed.
+# ai_housing: Let the AI build houses smarter
+# need localized category
+ai_nosleep: Disable sleep mode for production facilities
+ai_nosleep_descr: |
+  The AI lords put their production buildings to sleep, if they run out of a resources they depend on for their Industry. E.g. all bakers are put to sleep when Saladin runs out of flour. 
+  However, this often disregards goods still being processed or midst their delivery leading to a constant loss of goods.
+  Here you can disable this sleep mode for the AI entirely.
 ai_resources_rebuy: Improve AI restocking of needed goods
-ai_resources_rebuy_descr: The AI often doesn't restock goods even if it has the gold
-  for it, leaving its production chains running dry. This option reduces the amount
-  of time the AI waits for its stocks to be empty before restocking the necessary
-  goods.
-ai_tethers: Disable ox tether spam
-ai_tethers_descr: 'Usually, the AI builds for each new stone quarry a new ox tether,
-  &
-
-  independent of how many tether already exist. This can be disabled here, since &
-
-  it leads to ox tether spam if the AIs'' quarries get destroyed repeatedly.'
-ai_towerengines: No limit for siege engines on towers
-ai_towerengines_descr: 'Usually the AI only builds up to three mangonels and ballistae
-  each on its towers. &
-
-  This limit can be lifted here.'
-aiv_cli_prompt: Custom AIVs detected. Enter 'delete' to erase or enter folder name
-  to copy files to.
-aiv_prompt: Custom AIVs detected. Do you want to create a backup Milord?
+ai_resources_rebuy_descr: |
+  The AI often doesn't restock goods even if it has the gold for it, leaving its production chains running dry. This option reduces the amount of time the AI waits for its stocks to be empty before restocking the necessary goods.
+ai_noflour_maxtime_descr: |
+  Time in 1/12th of months until the AI restocks 2 flour.
+ai_noiron_maxtime_descr: |
+  Time in 1/12th of months until the AI restocks 2 iron.
+ai_nowood_maxtime_descr: |
+  Time in 1/12th of months until the AI restocks 5 wood.
+ai_rebuild: Improved AI repairs
+ai_rebuild_descr: |
+  With this setting the AIs will replace tower ruins and slightly damaged walls. They will also overbuild gathering grounds of recruitment buildings if their main building went missing.
+ai_recruitinterval: Override and maximize recruitment speed
+ai_recruitinterval_descr: |
+  Sets the recruitment interval of all AIs to the lowest value, recruiting as fast as the Vanilla Rat/Richard.
+  NOTE: There is a more granular way to set individual recruitment speed for AIs inside the AIC by using the ai-swapper module.
+ai_recruitstate_initialtimer: Set AIs initial time until they recruit according to the AIC parameters
+ai_recruitstate_initialtimervalue_descr: |
+  Set this value to number of months for which the AI will exclusively recruit defence troops, unless its pool of defense units is full.
+ai_tethers: Set ox tethers to a maximum of 10 per AI lord
+ai_tethers_descr: |
+  Usually, the AI builds a new ox tether for every new quarry it constructs, even if it exceeds the usual limit of 10 ox tethers per lord. This can lead to a spam of ox tethers, reaching the housing limit for an AI lord causing no new peasants to spawn. With this setting you can disable the placement of that extra ox tether when a new quarry is built.
+ai_towerengines: Increase the siege engine limit of the AI
+ai_towerengines_descr: |
+  Usually the AI only builds up to three mangonels and ballistas on its towers. With this option this limit is increased to 5 per engine.
 backup_aiv_select: Select Backup AIV folder
-build_housing_descr: Difference between current and maximum population, above which
-  the AI stops building houses. This is 0 in vanilla. This also disables deleting
-  of houses for the AI.
-campfire_housing_descr: Number of idle peasants at the campfire before the AI stops
-  building houses. This also disables deleting of houses for the AI.
-delete_housing: Disable the AI's ability to delete houses.
-delete_housing_descr: When this option is selected the AI will never delete houses.
+build_housing: Set empty housing buffer
+build_housing_descr: |
+  Set the amount of empty housing space before the AIs will stop to build new houses. This ensures enough space for new peasants to spawn, in vanilla this value is 0.
+  This option also prevents the AIs from demolishing their extra houses.
+campfire_housing: Set idle peasants buffer
+campfire_housing_descr: |
+  Set the max amount of peasants at the AIs' campfires, before the AIs stops building new houses. This option also prevents the AIs from demolishing their "extra" houses.
+delete_housing: This option exclusively prevents the AIs from demolishing their extra houses.
 fix_apple_orchard_build_size: Shrink apple orchard's build size
-fix_apple_orchard_build_size_descr: Changes the apple orchard's build size to the
-  size it occupies after the farm is placed down. This saves some space when building
-  the farms and increases the rate with which the AI is able to put these farms down.
-install_abort: Installation aborted
-install_abort_io: Installation aborted. Files with the same name already exist in
-  this folder. Please try again and select a different folder.
-o_armory_marketplace_weapon_order_fix: Fix armory/marketplace weapon orders to match
-o_armory_marketplace_weapon_order_fix_descr: Reorders Weapon icons in Armory and Marketplace
-  to have the same order. Also moves Leather Armor between Mace and Crossbow, and
-  moves Metal Armor between Polearm and Sword for easier access while in Marketplace
-  scrolling through items.
-o_change_siege_engine_spawn_position_catapult: Spawn siege engines in the center of
-  their tent
-o_change_siege_engine_spawn_position_catapult_descr: Siege engines are spawning in
-  the middle of their construction tent, instead of the top right corner.
-o_default_multiplayer_speed: Set default multiplayer speed.
-o_default_multiplayer_speed_descr: ' '
-o_disable_border_scrolling: Disable border scrolling
-o_disable_border_scrolling_descr: Moving the cursor to the edge of the screen will
-  no longer move its position.
-o_engineertent: No siege tent deselection
-o_engineertent_descr: 'With this setting, the game will not deselect your chosen siege
-  equipment &
-
-  after placing one tent anymore. This way you can create several tents after another
-  &
-
-  without having to reselect the same siege equipment every time.'
-o_fast_placing: Fast placing
-o_fast_placing_all: all builds
-o_fast_placing_all_descr: Hold left mouse button down to place buildings.
-o_fast_placing_common: killing pit, pitch ditch, woodcutter, good & bad things, mill,
-  water pot, bakery, hovel)
+fix_apple_orchard_build_size_descr: |
+  Changes the apple orchard's build preview to the size it occupies after the farm is placed down. This saves some space when building apple orchards and makes it easier for the AI to find space to place them on oasisgrass.
+o_armory_marketplace_weapon_order_fix: Fix armory/marketplace weapon order
+o_armory_marketplace_weapon_order_fix_descr: |
+  Reorders weapon icons in the armory and the marketplace to be the same. This includes the switching of pages in the market, as well as the display in the main category.
+o_change_siege_engine_spawn_position_catapult: Spawn siege engines in the center of their tent
+o_change_siege_engine_spawn_position_catapult_descr: |
+  In Vanilla the siegeengines are being spawned int he top right of their construction tent. This options places them in the middle of the tent instead
+  (the tent itself is still not centered at the location designated in the AIV editor however).
+o_default_multiplayer_speed: Set default multiplayer speed
+o_default_multiplayer_speed_descr: |
+  ' '
+o_disable_border_scrolling: Disable border scrolling via mousecurser
+o_disable_border_scrolling_descr: |
+  Moving the cursor to the edge of the screen will no longer move the camera.
+  NOTE: This option is designed to be used in windowed mode, and you are moving your mouse out of the window to do other things.
+o_engineertent: Continious siege tent placement
+o_engineertent_descr: |
+  This option allows the player to continuously place siegeengines down, without the game automatically deselecting the engine after the tent has been placed.
+o_fast_placing: Rapid building placement
+o_fast_placing_all: All buildings
+o_fast_placing_all_descr: |
+  Holding your left mouse button down will continuously place the building.
+o_fast_placing_common: | 
+  Just these common buildings: Killing pit, pitch ditch, woodcutter, good & bad things, mill, water pot, bakery, hovel
 o_fast_placing_common_descr: ' '
-o_firecooldown: Extend fireproof duration of extinguished buildings
-o_firecooldown_descr: The duration in which extinguished buildings cannot catch fire
-  again can be extended here.
+o_firecooldown: Adjust the fireproof period for buildings after extinguishment.
+o_firecooldown_descr: |
+  The amount of time during which extinguished buildings cannot catch fire again. In vanilla the duration is 2000 gameticks, which equals 2 1/2 months.
 o_fix_baker_disappear: Fix bakers despawning
-o_fix_baker_disappear_descr: Bakers no longer disappear when they don't find flour
-  at their targeted stockpile.
-o_fix_fletcher_bug: Fix fletcher pathing
-o_fix_fletcher_bug_descr: Fixes the behaviour where fletchers go back to the workplace
-  after depositing the bow/crossbow instead of going straight to the stockpile.
-o_fix_ladderclimb: Fix ladder climbing destination bug
-o_fix_ladderclimb_descr: Units will now remember their original destination after
-  climbing a ladder, not getting stuck on the ladder.
-o_fix_map_sending: Enable map sending in multiplayer
-o_fix_map_sending_descr: Reduces the length of the sent map name, to make map sending
-  possible again!
-o_fix_moat_digging_unit_disappearing: Fix despawning of digging units
-o_fix_moat_digging_unit_disappearing_descr: Fixes the bug where moat digging units
-  would disappear while digging. Note that they can still disappear if you order them
-  to move while standing on unwalkable terrain!
-o_fix_rapid_deletion_bug: Fix resources rapid deletion
-o_fix_rapid_deletion_bug_descr: Deleting buildings with a fast auto clicker no longer
-  gives resources for more than one deletion.
-o_freetrader: Free trader post
-o_freetrader_descr: 'Since the AI sometimes plays itself, when they''re out of wood
-  and their trader post &
-
-  is destroyed. With this setting, the trader post will become free of cost to prevent
-  this.'
+o_fix_baker_disappear_descr: |
+  Bakers no longer disappear when they don't find flour at their targeted stockpile.
+o_fix_fletcher_bug: Fix fletchers inefficient pathing
+o_fix_fletcher_bug_descr: |
+  Fixes the behaviour where fletchers would go back to their workplace after delivering the bow/crossbow at the armory, instead of going straight to the stockpile to grab wood for the next production cycle.
+o_fix_ladderclimb: Units climbing ladders retain their move command target
+o_fix_ladderclimb_descr: |
+  Units will keep remembering their original destination after climbing a ladder,instead of getting stuck on the ladders and just waiting on the walltile they climbed up onto.
+o_fix_map_sending: Enable map sending for multiplayer
+o_fix_map_sending_descr: |
+  Reduces the length of the sent map name, to make map sending possible again.
+o_fix_moat_digging_unit_disappearing: Fix despawning digging troops
+o_fix_moat_digging_unit_disappearing_descr: |
+  Fixes the bug where moat digging units would disappear while digging. 
+  Note that they can still despwawn if you order them to move while standing on unwalkable terrain!
+o_fix_rapid_deletion_bug: Fix resource dublication from rapid deletion
+o_fix_rapid_deletion_bug_descr: |
+  Deleting buildings with a fast auto clicker no longer deletes the building multiple times. This way you dont get more resources back from deleting than the game has intended.
+o_freetrader: Free trading post
+o_freetrader_descr: |
+  This option makes the trading post cost no resources to prevent the AI from getting stuck due to not having enough resources to build the marketplace. In multiplayer games, this prevents the need to restart entirely or demolish buildings for wood when a trading post is forgotten.
 o_gamespeed: Extended game speed limits
-o_gamespeed_descr: "The game speed can now be changed as follows:\n - From 10 to 90\
-  \ in intervals of 5\n - From 90 to 200 in intervals of 10\n - From 200 to 1000 in\
-  \ intervals of 100\nThe new values are only available ingame via the +- keys, the\
-  \ slider in the &\ngame menu remains unchanged."
-o_healer: Healer heals casualties
-o_healer_descr: 'The healer of the apothecary building now actively seeks out injured
-  soldiers, &
-
-  civilists and animals to heal them. The nearest targets are treated first. With
-  each &
-
-  healing animation ca. 1/3 of a spearman''s health is recovered. The strolling through
-  &
-
-  gardens and investigation of plague clouds is not replaced! Only the strolling through
-  &
-
-  the castle is skipped until no more wounded targets are in the area.'
-o_increase_path_update_tick_rate: Check more often for available paths
-o_increase_path_update_tick_rate_descr: 'In vanilla, it took 200 game ticks to check
-  for new paths, often stopping units to move into the castle after destroying a gate
-  or tower immediately.
-
-
-  Availability is calculated every 50 gameticks now, allowing the units to ''realize''
-  new paths more quickly.'
-o_keys: WASD-Keys and quicksaves
-o_keys_descr: 'The WASD-keys can be used to move around with this setting as well
-  as &
-
-  CTRL-S and CTRL-L to quicksave and load respectively.'
+o_gamespeed_descr: |
+  Enable the change of the gamespeed as follows:
+  - From 10 to 90 in intervals of 5
+  - From 90 to 200 in intervals of 10
+  - From 200 to 1000 in intervals of 100
+  The new values are only available ingame via the +- keys, the slider in the ingame menu remains unchanged.
+o_healer: Apothecary worker heals injured people
+o_healer_descr: |
+  The healer of the apothecary building now actively seeks out injured soldiers, siegeengines, civilians and animals to heal them. The nearest targets are treated first. With each healing animation ca. 1/3 of a spearman's health is recovered. The strolling through gardens and investigation of plague clouds is not replaced. 
+  Only the strolling through the castle is skipped until no more wounded targets are in the area.
+o_increase_path_update_tick_rate: more frequent checking for available paths
+o_increase_path_update_tick_rate_descr: |
+  In vanilla, it took 200 game ticks to check for new pathing being avaviable, often stopping units to move into the castle after destroying a gate or tower immediately.
+  Change the calcualtion of availability to every 50 gameticks, allows the units to 'realize' new paths bbeing avaviable more quickly.
+o_keys: Move camera with WASD-Keys and enable quicksaves
+o_keys_descr: |
+  The WASD-keys can be used to move the camera around as well as CTRL-S and CTRL-L for quicksaving and loading respectively.
+  NOTE: Writing and selecting the Armory with A become infeasabile with this option.
 o_moatvisibility: Always show planned moat
-o_moatvisibility_descr: 'Your own placed but not digged out moat will always be shown
-  with this &
-
-  setting, even if you deselect the moat placing.'
+o_moatvisibility_descr: |
+  With this option you will always see your unfinished planned moat even when deselecting the moat tool or not having any units selected.
 o_onlyai: Activate Spectator-mode [bug possible]
-o_onlyai_descr: 'Removes player 1 so that you can only spectate and makes 8 AIs in
-  one &
-
-  round possible. Savegames now load properly in this mode. Sometimes a bug &
-
-  appears in which random objects spawn all over the map. This is just visually &
-
-  and can be removed by saving the game, ending the mission and reloading the &
-
-  save file.'
+o_onlyai_descr: |
+  Removes player 1 so that you can spectate up to 8 AIs on a single map. Savegames load properly in this mode but if a player was present he will not be controllable. Sometimes a bug appears in which random objects spawn all over the map. This is just visually and can be removed by saving the game, ending the mission and reloading the save file.
 o_override_identity_menu: Override the Set-up Identity menu adding new features
-o_override_identity_menu_descr: Adds Ranged and Melee unit selection to Set-up Identity
-  menu. ONLY FOR NORMAL GAME MODE!
+o_override_identity_menu_descr: |
+  Adds Ranged and Melee startunit selection to Set-up Identity menu. ONLY FOR NORMAL GAME MODE!
 o_playercolor: Change the color of player 1
 o_playercolor_descr: ' '
-o_quicksave: Enable quicksaves via CTRL-S and CTRL-L
-o_quicksave_descr: CTRL-S can be used to perform a quicksave. CTRL-L will load the
-  same save
 o_remove_right_click_context_menu: Remove right click context menu
-o_remove_right_click_context_menu_descr: Removes right click context menu where you
-  can rotate the map, lower walls, zoom and flatten.
-o_responsivegates: Quicker responsiveness of gates towards enemies
-o_responsivegates_descr: "Gates close themselves later if enemies get into range and\
-  \ open faster &\nwhen the danger is gone. The distance of an enemy for which the\
-  \ gates close &\nwill be reduced from 200 to 140. The time after which the gates\
-  \ open, after & \nall enemies left will be reduced from 1200 to 100."
-o_restore_arabian_engineer_speech: Restore engineer arabian speech
-o_restore_arabian_engineer_speech_descr: Allows engineers to speak the originally
-  recorded arabian voicelines when the player uses the Arabian lord.
+o_remove_right_click_context_menu_descr: |
+  Removes the right click context menu where you can rotate the map, lower walls, zoom and flatten.
+o_responsivegates: No more oversensitive Gates
+o_responsivegates_descr: |
+  Gates will only close automatically if absolutely nessecary and open much faster if no enemy is closeby anymore. The distance for enemy detection will be changed from 200 to 140 and the time it takes for the gate to popen again will be reduced from 1200 to 100.
+o_restore_arabian_engineer_speech: Restore arabian engineer voicelines
+o_restore_arabian_engineer_speech_descr: |
+  Allows engineers to speak previously unused arabian voicelines when the player selected the Arabian lord.
 o_seed_modification_possibility: Enable & Save game randomseeds
-o_seed_modification_possibility_descr: This option will save the seed from games that
-  do not have a live seed set, so you can rename them to 'live' in order to recreate
-  the match afterwards.
+o_seed_modification_possibility_descr: |
+  This option will save the seed from games that do not have a live seed set, so you can rename them to 'live' in order to recreate the match afterwards.
 o_seed_modification_possibility_only_set: Enable fixed game randomseed
-o_seed_modification_possibility_only_set_descr: 'Setting the Game seed will allow
-  AI-only games to play out the same way if the same map settings are used. For games
-  involving human players, it will ensure the same starting conditions in the map
-  (e.g. AIV selection). To set the game seed, enable this option and create a file
-  called ''live'' containing an integer in the [game install]/gameseeds directory.
-  CAUTION: This feature only works after also restarting the game!'
+o_seed_modification_possibility_only_set_descr: |
+  'Setting the Game seed will allow
+  AI-only games to play out the same way if the same map settings are used. For games involving human players, it will ensure the same starting conditions in the map (e.g. AIV selection). To set the game seed, enable this option and create a file called ''live'' containing an integer in the [game install]/gameseeds directory. CAUTION: This feature only works after also restarting the game!'
 o_seed_modification_possibility_title: Manipulate random number generator
 o_shfy: Strongholdify
 o_shfy_beer: Popularity bonus from beer
@@ -302,54 +199,49 @@ o_shfy_beer_descr: ' '
 o_shfy_peasantspawnrate: Spawnrate peasants
 o_shfy_peasantspawnrate_descr: ' '
 o_shfy_religion: Popularity bonus from cathedral and church
-o_shfy_religion_descr: ' '
+o_shfy_religion_descr: |
+  ' '
 o_shfy_resourcequantity: Quantity of delivered resources
-o_shfy_resourcequantity_descr: 'Adapts listed aspects to match Stronghold 1. Attention:
+o_shfy_resourcequantity_descr: |
+  'Adapts listed aspects to match Stronghold 1. Attention:
   Every change influences the AI lords, in the worst case renders them useless!'
-o_stop_player_keep_rotation: Rotate player keeps same as AI's
-o_stop_player_keep_rotation_descr: Player keeps now get rotated the same way, that
-  AI keeps rotate on a map, facing with their campfire outwards towards the map edge.
+o_stop_player_keep_rotation: Rotate the players keep like the AI's
+o_stop_player_keep_rotation_descr: |
+  Player keeps now get rotated the same way as the AI keeps rotate on a map, pointing their campfire outwards towards the map edge.
 o_wasd: Enable using WASD to move around
-o_wasd_descr: WASD can be used to move around in addition to the existing arrow keys
-o_xtreme: Remove the magic bar in Extreme
-o_xtreme_descr: Removes the magic bar in Crusader Extreme.
+o_wasd_descr: |
+  WASD can be used to move around in addition to the existing arrow keys
+o_xtreme: Remove the magic bar in Crusader Extreme
 u_arabwall: Arabic Swordsmen destroy walls faster
-u_arabwall_descr: 'In Vanilla, arabic swordsmen destroy walls slower than any other
-  melee unit. &
-
-  With this option, the tear down speed against walls is about doubled for them, &
-
-  putting them slightly above Spearmen.'
-u_arabxbow: Increased armor of Arabic Swordsmen against crossbows
-u_arabxbow_descr: ' - Arabic Swordsmen only die after 6 crossbow hits intead of 3'
-u_ballistamonk: Fire ballistas shoot monks
-u_ballistamonk_descr: Fire ballistas shoot automatically at monks with this setting.
-u_fireballistafix: Fire ballistae shoot monks and tunnelers
-u_fireballistafix_descr: Fire ballistae automatically shoot at monks and tunnelers.
+u_arabwall_descr: |
+  In Vanilla, arabic swordsmen destroy walls slower than any other
+  melee unit. With this option, the tear down speed against walls is about doubled for them, putting them slightly above Spearmen.
+u_arabxbow: Increased armor for Arabic Swordsmen against crossbows
+u_arabxbow_descr: |
+  Arabic Swordsmen only die after 6 crossbow hits intead of 3
+u_fireballistafix: Fire ballistae now auto target monks and tunnelers
 u_fix_applefarm_blocking: Fix apple farm worker getting blocked
-u_fix_applefarm_blocking_descr: Apple farmers can no longer be blocked by placing
+u_fix_applefarm_blocking_descr: |
+  Apple farmers can no longer be blocked from reaching their workbuilding by placing
   buildings at the top left side of the farm.
 u_fix_lord_animation_stuck_movement: Reset lord animation after destroying buildings
-u_fix_lord_animation_stuck_movement_descr: Reset the pose of the lord after it stops
-  moving or destroys a building into the upright position. Usually it would get stuck
-  bend down to the ground.
-u_jestermoveto_assassin: Stop the jester from visiting assassins
-u_jestermoveto_assassin_descr: The jester visits your units on the battlefield to
-  cheer them up. Now it wont visit your invisible assassins anymore, showing everyone
-  where they are!
+u_fix_lord_animation_stuck_movement_descr: |
+  Reset the pose of the lord after he stops moving or destroying a building into his upright posture. Usually it would get stuck in his last attack animationframe.
+u_jestermoveto_assassin: Stop the jester from seeking out assassins
+u_jestermoveto_assassin_descr: |
+  The jester visits your units on the battlefield to cheer them up. Now he wont visit your invisible assassins anymore, showing everyone where they are!
 u_laddermen: Increased armor of laddermen against ranged units
-u_laddermen_descr: " - Laddermen die after 12 arrow hits instead of 5\n - Laddermen\
-  \ die after 5 crossbow or slinger hits instead of 2\n - Laddermen cost 20 gold instead\
-  \ of 4"
+u_laddermen_descr: |
+  In Vanilla the Laddermen died after 5 arrows, 5 crossbowbolts/slingerstones, with this option it is increased to 12 arrow 5 crossbowbolts/slingerstones. this option also raises the goldcost of laddermen to 20 gold.
 u_spearmen: Increased armor of spearmen against ranged units
-u_spearmen_descr: " - Spearmen only die after 5 arrow hits instead of 3\n - Spearmen\
-  \ barely survive one crossbow hit, instead of getting one-shot"
+u_spearmen_descr: |
+  Spearmen only die after 5 arrow hits instead of 3 spearmen barely survive one crossbowbolt, instead of getting killed in one shot.
 u_spearmen_run: Spearmen run by default instead of walking.
-u_spearmen_run_descr: Makes spearmen run by default like slaves and macemen.
-u_tanner_fix: Fix tanners getting all the same cow
-u_tanner_fix_descr: Tanners will no longer return without a cow when another tanner
-  took their target cow. They will now instead stand around a bit and then get another
-  one.
+u_spearmen_run_descr: |
+  Makes spearmen run by default like slaves and macemen.
+u_tanner_fix: Fix tanners gathering cow behaviour
+u_tanner_fix_descr: |
+  Tanners will no longer return without a cow when another tanner took their targeted cow. They will now wait a bit and then select a different cow.
 ui_AIC: AIC
 ui_AIV: AIV
 ui_Resource: StartGoods
