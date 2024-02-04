@@ -487,7 +487,7 @@ private:
 			throw ModuleHandleException("failed to hash: " + path + "\n reason: " + errorMsg);
 		}
 
-		if (Core::getInstance().getModuleHashStore().verify(name, hash)) {
+		if (Core::getInstance().getModuleHashStore()->verify(name, hash)) {
 			return true;
 		}
 

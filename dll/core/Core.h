@@ -108,7 +108,7 @@ public:
 
 	
 
-	Store getModuleHashStore();
+	Store* getModuleHashStore();
 
 	void log(int logLevel, std::string message);
 

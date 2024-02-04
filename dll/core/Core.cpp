@@ -176,8 +176,8 @@ bool Core::codeLocationExists(bool& asZip, bool& asFolder) {
 	return asZip || asFolder;
 }
 
-Store Core::getModuleHashStore() {
-	return *this->moduleHashStore;
+Store* Core::getModuleHashStore() {
+	return this->moduleHashStore;
 }
 
 
