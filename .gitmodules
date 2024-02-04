@@ -39,7 +39,7 @@
 	ignore = dirty
 
 [submodule "content/ucp/modules/startResources-0.1.0"]
-	path = content/ucp/modules/startResources-0.2.0
+	path = content/ucp/modules/startResources-0.2.1
 	url = https://github.com/gynt/ucp_startResources
 
 [submodule "dll/vendor/cxxopts"]
