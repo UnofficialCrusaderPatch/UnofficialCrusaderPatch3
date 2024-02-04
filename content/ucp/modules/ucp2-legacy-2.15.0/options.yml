@@ -131,26 +131,26 @@ options:
     text: '{{ai_demolish_eco_descr}}'
     display: Paragraph
   - name: ai_demolish_walls
-    display: UCP2Switch
-    header: '{{ai_demolish_walls}}'
+    display: Switch
+    text: '{{ai_demolish_walls}}'
     url: ucp2-legacy.ai_demolish.ai_demolish_walls.enabled
     contents:
       value: false
       type: boolean
   - name: ai_demolish_trapped
-    display: UCP2Switch
-    header: '{{ai_demolish_trapped}}'
+    display: Switch
+    text: '{{ai_demolish_trapped}}'
     url: ucp2-legacy.ai_demolish.ai_demolish_trapped.enabled
     contents:
       value: false
       type: boolean
   - name: ai_demolish_eco
-    display: UCP2Switch
-    header: '{{ai_demolish_eco}}'
+    display: Switch
+    text: '{{ai_demolish_eco}}'
     url: ucp2-legacy.ai_demolish.ai_demolish_eco.enabled
     contents:
       value: false
-      type: boolean 
+      type: boolean
 - category:
   - AI
   - Units
@@ -573,29 +573,29 @@ options:
     header: '{{o_shfy}}'
     text: '{{o_shfy_resourcequantity_descr}}'
   - name: o_shfy_beer
-    header: '{{o_shfy_beer}}'
-    display: UCP2Switch
+    text: '{{o_shfy_beer}}'
+    display: Switch
     url: ucp2-legacy.o_shfy.o_shfy_beer.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_religion
-    header: '{{o_shfy_religion}}'
-    display: UCP2Switch
+    text: '{{o_shfy_religion}}'
+    display: Switch
     url: ucp2-legacy.o_shfy.o_shfy_religion.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_peasantspawnrate
-    header: '{{o_shfy_peasantspawnrate}}'
-    display: UCP2Switch
+    text: '{{o_shfy_peasantspawnrate}}'
+    display: Switch
     url: ucp2-legacy.o_shfy.o_shfy_peasantspawnrate.enabled
     contents:
       value: false
       type: boolean
   - name: o_shfy_resourcequantity
-    header: '{{o_shfy_resourcequantity}}'
-    display: UCP2Switch
+    text: '{{o_shfy_resourcequantity}}'
+    display: Switch
     url: ucp2-legacy.o_shfy.o_shfy_resourcequantity.enabled
     contents:
       value: false
