@@ -447,12 +447,31 @@ class AiSetting {
 
 class AiSelectMenu {
   #mainElem;
+  #selectTable;
+
+  #sortAndCreateSelectTable(filter) {
+    this.#selectTable.replaceChildren();
+    if (!filter) {
+      FOUND_AI_META.forEach((meta) => meta.appendRowToParent(this.#selectTable));
+      return;
+    }
+    const filterRegex = new RegExp(filter);
+    FOUND_AI_META.forEach((meta) => !filterRegex.test(meta.name) || meta.appendRowToParent(this.#selectTable));
+  }
 
   constructor(mainElem) {
     this.#mainElem = mainElem;
 
+
+    this.#selectTable = document.querySelector(".ai-swapper__select-menu__table__body");
+    this.#sortAndCreateSelectTable();
+
     const closeButton = this.#mainElem.querySelector(".ai-swapper__select-menu__close");
     addEnterAndClickListener(closeButton, () => this.#mainElem.close());
+
+    const filterInput = this.#mainElem.querySelector(".ai-filter-input");
+    filterInput.onchange = (event) => this.#sortAndCreateSelectTable(event.target.value);
+
     document.addEventListener(AI_SELECT_EVENT, () => closeButton.click());
   }
 }
@@ -523,8 +542,8 @@ class AiChangeMenu {
 
 class AiSlot {
   #slotName;
-  #pluginSettings = [];
   #aiSettings = [];
+  #pluginSettings = [];
 
   #localizedSlotName;
   #changeMenu;
@@ -575,11 +594,16 @@ class AiSlot {
   }
 
   getAiSlotName() {
-    if (!this.#aiSettings.length) {
+    if (!this.#aiSettings.length && !this.#pluginSettings.length) {
       return this.#localizedSlotName;
     }
     // using first that has any kind of setting
     for (const aiSetting of this.#aiSettings) {
+      if (AI_CONTROL_SETTINGS.map((setting) => aiSetting.control[setting]).some(isPrimitiveBool)) {
+        return aiSetting.name;
+      }
+    }
+    for (const aiSetting of this.#pluginSettings) {
       if (AI_CONTROL_SETTINGS.map((setting) => aiSetting.control[setting]).some(isPrimitiveBool)) {
         return aiSetting.name;
       }
@@ -589,6 +613,11 @@ class AiSlot {
 
   getAiImgSource() {
     for (const aiSetting of this.#aiSettings) {
+      if (aiSetting.control.portrait && aiSetting.aiMeta.portraitAssetPath) {
+        return aiSetting.aiMeta.portraitAssetPath;
+      }
+    }
+    for (const aiSetting of this.#pluginSettings) {
       if (aiSetting.control.portrait && aiSetting.aiMeta.portraitAssetPath) {
         return aiSetting.aiMeta.portraitAssetPath;
       }
@@ -633,8 +662,8 @@ class AiSlot {
   }
 
   appendAllPluginAndAiSettings(parent) {
-    this.#pluginSettings.forEach((setting) => setting.appendRowToParent(parent));
     this.#aiSettings.forEach((setting) => setting.appendRowToParent(parent));
+    this.#pluginSettings.forEach((setting) => setting.appendRowToParent(parent));
   }
 
   updateStatus() {
@@ -645,14 +674,6 @@ class AiSlot {
   updatePluginAndAiSettingsCellStatus() {
     AI_CONTROL_SETTINGS.forEach((controlSetting) => {
       let discoveredActive = false;
-      this.#pluginSettings.forEach((pluginSetting) => {
-        if (discoveredActive) {
-          pluginSetting.setBoolCellCurrent(controlSetting, false);
-          return;
-        }
-        discoveredActive = isPrimitiveBool(pluginSetting.control[controlSetting]);
-        pluginSetting.setBoolCellCurrent(controlSetting, discoveredActive);
-      });
 
       this.#aiSettings.forEach((aiSetting) => {
         if (discoveredActive) {
@@ -661,6 +682,15 @@ class AiSlot {
         }
         discoveredActive = isPrimitiveBool(aiSetting.control[controlSetting]);
         aiSetting.setBoolCellCurrent(controlSetting, discoveredActive);
+      });
+
+      this.#pluginSettings.forEach((pluginSetting) => {
+        if (discoveredActive) {
+          pluginSetting.setBoolCellCurrent(controlSetting, false);
+          return;
+        }
+        discoveredActive = isPrimitiveBool(pluginSetting.control[controlSetting]);
+        pluginSetting.setBoolCellCurrent(controlSetting, discoveredActive);
       });
     });
   }
@@ -715,12 +745,9 @@ async function receiveAllAvailableAi() {
   for (const foundAi of foundAis) {
     (await Promise.all(foundAi.paths.map(AiMeta.fromMetaPath)))
       .filter((meta) => !!meta)
+      .toSorted((metaOne, metaTwo) => metaOne.name.localeCompare(metaTwo.name) || metaOne.root.localeCompare(metaTwo.root))
       .forEach((meta) => FOUND_AI_META.set(meta.root, meta));
   }
-
-  // no sort for now
-  const selectTable = document.querySelector(".ai-swapper__select-menu__table__body");
-  FOUND_AI_META.forEach((meta) => meta.appendRowToParent(selectTable));
 }
 
 async function receiveCurrentConfig() {

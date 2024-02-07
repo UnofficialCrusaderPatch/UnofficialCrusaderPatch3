@@ -96,6 +96,22 @@ select:disabled {
   width: 100%;
 }
 
+.ai-swapper__select-menu__header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.ai-swapper__select-menu__header > label {
+  margin: 10px;
+  color: whitesmoke;
+}
+
+.ai-swapper__select-menu__header > input {
+  background-color: whitesmoke;
+  margin: 10px;
+}
+
 .ai-swapper__change-menu__select {
   color: black;
   margin: 10px 0 10px 0;
@@ -123,7 +139,6 @@ select:disabled {
 .ai-swapper__select-menu__container {
   flex-grow: 1;
   width: 100%;
-  margin-top: 30px;
   overflow-x: auto;
 }
 
