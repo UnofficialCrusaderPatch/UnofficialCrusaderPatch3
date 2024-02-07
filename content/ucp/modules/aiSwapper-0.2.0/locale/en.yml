@@ -37,6 +37,7 @@ change.controls.priority: Priority
 change.controls.remove: Remove
 change.image: Image
 change.name: Name
+change.plugin: Plugin
 change.path: Path
 change.language: Language
 change.binks: Binks

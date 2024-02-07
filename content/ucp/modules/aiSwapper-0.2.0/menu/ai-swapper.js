@@ -217,6 +217,7 @@ class AiSetting {
   root;
   control;
   aiMeta;
+  extension;
 
   #dataRow;
   #controlCell;
@@ -350,9 +351,13 @@ class AiSetting {
     this.#dataRow = document.createElement("tr");
     this.#dataRow.classList.add("ai-setting-row");
 
-    this.#appendDataRowControl();
-    this.#appendDataRowImg();
+    if (!this.extension) {
+      this.#dataRow.classList.add("ai-setting-row--user");
+    }
 
+    this.#appendDataRowControl();
+    this.#dataRow.appendChild(createTextCell(this.extension ?? "-"));
+    this.#appendDataRowImg();
     this.#dataRow.appendChild(createTextCell(this.name));
     this.#dataRow.appendChild(createTextCell(this.root));
 
@@ -373,9 +378,18 @@ class AiSetting {
     AI_CONTROL_SETTINGS.forEach((setting) => aiControl[setting] = this.#verifyAiControlSetting(aiControl[setting], aiMetaSwitched[setting]));
   }
 
+  #setInteractionStatus(active) {
+    this.#dataRow.querySelectorAll(active ? '[tabIndex="-1"]' : '[tabIndex="0"]').forEach((elem) => elem.tabIndex = active ? 0 : -1);
+    this.#dataRow.querySelectorAll(active ? 'select[disabled]' : 'select').forEach((elem) => elem.disabled = !active);
+
+    const controls = this.#controlCell.querySelector(".ai-setting-control");
+    active ? controls.removeAttribute("inert") : controls.setAttribute("inert", "");
+  }
+
   constructor(meta, settingObj) {
     this.aiMeta = meta;
 
+    this.extension = settingObj.extension;
     this.name = receiveStringOrFallback(this.aiMeta.name, DEFAULT_VALUE_MARKER);
     this.root = receiveStringOrFallback(this.aiMeta.root, DEFAULT_VALUE_MARKER);
     this.language = receiveStringOrFallback(settingObj.language);
@@ -392,11 +406,7 @@ class AiSetting {
     }
 
     this.#createDataRow();
-  }
-
-  setInteractionStatus(active) {
-    this.#dataRow.querySelectorAll(active ? '[tabIndex="-1"]' : '[tabIndex="0"]').forEach((elem) => elem.tabIndex = active ? 0 : -1);
-    this.#dataRow.querySelectorAll(active ? 'select[disabled]' : 'select').forEach((elem) => elem.disabled = !active);
+    this.#setInteractionStatus(!this.extension);
   }
 
   setBoolCellCurrent(controlName, isCurrent) {
@@ -459,8 +469,8 @@ class AiChangeMenu {
 
   #updateTable() {
     this.#tableBodyElement.replaceChildren();
-    this.#currentSlot.updateAiSettingsCellStatus();
-    this.#currentSlot.appendAllAiSettings(this.#tableBodyElement);
+    this.#currentSlot.updatePluginAndAiSettingsCellStatus();
+    this.#currentSlot.appendAllPluginAndAiSettings(this.#tableBodyElement);
   }
 
   #changeEvent(detail) {
@@ -504,9 +514,7 @@ class AiChangeMenu {
     this.#slotNameElem.textContent = localizedSlotName ?? this.#currentSlotName;
     this.#currentSlot = aiSlot;
 
-    const isLocked = this.#currentSlot.isLocked()
-    this.#selectAiElem.disabled = isLocked;
-    this.#selectAiElem.textContent = isLocked ? [GENERAL_LOCALIZATION["change.button.locked"], this.#currentSlot.getLockingExtension()].join(" ") : this.#selectMainText;
+    this.#selectAiElem.textContent = this.#selectMainText;
 
     this.#updateTable();
     this.#mainElem.showModal();
@@ -515,11 +523,8 @@ class AiChangeMenu {
 
 class AiSlot {
   #slotName;
+  #pluginSettings = [];
   #aiSettings = [];
-
-  // TEMP?, will lock the ai, so that no edits are possible
-  #aiLocked = false;
-  #lockingExtension;
 
   #localizedSlotName;
   #changeMenu;
@@ -531,35 +536,42 @@ class AiSlot {
     this.#slotName = slotName;
   }
 
-  pushBaselineSetting(lockingExtension, aiSetting) {
-    this.#aiLocked = true;
-    this.#lockingExtension = lockingExtension;
-    this.#aiSettings.push(aiSetting);
+  pushBaselineSetting(aiSetting) {
+    this.#pluginSettings.push(aiSetting);
   }
 
   pushUserSetting(aiSetting) {
     this.#aiSettings.push(aiSetting);
   }
 
-  isLocked() {
-    return this.#aiLocked;
-  }
-
-  getLockingExtension() {
-    return this.#lockingExtension;
-  }
-
-  appendSlotExportSettingsToConfig(config) {
-    if (this.isLocked()) {
+  appendUserMenuEntryForSlot(menu) {
+    if (!this.#aiSettings.length) {
+      menu[this.#slotName] = undefined; // deleting old setting
       return;
     }
+    menu[this.#slotName] = this.#aiSettings.map((setting) => setting.toSettingNameAndObject());
+  }
 
-    const configKey = `ai.${this.#slotName}`;
-    if (!this.#aiSettings.length || this.isLocked()) {
-      config[configKey] = undefined; // deleting old setting
-      return;
-    }
-    config[configKey] = this.#aiSettings.map((setting) => setting.toSettingNameAndObject());
+  appendAiControlSettingsForSlot(config) {
+    AI_CONTROL_SETTINGS.forEach((controlSetting) => {
+      const configKey = `ai.${this.#slotName}.${controlSetting}`;
+
+      for (const aiSetting of this.#aiSettings) {
+        if (!isPrimitiveBool(aiSetting.control[controlSetting])) {
+          continue;
+        }
+
+        config[configKey] = {
+          name: aiSetting.name,
+          root: aiSetting.root,
+          active: aiSetting.control[controlSetting],
+          language: aiSetting.language,
+        }
+        return;
+      }
+
+      config[configKey] = undefined; // unset
+    });
   }
 
   getAiSlotName() {
@@ -620,7 +632,8 @@ class AiSlot {
     parent?.appendChild(this.#mainElem);
   }
 
-  appendAllAiSettings(parent) {
+  appendAllPluginAndAiSettings(parent) {
+    this.#pluginSettings.forEach((setting) => setting.appendRowToParent(parent));
     this.#aiSettings.forEach((setting) => setting.appendRowToParent(parent));
   }
 
@@ -629,9 +642,18 @@ class AiSlot {
     this.#aiNameElem.textContent = this.getAiSlotName();
   }
 
-  updateAiSettingsCellStatus() {
+  updatePluginAndAiSettingsCellStatus() {
     AI_CONTROL_SETTINGS.forEach((controlSetting) => {
       let discoveredActive = false;
+      this.#pluginSettings.forEach((pluginSetting) => {
+        if (discoveredActive) {
+          pluginSetting.setBoolCellCurrent(controlSetting, false);
+          return;
+        }
+        discoveredActive = isPrimitiveBool(pluginSetting.control[controlSetting]);
+        pluginSetting.setBoolCellCurrent(controlSetting, discoveredActive);
+      });
+
       this.#aiSettings.forEach((aiSetting) => {
         if (discoveredActive) {
           aiSetting.setBoolCellCurrent(controlSetting, false);
@@ -641,7 +663,6 @@ class AiSlot {
         aiSetting.setBoolCellCurrent(controlSetting, discoveredActive);
       });
     });
-    this.#aiSettings.forEach((aiSetting) => aiSetting.setInteractionStatus(!this.isLocked()));
   }
 
   removeAiSetting(aiSetting) {
@@ -667,8 +688,11 @@ class AiSlot {
 function createResultConfig() {
   const configState = {};
 
+  configState.menu = {};
+  AI_SLOTS.forEach((slot) => slot.appendUserMenuEntryForSlot(configState.menu));
   configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : undefined;
-  AI_SLOTS.forEach((slot) => slot.appendSlotExportSettingsToConfig(configState));
+
+  AI_SLOTS.forEach((slot) => slot.appendAiControlSettingsForSlot(configState));
   return configState;
 }
 
@@ -701,36 +725,53 @@ async function receiveAllAvailableAi() {
 
 async function receiveCurrentConfig() {
   const { baseline, user } = await HOST_FUNCTIONS.getCurrentConfig();
-  // ignore baseline default language
 
-  const { defaultLanguage, ...userAi } = user;
+  // ignore baseline default language and menu
+  const { defaultLanguage: _baselineDefaultLanguage, menu: _baselineMenu, ...baselineAi } = baseline;
+  const { defaultLanguage, menu } = user;
 
   if (defaultLanguage) {
     DEFAULT_LANGUAGE = defaultLanguage;
   }
 
-  const baseLineAiArray = Object.entries(baseline).map(([key, value]) => [key, value.modifications.value.entity, value.modifications.value.content]);
-  for (const [aiUrl, extension, configArray] of baseLineAiArray) {
-    const ai = aiUrl.replace("ai.", "");
+  const baselineConfigObject = Object.entries(baselineAi)
+    .map(([key, value]) => [
+      key.replace("ai.", ""),
+      value.modifications.value.entity,
+      value.modifications.value.content,
+    ])
+    .reduce(
+      (resultObj, [aiSettingUrl, extension, value]) => {
+        const [ai, aiSetting] = aiSettingUrl.split(".");
+        const aiObj = resultObj[ai] = resultObj[ai] ?? {};
 
-    configArray.filter((config) => FOUND_AI_META.has(config.root))
+        const sourceKey = `${extension}-${value.root}-${value.name}-${value.language}`;
+        if (!aiObj[sourceKey]) {
+          const configObj = aiObj[sourceKey] = {};
+          configObj.root = value.root;
+          configObj.name = value.name;
+          configObj.control = {};
+          configObj.language = value.language;
+          configObj.extension = extension;
+        }
+        aiObj[sourceKey].control[aiSetting] = value.active;
+        return resultObj;
+      },
+      {}
+    );
+  for (const [ai, configObj] of Object.entries(baselineConfigObject)) {
+    Object.values(configObj).filter((config) => FOUND_AI_META.has(config.root))
       .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
-      .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(extension, aiSetting));
+      .forEach((aiSetting) => AI_SLOTS.get(ai).pushBaselineSetting(aiSetting));
   }
 
   // filter to handle keys set to undefined
-  for (const [aiUrl, configArray] of Object.entries(userAi).filter(([, configArray]) => !!configArray)) {
-    const ai = aiUrl.replace("ai.", "");
-
-    const slot = AI_SLOTS.get(ai);
-    if (slot.isLocked()) { // TEMP: settings from user are discarded if a plugin takes control
-      continue;
-    }
+  for (const [ai, configArray] of Object.entries(menu).filter(([, configArray]) => !!configArray)) {
     configArray.filter((config) => FOUND_AI_META.has(config.root))
       .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
-      .forEach((aiSetting) => slot.pushUserSetting(aiSetting));
+      .forEach((aiSetting) => AI_SLOTS.get(ai).pushUserSetting(aiSetting));
   }
 }
 

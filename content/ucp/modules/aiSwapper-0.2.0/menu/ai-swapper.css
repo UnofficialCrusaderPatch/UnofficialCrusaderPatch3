@@ -255,15 +255,15 @@ tr .ai-image {
   filter: brightness(50%);
 }
 
-.ai-setting-control :is(.priority, .remove)[tabIndex="-1"] {
+.ai-setting-control[inert] :is(.priority, .remove) {
   pointer-events: none;
-  filter: brightness(50%);
-}
-
-.ai-swapper__change-menu__table__body .ai-setting-row:first-child .ai-setting-control .priority.up {
   visibility: hidden;
 }
 
-.ai-swapper__change-menu__table__body .ai-setting-row:last-child .ai-setting-control .priority.down {
+.ai-swapper__change-menu__table__body .ai-setting-row--user:nth-child(1 of .ai-setting-row--user) .ai-setting-control .priority.up {
+  visibility: hidden;
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row--user:nth-last-child(1 of .ai-setting-row--user) .ai-setting-control .priority.down {
   visibility: hidden;
 }
