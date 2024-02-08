@@ -18,8 +18,10 @@
         &#10006;
       </button>
       <div class="ai-swapper__select-menu__header">
-        <label for="filer">{{select.filter.label}}</label>
-        <input class="ai-filter-input" type="text" name="filter"/>
+        <label for="name-filter">{{select.filter.label}}</label>
+        <input class="ai-filter-input" type="text" id="name-filter" name="name-filter" />
+        <label for="regex-checkbox">Regex:</label>
+        <input class="ai-filter-regex" type="checkbox" id="regex-checkbox" name="regex-checkbox" />
       </div>
       <div class="ai-swapper__select-menu__container">
         <table class="ai-swapper__select-menu__table">

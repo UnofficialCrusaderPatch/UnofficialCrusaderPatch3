@@ -448,29 +448,40 @@ class AiSetting {
 class AiSelectMenu {
   #mainElem;
   #selectTable;
+  #filterInput;
+  #regexCheckbox;
 
-  #sortAndCreateSelectTable(filter) {
+  #sortAndCreateSelectTable() {
+    const filter = this.#filterInput.value;
     this.#selectTable.replaceChildren();
     if (!filter) {
       FOUND_AI_META.forEach((meta) => meta.appendRowToParent(this.#selectTable));
       return;
     }
-    const filterRegex = new RegExp(filter);
-    FOUND_AI_META.forEach((meta) => !filterRegex.test(meta.name) || meta.appendRowToParent(this.#selectTable));
+
+    if (this.#regexCheckbox?.checked) {
+      const filterRegex = new RegExp(filter);
+      FOUND_AI_META.forEach((meta) => !filterRegex.test(meta.name) || meta.appendRowToParent(this.#selectTable));
+    } else {
+      FOUND_AI_META.forEach((meta) => !meta.name.includes(filter) || meta.appendRowToParent(this.#selectTable));
+    }
   }
 
   constructor(mainElem) {
     this.#mainElem = mainElem;
-
-
     this.#selectTable = document.querySelector(".ai-swapper__select-menu__table__body");
-    this.#sortAndCreateSelectTable();
 
     const closeButton = this.#mainElem.querySelector(".ai-swapper__select-menu__close");
     addEnterAndClickListener(closeButton, () => this.#mainElem.close());
 
-    const filterInput = this.#mainElem.querySelector(".ai-filter-input");
-    filterInput.onchange = (event) => this.#sortAndCreateSelectTable(event.target.value);
+    this.#filterInput = this.#mainElem.querySelector(".ai-filter-input");
+    this.#regexCheckbox = this.#mainElem.querySelector(".ai-filter-regex");
+
+    const filterChangeEvent = () => this.#sortAndCreateSelectTable();
+    this.#filterInput.onchange = filterChangeEvent;
+    this.#regexCheckbox.onchange = filterChangeEvent;
+
+    this.#sortAndCreateSelectTable();
 
     document.addEventListener(AI_SELECT_EVENT, () => closeButton.click());
   }

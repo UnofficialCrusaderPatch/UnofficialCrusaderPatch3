@@ -109,6 +109,7 @@ select:disabled {
 
 .ai-swapper__select-menu__header > input {
   background-color: whitesmoke;
+  color: black;
   margin: 10px;
 }
 
