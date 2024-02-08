@@ -794,7 +794,7 @@ async function receiveCurrentConfig() {
   }
 
   // filter to handle keys set to undefined
-  for (const [ai, configArray] of Object.entries(menu).filter(([, configArray]) => !!configArray)) {
+  for (const [ai, configArray] of Object.entries(menu ?? {}).filter(([, configArray]) => !!configArray)) {
     configArray.filter((config) => FOUND_AI_META.has(config.root))
       .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)

@@ -93,14 +93,14 @@ local function setAI(lordToReplace, aiName, control, pathroot, aiLang)
   -- all parts take care of their own reset, otherwise they are not usable on their own
 
   control = control or {
-    binks = true,
-    speech = true,
-    aic = true,
-    aiv = true,
-    lord = true,
-    startTroops = true,
-    ["lines"] = true,
-    portrait = true,
+    [enums.CONFIG_CONTROL_ENTRY.BINKS] = true,
+    [enums.CONFIG_CONTROL_ENTRY.SPEECH] = true,
+    [enums.CONFIG_CONTROL_ENTRY.AIC] = true,
+    [enums.CONFIG_CONTROL_ENTRY.AIV] = true,
+    [enums.CONFIG_CONTROL_ENTRY.LORD] = true,
+    [enums.CONFIG_CONTROL_ENTRY.STARTTROOPS] = true,
+    [enums.CONFIG_CONTROL_ENTRY.LINES] = true,
+    [enums.CONFIG_CONTROL_ENTRY.PORTRAIT] = true,
   }
 
   setAiPart(portrait.loadAndSetPortrait, portrait.resetPortrait, control.portrait,
@@ -185,14 +185,48 @@ local function resetAllAIWithOptions(toVanilla)
   end
 end
 
+local function transformConfigData(aiName, settings, collector)
+  local index = enums.LORD_ID[string.upper(aiName)]
+  if index == nil then
+    log(WARNING, string.format("Unable to apply AI options for '%s'. Unknown lord.", aiName))
+    return
+  end
 
+  local configMerger = {}
+  for setting, entry in pairs(settings) do
+    if not util.containsValue(enums.CONFIG_CONTROL_ENTRY, setting) then
+      log(WARNING, string.format("Unable to apply AI setting '%s' for '%s'. Unknown setting.", setting, aiName))
+    else
+      local sourceKey = string.format("%s-%s-%s", entry.root, entry.name, entry.language);
+
+      if not configMerger[sourceKey] then
+        local config = {}
+        configMerger[sourceKey] = config
+
+        config.root = entry.root;
+        config.name = entry.name;
+        config.control = {};
+        config.language = entry.language;
+        config.extension = entry;
+      end
+      configMerger[sourceKey].control[setting] = entry.active;
+    end
+  end
+
+  local aiConfigArray = {}
+  local indexCount = 1
+  for _, entry in pairs(configMerger) do
+    aiConfigArray[indexCount] = entry
+    indexCount = indexCount + 1
+  end
+  collector[aiName] = aiConfigArray
+end
 
 --[[ Main Func ]]--
 
 local exports = {}
 
 exports.enable = function(self, moduleConfig, globalConfig)
-
   -- load requires here, so that the cpp helper module can find the functions
   enums = require("scripts.enums")
   util = require("scripts.util")
@@ -210,15 +244,11 @@ exports.enable = function(self, moduleConfig, globalConfig)
   if not options.ai then
     options.ai = {}
   else
-    options.ai = util.createTableWithTransformedKeys(options.ai,
-      function(aiName)
-        local index = enums.LORD_ID[string.upper(aiName)]
-        if index == nil then
-          log(WARNING, string.format("Unable to apply AI options for '%s'. Unknown lord.", aiName))
-        end
-        return index
-      end,
-      false)
+    local compatibleAiSettings = {}
+    for ai, settings in pairs(options.ai) do
+      transformConfigData(ai, settings, compatibleAiSettings)
+    end
+    options.ai = compatibleAiSettings
   end
 
   -- set functions
