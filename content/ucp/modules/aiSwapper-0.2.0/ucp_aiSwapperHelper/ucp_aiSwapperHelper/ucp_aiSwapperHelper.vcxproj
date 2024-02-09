@@ -65,7 +65,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LocalDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>D:\SteamStuff\steamapps\common\Stronghold Crusader Extreme\ucp\modules\aiSwapper-0.1.0\</OutDir>
+    <OutDir>D:\SteamStuff\steamapps\common\Stronghold Crusader Extreme\ucp\modules\aiSwapper-1.0.0\</OutDir>
     <TargetName>aiSwapperHelper</TargetName>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Dependencies</IncludePath>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Dependencies</ExternalIncludePath>
