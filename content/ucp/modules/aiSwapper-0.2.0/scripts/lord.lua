@@ -48,18 +48,16 @@ end
 --[[ Addresses and Hooks ]]--
 
 -- looks like it is squares + strength in percent... first is player, than AI
-local ptrLordStrengthArray = core.AOBScan("83 c0 04 3d ? ? ? ? 7c f2 33 c0 c2", 0x400000)
-if ptrLordStrengthArray == nil then
-  log(ERROR, "'aiSwapper' was unable to find the start of the lord strength array.")
-  error("'aiSwapper' can not be initialized.")
-end
-ptrLordStrengthArray = core.readInteger(ptrLordStrengthArray + 4)
+local ptrLordStrengthArray = util.getAddress(
+  "83 c0 04 3d ? ? ? ? 7c f2 33 c0 c2",
+  "aiSwapper.lord", "'%s' was unable to find the start of the lord strength array.",
+  function(foundAddress) return core.readInteger(foundAddress + 4) end
+)
 
-local ptrToLordTypeDetour = core.AOBScan("83 c0 fe 83 f8 0f 77 13", 0x400000)
-if ptrToLordTypeDetour == nil then
-  log(ERROR, "'aiSwapper' was unable to find the position to detour the lord type function.")
-  error("'aiSwapper' can not be initialized.")
-end
+local ptrToLordTypeDetour = util.getAddress(
+  "83 c0 fe 83 f8 0f 77 13",
+  "aiSwapper.lord", "'%s' was unable to find the position to detour the lord type function."
+)
 
 -- first add a ret
 core.writeCode(

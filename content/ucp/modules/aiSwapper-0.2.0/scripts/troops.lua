@@ -51,13 +51,11 @@ local vanillaStartTroops = {}
 
 --[[ Addresses and Hooks ]]--
 
-local ptrStartTroopsArray = core.AOBScan("8d bf ? ? ? ? c7 44 24 1c 14", 0x400000)
-if ptrStartTroopsArray == nil then
-  log(ERROR, "'aiSwapper' was unable to find the start of the start troops array.")
-  error("'aiSwapper' can not be initialized.")
-end
-ptrStartTroopsArray = core.readInteger(ptrStartTroopsArray + 2) + 0x140 -- uses a fixed offset
-
+local ptrStartTroopsArray = util.getAddress(
+  "8d bf ? ? ? ? c7 44 24 1c 14",
+  "aiSwapper.troops", "'%s' was unable to find the start of the start troops array.",
+  function(foundAddress) return core.readInteger(foundAddress + 2) + 0x140 end -- uses a fixed offset
+)
 
 local function getModeAddress(aiIndex, modeIndex)
   return ptrStartTroopsArray + (aiIndex * 60 + modeIndex * 20) * 4
