@@ -16,9 +16,8 @@
 
   <ItemGroup>
     
-    <!-- Required in order to export a luaopen_mymodulename function 
+    <!-- Required in order to export a luaopen_mymodulename function -->
     <PackageReference Include="lua" Version="5.4.6" />
-    -->
     
     <!-- Not strictly required -->
     <PackageReference Include="UnofficialCrusaderPatch3" />
