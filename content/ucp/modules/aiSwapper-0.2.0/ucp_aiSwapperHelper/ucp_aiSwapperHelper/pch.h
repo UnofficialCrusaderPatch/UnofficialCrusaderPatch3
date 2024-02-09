@@ -3,10 +3,8 @@
 #ifndef PCH_H
 #define PCH_H
 
-// Fügen Sie hier Header hinzu, die vorkompiliert werden sollen.
-#include "framework.h"
+#include <ucp3.h>
 
-// logging can be used everywhere
-#include <luaLog.h>
+#include "framework.h"
 
 #endif //PCH_H

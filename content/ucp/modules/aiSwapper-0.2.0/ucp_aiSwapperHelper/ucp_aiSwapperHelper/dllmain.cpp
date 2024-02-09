@@ -10,11 +10,6 @@
 // lua module load
 extern "C" __declspec(dllexport) int __cdecl luaopen_aiSwapperHelper(lua_State *L)
 {
-  if (!LuaLog::init(L))
-  {
-    luaL_error(L, "[aiSwapperHelper]: Failed to receive Log functions.");
-  }
-
   if (!TextResourceModifierHeader::initModuleFunctions())
   {
     luaL_error(L, "[aiSwapperHelper]: Failed to initialize text modifier API.");
@@ -66,20 +61,4 @@ extern "C" __declspec(dllexport) int __cdecl luaopen_aiSwapperHelper(lua_State *
   lua_setfield(L, -2, "lua_SetBink");
 
   return 1;
-}
-
-// entry point
-BOOL APIENTRY DllMain(HMODULE,
-                      DWORD ul_reason_for_call,
-                      LPVOID)
-{
-  switch (ul_reason_for_call)
-  {
-  case DLL_PROCESS_ATTACH:
-  case DLL_THREAD_ATTACH:
-  case DLL_THREAD_DETACH:
-  case DLL_PROCESS_DETACH:
-    break;
-  }
-  return TRUE;
 }
