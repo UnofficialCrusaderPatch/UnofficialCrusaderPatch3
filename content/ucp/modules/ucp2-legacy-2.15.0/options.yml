@@ -1,77 +1,86 @@
 meta:
   version: 1.0.0
 options:
-- category: [AI, Improvements, Smarter housing management]
-  header: '{{ai_housing}}'
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_housing_group
-  display: Group
+  header: '{{ai_housing}}'
+  text: '{{ai_housing_descr}}'
+  display: GroupBox
   children:
-  - display: Paragraph
-    header: false
-  - display: UCP2Slider
-    text: '{{build_housing_descr}}'
-    header: '{{build_housing}}'
-    hasHeader: true
-    url: ucp2-legacy.ai_housing.build_housing
-    contents:
-      min: 0
-      max: 100
-      step: 1
-      decimals: 0
-      value:
-        enabled: false
-        sliderValue: 0
-  - display: UCP2Slider
-    name: campfire_housing
-    text: '{{campfire_housing_descr}}'
-    header: '{{campfire_housing}}'
-    hasHeader: true
-    url: ucp2-legacy.ai_housing.campfire_housing
-    contents:
-      min: 0
-      max: 25
-      step: 1
-      decimals: 0
-      value:
-        enabled: false
-        sliderValue: 0
-  - display: UCP2Switch
-    name: delete_housing
-    header: '{{delete_housing}}'
-    url: ucp2-legacy.ai_housing.delete_housing.enabled
-    contents:
-      value: false
-      type: boolean
-- category: [AI, Improvements, Demolishing buildings for money]
-  display: Group
+  - name: ai_housing_group_style
+    display: Group
+    style:
+      css:
+        paddingLeft: 1.0rem
+    children:
+    - display: UCP2Slider
+      text: '{{ai_build_housing_descr}}'
+      header: '{{ai_build_housing}}'
+      hasHeader: true
+      url: ucp2-legacy.ai_housing.build_housing
+      contents:
+        min: 0
+        max: 100
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 5
+    - display: UCP2Slider
+      name: campfire_housing
+      text: '{{ai_campfire_housing_descr}}'
+      header: '{{ai_campfire_housing}}'
+      hasHeader: true
+      url: ucp2-legacy.ai_housing.campfire_housing
+      contents:
+        min: 0
+        max: 25
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 8
+    - display: UCP2Switch
+      name: delete_housing
+      header: '{{ai_delete_housing}}'
+      url: ucp2-legacy.ai_housing.delete_housing.enabled
+      contents:
+        value: false
+        type: boolean
+- category: ['{{ai}}', '{{improvements}}']
+  display: GroupBox
   name: ai_demolish_group
+  header: '{{ai_demolish}}'
+  text: '{{ai_demolish_descr}}'
   children:
-  - name: ai_demolish
-    header: '{{ai_demolish}}'
-    text: '{{ai_demolish_eco_descr}}'
-    display: Paragraph
-  - name: ai_demolish_walls
-    display: Switch
-    text: '{{ai_demolish_walls}}'
-    url: ucp2-legacy.ai_demolish.ai_demolish_walls.enabled
-    contents:
-      value: false
-      type: boolean
-  - name: ai_demolish_trapped
-    display: Switch
-    text: '{{ai_demolish_trapped}}'
-    url: ucp2-legacy.ai_demolish.ai_demolish_trapped.enabled
-    contents:
-      value: false
-      type: boolean
-  - name: ai_demolish_eco
-    display: Switch
-    text: '{{ai_demolish_eco}}'
-    url: ucp2-legacy.ai_demolish.ai_demolish_eco.enabled
-    contents:
-      value: false
-      type: boolean 
-- category: [AI, Fixes]
+  - name: ai_demolish_group_style
+    display: Group
+    style:
+      css:
+        paddingLeft: 1.0rem
+    children:
+    - name: ai_demolish_walls
+      display: Switch
+      text: '{{ai_demolish_walls}}'
+      url: ucp2-legacy.ai_demolish.ai_demolish_walls.enabled
+      contents:
+        value: false
+        type: boolean
+    - name: ai_demolish_trapped
+      display: Switch
+      text: '{{ai_demolish_trapped}}'
+      url: ucp2-legacy.ai_demolish.ai_demolish_trapped.enabled
+      contents:
+        value: false
+        type: boolean
+    - name: ai_demolish_eco
+      display: Switch
+      text: '{{ai_demolish_eco}}'
+      url: ucp2-legacy.ai_demolish.ai_demolish_eco.enabled
+      contents:
+        value: false
+        type: boolean 
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_access
   header: '{{ai_access}}'
   text: '{{ai_access_descr}}'
@@ -80,7 +89,7 @@ options:
   contents:
     type: boolean
     value: false
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_addattack_ui_alt
   display: UCP2SliderChoice
   hasHeader: true
@@ -106,7 +115,7 @@ options:
       max: 3.0
       step: 0.1
       text: '{{ai_addattack_alt_descr}}'
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_attacklimit
   header: '{{ai_attacklimit}}'
   text: '{{ai_attacklimit_descr}}'
@@ -116,13 +125,13 @@ options:
   contents:
     min: 0
     max: 3000
-    step: 1
+    step: 10
     decimals: 0
     type: number
     value:
       enabled: false
-      sliderValue: 200
-- category: [AI, Fixes]
+      sliderValue: 500
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_assaultswitch
   header: '{{ai_assaultswitch}}'
   text: '{{ai_assaultswitch_descr}}'
@@ -131,10 +140,10 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_attacktarget
   header: '{{ai_attacktarget}}'
-  text: '{{ai_attacktarget_weakest_descr}}'
+  text: '{{ai_attacktarget_descr}}'
   hasHeader: true
   display: UCP2RadioGroup
   url: ucp2-legacy.ai_attacktarget
@@ -149,7 +158,7 @@ options:
     value:
       enabled: false
       choice: ''
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_attackwave
   header: '{{ai_attackwave}}'
   text: '{{ai_attackwave_descr}}'
@@ -158,7 +167,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_buywood
   header: '{{ai_buywood}}'
   text: '{{ai_buywood_descr}}'
@@ -167,7 +176,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_defense
   header: '{{ai_defense}}'
   text: '{{ai_defense_descr}}'
@@ -176,7 +185,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_fix_crusader_archers_pitch
   header: '{{ai_fix_crusader_archers_pitch}}'
   text: '{{ai_fix_crusader_archers_pitch_descr}}'
@@ -185,7 +194,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_fix_laddermen_with_enclosed_keep
   header: '{{ai_fix_laddermen_with_enclosed_keep}}'
   text: '{{ai_fix_laddermen_with_enclosed_keep_descr}}'
@@ -194,7 +203,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_nosleep
   header: '{{ai_nosleep}}'
   text: '{{ai_nosleep_descr}}'
@@ -203,7 +212,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_rebuild
   header: '{{ai_rebuild}}'
   text: '{{ai_rebuild_descr}}'
@@ -212,7 +221,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_recruitinterval
   header: '{{ai_recruitinterval}}'
   text: '{{ai_recruitinterval_descr}}'
@@ -221,7 +230,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Improvements]
+- category: ['{{ai}}', '{{improvements}}']
   name: ai_recruitstate_initialtimer
   header: '{{ai_recruitstate_initialtimer}}'
   text: '{{ai_recruitstate_initialtimervalue_descr}}'
@@ -235,8 +244,8 @@ options:
     decimals: 0
     value:
       enabled: false
-      sliderValue: 6
-- category: [AI, Fixes]
+      sliderValue: 0
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_tethers
   header: '{{ai_tethers}}'
   text: '{{ai_tethers_descr}}'
@@ -245,7 +254,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [AI, Fixes]
+- category: ['{{ai}}', '{{fixes}}']
   name: ai_towerengines
   header: '{{ai_towerengines}}'
   text: '{{ai_towerengines_descr}}'
@@ -254,7 +263,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: fix_apple_orchard_build_size
   header: '{{fix_apple_orchard_build_size}}'
   text: '{{fix_apple_orchard_build_size_descr}}'
@@ -263,7 +272,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Quality of Life]
+- category: ['{{qol}}']
   name: o_armory_marketplace_weapon_order_fix
   header: '{{o_armory_marketplace_weapon_order_fix}}'
   text: '{{o_armory_marketplace_weapon_order_fix_descr}}'
@@ -272,7 +281,34 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Miscellaneous]
+- category: ['{{qol}}']
+  name: o_fast_placing
+  header: '{{o_fast_placing}}'
+  text: '{{o_fast_placing_descr}}'
+  display: UCP2Switch
+  url: ucp2-legacy.o_fast_placing.enabled
+  contents:
+    value: false
+    type: boolean
+- category: ['{{bugfixes}}']
+  name: o_fix_map_sending
+  header: '{{o_fix_map_sending}}'
+  text: '{{o_fix_map_sending_descr}}'
+  display: UCP2Switch
+  url: ucp2-legacy.o_fix_map_sending.enabled
+  contents:
+    value: false
+    type: boolean
+- category: ['{{bugfixes}}']
+  name: o_fix_rapid_deletion_bug
+  header: '{{o_fix_rapid_deletion_bug}}'
+  text: '{{o_fix_rapid_deletion_bug_descr}}'
+  display: UCP2Switch
+  url: ucp2-legacy.o_fix_rapid_deletion_bug.enabled
+  contents:
+    value: false
+    type: boolean
+- category: ['{{misc}}']
   name: o_change_siege_engine_spawn_position_catapult
   header: '{{o_change_siege_engine_spawn_position_catapult}}'
   text: '{{o_change_siege_engine_spawn_position_catapult_descr}}'
@@ -281,7 +317,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Quality of Life]
+- category: ['{{qol}}']
   name: o_default_multiplayer_speed
   header: '{{o_default_multiplayer_speed}}'
   text: '{{o_default_multiplayer_speed_descr}}'
@@ -295,8 +331,8 @@ options:
     decimals: 0
     value:
       enabled: false
-      sliderValue: 40
-- category: [Quality of Life]
+      sliderValue: 50
+- category: ['{{qol}}']
   name: o_engineertent
   header: '{{o_engineertent}}'
   text: '{{o_engineertent_descr}}'
@@ -305,7 +341,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: o_firecooldown
   header: '{{o_firecooldown}}'
   hasHeader: true
@@ -320,7 +356,7 @@ options:
     value:
       enabled: false
       sliderValue: 2000
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: o_fix_baker_disappear
   header: '{{o_fix_baker_disappear}}'
   text: '{{o_fix_baker_disappear_descr}}'
@@ -329,7 +365,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: o_fix_fletcher_bug
   header: '{{o_fix_fletcher_bug}}'
   text: '{{o_fix_fletcher_bug_descr}}'
@@ -338,7 +374,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: o_fix_ladderclimb
   header: '{{o_fix_ladderclimb}}'
   text: '{{o_fix_ladderclimb_descr}}'
@@ -347,7 +383,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: o_fix_moat_digging_unit_disappearing
   header: '{{o_fix_moat_digging_unit_disappearing}}'
   text: '{{o_fix_moat_digging_unit_disappearing_descr}}'
@@ -356,7 +392,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: o_freetrader
   header: '{{o_freetrader}}'
   text: '{{o_freetrader_descr}}'
@@ -365,7 +401,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Quality of Life]
+- category: ['{{qol}}']
   name: o_gamespeed
   header: '{{o_gamespeed}}'
   text: '{{o_gamespeed_descr}}'
@@ -374,7 +410,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: o_healer
   header: '{{o_healer}}'
   text: '{{o_healer_descr}}'
@@ -383,7 +419,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Miscellaneous]
+- category: ['{{misc}}']
   name: o_increase_path_update_tick_rate
   header: '{{o_increase_path_update_tick_rate}}'
   text: '{{o_increase_path_update_tick_rate_descr}}'
@@ -392,7 +428,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Quality of Life]
+- category: ['{{qol}}']
   name: o_keys
   header: '{{o_keys}}'
   text: '{{o_keys_descr}}'
@@ -401,7 +437,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Quality of Life]
+- category: ['{{qol}}']
   name: o_moatvisibility
   header: '{{o_moatvisibility}}'
   text: '{{o_moatvisibility_descr}}'
@@ -410,7 +446,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Miscellaneous]
+- category: ['{{misc}}']
   name: o_onlyai
   header: '{{o_onlyai}}'
   text: '{{o_onlyai_descr}}'
@@ -419,7 +455,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Miscellaneous]
+- category: ['{{misc}}']
   name: o_override_identity_menu
   url: ucp2-legacy.o_override_identity_menu.enabled
   contents:
@@ -428,7 +464,7 @@ options:
   display: UCP2Switch
   header: '{{o_override_identity_menu}}'
   text: '{{o_override_identity_menu_descr}}'
-- category: [Miscellaneous]
+- category: ['{{misc}}']
   name: o_playercolor
   header: '{{o_playercolor}}'
   text: '{{o_playercolor_descr}}'
@@ -456,7 +492,7 @@ options:
     value:
       enabled: false
       choice: 'red'
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: o_responsivegates
   header: '{{o_responsivegates}}'
   text: '{{o_responsivegates_descr}}'
@@ -465,7 +501,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: o_restore_arabian_engineer_speech
   header: '{{o_restore_arabian_engineer_speech}}'
   text: '{{o_restore_arabian_engineer_speech_descr}}'
@@ -474,42 +510,47 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes, Strongholdify]
+- category: ['{{balance_changes}}']
+  display: GroupBox
   name: strongholdify
-  display: Group
+  header: '{{o_shfy}}'
+  text: '{{o_shfy_descr}}'
   children:
-  - display: Paragraph
-    header: false
-    text: '{{o_shfy_resourcequantity_descr}}'
-  - name: o_shfy_beer
-    text: '{{o_shfy_beer}}'
-    display: Switch
-    url: ucp2-legacy.o_shfy.o_shfy_beer.enabled
-    contents:
-      value: false
-      type: boolean
-  - name: o_shfy_religion
-    text: '{{o_shfy_religion}}'
-    display: Switch
-    url: ucp2-legacy.o_shfy.o_shfy_religion.enabled
-    contents:
-      value: false
-      type: boolean
-  - name: o_shfy_peasantspawnrate
-    text: '{{o_shfy_peasantspawnrate}}'
-    display: Switch
-    url: ucp2-legacy.o_shfy.o_shfy_peasantspawnrate.enabled
-    contents:
-      value: false
-      type: boolean
-  - name: o_shfy_resourcequantity
-    text: '{{o_shfy_resourcequantity}}'
-    display: Switch
-    url: ucp2-legacy.o_shfy.o_shfy_resourcequantity.enabled
-    contents:
-      value: false
-      type: boolean
-- category: [Miscellaneous]
+  - name: o_shfy_group
+    display: Group
+    style:
+      css:
+        paddingLeft: 1.0rem
+    children:
+    - name: o_shfy_beer
+      text: '{{o_shfy_beer}}'
+      display: Switch
+      url: ucp2-legacy.o_shfy.o_shfy_beer.enabled
+      contents:
+        value: false
+        type: boolean
+    - name: o_shfy_religion
+      text: '{{o_shfy_religion}}'
+      display: Switch
+      url: ucp2-legacy.o_shfy.o_shfy_religion.enabled
+      contents:
+        value: false
+        type: boolean
+    - name: o_shfy_peasantspawnrate
+      text: '{{o_shfy_peasantspawnrate}}'
+      display: Switch
+      url: ucp2-legacy.o_shfy.o_shfy_peasantspawnrate.enabled
+      contents:
+        value: false
+        type: boolean
+    - name: o_shfy_resourcequantity
+      text: '{{o_shfy_resourcequantity}}'
+      display: Switch
+      url: ucp2-legacy.o_shfy.o_shfy_resourcequantity.enabled
+      contents:
+        value: false
+        type: boolean
+- category: ['{{misc}}']
   name: o_stop_player_keep_rotation
   header: '{{o_stop_player_keep_rotation}}'
   text: '{{o_stop_player_keep_rotation_descr}}'
@@ -518,7 +559,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Miscellaneous]
+- category: ['{{misc}}']
   name: o_xtreme
   header: '{{o_xtreme}}'
   display: UCP2Switch
@@ -526,7 +567,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: u_arabwall
   header: '{{u_arabwall}}'
   text: '{{u_arabwall_descr}}'
@@ -535,7 +576,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: u_arabxbow
   header: '{{u_arabxbow}}'
   text: '{{u_arabxbow_descr}}'
@@ -544,7 +585,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: u_fireballistafix
   header: '{{u_fireballistafix}}'
   display: UCP2Switch
@@ -552,7 +593,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: u_fix_applefarm_blocking
   header: '{{u_fix_applefarm_blocking}}'
   text: '{{u_fix_applefarm_blocking_descr}}'
@@ -561,7 +602,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: u_fix_lord_animation_stuck_movement
   header: '{{u_fix_lord_animation_stuck_movement}}'
   text: '{{u_fix_lord_animation_stuck_movement_descr}}'
@@ -570,7 +611,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: u_laddermen
   header: '{{u_laddermen}}'
   text: '{{u_laddermen_descr}}'
@@ -579,7 +620,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: u_spearmen
   header: '{{u_spearmen}}'
   text: '{{u_spearmen_descr}}'
@@ -588,7 +629,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Balance Changes]
+- category: ['{{balance_changes}}']
   name: u_spearmen_run
   header: '{{u_spearmen_run}}'
   text: '{{u_spearmen_run_descr}}'
@@ -597,7 +638,7 @@ options:
   contents:
     value: false
     type: boolean
-- category: [Bugfixes]
+- category: ['{{bugfixes}}']
   name: u_tanner_fix
   header: '{{u_tanner_fix}}'
   text: '{{u_tanner_fix_descr}}'
