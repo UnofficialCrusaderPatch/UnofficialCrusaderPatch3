@@ -731,7 +731,7 @@ function createResultConfig() {
 
   configState.menu = {};
   AI_SLOTS.forEach((slot) => slot.appendUserMenuEntryForSlot(configState.menu));
-  configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : undefined;
+  configState.defaultLanguage = DEFAULT_LANGUAGE ? DEFAULT_LANGUAGE : null;
 
   AI_SLOTS.forEach((slot) => slot.appendAiControlSettingsForSlot(configState));
   return configState;
