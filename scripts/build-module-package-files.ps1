@@ -92,7 +92,7 @@ if($hasFilesList) {
       $files | ForEach-Object {
 
         # To allow specification of $(Configuration) in "src" in module.files, we substitute it with the right value here
-        if ($src -eq $null) {
+        if ($_.src -eq $null) {
           throw ".src attribute cannot be empty"
         }
 
