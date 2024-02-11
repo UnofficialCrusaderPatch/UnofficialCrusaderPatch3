@@ -185,9 +185,7 @@ namespace = {
         Personality.resetOverridenValues(aiType)
 
         for _, additional in pairs(additionalAIC) do
-            if additional.resetFunction then
-                additional.resetFunction(aiType)
-            end
+            additional.resetFunction(aiType)
         end
     end,
 

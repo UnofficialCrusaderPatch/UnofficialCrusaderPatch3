@@ -535,9 +535,7 @@ end
 
 local function resetOverridenValues(aiType)
   for _, override in pairs(aicFieldOverrides) do
-    if override.resetFunction then
-      override.resetFunction(aiType)
-    end
+    override.resetFunction(aiType)
   end
 end
 
