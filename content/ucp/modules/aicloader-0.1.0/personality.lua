@@ -53,10 +53,6 @@ local function isIntegerBetweenZeroAndOneHundred(value, extendError)
   return isIntegerValue(value, 0, 100, extendError)
 end
 
-local function isIntegerBetweenZeroAndOneHundred(value, extendError)
-  return isIntegerValue(value, 0, 100, extendError)
-end
-
 local function isIntegerBetweenZeroAndEleven(value, extendError)
   return isIntegerValue(value, 0, 11, extendError)
 end
@@ -508,7 +504,51 @@ local aiFieldIndex = {
   TargetChoice                    = 168,
 }
 
+--[[ Overrides ]]--
+
+local aicFieldOverrides = {}
+
+local function setAICValueOverride(aicField, index, valueFunction, resetFunction)
+  if index == nil then
+    aicFieldOverrides[aicField] = nil
+    return
+  end
+  isIntegerValue(index, 0, 168, nil, "an AIC index") -- validation throws error
+  if not valueFunction or type(valueFunction) ~= "function" then
+    error(string.format("Received no valid value function for override with name '%s' for index '%s'.",
+      aicField, index), 0)
+  end
+  if not resetFunction or type(resetFunction) ~= "function" then
+    error(string.format("Received no valid reset function for override with name '%s' for index '%s'.",
+      aicField, index), 0)
+  end
+  if aicFieldOverrides[aicField] then
+    log(WARNING,
+      string.format("Replacing current AIC override for name %s. Is this intended?", aicField))
+  end
+  aicFieldOverrides[aicField] = {
+    index = index,
+    valueFunction = valueFunction,
+    resetFunction = resetFunction,
+  }
+end
+
+local function resetOverridenValues(aiType)
+  for _, override in pairs(aicFieldOverrides) do
+    if override.resetFunction then
+      override.resetFunction(aiType)
+    end
+  end
+end
+
+--[[ Get and Validate ]]--
+
 local function getAndValidateAicValue(aicField, aicValue)
+  local override = aicFieldOverrides[aicField]
+  if override then
+    return override.index, override.valueFunction(aicValue)
+  end
+
   local valueIndex = aiFieldIndex[aicField]
   if valueIndex == nil then
     error("Unknown AIC field: " .. aicField, 0)
@@ -520,4 +560,8 @@ local function getAndValidateAicValue(aicField, aicValue)
   return valueIndex, valueFunction(aicValue)
 end
 
-return getAndValidateAicValue
+return {
+  getAndValidateAicValue = getAndValidateAicValue,
+  setAICValueOverride = setAICValueOverride,
+  resetOverridenValues = resetOverridenValues,
+}

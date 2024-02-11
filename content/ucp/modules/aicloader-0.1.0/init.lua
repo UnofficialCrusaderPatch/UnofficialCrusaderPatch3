@@ -4,13 +4,14 @@ local readInteger = core.readInteger
 
 local AICharacterName = require("characters")
 
-local getAndValidateAicValue = require("personality")
+local Personality = require("personality")
 
 local aicArrayBaseAddr = core.readInteger(core.AOBScan("? ? ? ? e8 ? ? ? ? 89 1d ? ? ? ? 83 3d ? ? ? ? 00 75 44 6a 08 b9 ? ? ? ? e8 ? ? ? ? 85 c0 74 34 8b c5 2b 05"))
 
 local isInitialized = false
 local vanillaAIC = {}
 
+local additionalAIC = {}
 
 local aiTypeToInteger = function(aiType)
     local aiInteger = AICharacterName[aiType]
@@ -24,8 +25,8 @@ local function initializedCheck()
     if isInitialized then
        return true
     end
-    
-    log(WARN, "AIC loader not yet initialized. Call ignored.")
+
+    log(WARNING, "AIC loader not yet initialized. Call ignored.")
     return false
 end
 
@@ -47,13 +48,17 @@ namespace = {
             modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
             modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
         end
-        
+
         hooks.registerHookCallback("afterInit", function()
-            
             saveVanillaAIC()
-            
+
             isInitialized = true
-            
+
+            -- call override reset here, since initialization is through
+            for _, aiType in pairs(AICharacterName) do
+                Personality.resetOverridenValues(aiType)
+            end
+
             if config.aicFiles then
                 if type(config.aicFiles) == "table" then
                     for i, fileName in pairs(config.aicFiles) do
@@ -66,7 +71,7 @@ namespace = {
                     error("aicFiles should be a yaml array")
                 end
             end
-            
+
             log(INFO, "AIC loader initialized.")
         end)
     end,
@@ -81,11 +86,11 @@ namespace = {
         if not initializedCheck() then
             return
         end
-      
+
         local aiType, fieldName, value = command:match("^/setAICValue ([A-Za-z0-9_]+) ([A-Za-z0-9_]+) ([A-Za-z0-9_]+)$")
         if aiType == nil or fieldName == nil or value == nil then
             modules.commands.displayChatText(
-                "invalid command: " .. command .. " usage: " .. 
+                "invalid command: " .. command .. " usage: " ..
                 "/setAICValue [aiType: 1-16 or AI character type] [field name] [value]"
             )
         else
@@ -97,11 +102,11 @@ namespace = {
         if not initializedCheck() then
             return
         end
-      
+
         local path = command:match("^/loadAICsFromFile ([A-Za-z0-9_ /.:-]+)$")
         if path == nil then
             modules.commands.displayChatText(
-                "invalid command: " .. command .. " usage: " .. 
+                "invalid command: " .. command .. " usage: " ..
                 "/loadAICsFromFile [path]"
             )
         else
@@ -114,15 +119,21 @@ namespace = {
             return
         end
 
-        local status, err = pcall(function ()
+        local status, err = pcall(function()
             if type(aiType) == "string" then
                 aiType = aiTypeToInteger(aiType)
             end
 
+            local additional = additionalAIC[aicField]
+            if additional then
+                additional.handlerFunction(aiType, aicValue)
+                return
+            end
+
             local aicAddr = aicArrayBaseAddr + ((4 * 169) * aiType)
-            local fieldIndex, fieldValue = getAndValidateAicValue(aicField, aicValue)
+            local fieldIndex, fieldValue = Personality.getAndValidateAicValue(aicField, aicValue)
             writeInteger(aicAddr + (4 * fieldIndex), fieldValue)
-            --TODO: optimize by writing a longer array of bytes...
+            --TODO: optimize by writing a longer array of bytes... (would only apply to native AIC structure)
         end)
 
         if not status then
@@ -155,7 +166,7 @@ namespace = {
             namespace.overwriteAIC(aic.Name, aic.Personality)
         end
     end,
-    
+
     resetAIC = function(aiType)
         if not initializedCheck() then
             return
@@ -170,6 +181,44 @@ namespace = {
         for addr = vanillaStartAddr, vanillaEndAddr, 4 do
             writeInteger(addr, vanillaAIC[addr])
         end
+
+        Personality.resetOverridenValues(aiType)
+
+        for _, additional in pairs(additionalAIC) do
+            if additional.resetFunction then
+                additional.resetFunction(aiType)
+            end
+        end
+    end,
+
+    -- index == nil removes override; valueFunction needs to return final integer to write
+    -- to allow renaming, there is no check if an index is overriden multiple times, to take care!
+    -- resetFunction will always reveive an AI index starting from 1 (Rat) to 16 (Abbot)
+    setAICValueOverride = function(aicField, index, valueFunction, resetFunction)
+        Personality.setAICValueOverride(aicField, index, valueFunction, resetFunction)
+    end,
+
+    -- handlerFunction == nil removes additional AIC; handlerFunction only gets value from file, nothing else is done
+    -- resetFunction will always reveive an AI index starting from 1 (Rat) to 16 (Abbot)
+    setAdditionalAICValue = function(aicField, handlerFunction, resetFunction)
+        if handlerFunction == nil then
+            additionalAIC[aicField] = nil
+            return
+        end
+        if not handlerFunction or type(handlerFunction) ~= "function" then
+            error(string.format("Received no valid handler function for additional AIC with name '%s'.", aicField), 0)
+        end
+        if not resetFunction or type(resetFunction) ~= "function" then
+            error(string.format("Received no valid reset function for additional AIC with name '%s'.", aicField), 0)
+        end
+        if additionalAIC[aicField] then
+            log(WARNING,
+                string.format("Replacing current handler for additional AIC with name %s. Is this intended?", aicField))
+        end
+        additionalAIC[aicField] = {
+            handlerFunction = handlerFunction,
+            resetFunction = resetFunction,
+        }
     end
 }
 
