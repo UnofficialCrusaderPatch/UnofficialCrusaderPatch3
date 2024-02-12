@@ -8,12 +8,6 @@
 	path = dll/vendor/fasm
 	url = https://github.com/Konctantin/FASM
 
-[submodule "content/ucp/modules/inputHandler-0.1.0"]
-	path = content/ucp/modules/inputHandler-0.2.0
-	url = https://github.com/TheRedDaemon/ucp_inputHandler
-	branch = dev
-	ignore = dirty
-
 [submodule "content/ucp/modules/winProcHandler-0.1.0"]
 	path = content/ucp/modules/winProcHandler-0.2.0
 	url = https://github.com/TheRedDaemon/ucp_winProcHandler
