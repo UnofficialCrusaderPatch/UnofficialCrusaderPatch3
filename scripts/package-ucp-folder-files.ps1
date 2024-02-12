@@ -13,6 +13,7 @@ $SIMPLE_CONFIG_MAPPING = @{
     "Release" = "Release";
 }
 
+
 ## Copy the dll files
 $dllfiles = Get-ChildItem "$($Path)\$BUILD_CONFIGURATION\*.dll"
 Copy-Item $dllfiles -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\" -Recurse
@@ -44,6 +45,8 @@ $f = Get-Content -Path "$($Path)\version.yml" -Raw
 $vyml = ConvertFrom-Yaml $f
 
 $date = $(git log -1 --format=%cd --date=iso-strict)
+
+$GITHUB_SHA = (git rev-parse HEAD)
 
 # Create the ucp-version.yml
 #Import-Module powershell-yaml
