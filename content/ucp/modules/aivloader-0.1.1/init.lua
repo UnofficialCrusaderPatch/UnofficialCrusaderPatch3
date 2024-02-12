@@ -153,7 +153,7 @@ local function createDefaultAIVPath(ai, castle)
 end
 
 local function getNumberOfCastlesPerAiPtr(aiIndex)
-  return ptrAivPerAIArray + aiIndex
+  return ptrAivPerAIArray + aiIndex * 4
 end
 
 local function getCastleStatIndex(aiIndex, castleIndex)
