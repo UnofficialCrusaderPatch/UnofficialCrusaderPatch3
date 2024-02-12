@@ -20,9 +20,9 @@ local afterInit = core.scanForAOB("e8 ? ? ? ? 39 1d ? ? ? ? 89 2d ? ? ? ? 89 1d 
 local function onAfterInit(registers)
     log(DEBUG, "[hooks]: firing afterInit callbacks")
 
-    local status, message = pcall(fireCallbacksForHook, "afterInit")
+    local status, message = xpcall(fireCallbacksForHook, debug.traceback, "afterInit")
     if not status then
-        error(message)
+        log(WARNING, message)
     end
 
     return registers
