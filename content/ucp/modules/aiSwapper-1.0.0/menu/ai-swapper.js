@@ -624,14 +624,24 @@ class AiSlot {
 
   getAiImgSource() {
     for (const aiSetting of this.#aiSettings) {
-      if (aiSetting.control.portrait && aiSetting.aiMeta.portraitAssetPath) {
-        return aiSetting.aiMeta.portraitAssetPath;
+      const controlValue = aiSetting.control.portrait;
+      if (!isPrimitiveBool(controlValue)) {
+        continue;
       }
+      if (!controlValue) {
+        return AI_PORTRAIT_DATA[this.#slotName];
+      }
+      return aiSetting.aiMeta.portraitAssetPath ?? AI_PORTRAIT_MISSING;
     }
     for (const aiSetting of this.#pluginSettings) {
-      if (aiSetting.control.portrait && aiSetting.aiMeta.portraitAssetPath) {
-        return aiSetting.aiMeta.portraitAssetPath;
+      const controlValue = aiSetting.control.portrait;
+      if (!isPrimitiveBool(controlValue)) {
+        continue;
       }
+      if (!controlValue) {
+        return AI_PORTRAIT_DATA[this.#slotName];
+      }
+      return aiSetting.aiMeta.portraitAssetPath ?? AI_PORTRAIT_MISSING;
     }
     return AI_PORTRAIT_DATA[this.#slotName];
   }
