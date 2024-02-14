@@ -1,4 +1,14 @@
 return {
+  CONFIG_CONTROL_ENTRY = {
+    BINKS         = "binks",
+    SPEECH        = "speech",
+    AIC           = "aic",
+    AIV           = "aiv",
+    LORD          = "lord",
+    START_TROOPS  = "startTroops",
+    LINES         = "lines",
+    PORTRAIT      = "portrait",
+  },
   LORD_ID = {
     RAT       = 0,
     SNAKE     = 1,

@@ -7,7 +7,7 @@ slot.name.wolf: Wolf
 slot.name.saladin: Saladin
 slot.name.caliph: Caliph
 slot.name.sultan: Sultan
-slot.name.lionheart: Lionheart
+slot.name.richard: Richard
 slot.name.frederick: Frederick
 slot.name.phillip: Phillip
 slot.name.wazir: Wazir
@@ -31,12 +31,14 @@ select.aic: AIC
 select.aiv: AIV
 select.lord: Lord
 select.starttroops: Start Troops
+select.filter.label: "Filter by name:"
 language.default: "Language to use as default if not set for slot:"
 language.default.default: Default
 change.controls.priority: Priority
 change.controls.remove: Remove
 change.image: Image
 change.name: Name
+change.plugin: Plugin
 change.path: Path
 change.language: Language
 change.binks: Binks

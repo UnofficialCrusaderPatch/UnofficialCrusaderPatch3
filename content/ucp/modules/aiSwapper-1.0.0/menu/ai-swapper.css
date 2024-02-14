@@ -96,6 +96,23 @@ select:disabled {
   width: 100%;
 }
 
+.ai-swapper__select-menu__header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.ai-swapper__select-menu__header > label {
+  margin: 10px;
+  color: whitesmoke;
+}
+
+.ai-swapper__select-menu__header > input {
+  background-color: whitesmoke;
+  color: black;
+  margin: 10px;
+}
+
 .ai-swapper__change-menu__select {
   color: black;
   margin: 10px 0 10px 0;
@@ -123,7 +140,6 @@ select:disabled {
 .ai-swapper__select-menu__container {
   flex-grow: 1;
   width: 100%;
-  margin-top: 30px;
   overflow-x: auto;
 }
 
@@ -156,12 +172,13 @@ select:disabled {
 .ai-swapper__select-menu__close {
   position: absolute;
   text-align: center;
-  line-height: 16px;
+  font-size: 26px;
+  line-height: 22px;
   color: var(--ucp-main-brown);
-  right: 0;
+  left: 0;
   top: 0;
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 40px;
   margin: 5px;
   padding: 0;
   background-color: var(--ucp-main-grey);
@@ -255,15 +272,15 @@ tr .ai-image {
   filter: brightness(50%);
 }
 
-.ai-setting-control :is(.priority, .remove)[tabIndex="-1"] {
+.ai-setting-control[inert] :is(.priority, .remove) {
   pointer-events: none;
-  filter: brightness(50%);
-}
-
-.ai-swapper__change-menu__table__body .ai-setting-row:first-child .ai-setting-control .priority.up {
   visibility: hidden;
 }
 
-.ai-swapper__change-menu__table__body .ai-setting-row:last-child .ai-setting-control .priority.down {
+.ai-swapper__change-menu__table__body .ai-setting-row--user:nth-child(1 of .ai-setting-row--user) .ai-setting-control .priority.up {
+  visibility: hidden;
+}
+
+.ai-swapper__change-menu__table__body .ai-setting-row--user:nth-last-child(1 of .ai-setting-row--user) .ai-setting-control .priority.down {
   visibility: hidden;
 }
