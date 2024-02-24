@@ -21,7 +21,9 @@ return {
         iteration.setOption(key, value)
     end,
 }, {
-  "overrideFileWith", 
-  "registerOverrideFunction",
-  "setIterationOption",
+  public = {
+    "overrideFileWith", 
+    "registerOverrideFunction",
+    "setIterationOption",
+  }
 }

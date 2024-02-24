@@ -243,8 +243,10 @@ for k, ext in pairs(allActiveExtensions) do
         log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(moduleEnv)
         local e, p = ext:load(moduleEnv)
+        p = p or { public = {}, }
+        p = p.public or {}
         modules[ext.name], publicElements[ext.name] = e, p
-        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p or {}, ', ')))
+        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p, ', ')))
         local ep = ExtensionProxy(e)
         moduleProxies[ext.name] = ep
         modulePublicProxies[ext.name] = PublicProxy(ep, p)
@@ -252,8 +254,10 @@ for k, ext in pairs(allActiveExtensions) do
       log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(pluginEnv)
         local e, p = ext:load(pluginEnv)
+        p = p or { public = {}, }
+        p = p.public or {}
         plugins[ext.name], publicElements[ext.name] = e, p
-        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p or {}, ', ')))
+        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p, ', ')))
         local ep = ExtensionProxy(e)
         pluginProxies[ext.name] = ep
         pluginPublicProxies[ext.name] = PublicProxy(ep, p)
