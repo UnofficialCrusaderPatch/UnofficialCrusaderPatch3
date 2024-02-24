@@ -4,6 +4,33 @@ FALSE = 0
 ---@module core
 local core = {}
 
+---Converts integer `value` to a table of 4 bytes.
+function core.itob(value)
+  return {
+    (value >> 0) & 0xFF,
+    (value >> 8) & 0xFF,
+    (value >> 16) & 0xFF,
+    (value >> 24) & 0xFF,
+  }
+end
+
+---Converts short `value` to a table of 2 bytes.
+function core.stob(value)
+  return {
+      (value >> 0) & 0xFF,
+      (value >> 8) & 0xFF,
+  }
+end
+
+---Converts byte `value` to an unsigned byte (0-255).
+function core.btoub(value)
+  if value < 0 then
+      return 256 + value -- (256 + -1 = 255)
+  else
+      return value
+  end
+end
+
 ---Read integer from memory at a specified address.
 ---@param address number the address of the memory to read the integer from
 ---@return number the integer
@@ -41,35 +68,35 @@ function core.readString(address)
 end
 
 ---Write a integer to memory at a specified address
----@param address number the address of the memory to write the integer to
+---@param address number the address of the read and write memory to write the integer to
 ---@param value number a integer value
 function core.writeInteger(address, value)
     return ucp.internal.writeInteger(address, value)
 end
 
 ---Write a short to memory at a specified address
----@param address number the address of the memory to write the short to
+---@param address number the address of the read and write memory to write the short to
 ---@param value number a short value
 function core.writeSmallInteger(address, value)
     return ucp.internal.writeSmallInteger(address, value)
 end
 
 ---Write a byte to memory at a specified address
----@param address number the address of the memory to write the byte to
+---@param address number the address of the read and write memory to write the byte to
 ---@param value number a byte value
 function core.writeByte(address, value)
     return ucp.internal.writeByte(address, value)
 end
 
 ---Write bytes to memory at a specified address
----@param address number the address of the memory to write the bytes to
+---@param address number the address of the read and write memory to write the bytes to
 ---@param value table a table of byte values
 function core.writeBytes(address, value)
     return ucp.internal.writeBytes(address, value)
 end
 
 ---Write string to memory at a specified address
----@param address number the address of the memory to write the string to
+---@param address number the address of the read and write memory to write the string to
 ---@param value string a string to write
 function core.writeString(address, value)
     return ucp.internal.writeString(address, value)
@@ -108,6 +135,34 @@ function core.writeCode(address, code, compile)
     else
         return ucp.internal.writeCode(address, code)
     end
+end
+
+---Write a byte to executable memory at a specified address
+---@param address number the address of the executable memory to write the byte to
+---@param value number a byte value
+function core.writeCodeByte(address, value)
+  core.writeCode(address, { core.btoub(value) }, false)
+end
+
+---Write bytes to executable memory at a specified address
+---@param address number the address of the executable memory to write the bytes to
+---@param value table a table of byte values
+function core.writeCodeBytes(address, value)
+  core.writeCode(address, value, false)
+end
+
+---Write a integer to executable memory at a specified address
+---@param address number the address of the executable memory to write the integer to
+---@param value number a integer value
+function core.writeCodeInteger(address, value)
+  core.writeCode(address, core.itob(value), false)
+end
+
+---Write a short to executable memory at a specified address
+---@param address number the address of the executable memory to write the short to
+---@param value number a short value
+function core.writeCodeSmallInteger(address, value)
+  core.writeCode(address, core.stob(value), false)
 end
 
 ---Allocates an executable memory section to store code
