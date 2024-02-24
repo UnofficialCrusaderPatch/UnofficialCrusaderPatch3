@@ -45,7 +45,9 @@ function BaseLoader:load()
         error(message)
     end
 
-    local status, value = pcall(initCode)
+    local ret = table.pack(pcall(initCode))
+    local status = ret[1]
+    local value = ret[2]
 
     if not status then
         error(value)
@@ -57,7 +59,8 @@ function BaseLoader:load()
         log(WARNING, "[extensions/loader]: " .. init_file_path .. " did not return a valid handle: " .. self.handle)
     end
 
-    return self.handle
+    -- Return value/self.handle and all the other return values 
+    return self.handle, select(3, table.unpack(ret))
 end
 
 function BaseLoader:unload()

@@ -20,4 +20,8 @@ return {
     setIterationOption = function(self, key, value)
         iteration.setOption(key, value)
     end,
+}, {
+  "overrideFileWith", 
+  "registerOverrideFunction",
+  "setIterationOption",
 }

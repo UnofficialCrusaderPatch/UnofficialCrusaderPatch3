@@ -192,13 +192,40 @@ data.version.overwriteVersion(configFinal)
 --- not declared as local because it should persist
 modules = {}
 plugins = {}
+publicElements = {}
 
+-- These contains the proxies that are passed to extensions
+moduleProxies = {}
+pluginProxies = {}
+modulePublicProxies = {}
+pluginPublicProxies = {}
+
+function table.merge(t1, t2)
+  
+  for k, v in ipairs(t1) do 
+    error("Cannot apply table.merge on an array")
+  end
+  
+  for k, v in ipairs(t2) do 
+    error("Cannot apply table.merge on an array")
+  end
+
+  local t = {}
+
+  for k, v in pairs(t1) do t[k] = v end
+  for k, v in pairs(t2) do t[k] = v end
+
+  return t
+end
 
 ---TODO: restrict module allowed functions table
-moduleEnv = _G
+moduleEnv = table.merge(_G, {
+  modules = moduleProxies,
+  plugins = pluginProxies,  
+})
 pluginEnv = {
-    modules = modules,
-    plugins = plugins,
+    modules = modulePublicProxies,
+    plugins = pluginPublicProxies,
     utils = utils,
     table = table,
     string = string,
@@ -207,16 +234,29 @@ pluginEnv = {
     ipairs = ipairs,
 }
 
+local ExtensionProxy = extensions.proxies.ExtensionProxy
+local PublicProxy = extensions.proxies.PublicProxy
+
 for k, ext in pairs(allActiveExtensions) do
     local t = ext:type()
     if t == "ModuleLoader" then
         log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(moduleEnv)
-        modules[ext.name] = ext:load(moduleEnv)
+        local e, p = ext:load(moduleEnv)
+        modules[ext.name], publicElements[ext.name] = e, p
+        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p or {}, ', ')))
+        local ep = ExtensionProxy(e)
+        moduleProxies[ext.name] = ep
+        modulePublicProxies[ext.name] = PublicProxy(ep, p)
     elseif t == "PluginLoader" then
       log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(pluginEnv)
-        plugins[ext.name] = ext:load(pluginEnv)
+        local e, p = ext:load(pluginEnv)
+        plugins[ext.name], publicElements[ext.name] = e, p
+        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p or {}, ', ')))
+        local ep = ExtensionProxy(e)
+        pluginProxies[ext.name] = ep
+        pluginPublicProxies[ext.name] = PublicProxy(ep, p)
     else
         error("[main]: unknown extension type for: " .. ext.name)
     end
@@ -228,12 +268,10 @@ for k, ext in pairs(allActiveExtensions) do
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
         local o = configFinal[ext.name .. "-" .. ext.version] or {}
         ext:enable(o)
-        modules[ext.name] = extensions.createRecursiveReadOnlyTable(modules[ext.name])
     elseif t == "PluginLoader" then
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
         local o = configFinal[ext.name .. "-" .. ext.version] or {}
         ext:enable(o)
-        plugins[ext.name] = extensions.createRecursiveReadOnlyTable(plugins[ext.name])
     else
         error("[main]: unknown extension type for: " .. ext.name)
     end
