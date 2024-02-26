@@ -48,6 +48,54 @@ options:
         value: false
         type: boolean
 - category: ['{{ai}}', '{{improvements}}']
+  name: ai_resources_rebuy
+  header: '{{ai_resources_rebuy}}'
+  text: '{{ai_resources_rebuy_descr}}'
+  display: GroupBox
+  children:
+  - name: ai_resources_rebuy_group_style
+    display: Group
+    style:
+      css:
+        paddingLeft: 1.0rem
+    children:
+    - display: UCP2Slider
+      header: '{{ai_noflour_maxtime_descr}}'
+      hasHeader: true
+      url: ucp2-legacy.ai_resources_rebuy.flour
+      contents:
+        min: 0
+        max: 72
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 36
+    - display: UCP2Slider
+      header: '{{ai_noiron_maxtime_descr}}'
+      hasHeader: true
+      url: ucp2-legacy.ai_resources_rebuy.iron
+      contents:
+        min: 0
+        max: 72
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 36
+    - display: UCP2Slider
+      header: '{{ai_nowood_maxtime_descr}}'
+      hasHeader: true
+      url: ucp2-legacy.ai_resources_rebuy.wood
+      contents:
+        min: 0
+        max: 72
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 36
+- category: ['{{ai}}', '{{improvements}}']
   display: GroupBox
   name: ai_demolish_group
   header: '{{ai_demolish}}'

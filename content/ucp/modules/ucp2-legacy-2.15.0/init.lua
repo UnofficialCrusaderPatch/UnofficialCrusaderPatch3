@@ -16,6 +16,7 @@ local changes = {
   ["ai_rebuild"] = "port/ai_rebuild",
   ["ai_recruitinterval"] = "port/ai_recruitinterval",
   ["ai_recruitstate_initialtimer"] = "port/ai_recruitstate_initialtimer",
+  ["ai_resources_rebuy"] = "port/ai_resources_rebuy",
   ["ai_tethers"] = "port/ai_tethers",
   ["ai_towerengines"] = "port/ai_towerengines",
   ["fix_apple_orchard_build_size"] = "port/fix_apple_orchard_build_size",

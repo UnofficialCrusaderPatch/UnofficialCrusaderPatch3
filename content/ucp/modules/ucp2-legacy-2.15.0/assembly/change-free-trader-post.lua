@@ -1,6 +1,0 @@
-
-local writeCode = core.writeCode
-local scanForAOB = core.scanForAOB
-
--- 0x005C23D8
-writeCode(scanForAOB("05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1E 00 00 00 00 00 00 00 00 00 00 00 0A 00 00 00 00 00 00 00 64 00 00 00 0A 00 00 00"), {0x00})
