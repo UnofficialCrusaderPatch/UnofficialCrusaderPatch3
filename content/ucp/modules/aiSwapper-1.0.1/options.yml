@@ -1,0 +1,16 @@
+meta:
+  version: 1.0.0
+options:
+- category: [AI Swapper]
+  name: ai_swapper
+  header: '{{ai_swapper}}'
+  text: '{{ai_swapper_descr}}'
+  hasHeader: true
+  display: CustomMenu
+  url: aiSwapper
+  contents:
+    type: custom
+    source:
+      html: ai-swapper.html
+      css: ai-swapper.css
+      js: ai-swapper.js

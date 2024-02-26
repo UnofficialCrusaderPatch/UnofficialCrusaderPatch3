@@ -1,0 +1,8 @@
+# The name of your module
+name: aicloader
+version: 0.1.1
+suggests: [commands>=0.0.1]
+author: [gynt, TheRedDaemon]
+game: [SHC==1.41, SHCE==1.41, SHCE==1.41.1]
+meta:
+  version: 1.0.0

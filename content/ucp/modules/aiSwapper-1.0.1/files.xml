@@ -1,0 +1,22 @@
+<module>
+  <project path="ucp_aiSwapperHelper/ucp_aiSwapperHelper/ucp_aiSwapperHelper.vcxproj"/>
+  
+  <files> <!-- first without could be equal to build="Release"-->
+    <file src="ucp_aiSwapperHelper/$(Configuration)/aiSwapperHelper.dll" />
+    <file src="*.lua" target="." />
+    <file src="scripts/*.lua" target="./scripts" />
+    <file src="*.yml" target="." />
+    <file src="menu/*" target="./menu" />
+    <file src="locale/*" target="./locale" />
+  </files>
+  
+  <files build="Debug">
+    <file src="ucp_aiSwapperHelper/$(Configuration)/aiSwapperHelper.dll" />
+    <file src="ucp_aiSwapperHelper/$(Configuration)/aiSwapperHelper.pdb" />
+    <file src="*.lua" target="." />
+    <file src="scripts/*.lua" target="./scripts" />
+    <file src="*.yml" target="." />
+    <file src="menu/*" target="./menu" />
+    <file src="locale/*" target="./locale" />
+  </files>
+</module>

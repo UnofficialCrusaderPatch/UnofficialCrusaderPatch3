@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ucp_aiSwapperHelper", "ucp_aiSwapperHelper\ucp_aiSwapperHelper.vcxproj", "{C70B832F-965F-4411-9F8E-CDA58CD18DC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		LocalDebug|x86 = LocalDebug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.Debug|x86.ActiveCfg = Debug|Win32
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.Debug|x86.Build.0 = Debug|Win32
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.LocalDebug|x86.ActiveCfg = LocalDebug|Win32
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.LocalDebug|x86.Build.0 = LocalDebug|Win32
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.Release|x86.ActiveCfg = Release|Win32
+		{C70B832F-965F-4411-9F8E-CDA58CD18DC1}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42DD2553-82F6-4A86-9D32-B50F7E47BD46}
+	EndGlobalSection
+EndGlobal

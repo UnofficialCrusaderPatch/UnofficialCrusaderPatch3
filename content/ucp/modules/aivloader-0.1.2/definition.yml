@@ -1,0 +1,9 @@
+name: aivloader
+display-name: AIV Loader
+version: 0.1.2
+author: gynt, TheRedDaemon
+meta:
+  version: 1.0.0
+type: module
+dependencies:
+  files: ">= 0.0.1"
