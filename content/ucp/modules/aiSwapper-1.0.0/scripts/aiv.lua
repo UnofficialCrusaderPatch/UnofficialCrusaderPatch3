@@ -16,7 +16,7 @@ local CASTLE_LAST_ID = 8
 --[[ Functions ]]--
 
 local function resetAIV(indexToReset)
-  aivModule.resetAllAIVForAi(indexToReset)
+  aivModule:resetAllAIVForAi(indexToReset)
 end
 
 local function setAIV(aiIndexToReplace, pathroot, aiName)
@@ -47,7 +47,7 @@ local function setAIV(aiIndexToReplace, pathroot, aiName)
       end
     end
   end
-  aivModule.setMultipleAIVForAi(aiIndexToReplace, castlesToSet)
+  aivModule:setMultipleAIVForAi(aiIndexToReplace, castlesToSet)
 end
 
 return {

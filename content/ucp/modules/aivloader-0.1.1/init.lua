@@ -292,25 +292,25 @@ return {
   end,
 
   -- ReadOnlyTable is preventing this from being prettier (we cannot expose 'api' because it becomes frozen)
-  setAIVFileForAI = function(ai, castle, fileName)
+  setAIVFileForAI = function(self, ai, castle, fileName)
     if not isInit() then return end
     setAivForAi(ai, castle, fileName)
   end,
-  disableAIVForAi = function(ai, castle)
+  disableAIVForAi = function(self, ai, castle)
     if not isInit() then return end
     setAivForAi(ai, castle, "")
   end,
-  resetAIVForAi = function(ai, castle)
+  resetAIVForAi = function(self, ai, castle)
     if not isInit() then return end
     setAivForAi(ai, castle, nil)
   end,
-  resetAllAIVForAi = function(ai)
+  resetAllAIVForAi = function(self, ai)
     if not isInit() then return end
     for i = 1, 8 do
       setAivForAi(ai, i, nil)
     end
   end,
-  setMultipleAIVForAi = function(ai, castleToPathTable)
+  setMultipleAIVForAi = function(self, ai, castleToPathTable)
     if not isInit() then return end
     for castleIndex, filePath in pairs(castleToPathTable) do
       setAivForAi(ai, castleIndex, filePath)

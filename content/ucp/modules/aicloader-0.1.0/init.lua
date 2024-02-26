@@ -40,12 +40,48 @@ end
 -- You can consider this a forward declaration
 local namespace = {}
 
+local commands = {
+
+  onCommandSetAICValue = function(command)
+    if not initializedCheck() then
+        return
+    end
+  
+    local aiType, fieldName, value = command:match("^/setAICValue ([A-Za-z0-9_]+) ([A-Za-z0-9_]+) ([A-Za-z0-9_]+)$")
+    if aiType == nil or fieldName == nil or value == nil then
+        modules.commands:displayChatText(
+            "invalid command: " .. command .. " usage: " .. 
+            "/setAICValue [aiType: 1-16 or AI character type] [field name] [value]"
+        )
+    else
+        namespace:setAICValue(aiType, fieldName, value)
+    end
+end,
+
+onCommandloadAICsFromFile = function(command)
+    if not initializedCheck() then
+        return
+    end
+  
+    local path = command:match("^/loadAICsFromFile ([A-Za-z0-9_ /.:-]+)$")
+    if path == nil then
+        modules.commands:displayChatText(
+            "invalid command: " .. command .. " usage: " .. 
+            "/loadAICsFromFile [path]"
+        )
+    else
+        namespace:overwriteAICsFromFile(path)
+    end
+end,
+
+}
+
 -- functions you want to expose to the outside world
 namespace = {
     enable = function(self, config)
         if modules.commands then
-            modules.commands.registerCommand("setAICValue", self.onCommandSetAICValue)
-            modules.commands.registerCommand("loadAICsFromFile", self.onCommandloadAICsFromFile)
+            modules.commands:registerCommand("setAICValue", commands.onCommandSetAICValue)
+            modules.commands:registerCommand("loadAICsFromFile", commands.onCommandloadAICsFromFile)
         end
         
         hooks.registerHookCallback("afterInit", function()
@@ -59,7 +95,7 @@ namespace = {
                     for i, fileName in pairs(config.aicFiles) do
                         if fileName:len() > 0 then
                             print("Overwritten AIC values from file: " .. fileName)
-                            namespace.overwriteAICsFromFile(fileName)
+                            namespace:overwriteAICsFromFile(fileName)
                         end
                     end
                 else
@@ -77,39 +113,8 @@ namespace = {
         end
     end,
 
-    onCommandSetAICValue = function(command)
-        if not initializedCheck() then
-            return
-        end
-      
-        local aiType, fieldName, value = command:match("^/setAICValue ([A-Za-z0-9_]+) ([A-Za-z0-9_]+) ([A-Za-z0-9_]+)$")
-        if aiType == nil or fieldName == nil or value == nil then
-            modules.commands.displayChatText(
-                "invalid command: " .. command .. " usage: " .. 
-                "/setAICValue [aiType: 1-16 or AI character type] [field name] [value]"
-            )
-        else
-            namespace.setAICValue(aiType, fieldName, value)
-        end
-    end,
 
-    onCommandloadAICsFromFile = function(command)
-        if not initializedCheck() then
-            return
-        end
-      
-        local path = command:match("^/loadAICsFromFile ([A-Za-z0-9_ /.:-]+)$")
-        if path == nil then
-            modules.commands.displayChatText(
-                "invalid command: " .. command .. " usage: " .. 
-                "/loadAICsFromFile [path]"
-            )
-        else
-            namespace.overwriteAICsFromFile(path)
-        end
-    end,
-
-    setAICValue = function(aiType, aicField, aicValue)
+    setAICValue = function(self, aiType, aicField, aicValue)
         if not initializedCheck() then
             return
         end
@@ -130,17 +135,17 @@ namespace = {
         end
     end,
 
-    overwriteAIC = function(aiType, aicSpec)
+    overwriteAIC = function(self, aiType, aicSpec)
         if not initializedCheck() then
             return
         end
 
         for name, value in pairs(aicSpec) do
-            namespace.setAICValue(aiType, name, value)
+            namespace:setAICValue(aiType, name, value)
         end
     end,
 
-    overwriteAICsFromFile = function(aicFilePath)
+    overwriteAICsFromFile = function(self, aicFilePath)
         if not initializedCheck() then
             return
         end
@@ -152,11 +157,11 @@ namespace = {
         local aics = aicSpec.AICharacters
 
         for k, aic in pairs(aics) do
-            namespace.overwriteAIC(aic.Name, aic.Personality)
+            namespace:overwriteAIC(aic.Name, aic.Personality)
         end
     end,
     
-    resetAIC = function(aiType)
+    resetAIC = function(self, aiType)
         if not initializedCheck() then
             return
         end
@@ -173,4 +178,11 @@ namespace = {
     end
 }
 
-return namespace
+return namespace, {
+  public = {
+    "setAICValue",
+    "resetAIC",
+    "overwriteAIC",
+    "overwriteAICsFromFile",
+  }
+}

@@ -64,7 +64,7 @@ local function performTextSetBasedOnEnum(enum, source, aiIndex, linesIndexConsta
   source = source or {} -- to avoid error
   for lineName, lineId in pairs(enum) do
     local lineIndex = lineIndexGetter(aiIndex, lineId)
-    textModule.SetText(linesIndexConstant, lineIndex, source[lineName]) -- nil will auto reset
+    textModule:SetText(linesIndexConstant, lineIndex, source[lineName]) -- nil will auto reset
   end
 end
 

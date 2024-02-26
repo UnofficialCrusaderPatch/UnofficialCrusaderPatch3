@@ -11,7 +11,7 @@ local DATA_PATH_CHARACTER = "character.json"
 --[[ Functions ]]--
 
 local function resetAIC(indexToReset)
-  aicModule.resetAIC(indexToReset + 1) -- uses ai ids
+  aicModule:resetAIC(indexToReset + 1) -- uses ai ids
 end
 
 local function setAIC(indexToReplace, pathroot, aiName, loadedCharacterJson)
@@ -29,7 +29,7 @@ local function setAIC(indexToReplace, pathroot, aiName, loadedCharacterJson)
     return
   end
 
-  aicModule.overwriteAIC(indexToReplace + 1, loadedCharacterJson.aic) -- uses ai ids
+  aicModule:overwriteAIC(indexToReplace + 1, loadedCharacterJson.aic) -- uses ai ids
   return loadedCharacterJson
 end
 

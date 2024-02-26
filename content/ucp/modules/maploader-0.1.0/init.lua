@@ -5,5 +5,5 @@ return {
           modules.files:setIterationOption(k, v)
         end
     end,
-    disable = function()  end
+    disable = function(self)  end
 }
