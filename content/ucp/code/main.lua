@@ -110,7 +110,11 @@ else
     local m = config.matcher.findMatchForExtensionRequirement(extensionLoaders, req)
   --]]  
   
-  log(DEBUG, "[main]: iterating through load order, trying: " .. req)
+  if type(req) == "table" then 
+    log(DEBUG, "[main]: iterating through load order, trying: " .. yaml.dump(req))
+  else 
+    log(DEBUG, "[main]: iterating through load order, trying: " .. tostring(req))
+  end
   
     local m = config.matcher.findPreMatchForExtensionRequirement(moduleFolders, req)
     local e
@@ -119,7 +123,11 @@ else
         m = config.matcher.findPreMatchForExtensionRequirement(pluginFolders, req)
 
         if m == nil then
-          log(FATAL, "[main]: Could not find a matching extension for requirement: " .. tostring(req))
+          if type(req) == "table" then 
+            log(FATAL, "[main]: Could not find a matching extension for requirement: " .. yaml.dump(req))
+          else 
+            log(FATAL, "[main]: Could not find a matching extension for requirement: " .. tostring(req))
+          end
         else
           e = config.utils.loadExtensionFromFolder(m.name, m.version, extensions.PluginLoader)
           extensionLoaders[m.name] = e

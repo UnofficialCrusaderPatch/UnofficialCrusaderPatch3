@@ -57,8 +57,19 @@ end
 
 ---@param extensions table<string, BaseLoader> extensions
 ---@param requirement string requirement string
-function matcher.findPreMatchForExtensionRequirement(preExtensions, requirementString)
-  local req = version.VersionRequirement:fromString(requirementString)
+function matcher.findPreMatchForExtensionRequirement(preExtensions, requirement)
+
+  local requirementString, req
+  if type(requirement) == "string" then
+    requirementString = requirement
+    req = version.VersionRequirement:fromString(requirementString)
+  elseif type(requirement) == "table" then
+    requirementString = string.format("%s %s %s", requirement.extension, '==', requirement.version)
+    req = version.VersionRequirement:new(requirement.extension, '==', requirement.version)
+  else
+    error("error during finding extension for requirement")
+  end
+
   local m
   log(DEBUG, "[config/matcher]: finding extension for requirement: " .. requirementString)
   for k, preExtension in pairs(preExtensions) do

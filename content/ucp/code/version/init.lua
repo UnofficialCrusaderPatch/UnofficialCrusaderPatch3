@@ -89,6 +89,17 @@ version.VersionRequirement = {
         return o
 
     end,
+
+    new = function(self, name, eq, versionString)
+      local o = setmetatable({
+        name = name,
+        equality = eq,
+        version = version.SemanticVersion:fromString(versionString),
+      }, {__index = self})
+
+      return o
+
+    end,
 }
 
 return version
