@@ -257,7 +257,7 @@ for k, ext in pairs(allActiveExtensions) do
         log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p, ', ')))
         local ep = ExtensionProxy(e)
         moduleProxies[ext.name] = ep
-        modulePublicProxies[ext.name] = PublicProxy(ep, p)
+        modulePublicProxies[ext.name] = PublicProxy(e, p)
     elseif t == "PluginLoader" then
       log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(pluginEnv)
@@ -268,22 +268,41 @@ for k, ext in pairs(allActiveExtensions) do
         log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p, ', ')))
         local ep = ExtensionProxy(e)
         pluginProxies[ext.name] = ep
-        pluginPublicProxies[ext.name] = PublicProxy(ep, p)
+        pluginPublicProxies[ext.name] = PublicProxy(e, p)
     else
         error("[main]: unknown extension type for: " .. ext.name)
     end
 end
+
+local TableProxy = extensions.proxies.TableProxy
+
+local activeExtensionVersions = {}
+for k, ext in pairs(allActiveExtensions) do
+  activeExtensionVersions[ext.name] = ext.version
+end
+
+local activeExtensionLoadOrder = {}
+for k, ext in pairs(extensionsInLoadOrder) do
+  activeExtensionLoadOrder[k] = ext.name
+end
+
+configInfoForExtensions = TableProxy({
+  extensions = {
+    version = activeExtensionVersions,
+    order = activeExtensionLoadOrder,
+  },
+})
 
 for k, ext in pairs(allActiveExtensions) do
     local t = ext:type()
     if t == "ModuleLoader" then
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
         local o = configFinal[ext.name .. "-" .. ext.version] or {}
-        ext:enable(o)
+        ext:enable(o, configInfoForExtensions)
     elseif t == "PluginLoader" then
       log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
         local o = configFinal[ext.name .. "-" .. ext.version] or {}
-        ext:enable(o)
+        ext:enable(o, configInfoForExtensions)
     else
         error("[main]: unknown extension type for: " .. ext.name)
     end

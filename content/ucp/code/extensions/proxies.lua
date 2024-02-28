@@ -1,4 +1,42 @@
 
+local utils = {}
+
+function utils.__pairs(tbl)
+
+  -- Iterator function takes the table and an index and returns the next index and associated value
+  -- or nil to end iteration
+
+  local function stateless_iter(tbl, k)
+    local v
+    -- Implement your own key,value selection logic in place of next
+    k, v = next(tbl, k)
+    if nil~=v then return k,v end
+  end
+
+  -- Return an iterator function, the table, starting point
+  return stateless_iter, tbl, nil
+end
+
+function utils.__ipairs(tbl)
+  -- Iterator function
+  local function stateless_iter(tbl, i)
+    -- Implement your own index, value selection logic
+    i = i + 1
+    local v = tbl[i]
+    if nil~=v then return i, v end
+  end
+
+  -- return iterator function, table, and starting point
+  return stateless_iter, tbl, 0
+end
+
+-- function utils.__next(tbl, index)
+--   if index == nil then
+--     return next(tbl)
+--   end
+--   return next(tbl, index)
+-- end
+
 local function contains(t, obj)
 	for k, v in pairs(t) do
 		if v == obj then return true end
@@ -7,8 +45,10 @@ local function contains(t, obj)
 	return false
 end
 
+local TableProxy
+TableProxy = function(obj)
 
-local TableProxy = function(obj)
+  if type(obj) ~= "table" then return obj end
 
 	return setmetatable({}, {
 
@@ -18,7 +58,7 @@ local TableProxy = function(obj)
 
 			if type(value) == "table" then
 
-				return TableProxy(obj)
+				return TableProxy(value)
 
 			end
 
@@ -32,56 +72,47 @@ local TableProxy = function(obj)
 
 		end,
 
+    __pairs = function(self) 
+      -- Iterator function takes the table and an index and returns the next index and associated value
+      -- or nil to end iteration
+
+      local function stateless_iter(tbl, k)
+        local v
+        -- Implement your own key,value selection logic in place of next
+        k, v = next(obj, k)
+        if nil~=v then 
+          return k,TableProxy(v)
+        end
+      end
+
+      -- Return an iterator function, the table, starting point
+      return stateless_iter, self, nil
+    end,
+      
+
+    __ipairs = function(self) 
+      -- Iterator function
+      local function stateless_iter(tbl, i)
+        -- Implement your own index, value selection logic
+        i = i + 1
+        local v = obj[i]
+        if nil~=v then 
+          return i, TableProxy(v) 
+        end
+      end
+
+      -- return iterator function, table, and starting point
+      return stateless_iter, self, 0
+    end,
+
+    __next = function(self, k)
+      local k, v = next(obj, k)
+      if nil~=v then 
+        return k,TableProxy(v) 
+      end
+    end,
+
 	})	
-end
-
-
-local PublicProxy = function(obj, publicObjects)
-
-  local publicObjects = publicObjects or {}
-
-	return setmetatable({}, {
-
-		__index = function(self, k)
-
-			if contains(publicObjects, k) then
-
-				local value = obj[k]
-				
-				if type(value) == "table" then
-
-					return TableProxy(value)
-
-				elseif type(value) == "function" then
-
-					return function(...)
-
-						-- Force the self to be obj
-
-						return value(obj, select(2, ...))
-
-					end
-
-				end
-				
-				return value
-
-			else
-
-				return nil
-
-			end
-
-		end,
-		
-		__newindex = function(self, k, v)
-
-			error(string.format("Setting a value on this object is not allowed. Key: %s", k))
-
-		end,
-
-	})
-
 end
 
 
@@ -113,10 +144,20 @@ local ExtensionProxy = function(obj)
 
 			elseif type(value) == "function" then
 
-				return function(...)
+				return function(epSelf, ...)
 
-					-- Force the self to be obj
-					return TableProxy(value(obj, select(2, ...)))
+          -- Force the self to be obj
+          local ret = value(obj, ...)
+					
+          if type(ret) == "table" then
+
+            return TableProxy(ret)
+          
+          else
+            
+            return ret
+          
+          end					
 
 				end
 
@@ -136,8 +177,63 @@ local ExtensionProxy = function(obj)
 
 end
 
+
+
+local PublicProxy = function(obj, publicObjects)
+
+  local publicObjects = publicObjects or {}
+
+  local ep = ExtensionProxy(obj)
+
+	return setmetatable({}, {
+
+		__index = function(self, k)
+
+			if contains(publicObjects, k) then
+
+        return ep[k]
+
+			else
+
+				return nil
+
+			end
+
+		end,
+		
+		__newindex = function(self, k, v)
+
+			error(string.format("Setting a value on this extension is not allowed. Key: %s", k))
+
+		end,
+
+	})
+
+end
+
+local Deproxy
+Deproxy = function(obj)
+  if type(obj) ~= "table" then return obj end
+
+  local result = {}
+  for k, v in pairs(obj) do
+    local newk = k
+    local newv = v
+    if type(k) == "table" then
+      newk = Deproxy(k)
+    end
+    if type(v) == "table" then
+      newv = Deproxy(v)
+    end
+    result[newk] = newv
+  end
+  return result
+end
+
+
 return {
   TableProxy = TableProxy,
   ExtensionProxy = ExtensionProxy,
   PublicProxy = PublicProxy,
+  Deproxy = Deproxy,
 }
