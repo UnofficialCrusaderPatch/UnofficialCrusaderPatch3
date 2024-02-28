@@ -89,6 +89,10 @@ select:disabled {
   min-height: 0;
 }
 
+.ai-swapper__overview__ai > .ai-name {
+  width: 100%;
+}
+
 .ai-swapper__change-menu__header {
   color: whitesmoke;
   display: flex;
