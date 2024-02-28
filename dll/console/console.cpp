@@ -17,35 +17,60 @@ namespace Console {
 	FILE* errorFile;
 	FILE* user_in;
 
-	void executeLuaSnippet(std::string code) {
+	void executeLuaSnippet(const std::string &code) {
+
 		lua_State* L = RPS_getLuaState();
+
 		int before = lua_gettop(L);
-		int r = luaL_dostring(L, code.c_str());
+
+		const std::string returnCode = "return " + code;
+
+		std::string finalCode = returnCode;
+
+		if (luaL_loadstring(L, returnCode.c_str()) != LUA_OK) {
+			finalCode = code;
+			lua_pop(L, 1);
+
+			if (luaL_loadstring(L, code.c_str()) != LUA_OK) {
+				std::string errormsg = lua_tostring(L, -1);
+				std::cout << errormsg << std::endl;
+				lua_pop(L, 1); // pop off the error message;
+
+				lua_settop(L, before);
+
+				return;
+			}
+		}
+
+		int r = lua_pcall(L, 0, LUA_MULTRET, 0);
 		if (r == LUA_OK) {
 			int after = lua_gettop(L);
-			if (after - before > 0) {
+			int nreturns = after - before;
+			if (nreturns > 0) {
 				for (int i = before; i < after; i++) {  /* for each argument */
 					size_t l;
-					const char* s = luaL_tolstring(L, i, &l);  /* convert it to string */
-					if (i > 1)  /* not the first element? */
+					const char* s = luaL_tolstring(L, i + 1, &l);  /* convert it to string and push it on the stack */
+					if (i > 0)  /* not the first element? */
 						lua_writestring("\t", 1);  /* add a tab before it */
 					lua_writestring(s, l);  /* print it */
-					lua_pop(L, 1);  /* pop result */
+					lua_pop(L, 1);  /* pop result of tolstring */
 				}
 				lua_writeline();
 			}
-			lua_pop(L, after - before);
+			lua_pop(L, nreturns);
 		}
 		else {
 			std::string errormsg = lua_tostring(L, -1);
-			std::cout << "[RPS]: error in lua snippet: " << errormsg << std::endl;
+			std::cout << errormsg << std::endl;
 			lua_pop(L, 1); // pop off the error message;
 		}
+
+		lua_settop(L, before);
 	}
 
 	void RunUserInputLoop()
 	{
-		std::cout << std::endl << std::endl << "Welcome to the UCP. Type help to get started." << std::endl;
+		// std::cout << std::endl << std::endl << "Welcome to the UCP. Type help to get started." << std::endl;
 
 		std::regex command("^\\s*(\\S+)(\\s|$)");
 
@@ -74,7 +99,7 @@ namespace Console {
 			if (the_command == "help") {
 				std::cout << "Available commands: " << std::endl << "\thelp\n\tluaStackSize\n\texit" << std::endl;
 			}
-			else if (the_command == "luaStackSize") {
+			else if (the_command == ".luaStackSize") {
 				std::cout << "Current lua stack size: " << RPS_getCurrentStackSize() << std::endl;
 			}
 			else if (the_command == "exit") {
