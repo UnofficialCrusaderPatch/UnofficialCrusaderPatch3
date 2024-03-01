@@ -31,6 +31,16 @@ if UCP_CONFIG then
 end
 
 ---Load essential ucp lua code
+if io.resolveAliasedPath == nil then
+  if ucp.internal.resolveAliasedPath ~= nil then
+    io.resolveAliasedPath = ucp.internal.resolveAliasedPath
+  end
+end
+if io.registerPathAlias == nil then
+  if ucp.internal.registerPathAlias ~= nil then
+    io.registerPathAlias = ucp.internal.registerPathAlias
+  end
+end
 core = require('core')
 utils = require('utils')
 data = require('data')
