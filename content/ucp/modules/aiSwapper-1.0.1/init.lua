@@ -197,19 +197,21 @@ local function transformConfigData(aiName, settings, collector)
     if not util.containsValue(enums.CONFIG_CONTROL_ENTRY, setting) then
       log(WARNING, string.format("Unable to apply AI setting '%s' for '%s'. Unknown setting.", setting, aiName))
     else
-      local sourceKey = string.format("%s-%s-%s", entry.root, entry.name, entry.language);
+      local sourceKey = string.format("%s-%s-%s", entry.root, entry.name, entry.language)
 
       if not configMerger[sourceKey] then
         local config = {}
         configMerger[sourceKey] = config
 
-        config.root = entry.root;
-        config.name = entry.name;
-        config.control = {};
-        config.language = entry.language;
-        config.extension = entry;
+        -- transform to path with version
+        config.root = io.resolveAliasedPath(entry.root)
+
+        config.name = entry.name
+        config.control = {}
+        config.language = entry.language
+        config.extension = entry
       end
-      configMerger[sourceKey].control[setting] = entry.active;
+      configMerger[sourceKey].control[setting] = entry.active
     end
   end
 
