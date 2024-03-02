@@ -20,7 +20,7 @@ select.img: Image
 select.name: Name
 select.version: Version
 select.author: Author
-select.root: Path
+select.nativeroot: Native Path
 select.defaultlang: Default Language
 select.supportedlang: Supported Languages
 select.binks: Binks

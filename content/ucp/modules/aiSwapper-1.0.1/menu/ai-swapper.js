@@ -32,6 +32,8 @@ const AI_CHANGE_UPDATE_EVENT = "ai_change_update_event";
 
 const DEFAULT_VALUE_MARKER = "";
 
+const PATH_ROOT_VERSION_PART_REGEX = /(?<=ucp\/plugins\/.+)-[\d\.]+(?=\/.*)/;
+
 /** DYNAMIC GLOBALS **/
 
 const GENERAL_LOCALIZATION = {
@@ -92,6 +94,10 @@ function createSimpleOptionElement(value, label) {
   return option;
 }
 
+function createVersionFreeRootPath(path) {
+  return path.replace(PATH_ROOT_VERSION_PART_REGEX, "");
+}
+
 /** CLASSES **/
 
 class AiControl {
@@ -126,6 +132,7 @@ class AiMeta {
   defaultLang;
   supportedLang;
   switched;
+  nativeRoot;
   root;
 
   portraitAssetPath;
@@ -161,14 +168,14 @@ class AiMeta {
     this.#dataRow.appendChild(createTextCell(this.name));
     this.#dataRow.appendChild(createTextCell(this.version));
     this.#dataRow.appendChild(createTextCell(this.author));
-    this.#dataRow.appendChild(createTextCell(this.root));
+    this.#dataRow.appendChild(createTextCell(this.nativeRoot));
     this.#dataRow.appendChild(createTextCell(this.defaultLang));
     this.#dataRow.appendChild(createTextCell(this.supportedLang.join(', ')));
 
     AI_CONTROL_SETTINGS.forEach((setting) => this.#dataRow.appendChild(createBooleanCell(this.switched[setting])));
   }
 
-  constructor(metaPath, metaObj) {
+  constructor(nativeMetaPath, metaObj) {
     this.name = receiveStringOrFallback(metaObj.name, DEFAULT_VALUE_MARKER);
     this.description = receiveStringOrFallback(metaObj.description, DEFAULT_VALUE_MARKER);
     this.author = receiveStringOrFallback(metaObj.author, DEFAULT_VALUE_MARKER);
@@ -177,14 +184,15 @@ class AiMeta {
     this.defaultLang = receiveStringOrFallback(metaObj.defaultLang);
     this.supportedLang = Array.isArray(metaObj.supportedLang) ? metaObj.supportedLang : [];
     this.switched = AiControl.fromControlObject(metaObj.switched ?? {}, false);
-    this.root = metaPath.replace(AiMeta.META_FILE, DEFAULT_VALUE_MARKER);
+    this.nativeRoot = nativeMetaPath.replace(AiMeta.META_FILE, DEFAULT_VALUE_MARKER);
+    this.root = createVersionFreeRootPath(this.nativeRoot)
 
     this.#createDataRow();
   }
 
   async loadAssetPortrait() {
     if (this.switched.portrait) {
-      this.portraitAssetPath = await HOST_FUNCTIONS.getAssetUrl(`${this.root}/portrait.png`);
+      this.portraitAssetPath = await HOST_FUNCTIONS.getAssetUrl(`${this.nativeRoot}/portrait.png`);
       this.#dataRowImg.src = this.portraitAssetPath;
     }
   }
@@ -193,18 +201,18 @@ class AiMeta {
     parent.appendChild(this.#dataRow);
   }
 
-  static async fromMetaRootPath(root) {
-    return this.fromMetaPath(`${root}/${AiMeta.META_FILE}`);
+  static async fromNativeMetaRootPath(nativeMetaRootPath) {
+    return this.fromNativeMetaPath(`${nativeMetaRootPath}/${AiMeta.META_FILE}`);
   }
 
-  static async fromMetaPath(path) {
-    const loadedFile = await (HOST_FUNCTIONS.getTextFile(path).catch(() => null));
+  static async fromNativeMetaPath(nativeMetaPath) {
+    const loadedFile = await (HOST_FUNCTIONS.getTextFile(nativeMetaPath).catch(() => null));
     if (!loadedFile) {
       return null;
     }
     const metaObj = JSON.parse(loadedFile);
 
-    const aiMeta = new AiMeta(path, metaObj);
+    const aiMeta = new AiMeta(nativeMetaPath, metaObj);
     await aiMeta.loadAssetPortrait();
 
     return aiMeta;
@@ -764,7 +772,7 @@ async function initData() {
 async function receiveAllAvailableAi() {
   const foundAis = await HOST_FUNCTIONS.receivePluginPaths("resources/ai", `**/${AiMeta.META_FILE}`);
   for (const foundAi of foundAis) {
-    (await Promise.all(foundAi.paths.map(AiMeta.fromMetaPath)))
+    (await Promise.all(foundAi.paths.map(AiMeta.fromNativeMetaPath)))
       .filter((meta) => !!meta)
       .toSorted((metaOne, metaTwo) => metaOne.name.localeCompare(metaTwo.name) || metaOne.root.localeCompare(metaTwo.root))
       .forEach((meta) => FOUND_AI_META.set(meta.root, meta));
@@ -793,6 +801,9 @@ async function receiveCurrentConfig() {
         const [ai, aiSetting] = aiSettingUrl.split(".");
         const aiObj = resultObj[ai] = resultObj[ai] ?? {};
 
+        // clean version if present
+        value.root = createVersionFreeRootPath(value.root);
+
         const sourceKey = `${extension}-${value.root}-${value.name}-${value.language}`;
         if (!aiObj[sourceKey]) {
           const configObj = aiObj[sourceKey] = {};
@@ -816,7 +827,12 @@ async function receiveCurrentConfig() {
 
   // filter to handle keys set to undefined
   for (const [ai, configArray] of Object.entries(menu ?? {}).filter(([, configArray]) => !!configArray)) {
-    configArray.filter((config) => FOUND_AI_META.has(config.root))
+    configArray.map((config) => {
+       // clean version if present
+      config.root = createVersionFreeRootPath(config.root);
+      return config;
+    })
+      .filter((config) => FOUND_AI_META.has(config.root))
       .map((config) => AiSetting.fromMetaAndSettings(FOUND_AI_META.get(config.root), config))
       .filter((aiSetting) => !!aiSetting)
       .forEach((aiSetting) => AI_SLOTS.get(ai)?.pushUserSetting(aiSetting));
