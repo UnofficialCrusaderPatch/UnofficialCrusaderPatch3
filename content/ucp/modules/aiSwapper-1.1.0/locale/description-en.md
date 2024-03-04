@@ -1,7 +1,7 @@
 # AI Swapper
 
 **Authors**: TheRedDaemon, gynt  
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Repository**: Part of [https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3)
 
 This module allows to swap individual AI slots without restrictions. This includes placing an AI in any slot without message problems. It allows further to use individual videos for every voice line and supports localization.
