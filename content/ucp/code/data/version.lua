@@ -11,7 +11,7 @@ end
 local scanForString = function(s)
     local targetBytes = table.pack(string.byte(s, 1, -1))
     local targetString = utils.bytesToAOBString(targetBytes)
-    return core.scanForAOB(targetString, 0x00400000, 0x00600000)
+    return core.AOBScan(targetString, 0x00400000, 0x00600000)
 end
 
 local computeVersionString = function(config)
@@ -83,14 +83,14 @@ namespace.initialize = function()
 
 	--- Create the search bytes to find the usage of this version string: push versionString
     local push_vf = { 0x68, table.unpack(utils.itob(vf)) }
-    namespace.push_vf_address = core.scanForAOB(utils.bytesToAOBString(push_vf))
+    namespace.push_vf_address = core.AOBScan(utils.bytesToAOBString(push_vf))
 
     if namespace.push_vf_address == nil then
         error()
     end
     
 	--- Find the minor version number by searching for: push number
-	local vnumber_address = core.scanForAOB("6A", namespace.push_vf_address - 20, namespace.push_vf_address)
+	local vnumber_address = core.AOBScan("6A", namespace.push_vf_address - 20, namespace.push_vf_address)
     if vnumber_address == nil then
         error()
     end
@@ -129,7 +129,7 @@ namespace.overwriteVersion = function(config)
     namespace.digest = computeVersionString(config)
     namespace.setMenuVersion(namespace.original_version_string .. " UCP " .. namespace.known_version_string .. " (" .. namespace.digest:sub(1, 6) .. ")")
 
-    namespace.game_language = core.readInteger(core.scanForAOB("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
+    namespace.game_language = core.readInteger(core.AOBScan("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
     namespace.afterGameInit = false
 
     hooks.registerHookCallback("afterInit", function()

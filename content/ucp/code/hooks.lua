@@ -15,7 +15,7 @@ local function fireCallbacksForHook(hook)
 end
 
 ---This is right before the windows messages loop
-local afterInit = core.scanForAOB("e8 ? ? ? ? 39 1d ? ? ? ? 89 2d ? ? ? ? 89 1d ? ? ? ? 0f 85 ? ? ? ?")
+local afterInit = core.AOBScan("e8 ? ? ? ? 39 1d ? ? ? ? 89 2d ? ? ? ? 89 1d ? ? ? ? 0f 85 ? ? ? ?")
 
 local function onAfterInit(registers)
     log(DEBUG, "[hooks]: firing afterInit callbacks")
