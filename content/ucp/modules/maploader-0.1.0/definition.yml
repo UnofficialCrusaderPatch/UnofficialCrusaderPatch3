@@ -1,8 +1,0 @@
-name: maploader
-version: 0.1.0
-author: gynt
-game: [SHC==1.41]
-dependencies:
-- files >= 0.2.0
-meta:
-  version: 1.0.0

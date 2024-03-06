@@ -1,8 +1,0 @@
-name: ucp2-legacy-defaults
-display-name: "UCP2-Legacy: default settings"
-author: gynt
-version: 2.15.0
-dependencies:
-  - ucp2-legacy == 2.15.0
-meta:
-  version: 1.0.0
