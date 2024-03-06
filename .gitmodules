@@ -50,3 +50,7 @@
 [submodule "content/ucp/modules/aivloader-0.1.2"]
 	path = content/ucp/modules/aivloader-0.1.2
 	url = https://github.com/UnofficialCrusaderPatch/extension-aivloader
+
+[submodule "content/ucp/modules/aiSwapper-1.1.0"]
+	path = content/ucp/modules/aiSwapper-1.1.0
+	url = https://github.com/UnofficialCrusaderPatch/extension-aiSwapper
