@@ -62,3 +62,7 @@
 [submodule "content/ucp/modules/maploader-0.1.0"]
 	path = content/ucp/modules/maploader-0.1.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-maploader
+
+[submodule "content/ucp/modules/ucp2-legacy-2.15.0"]
+	path = content/ucp/modules/ucp2-legacy-2.15.0
+	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-legacy
