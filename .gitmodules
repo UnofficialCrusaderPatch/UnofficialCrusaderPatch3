@@ -1,9 +1,11 @@
 [submodule "dll/vendor/loguru"]
 	path = dll/vendor/loguru
 	url = https://github.com/emilk/loguru
+
 [submodule "dll/vendor/MemoryModule"]
 	path = dll/vendor/MemoryModule
 	url = https://github.com/fancycode/MemoryModule
+
 [submodule "dll/vendor/fasm"]
 	path = dll/vendor/fasm
 	url = https://github.com/Konctantin/FASM
@@ -44,3 +46,7 @@
 [submodule "content/ucp/modules/aicloader-0.1.1"]
 	path = content/ucp/modules/aicloader-0.1.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-aicloader
+
+[submodule "content/ucp/modules/aivloader-0.1.2"]
+	path = content/ucp/modules/aivloader-0.1.2
+	url = https://github.com/UnofficialCrusaderPatch/extension-aivloader
