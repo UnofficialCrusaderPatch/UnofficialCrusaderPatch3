@@ -58,3 +58,7 @@
 [submodule "content/ucp/modules/files-0.2.2"]
 	path = content/ucp/modules/files-0.2.2
 	url = https://github.com/UnofficialCrusaderPatch/extension-files
+
+[submodule "content/ucp/modules/maploader-0.1.0"]
+	path = content/ucp/modules/maploader-0.1.0
+	url = https://github.com/UnofficialCrusaderPatch/extension-maploader
