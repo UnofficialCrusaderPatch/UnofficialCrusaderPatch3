@@ -311,6 +311,19 @@ void Core::initialize() {
 		return;
 	}
 
+	if (!this->secureMode) {
+		int answer = MessageBoxA(
+			NULL, 
+			"Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click YES, you agree you understand fully what this means and wish to proceed. Otherwise, click NO", 
+			"WARNING: NO SECURITY", 
+			MB_YESNO
+		);
+
+		if (answer != IDYES) {
+			exit(0);
+		}
+	}
+
 	this->setArgsFromCommandLine();
 	this->processEnvironmentVariables();
 	this->processCommandLineArguments();
@@ -318,6 +331,8 @@ void Core::initialize() {
 	initializeLogger(this->logLevel, this->consoleLogLevel);
 
 	this->initializeConsole();
+
+	this->moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", this->secureMode);
 		
 	// Start of lua related initialization
 	RPS_initializeLua();

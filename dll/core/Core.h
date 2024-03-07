@@ -47,9 +47,6 @@ private:
 				this->UCP_DIR = path;
 			}
 		}
-
-		moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", secureMode);
-		
 		
 		std::filesystem::path appData;
 		if (!getAppDataPath(appData)) throw "failed to get app data path";
