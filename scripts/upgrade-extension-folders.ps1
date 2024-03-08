@@ -12,24 +12,30 @@ $extensionDirs = $moduleDirs + $pluginDirs
 foreach($extensionDir in $extensionDirs) {
     $isGit = Test-Path -Path "$($extensionDir.FullName)\.git"
 
-    $defRaw = Get-Content -Raw -Path "$($extensionDir.FullName)\definition.yml"
+    if (Test-Path -Path "$($extensionDir.FullName)\definition.yml") {
 
-    $def = ConvertFrom-Yaml $defRaw
+        $defRaw = Get-Content -Raw -Path "$($extensionDir.FullName)\definition.yml"
 
-    $version = $def.version
+        $def = ConvertFrom-Yaml $defRaw
 
-    if ($extensionDir.FullName.EndsWith($version) -ne $true) {
-        $relativePath = $extensionDir.FullName.Substring($pwd.Path.Length + 1)
-        $noVersion = $relativePath.SubString(0, $relativePath.LastIndexOf('-'))
-        $newRelativePath = $noVersion + '-' + $version
+        $version = $def.version
 
-        if ( $true -eq $isGit ) {
-          Invoke-Expression "git mv $($relativePath) $($newRelativePath)"
-        } else {
-          Move-Item -Path "$relativePath" -Destination "$newRelativePath"
-        }
+        if ($extensionDir.FullName.EndsWith($version) -ne $true) {
+            $relativePath = $extensionDir.FullName.Substring($pwd.Path.Length + 1)
+            $noVersion = $relativePath.SubString(0, $relativePath.LastIndexOf('-'))
+            $newRelativePath = $noVersion + '-' + $version
+
+            if ( $true -eq $isGit ) {
+              Invoke-Expression "git mv $($relativePath) $($newRelativePath)"
+            } else {
+              Move-Item -Path "$relativePath" -Destination "$newRelativePath"
+            }
         
+        }
+
     }
+
+
 
     
 }

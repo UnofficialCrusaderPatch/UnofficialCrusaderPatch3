@@ -44,11 +44,11 @@
 	branch = eb78730
 
 [submodule "content/ucp/modules/aicloader-0.1.1"]
-	path = content/ucp/modules/aicloader-0.1.1
+	path = content/ucp/modules/aicloader-1.0.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-aicloader
 
 [submodule "content/ucp/modules/aivloader-0.1.2"]
-	path = content/ucp/modules/aivloader-0.1.2
+	path = content/ucp/modules/aivloader-1.0.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-aivloader
 
 [submodule "content/ucp/modules/aiSwapper-1.1.0"]
@@ -56,11 +56,11 @@
 	url = https://github.com/UnofficialCrusaderPatch/extension-aiSwapper
 
 [submodule "content/ucp/modules/files-0.2.2"]
-	path = content/ucp/modules/files-0.2.2
+	path = content/ucp/modules/files-1.0.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-files
 
 [submodule "content/ucp/modules/maploader-0.1.0"]
-	path = content/ucp/modules/maploader-0.1.0
+	path = content/ucp/modules/maploader-1.0.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-maploader
 
 [submodule "content/ucp/modules/ucp2-legacy-2.15.0"]
