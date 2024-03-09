@@ -3,6 +3,7 @@ param (
   [Parameter(Mandatory=$true)][string]$Path,
 	[Parameter(Mandatory=$true)][string]$Destination,
   [Parameter(Mandatory=$false)][switch]$RemoveZippedFolders = $true
+  [Parameter(Mandatory=$false)][switch]$Zip = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,11 +21,13 @@ $pluginDir = Get-Item -Path "$Destination\$($plugin.Name)"
 
 Copy-Item ($plugin.FullName + "\*") -Destination $pluginDir -Recurse
 
-
-$name = $pluginDir.Name
+if ($Zip) {
+  $name = $pluginDir.Name
 	
-7z a -tzip -m0=Copy "$($pluginDir.Parent)\$($name).zip" "$($pluginDir.FullName)\*"	
+  7z a -tzip -m0=Copy "$($pluginDir.Parent)\$($name).zip" "$($pluginDir.FullName)\*"	
 
-if ($RemoveZippedFolders) {
-  Remove-Item -Recurse -Force -Path "$($pluginDir.FullName)"
+  if ($RemoveZippedFolders) {
+    Remove-Item -Recurse -Force -Path "$($pluginDir.FullName)"
+  }
 }
+
