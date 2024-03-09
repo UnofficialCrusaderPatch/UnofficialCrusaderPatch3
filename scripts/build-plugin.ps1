@@ -2,7 +2,7 @@
 param (
   [Parameter(Mandatory=$true)][string]$Path,
 	[Parameter(Mandatory=$true)][string]$Destination,
-  [Parameter(Mandatory=$false)][switch]$RemoveZippedFolders = $true
+  [Parameter(Mandatory=$false)][switch]$RemoveZippedFolders = $true,
   [Parameter(Mandatory=$false)][switch]$Zip = $false
 )
 

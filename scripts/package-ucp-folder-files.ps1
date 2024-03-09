@@ -29,8 +29,6 @@ Rename-Item -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewNa
 ## Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
 Copy-Item "$($Path)\installer\rename-dlls.bat" "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\install.bat"
 
-# Needed for the gameseeds feature of ucp legacy
-New-Item -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package" -Name "gameseeds" -ItemType "directory" | Out-Null
 
 
 $ENDUSER_CONFIG_MAPPING = @{
