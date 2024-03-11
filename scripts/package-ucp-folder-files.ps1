@@ -1,7 +1,6 @@
-
 param (
-    [Parameter(Mandatory=$true)][string]$Path,
-    [Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$BUILD_CONFIGURATION
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,18 +15,20 @@ $SIMPLE_CONFIG_MAPPING = @{
 
 ## Copy the dll files
 $dllfiles = Get-ChildItem "$($Path)\$BUILD_CONFIGURATION\*.dll"
-Copy-Item $dllfiles -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\" -Recurse
+if ($dllfiles -ne $null) {
+    Copy-Item $dllfiles -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\" -Recurse
+}
 
 # binkw32.dll is in the Release or Debug folder.
-$binkw32dir = $SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]    
-Copy-Item "$($Path)\$binkw32dir\binkw32.dll" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\" -Recurse
+$binkw32dir = $SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
+Copy-Item "$($Path)\$binkw32dir\binkw32.dll" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\" -Recurse -ErrorAction Continue
 
 # Rename it to have the _ucp underscore
-Rename-Item -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewName "binkw32_ucp.dll" -Force
+Rename-Item -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\binkw32.dll" -NewName "binkw32_ucp.dll" -Force -ErrorAction Continue
 
 
 ## Copy the bat file that renames binkw32_ucp.dll to binkw32.dll and backs up binkw32.dll to binkw32_real.dll (if necessary)
-Copy-Item "$($Path)\installer\rename-dlls.bat" "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\install.bat"
+Copy-Item "$($Path)\installer\rename-dlls.bat" "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\install.bat" -ErrorAction Continue
 
 
 

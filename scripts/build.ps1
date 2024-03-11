@@ -154,7 +154,7 @@ try {
     ## Copy all the module information using the xml specifications of each module.
     $modules = Get-ChildItem -Directory "$Path\content\ucp\modules"
     foreach($module in $modules) {
-        & "$($PSScriptRoot)\build-module.ps1" -Path $($module) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
+        & "$($PSScriptRoot)\build-module.ps1" -Path $($module.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
     }
 
     Write-Output "Building modules complete"
@@ -167,7 +167,7 @@ try {
     ## Copy all the module information using the xml specifications of each module.
     $plugins = Get-ChildItem -Directory "$Path\content\ucp\plugins"
     foreach($plugin in $plugins) {
-        & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders
+        & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders
     }
 
     Write-Output "Building plugins complete"
@@ -187,7 +187,7 @@ try {
     }
 
     ## Copy all content/ucp files to ucp-package/ucp, except the modules and plugins folder
-    & "$($PSScriptRoot)\package-ucp-code.ps1" -Path $Path -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp" -RemoveZippedFolders
+    & "$($PSScriptRoot)\package-ucp-code.ps1" -Path "$Path" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp" -RemoveZippedFolders
 
     $ExtensionStorePath = "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\extension-store.yml"
     & "$($PSScriptRoot)\append-to-extension-store.ps1" -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\code.zip" -ExtensionStorePath $ExtensionStorePath
@@ -199,10 +199,10 @@ try {
     }
 
     ### Package ucp folder files
-    & "$($PSScriptRoot)\package-ucp-folder-files.ps1" -Path $Path -BUILD_CONFIGURATION $BUILD_CONFIGURATION
+    & "$($PSScriptRoot)\package-ucp-folder-files.ps1" -Path "$($Path)" -BUILD_CONFIGURATION $BUILD_CONFIGURATION
 
     ### Create the zip file
-    & "$($PSScriptRoot)\zip-ucp-into-package.ps1" -Path $Path -BUILD_CONFIGURATION $BUILD_CONFIGURATION -Destination $Path
+    & "$($PSScriptRoot)\zip-ucp-into-package.ps1" -Path "$($Path)" -BUILD_CONFIGURATION $BUILD_CONFIGURATION -Destination $Path
 
     Write-Output "Creating ucp package complete"
 

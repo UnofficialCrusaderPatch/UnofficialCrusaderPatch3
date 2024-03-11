@@ -15,8 +15,9 @@ Copy-Item "$($Path)\dll\vendor\fasm\LICENSE.txt" -Destination "$Destination\code
 
 $codeDirectory = Get-Item -Path "$($Destination)\code"
 
-Write-Output "Zipping code: file: $($Destination)\code.zip folder: $($codeDirectory)\*"
-7z a -tzip -m0=Copy "$($codeDirectory.Parent)\$($codeDirectory.Name).zip" "$($codeDirectory.FullName)\*"	
+# Write-Output "Zipping code: file: $($Destination)\code.zip folder: $($codeDirectory)\*"
+Write-Output "Zipping code: file: $($codeDirectory.Parent.FullName)\$($codeDirectory.Name).zip folder: $($codeDirectory)\*"
+7z a -tzip -m0=Copy "$($codeDirectory.Parent.FullName)\$($codeDirectory.Name).zip" "$($codeDirectory.FullName)\*"	
 
 if ($RemoveZippedFolders) {
   Remove-Item -Recurse -Force -Path $codeDirectory
