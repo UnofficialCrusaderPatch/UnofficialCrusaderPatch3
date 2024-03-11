@@ -70,3 +70,6 @@
 [submodule "content/ucp/plugins/ucp2-legacy-defaults-2.15.0"]
 	path = content/ucp/plugins/ucp2-legacy-defaults-2.15.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-legacy-defaults
+[submodule "content/ucp/plugins/ucp2-ai-files-2.15.1"]
+	path = content/ucp/plugins/ucp2-ai-files-2.15.1
+	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-ai-files.git
