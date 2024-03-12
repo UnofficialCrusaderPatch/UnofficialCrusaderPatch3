@@ -94,3 +94,6 @@
 [submodule "content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2"]
 	path = content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2
 	url = https://github.com/Krarilotus/extension-Vanilla-Interpretation-Castles.git
+[submodule "content/ucp/plugins/Vanilla-Interpretation-Castles-Applied-1.0.2"]
+	path = content/ucp/plugins/Vanilla-Interpretation-Castles-Applied-1.0.2
+	url = https://github.com/Krarilotus/extension-Vanilla-Interpretation-Castles-Applied.git
