@@ -73,3 +73,6 @@
 [submodule "content/ucp/plugins/ucp2-ai-files-2.15.1"]
 	path = content/ucp/plugins/ucp2-ai-files-2.15.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-ai-files.git
+[submodule "content/ucp/plugins/ucp2-aic-patch-2.15.1"]
+	path = content/ucp/plugins/ucp2-aic-patch-2.15.1
+	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-aic-patch.git
