@@ -82,3 +82,6 @@
 [submodule "content/ucp/plugins/ucp2-tatha-aiv-2.15.1"]
 	path = content/ucp/plugins/ucp2-tatha-aiv-2.15.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-tatha-aiv.git
+[submodule "content/ucp/plugins/ucp2-evrey-aiv-2.15.1"]
+	path = content/ucp/plugins/ucp2-evrey-aiv-2.15.1
+	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv.git
