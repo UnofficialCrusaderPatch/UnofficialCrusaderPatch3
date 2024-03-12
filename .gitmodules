@@ -106,3 +106,6 @@
 [submodule "content/ucp/plugins/AI-Tournament-Maps-1.0.0"]
 	path = content/ucp/plugins/AI-Tournament-Maps-1.0.0
 	url = https://github.com/Krarilotus/extension-AI-Tournament-Maps.git
+[submodule "content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1"]
+	path = content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1
+	url = https://github.com/Krarilotus/Vanilla-Retraced.git
