@@ -89,7 +89,7 @@
 	path = content/ucp/plugins/ApeX-AI-Behaviour-1.4.0
 	url = https://github.com/Xander10alpha/extension-ApeX-AI-Behaviour.git
 [submodule "content/ucp/plugins/Apex-AI-Behaviour-Applied-1.4.0"]
-	path = content/ucp/plugins/Apex-AI-Behaviour-Applied-1.4.0
+	path = content/ucp/plugins/ApeX-AI-Behaviour-Applied-1.4.0
 	url = https://github.com/Xander10alpha/extension-ApeX-AI-Behaviour-Applied.git
 [submodule "content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2"]
 	path = content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2
