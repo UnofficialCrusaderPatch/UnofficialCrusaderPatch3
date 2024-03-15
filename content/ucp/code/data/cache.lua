@@ -34,7 +34,7 @@ namespace.AOB.retrieve = function(aob)
   
   aobs[aob] = core.scanForAOB(aob)
   if aobs[aob] == nil then
-    error("[data/cache]: AOB could not be found: " .. aob)
+    error(debug.traceback("[data/cache]: AOB could not be found: " .. aob))
   end
   
   return aobs[aob]
