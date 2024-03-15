@@ -236,7 +236,7 @@ function core.AOBScan(target, start, stop)
     result = core.scanForAOB(target, start, stop)
 
     if not result then
-        error("AOB not found: " .. target)
+        error(debug.traceback("AOB not found: " .. target))
     end
     return result
 end
