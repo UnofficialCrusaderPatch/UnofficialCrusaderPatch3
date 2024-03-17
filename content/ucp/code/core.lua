@@ -69,7 +69,7 @@ end
 
 ---Read a string from memory at a specified address. Expects the string to be 0-terminated.
 ---@param address number the address of the memory to read the string from
----@param address nil|number the length of the string, if nil, the first nul byte is the end of a string
+---@param length nil|number the length of the string, if nil, the first nul byte is the end of a string
 ---@return string Returns the string at the address.
 function core.readString(address, length)
     if length == nil then
