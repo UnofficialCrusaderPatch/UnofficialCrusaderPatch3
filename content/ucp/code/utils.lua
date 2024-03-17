@@ -216,4 +216,61 @@ namespace.OrderedTable = {
 
 }
 
+function namespace.unpack(fmt, data, simplify)
+
+  if simplify == nil then
+    simplify = true
+  end
+
+  local result = {}
+  local offset = 1
+
+  while offset < data:len() do
+    local unpacked = table.pack(string.unpack(fmt, data, offset))
+
+    offset = unpacked[unpacked.n] -- last value is the new offset
+
+    if unpacked.n == 2 then
+      -- special case: new offset and 1 value
+
+      table.insert(result, unpacked[1])
+    else
+      unpacked.n = nil
+      if offset ~= table.remove(unpacked) then -- remove the last value, which is n
+        -- assert that truth
+        error(debug.traceback("offset not equal to removed value"))
+      end
+
+      table.insert(result, unpacked)
+    end
+
+  end
+
+  if #result == 1 and simplify then
+    return result[1]
+  end
+
+  return result
+end
+
+function namespace.pack(fmt, data)
+  local result = ''
+  local value 
+
+  for offset=1,#data,1 do
+    local datum = data[offset]
+
+    if type(datum) == "table" then
+      value = string.pack(fmt, table.unpack(datum))
+      result = result .. value
+    else
+      value = string.pack(fmt, datum)
+      result = result .. value
+    end
+
+  end
+
+  return result
+end
+
 return namespace
