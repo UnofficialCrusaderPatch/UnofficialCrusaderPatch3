@@ -1,6 +1,13 @@
 TRUE = 1
 FALSE = 0
 
+CallingConvention = {
+  CALLER = 0,
+  CDECL = 0,
+  THISCALL = 1,
+  STDCALL = 2,
+}
+
 ---@module core
 local core = {}
 
