@@ -1,0 +1,5 @@
+files:
+  - src: "*.lua"
+  - src: "*.yml"
+  - src: "resources\vanilla.json"
+    target: "vanilla.json"
