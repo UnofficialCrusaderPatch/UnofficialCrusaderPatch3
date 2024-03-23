@@ -216,7 +216,7 @@ end
 ---@param value number The value to set
 ---@param length number The amount of bytes to copy
 function core.setMemory(dst, value, length)
-  return ucp.internal.copyMemory(dst, value, length)
+  return ucp.internal.setMemory(dst, value, length)
 end
 
 ---Scan memory for an Array of Bytes (AOB)
