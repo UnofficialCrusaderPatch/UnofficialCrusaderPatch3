@@ -285,6 +285,7 @@ void Core::processCommandLineArguments() {
 		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value("0"))
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
+		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
