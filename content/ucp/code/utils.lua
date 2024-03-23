@@ -254,7 +254,7 @@ function namespace.unpack(fmt, data, simplify)
 end
 
 function namespace.pack(fmt, data)
-  local result = ''
+  local result = {}
   local value 
 
   for offset=1,#data,1 do
@@ -262,15 +262,15 @@ function namespace.pack(fmt, data)
 
     if type(datum) == "table" then
       value = string.pack(fmt, table.unpack(datum))
-      result = result .. value
+      table.insert(result, value)
     else
       value = string.pack(fmt, datum)
-      result = result .. value
+      table.insert(result, value)
     end
 
   end
 
-  return result
+  return table.concat(result)
 end
 
 return namespace
