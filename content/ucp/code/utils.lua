@@ -225,7 +225,7 @@ function namespace.unpack(fmt, data, simplify)
   local result = {}
   local offset = 1
 
-  while offset < data:len() do
+  while offset <= data:len() do
     local unpacked = table.pack(string.unpack(fmt, data, offset))
 
     offset = unpacked[unpacked.n] -- last value is the new offset
@@ -236,7 +236,7 @@ function namespace.unpack(fmt, data, simplify)
       table.insert(result, unpacked[1])
     else
       unpacked.n = nil
-      if offset ~= table.remove(unpacked) then -- remove the last value, which is n
+      if offset ~= table.remove(unpacked) then -- remove the last value, which is new offset
         -- assert that truth
         error(debug.traceback("offset not equal to removed value"))
       end
@@ -262,11 +262,11 @@ function namespace.pack(fmt, data)
 
     if type(datum) == "table" then
       value = string.pack(fmt, table.unpack(datum))
-      table.insert(result, value)
     else
       value = string.pack(fmt, datum)
-      table.insert(result, value)
     end
+
+    result[offset] = value
 
   end
 
