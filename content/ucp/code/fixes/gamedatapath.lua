@@ -28,7 +28,12 @@ namespace.setGameDataPathBasedOnCommandLine = function()
   local stringAddress = core.readInteger(stringPreAddress + 1)
   local configPathInUseAddress = core.readInteger(configPathInUsePreAddress + 2)
 
-  if not io.exists(ugdp) then
+  local ugdpDir = ugdp
+  if ugdpDir:sub(-1) ~= "/" and ugdpDir:sub(-1) ~= "\\" then
+    ugdpDir = ugdpDir .. "/"
+  end
+
+  if not io.exists(ugdpDir) then
     error(string.format("\nCannot continue as the game data path does not exist in the file system:\n%s", ugdp))
   end
 
