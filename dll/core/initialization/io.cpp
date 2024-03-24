@@ -1,5 +1,6 @@
 #include <core/initialization/io.h>
 
+#include "lua/LuaPathExists.h"
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaLoadLibrary.h"
 #include "lua/yaml/LuaYamlParser.h"
@@ -24,6 +25,8 @@ void addIOFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFileDescriptor);
 	lua_setfield(L, -2, "openFileDescriptor");
 
+	lua_pushcfunction(L, LuaIO::luaPathExists);
+	lua_setfield(L, -2, "exists");
 
 	// Create ucrt subtable
 	lua_newtable(L);
