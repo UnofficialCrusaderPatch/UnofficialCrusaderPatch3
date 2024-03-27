@@ -1,6 +1,13 @@
 TRUE = 1
 FALSE = 0
 
+CallingConvention = {
+  CALLER = 0,
+  CDECL = 0,
+  THISCALL = 1,
+  STDCALL = 2,
+}
+
 ---@module core
 local core = {}
 
@@ -62,9 +69,14 @@ end
 
 ---Read a string from memory at a specified address. Expects the string to be 0-terminated.
 ---@param address number the address of the memory to read the string from
+---@param length nil|number the length of the string, if nil, the first nul byte is the end of a string
 ---@return string Returns the string at the address.
-function core.readString(address)
-    return ucp.internal.readString(address)
+function core.readString(address, length)
+    if length == nil then
+      return ucp.internal.readString(address)
+    else
+      return ucp.internal.readString(address, length)
+    end
 end
 
 ---Write a integer to memory at a specified address
@@ -197,6 +209,14 @@ end
 ---@param length number The amount of bytes to copy
 function core.copyMemory(dst, src, length)
     return ucp.internal.copyMemory(dst, src, length)
+end
+
+---Set a chunk of memory with `memset` internally.
+---@param dst number The destination address
+---@param value number The value to set
+---@param length number The amount of bytes to copy
+function core.setMemory(dst, value, length)
+  return ucp.internal.setMemory(dst, value, length)
 end
 
 ---Scan memory for an Array of Bytes (AOB)

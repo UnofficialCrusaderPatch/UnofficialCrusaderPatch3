@@ -78,6 +78,10 @@ data.cache.AOB.loadFromFile()
 userConfig = config.ConfigHandler.loadUserConfig()
 config.ConfigHandler.validateUserConfig(userConfig)
 
+--- Create a read only version of the user config
+local TableProxy = extensions.proxies.TableProxy
+USER_CONFIG = TableProxy(userConfig)
+
 ---Early bail out of UCP
 if userConfig.active == false then
     log(WARNING, "[main]: UCP3 is set to inactive. To activate UCP3, change 'active' to true in ucp-config.yml")

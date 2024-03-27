@@ -218,6 +218,7 @@
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
     <ClInclude Include="lua\LuaListDirectories.h" />
     <ClInclude Include="lua\LuaListFiles.h" />
+    <ClInclude Include="lua\LuaPathExists.h" />
     <ClInclude Include="lua\Preload.h" />
     <ClInclude Include="lua\yaml\LuaYamlDumper.h" />
     <ClInclude Include="lua\yaml\LuaYamlParser.h" />
@@ -246,6 +247,7 @@
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
     <ClCompile Include="lua\LuaListDirectories.cpp" />
     <ClCompile Include="lua\LuaListFiles.cpp" />
+    <ClCompile Include="lua\LuaPathExists.cpp" />
     <ClCompile Include="lua\Preload.cpp" />
     <ClCompile Include="lua\LuaLoadLibrary.cpp" />
     <ClCompile Include="compilation\fasm.cpp" />
