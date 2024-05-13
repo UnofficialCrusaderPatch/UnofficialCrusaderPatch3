@@ -273,4 +273,180 @@ function namespace.pack(fmt, data)
   return table.concat(result)
 end
 
+
+local AOBExtractor = {}
+function AOBExtractor.parse(target)
+
+  local contains = function(t, value)
+    for k, v in pairs(t) do if v == value then return true end end
+    return false
+  end
+  
+  local validBytes = {
+    "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+    "?",
+  }    
+
+  local aob = {}
+  local currentaob = 0
+  
+  local groups = {}
+  local currentgroup = 0
+  
+  local i = 1
+  
+  while i <= #target do
+    local c = target:sub(i, i)
+    local cn = target:sub(i + 1, i + 1)
+    
+    if c == " " then
+    
+    elseif c == "@" then
+      if cn == "(" then
+        if currentgroup ~= 0 then error("Capture groups cannot be nested. Missing ')'") end
+        
+        table.insert(groups, {
+          type = "relative_address",
+          start = nil,
+          stop = nil,
+          size = 0,
+        })
+        
+        currentgroup = #groups
+        
+        i = i + 1 -- extra + 1 since we processed two chars
+      else
+        error("Expected (")
+      end
+      
+    elseif c == "I" then
+      if cn == "(" then
+        if currentgroup ~= 0 then error("Capture groups cannot be nested. Missing ')'") end
+        
+        table.insert(groups, {
+          type = "integer",
+          start = nil,
+          stop = nil,
+          size = 0,
+        })
+        
+        currentgroup = #groups
+        
+        i = i + 1 -- extra + 1 since we processed two chars
+      else
+        error("Expected (")
+      end
+    elseif c == "(" then
+      if currentgroup ~= 0 then error("Capture groups cannot be nested. Missing ')'") end
+    
+      -- Not prefixed with I or S
+      table.insert(groups, {
+        type = "bytes",
+        start = nil, -- assume a byte will follow
+        stop = nil,
+        size = 0,
+      })
+        
+      currentgroup = #groups
+    elseif c == ")" then
+      if currentgroup == 0 then error("Missing '('") end
+      
+      local group = groups[currentgroup]
+      group.stop = #aob
+      group.size = 1 + (group.stop - group.start)
+      
+      if group.type == "integer" and group.size ~= 4 then
+        error(string.format("Capture group of type I() cannot be of a size other than 4. Size was: %s. Error occurred at: %s", group.size, i))
+      end
+      
+      if group.type == "relative_address" and group.size ~= 5 then
+        error(string.format("Capture group of type @() cannot be of a size other than 5. Size was: %s. Error occurred at: %s", group.size, i))
+      end
+      
+      currentgroup = 0
+      
+    elseif contains(validBytes, c) then
+      if currentaob == 0 then
+        currentaob = #aob + 1
+        
+        if c == "?" then
+          aob[currentaob] = c
+          currentaob = 0 -- finished with this byte
+        else
+          if contains(validBytes, cn) and cn ~= "?" then
+            aob[currentaob] = c .. cn
+            currentaob = 0
+            
+            i = i + 1 -- we processed an extra char
+          else
+            error(string.format("Could not parse: %s . Syntax error at: %s, character: %s", target, i, c))
+          end
+        end
+      else
+        error(string.format("How did we get here: %s, %s", target, i))
+      end
+      
+      if currentgroup ~= 0 then
+        if groups[currentgroup].start == nil then
+          groups[currentgroup].start = #aob
+        end
+      end
+    else
+      error(string.format("Invalid character: %s", c))
+    end
+    
+    i = i + 1
+  end
+  
+  if currentgroup ~= 0 then
+    error("Missing ')'")
+  end
+  
+  if currentaob ~= 0 then
+    error("Missing final byte")
+  end
+  
+  return {
+    aob = table.concat(aob, " "),
+    groups = groups,
+  }
+end
+
+function AOBExtractor.extract(target, start, stop, unpacked)
+  if unpacked == nil or unpacked == true then
+    unpacked = true
+  else
+    unpacked = false
+  end
+
+  local parsed = AOBExtractor.parse(target)
+  
+  local address = core.AOBScan(parsed.aob, start, stop)
+  
+  local results = {}
+  
+  for k, group in pairs(parsed.groups) do
+    if group.type == "integer" then
+      table.insert(results, core.readInteger(address + (group.start - 1)))
+    elseif group.type == "bytes" then
+      table.insert(results, core.readBytes(address + (group.start - 1), group.size))
+    elseif group.type == "relative_address" then
+      table.insert(results, 5 + address + core.readInteger(address + (group.start - 1) + 1))
+    else
+      error(string.format("Invalid group type: %s", group.type))
+    end
+    
+  end
+  
+  if unpacked then
+    return table.unpack({address, table.unpack(results)})
+  else
+    return {address, results}
+  end
+  
+end
+
+namespace.AOBExtract = AOBExtractor.extract
+
 return namespace
