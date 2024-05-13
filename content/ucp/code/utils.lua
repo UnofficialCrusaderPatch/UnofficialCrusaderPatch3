@@ -447,6 +447,18 @@ function AOBExtractor.extract(target, start, stop, unpacked)
   
 end
 
+---Use capture groups in AOB search strings to immediately return values of interest
+---Searches through the memory for an array of bytes expressed as a hex string (where `?` can be used as wildcards: "FF 00 ? AA").
+---If the target is not found in memory, an error will be raised.
+---If the target is found, capture groups are evaluated and also returned.
+---
+---Supported capture groups are: @(), I(), ()
+---These return: a relative address made absolute (jmp/call, 5 bytes), an integer (4 bytes), array of bytes
+---
+---@param target string the hex string to search for
+---@param start number the starting address of the memory to start searching from
+---@param stop number the last address of the memory to stop searching at
+---@return number the address of target in memory, and the result of capture groups
 namespace.AOBExtract = AOBExtractor.extract
 
 return namespace
