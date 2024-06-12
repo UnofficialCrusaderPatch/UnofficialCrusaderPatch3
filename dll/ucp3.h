@@ -71,7 +71,10 @@ UCP3_DLL FILE* ucp_getFilePointer(const char* path, const char* mode);
 /**
 	Stronghold Crusader uses _open
 */
-UCP3_DLL int ucp_getFileDescriptor(const char* path, int mode, int perm);
+UCP3_DLL int ucp_getFileDescriptor(const char* path, const int mode, const int perm);
+
+UCP3_DLL int ucp_getFileSize(const char* filename);
+UCP3_DLL int ucp_getFileContents(const char* filename, void* buffer, const int size);
 
 
 /**

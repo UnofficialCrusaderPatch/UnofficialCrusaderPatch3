@@ -37,11 +37,38 @@ public:
 
 	virtual FILE* openFilePointer(const std::string& path, std::string& error) = 0;
 	virtual int openFileDescriptor(const std::string& path, std::string& error) = 0;
+	virtual int getFileSize(const std::string& path, std::string& error) = 0;
+	virtual int getFileContents(const std::string& path, void * buffer, int size, std::string& error) = 0;
 	virtual std::vector<std::string> listDirectories(const std::string& path) = 0;
 	virtual std::vector<std::string> listFiles(const std::string& path) = 0;
 
 };
 
+inline int getFileSizeOfRegularFile(int fd) {
+	_lseek(fd, 0L, SEEK_END);
+	long res = _tell(fd);
+	_close(fd);
+
+	return res;
+}
+
+inline int getFileContentsOfRegularFile(int fd, void* buffer, int size, std::string& error) {
+	int res = _read(fd, buffer, size);
+
+	_close(fd);
+
+	if (res == 0) {
+		error = "Could not read any bytes";
+		return -1;
+	};
+
+	if (res < size) {
+		error = "Read less than requested";
+		return -1;
+	}
+
+	return res;
+}
 
 class FolderFileExtensionHandle : public virtual ExtensionHandle {
 
@@ -74,6 +101,24 @@ public:
 		}
 
 		return fopen(fullPath.string().c_str(), "rb");
+	}
+
+	int getFileSize(const std::string& path, std::string& error) {
+		int fd = this->openFileDescriptor(path, error);
+		if (fd == -1) return -1;
+
+		return getFileSizeOfRegularFile(fd);
+	}
+
+	int getFileContents(const std::string& path, void* buffer, int size, std::string& error) {
+
+		int fd = this->openFileDescriptor(path, error);
+		if (fd == -1) {
+			error = "Could not open file descriptor";
+			return -1;
+		};
+
+		return getFileContentsOfRegularFile(fd, buffer, size, error);
 	}
 
 	std::vector<std::string> listDirectories(const std::string& path) {
@@ -265,6 +310,58 @@ public:
 		}
 
 		return result;
+	}
+
+	int getFileSize(const std::string& path, std::string& error) {
+		char* buf = NULL;
+		size_t bufsize = 0;
+
+		if (zip_entry_open(z, path.c_str()) != 0) {
+			error = "file '" + path + "' does not exist in extension zip: " + this->name;
+			return -1;
+		}
+
+		unsigned long long size = zip_entry_size(z);
+		zip_entry_close(z);
+
+		return size;
+	}
+
+	int getFileContents(const std::string& path, void* buffer, int size, std::string& error) {
+		char* buf = NULL;
+		size_t bufsize = 0;
+
+		if (zip_entry_open(z, path.c_str()) != 0) {
+			error = "file '" + path + "' does not exist in extension zip: " + this->name;
+			return -1;
+		}
+
+		int read = zip_entry_read(z, (void**)&buf, &bufsize);
+		zip_entry_close(z);
+
+		if (read < 0) {
+			error = "error during zip file reading";
+			free(buf);
+			return -1;
+		}
+
+		if (read < size) {
+			error = "Read too few bytes";
+			free(buf);
+			return -1;
+		}
+
+		if (read > size) {
+			error = "Read too many bytes";
+			free(buf);
+			return -1;
+		}
+
+		memcpy(buffer, buf, size);
+
+		free(buf);
+
+		return bufsize;
 	}
 
 	std::vector<std::string> listDirectories(const std::string& path) {
