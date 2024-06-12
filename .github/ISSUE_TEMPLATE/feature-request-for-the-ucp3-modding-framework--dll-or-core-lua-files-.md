@@ -1,5 +1,5 @@
 ---
-name: Feature request for the modding framework (UCP3 dll)
+name: Feature request for the UCP3 modding framework (dll or core lua files)
 about: Suggest an idea for the modding framework that improves the development experience
   for content creators
 title: 'Feature request: '

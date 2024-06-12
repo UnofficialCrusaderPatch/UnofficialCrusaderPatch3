@@ -1,5 +1,5 @@
 ---
-name: Bug report for the UCP3 modding framework
+name: Bug report for the UCP3 modding framework (dll or core lua files)
 about: Create a report to help us improve the modding framework itself
 title: ''
 labels: ''
