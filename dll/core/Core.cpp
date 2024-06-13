@@ -336,6 +336,11 @@ void Core::initialize() {
 	this->initializeConsole();
 
 	this->moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", this->secureMode);
+	
+	std::string error;
+	if (!TempfileManager::getInstance().initialize("ucp/.cache", error)) {
+		MessageBoxA(NULL, error.c_str(), "FATAL", MB_OK);
+	}
 		
 	// Start of lua related initialization
 	RPS_initializeLua();

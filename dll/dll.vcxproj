@@ -211,10 +211,13 @@
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="io\files.h" />
+    <ClInclude Include="io\modules\FolderFileExtensionHandle.h" />
     <ClInclude Include="io\modules\FolderFileModuleHandle.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
     <ClInclude Include="io\modules\ModuleManager.h" />
     <ClInclude Include="io\modules\module_utils.h" />
+    <ClInclude Include="io\modules\TempFileExtensionHandle.h" />
+    <ClInclude Include="io\modules\TempFileModuleHandle.h" />
     <ClInclude Include="io\modules\ZipFileModuleHandle.h" />
     <ClInclude Include="io\strings.h" />
     <ClInclude Include="io\tempfiles.h" />

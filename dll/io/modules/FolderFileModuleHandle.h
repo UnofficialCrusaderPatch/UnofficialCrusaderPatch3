@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/FolderFileExtensionHandle.h"
 
 class FolderFileModuleHandle : public ModuleHandle, public FolderFileExtensionHandle {
 

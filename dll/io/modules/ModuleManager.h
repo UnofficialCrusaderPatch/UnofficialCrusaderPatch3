@@ -2,6 +2,10 @@
 
 #include "io/modules/ZipFileModuleHandle.h"
 #include "io/modules/FolderFileModuleHandle.h"
+#include "io/modules/TempFileModuleHandle.h"
+
+#define ZippedExtensionHandler TempFileExtensionHandle
+#define ZippedModuleHandler TempFileModuleHandle
 
 class ModuleHandleManager {
 
@@ -140,7 +144,7 @@ public:
 					Core::getInstance().log(0, "verified zip file: " + extension);
 				}
 
-				ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
+				ZippedModuleHandler* zfmh = new ZippedModuleHandler(zipPath, extension);
 				extensionHandles[extension] = zfmh;
 
 				return zfmh;
@@ -159,7 +163,7 @@ public:
 		}
 
 		if (existsAsZip) {
-			ZipFileExtensionHandle* zfeh = new ZipFileExtensionHandle(zipPath, extension);
+			ZippedExtensionHandler* zfeh = new ZippedExtensionHandler(zipPath, extension);
 			extensionHandles[extension] = zfeh;
 
 			return zfeh;
@@ -207,7 +211,7 @@ public:
 				Core::getInstance().log(0, "verified zip file: " + extension);
 			}
 
-			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
+			ZippedModuleHandler* zfmh = new ZippedModuleHandler(zipPath, extension);
 			moduleHandles[extension] = zfmh;
 
 			return zfmh;
@@ -221,7 +225,7 @@ public:
 		}
 
 		if (existsAsZip) {
-			ZipFileModuleHandle* zfmh = new ZipFileModuleHandle(zipPath, extension);
+			ZippedModuleHandler* zfmh = new ZippedModuleHandler(zipPath, extension);
 			moduleHandles[extension] = zfmh;
 			extensionHandles[extension] = zfmh;
 			return zfmh;
