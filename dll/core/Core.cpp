@@ -24,7 +24,8 @@
 #include "security/Hash.h"
 #include "security/Store.h"
 #include "lua/Preload.h"
-#include "io/modules/ModuleHandle.h"
+
+#include "io/modules/ModuleManager.h"
 
 
 #include "core/initialization/io.h"

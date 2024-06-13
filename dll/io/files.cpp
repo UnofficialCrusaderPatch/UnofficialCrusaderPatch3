@@ -2,7 +2,7 @@
 #include "files.h"
 
 #include "core/Core.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 
 
 bool getExtensionHandleForFile(const std::string& filename, int mode, int perm, bool overridePathSanitization, ExtensionHandle *eh, bool &isRegular, std::string& sanitizedPath, std::string& insidePath, std::string& errorMsg) {

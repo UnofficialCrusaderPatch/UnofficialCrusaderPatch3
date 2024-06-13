@@ -211,10 +211,15 @@
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="io\files.h" />
+    <ClInclude Include="io\modules\FolderFileModuleHandle.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
+    <ClInclude Include="io\modules\ModuleManager.h" />
     <ClInclude Include="io\modules\module_utils.h" />
+    <ClInclude Include="io\modules\ZipFileModuleHandle.h" />
     <ClInclude Include="io\strings.h" />
+    <ClInclude Include="io\tempfiles.h" />
     <ClInclude Include="io\utils.h" />
+    <ClInclude Include="io\modules\ZipFileExtensionHandle.h" />
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
     <ClInclude Include="lua\LuaListDirectories.h" />
     <ClInclude Include="lua\LuaListFiles.h" />
@@ -243,6 +248,7 @@
     <ClCompile Include="io\files.cpp" />
     <ClCompile Include="io\modules\module_utils.cpp" />
     <ClCompile Include="io\strings.cpp" />
+    <ClCompile Include="io\tempfiles.cpp" />
     <ClCompile Include="io\utils.cpp" />
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
     <ClCompile Include="lua\LuaListDirectories.cpp" />
