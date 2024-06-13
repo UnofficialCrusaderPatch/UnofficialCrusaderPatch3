@@ -28,8 +28,8 @@ inline FILE* ucp_getFilePointerForFileInExtension(const std::string& extensionNa
 	return result;
 }
 
-inline int ucp_getFileDescriptorForFileInExtension(const std::string& extensionName, const std::string& path, const std::string& mode, std::string& errorMsg) {
-	int result = ucp_getFileDescriptorForFileInExtension(extensionName.c_str(), path.c_str(), mode.c_str());
+inline int ucp_getFileDescriptorForFileInExtension(const std::string& extensionName, const std::string& path, const int mode, std::string& errorMsg) {
+	int result = ucp_getFileDescriptorForFileInExtension(extensionName.c_str(), path.c_str(), mode);
 	errorMsg = ucp_lastErrorMessage();
 
 	return result;
@@ -50,6 +50,19 @@ inline int ucp_getFileSize(const std::string& filename, std::string& errorMsg) {
 }
 inline int ucp_getFileContents(const std::string& filename, void* buffer, const int size, std::string& errorMsg) {
 	int result = ucp_getFileContents(filename.c_str(), buffer, size);
+	errorMsg = ucp_lastErrorMessage();
+
+	return result;
+}
+
+inline int ucp_getFileSizeForFileInExtension(const std::string& extensionName, const std::string& path, std::string& errorMsg) {
+	int result = ucp_getFileSizeForFileInExtension(extensionName.c_str(), path.c_str());
+	errorMsg = ucp_lastErrorMessage();
+
+	return result;
+}
+inline int ucp_getFileContentsForFileInExtension(const std::string& extensionName, const std::string& path, void* buffer, const int size, std::string& errorMsg) {
+	int result = ucp_getFileContentsForFileInExtension(extensionName.c_str(), path.c_str(), buffer, size);
 	errorMsg = ucp_lastErrorMessage();
 
 	return result;

@@ -94,13 +94,12 @@ FILE* ucp_getFilePointerForFileInExtension(const char* extensionName, const char
 	
 }
 
-int ucp_getFileDescriptorForFileInExtension(const char* extensionName, const char* path, const char* mode) {
+int ucp_getFileDescriptorForFileInExtension(const char* extensionName, const char* path, int mode) {
 
 	std::string pathString = path;
-	std::string modeString = mode;
 
-	if (modeString != "r" && modeString != "rb") {
-		errorMsg = "invalid file access mode ('" + modeString + "') for file path: " + pathString;
+	if (mode != (O_RDONLY | O_BINARY)) {
+		errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + pathString;
 		return -1;
 	}
 
@@ -119,6 +118,39 @@ int ucp_getFileDescriptorForFileInExtension(const char* extensionName, const cha
 		return -1;
 	}
 
+}
+
+UCP3_DLL int ucp_getFileSizeForFileInExtension(const char* extensionName, const char* path) {
+	std::string extensionNameString = extensionName;
+	ExtensionHandle* eh = ModuleHandleManager::getInstance().loadedExtensionHandle(extensionNameString);
+	if (eh == NULL) {
+		errorMsg = "no loaded extension handle found for extension name: '" + extensionNameString + "'";
+		return -1;
+	}
+
+	try {
+		return eh->getFileSize(path, errorMsg);
+	}
+	catch (ModuleHandleException e) {
+		errorMsg = e.what();
+		return -1;
+	}
+}
+UCP3_DLL int ucp_getFileContentsForFileInExtension(const char* extensionName, const char* path, void* buffer, const int size) {
+	std::string extensionNameString = extensionName;
+	ExtensionHandle* eh = ModuleHandleManager::getInstance().loadedExtensionHandle(extensionNameString);
+	if (eh == NULL) {
+		errorMsg = "no loaded extension handle found for extension name: '" + extensionNameString + "'";
+		return -1;
+	}
+
+	try {
+		return eh->getFileContents(path, buffer, size, errorMsg);
+	}
+	catch (ModuleHandleException e) {
+		errorMsg = e.what();
+		return -1;
+	}
 }
 
 /**
