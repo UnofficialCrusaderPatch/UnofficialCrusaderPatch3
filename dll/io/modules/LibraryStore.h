@@ -81,6 +81,13 @@ public:
 		return true;
 	}
 
+	bool exists(const std::string& path) {
+		std::string name;
+		this->name(path, name);
+
+		return this->hmoduleMapping.count(name) > 0;
+	}
+
 	void* putLibrary(const std::string& path) {
 		std::string name;
 		this->name(path, name);
