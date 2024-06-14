@@ -13,7 +13,7 @@ typedef struct LibraryResolverHelper {
 } LibraryResolverHelper;
 
 inline FARPROC customMemoryGetProcAddress(HCUSTOMMODULE module, LPCSTR name, void* userdata);
-inline HCUSTOMMODULE customLoadLibraryDependencyFunction(LPCSTR path, void* userdata);
+inline HCUSTOMMODULE customLoadLibraryFromZipDependencyFunction(LPCSTR path, void* userdata);
 
 class LibraryStore {
 private:
@@ -122,8 +122,7 @@ public:
 		size_t bufsize = 0;
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
-			throw ModuleHandleException("library does not exist: " + path);
-			// return NULL;
+			return NULL;
 		}
 
 		zip_entry_read(z, (void**)&buf, &bufsize);
@@ -139,7 +138,7 @@ public:
 			(size_t)bufsize,
 			MemoryDefaultAlloc,
 			MemoryDefaultFree,
-			customLoadLibraryDependencyFunction,
+			customLoadLibraryFromZipDependencyFunction,
 			customMemoryGetProcAddress,
 			MemoryDefaultFreeLibrary,
 			&lrh
@@ -189,7 +188,7 @@ inline FARPROC customMemoryGetProcAddress(HCUSTOMMODULE module, LPCSTR name, voi
 	return MemoryDefaultGetProcAddress(module, name, userdata);
 }
 
-inline HCUSTOMMODULE customLoadLibraryDependencyFunction(LPCSTR path, void* userdata) {
+inline HCUSTOMMODULE customLoadLibraryFromZipDependencyFunction(LPCSTR path, void* userdata) {
 	if (path == NULL) return NULL;
 
 	Core::getInstance().log(1, "looking for library dependency: " + std::string(path));
@@ -199,6 +198,17 @@ inline HCUSTOMMODULE customLoadLibraryDependencyFunction(LPCSTR path, void* user
 	if (LibraryStore::getInstance().fetch(path, isCustom, &handle)) {
 		Core::getInstance().log(1, "found in store: " + std::string(path));
 		return handle;
+	}
+
+	LibraryResolverHelper* lrh = (LibraryResolverHelper*)userdata;
+	lrh->depth += 1;
+
+	if (lrh->depth <= 1) {
+		handle = LibraryStore::getInstance().putLibraryFromZip(path, (zip_t*)lrh->handler);
+		if (handle != NULL) return handle;
+	}
+	else {
+		Core::getInstance().log(1, "max depth for zip loading reached for: " + std::string(path));
 	}
 
 	Core::getInstance().log(1, "not found in store (not loaded yet?): " + std::string(path));
