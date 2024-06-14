@@ -70,39 +70,11 @@ inline int getFileContentsOfRegularFile(int fd, void* buffer, int size, std::str
 	return res;
 }
 
-inline void* loadLibraryIntoMemory(zip_t* z, const std::string& path) {
-
-	unsigned char* buf = NULL;
-	size_t bufsize = 0;
-
-	if (zip_entry_open(z, path.c_str()) != 0) {
-		throw ModuleHandleException("library does not exist: " + path);
-		// return NULL;
-	}
-
-	zip_entry_read(z, (void**)&buf, &bufsize);
-	zip_entry_close(z);
-
-	HMEMORYMODULE handle = MemoryLoadLibrary((void*)buf, (size_t)bufsize);
-	free(buf);
-
-	if (handle == NULL)
-	{
-		MessageBoxA(0, ("Cannot load dll from memory: " + path).c_str(), "ERROR", MB_OK);
-		return NULL;
-	}
-
-	return handle;
-}
-
 inline FARPROC loadFunctionFromMemoryLibrary(void* handle, const std::string& name) {
 	return MemoryGetProcAddress(handle, name.c_str());
 }
 
 class ModuleHandle : public virtual ExtensionHandle {
-
-protected:
-	std::map<std::string, void*> loadedLibraries;
 
 public:
 	ModuleHandle(const std::string& name) : ExtensionHandle(name) {};
