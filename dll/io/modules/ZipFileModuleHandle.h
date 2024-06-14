@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io/modules/ZipFileExtensionHandle.h"
+#include "io/modules/LibraryStore.h"
 
 class ZipFileModuleHandle : public ZipFileExtensionHandle, public ModuleHandle {
 
@@ -11,15 +12,16 @@ public:
 	}
 
 	void* loadLibrary(const std::string& path) {
-		if (loadedLibraries.count(path) == 1) {
-			return loadedLibraries[path];
+		bool isCustom;
+		void* obj;
+		if (LibraryStore::getInstance().fetch(path, isCustom, &obj)) {
+			return obj;
 		}
 
-		loadedLibraries[path] = loadLibraryIntoMemory(z, path);
-		return loadedLibraries[path];
+		return LibraryStore::getInstance().putLibraryFromZip(path, z);
 	}
 
 	FARPROC loadFunctionFromLibrary(void* handle, const std::string& name) {
-		return loadFunctionFromMemoryLibrary(handle, name.c_str());
+		return LibraryStore::getInstance().loadFunction(handle, name.c_str());
 	}
 };

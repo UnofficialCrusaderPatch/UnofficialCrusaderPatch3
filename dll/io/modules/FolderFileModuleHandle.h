@@ -2,6 +2,7 @@
 
 #include "io/modules/FolderFileExtensionHandle.h"
 
+
 class FolderFileModuleHandle : public ModuleHandle, public FolderFileExtensionHandle {
 
 public:
@@ -11,21 +12,38 @@ public:
 	}
 
 	void* loadLibrary(const std::string& path) {
-		if (loadedLibraries.count(path) == 1) {
-			return loadedLibraries[path];
-		}
-
-		std::filesystem::path libPath = (this->modulePath / path);
-		if (std::filesystem::is_regular_file(libPath)) {
-			HMODULE handle = LoadLibraryA(libPath.string().c_str());
-			loadedLibraries[path] = handle;
+		bool isCustom;
+		void* handle;
+		if (LibraryStore::getInstance().fetch(path, isCustom, &handle)) {
 			return handle;
 		}
-		throw ModuleHandleException("library does not exist: " + libPath.string());
+
+		std::filesystem::path fullPath = this->modulePath / path;
+
+		std::string error;
+		int size = this->getFileSize(path, error);
+		if (size == -1) {
+			handle = MemoryDefaultLoadLibrary(path.c_str(), NULL);
+			if (handle == NULL) {
+				throw ModuleHandleException("library does not exist: " + path);
+			}
+			LibraryStore::getInstance().put(path, false, handle);
+			return handle;
+}
+
+		handle = LibraryStore::getInstance().putLibrary(fullPath.string());
+		if (handle == NULL) {
+			throw ModuleHandleException("library does not exist: " + path);
+		}
+
+		return handle;
 	}
 
 	FARPROC loadFunctionFromLibrary(void* handle, const std::string& name) {
-		return GetProcAddress((HMODULE)handle, name.c_str());
+		return LibraryStore::getInstance().loadFunction(handle, name.c_str());
 	}
 
+
+
 };
+
