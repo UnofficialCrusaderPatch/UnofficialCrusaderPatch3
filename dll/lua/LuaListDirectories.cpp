@@ -1,5 +1,5 @@
 #include "LuaListDirectories.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 
 namespace LuaIO {
 

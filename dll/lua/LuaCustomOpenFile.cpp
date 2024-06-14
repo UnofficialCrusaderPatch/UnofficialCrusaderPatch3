@@ -1,6 +1,6 @@
 
 #include "LuaCustomOpenFile.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 #include "io/files.h"
 
 namespace LuaIO {
