@@ -1,11 +1,17 @@
-#pragma once
 
+#ifdef _cplusplus
 #ifdef UCPDLL_EXPORTS
 #define UCP3_DLL  extern "C"   __declspec(dllexport)
 #else
 #define UCP3_DLL  extern "C"   __declspec(dllimport)
 #endif
-
+#else
+#ifdef UCPDLL_EXPORTS
+#define UCP3_DLL  extern  __declspec(dllexport)
+#else
+#define UCP3_DLL  extern  __declspec(dllimport)
+#endif
+#endif
 
 #include <stdio.h>
 
@@ -17,7 +23,7 @@
 
 	NOTE: this enum was copy-pasted from loguru.hpp
 */
-enum ucp_NamedVerbosity : int
+enum ucp_NamedVerbosity
 {
 	// Used to mark an invalid verbosity. Do not log to this level.
 	Verbosity_INVALID = -10, // Never do LOG_F(INVALID)
@@ -56,7 +62,7 @@ enum ucp_NamedVerbosity : int
 /**
 	Call this function to log a message to the ucp console, and to log files
 */
-UCP3_DLL void ucp_log(ucp_NamedVerbosity logLevel, const char * logMessage);
+UCP3_DLL void ucp_log(enum ucp_NamedVerbosity logLevel, const char * logMessage);
 
 
 UCP3_DLL int ucp_logLevel();
