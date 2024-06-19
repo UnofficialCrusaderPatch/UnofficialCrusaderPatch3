@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <filesystem>
+#include <ucp3.hpp>
 
 
 typedef struct LibraryResolverHelper {
