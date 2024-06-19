@@ -1,6 +1,6 @@
 #include "ucp3.h"
 #include "core/Core.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 #include "io/files.h"
 
 std::string errorMsg;

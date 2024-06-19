@@ -23,7 +23,7 @@
 #include "io/utils.h"
 
 #include "LuaLoadLibrary.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 
 
 namespace LuaIO {
@@ -109,8 +109,10 @@ namespace LuaIO {
 			return 1;
 		}
 		catch (ModuleHandleException e) {
+			const DWORD err = GetLastError();
+
 			lua_pushnil(L);
-			lua_pushstring(L, ("dll does not exist: " + sanitizedPath).c_str()); //error message
+			lua_pushstring(L, ("Error loading DLL (error: " + std::to_string(err)  + ")" + ": " + sanitizedPath).c_str()); //error message
 			return 2;
 			//return luaL_error(L, e.what());
 		}
