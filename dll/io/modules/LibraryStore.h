@@ -21,6 +21,8 @@ private:
 	std::map<void*, std::string> reverseHmoduleMapping;
 	std::map<std::string, bool> isCustomMapping;
 
+	std::string searchPath;
+
 	LibraryStore() {};
 
 	void name(const std::string& path, std::string& name) {
@@ -39,8 +41,6 @@ public:
 	void operator=(LibraryStore const&) = delete;
 
 	void put(const std::string& path, const bool isCustom, void* obj) {
-		Core::getInstance().log(1, "putting by path: " + path);
-
 		std::string name;
 		this->name(path, name);
 		hmoduleMapping[name] = obj;
@@ -49,7 +49,6 @@ public:
 	}
 
 	bool fetch(const std::string& path, bool& isCustom, void** obj) {
-		Core::getInstance().log(1, "fetching by path: " + path);
 		std::string name;
 		*obj = NULL;
 		this->name(path, name);
@@ -69,8 +68,6 @@ public:
 	}
 
 	bool fetchByHandle(void* obj, bool& isCustom, std::string& name) {
-		Core::getInstance().log(1, "fetching by handle: ");
-
 		if (this->reverseHmoduleMapping.count(obj) == 0) {
 			return false;
 		}
@@ -95,9 +92,14 @@ public:
 		Core::getInstance().log(1, "loading library from path: " + path);
 
 		if (std::filesystem::exists(path)) {
-			HCUSTOMMODULE handle = MemoryDefaultLoadLibrary(path.c_str(), NULL);
+			std::filesystem::path absolutePath = std::filesystem::absolute(path);
+
+			std::filesystem::path containingFolder = absolutePath.parent_path();
+			SetDllDirectoryA(containingFolder.string().c_str());
+			HCUSTOMMODULE handle = MemoryDefaultLoadLibrary(absolutePath.string().c_str(), NULL);
+			SetDllDirectoryA(NULL);
 			if (handle == NULL) {
-				Core::getInstance().log(1, "loading library from path failed: " + path);
+				Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "loading library from path failed: " + absolutePath.string());
 				return NULL;
 			}
 			this->put(name, false, handle);
@@ -107,7 +109,7 @@ public:
 		else {
 			void* handle = MemoryDefaultLoadLibrary(name.c_str(), NULL);
 			if (handle == NULL) {
-				Core::getInstance().log(1, "loading library from name failed: " + name);
+				Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "loading library from name failed: " + name);
 				return NULL;
 			}
 
@@ -129,6 +131,7 @@ public:
 		size_t bufsize = 0;
 
 		if (zip_entry_open(z, path.c_str()) != 0) {
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "loading library from zip failed as it doesn't exist: " + path);
 			return NULL;
 		}
 
@@ -154,7 +157,8 @@ public:
 
 		if (handle == NULL)
 		{
-			MessageBoxA(0, ("Cannot load dll from memory: " + path).c_str(), "ERROR", MB_OK);
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "Could not load dll from memory: " + path);
+			MessageBoxA(0, ("Could not load dll from memory: " + path).c_str(), "ERROR", MB_OK);
 			return NULL;
 		}
 
@@ -165,6 +169,7 @@ public:
 
 	FARPROC loadFunction(void* handle, LPCSTR func) {
 		if (reverseHmoduleMapping.count(handle) == 0) {
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_ERROR, "Could not load function from dll as dll is not loaded. Function: " + std::string(func));
 			return NULL;
 		}
 		bool isCustom = isCustomMapping[reverseHmoduleMapping[handle]];
@@ -175,12 +180,11 @@ public:
 			return MemoryGetProcAddress(handle, func);
 		}
 	}
+
 };
 
 
 inline FARPROC customMemoryGetProcAddress(HCUSTOMMODULE module, LPCSTR name, void* userdata) {
-	Core::getInstance().log(1, "get proc address: " + std::string(name));
-
 	std::string moduleName;
 	bool isCustom;
 	void* handle;
@@ -198,12 +202,11 @@ inline FARPROC customMemoryGetProcAddress(HCUSTOMMODULE module, LPCSTR name, voi
 inline HCUSTOMMODULE customLoadLibraryFromZipDependencyFunction(LPCSTR path, void* userdata) {
 	if (path == NULL) return NULL;
 
-	Core::getInstance().log(1, "looking for library dependency: " + std::string(path));
+	Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "looking for library dependency: " + std::string(path));
 
 	bool isCustom;
 	void* handle;
 	if (LibraryStore::getInstance().fetch(path, isCustom, &handle)) {
-		Core::getInstance().log(1, "found in store: " + std::string(path));
 		return handle;
 	}
 
@@ -215,10 +218,10 @@ inline HCUSTOMMODULE customLoadLibraryFromZipDependencyFunction(LPCSTR path, voi
 		if (handle != NULL) return handle;
 	}
 	else {
-		Core::getInstance().log(1, "max depth for zip loading reached for: " + std::string(path));
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "max depth for zip loading reached for: " + std::string(path) + " resorting to default LoadLibrary");
 	}
 
-	Core::getInstance().log(1, "not found in store (not loaded yet?): " + std::string(path));
+	Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "not found in store (not loaded yet?): " + std::string(path));
 	// Fail here
 	return MemoryDefaultLoadLibrary(path, userdata);
 }
