@@ -1,5 +1,5 @@
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 #ifdef UCPDLL_EXPORTS
 #define UCP3_DLL  extern "C"   __declspec(dllexport)
 #else
