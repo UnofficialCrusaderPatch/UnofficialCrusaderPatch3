@@ -11,55 +11,6 @@ protected:
 
 	std::map<std::string, std::filesystem::path> mapping;
 
-	// BUG: seek (_lseek) is not supported breaking game files such as gm1 files because the game relies on seek for some file types.
-	// It is a strange bug because _tell and _lseek do report the right values, but _read does return the wrong data. I guess Pipes are really just that, Pipes.
-	// So, this works for files that only need read() and not seek() such as module code files (.lua files, .dll files, etc.)
-	int getFileDescriptor(const char* contents, size_t length, std::string& error) {
-		HANDLE read;
-		HANDLE write;
-
-		// A Pipe's resources are only freed after both handles are closed. But since _open_osfhandle involves a transfer of ownwership, I don't think we need flcose because lua will do that for us.
-		// https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/open-osfhandle?view=msvc-170
-		if (!CreatePipe(&read, &write, NULL, length)) {
-			throw ModuleHandleException("couldn't create anonymous pipe");
-		}
-
-		DWORD written;
-		WriteFile(write, contents, length, &written, NULL);
-
-		//We can close this already because this is the only time we write contents to it.
-		CloseHandle(write);
-
-		if (written != length) {
-			throw ModuleHandleException("couldn't write all contents to memory pipe");
-		}
-
-		int fd = _open_osfhandle((intptr_t)read, _O_RDONLY | _O_BINARY);
-
-		if (fd == -1) {
-			throw ModuleHandleException("couldn't create handle to memory pipe");
-		}
-
-		return fd;
-	}
-
-	int getFileDescriptor(const std::string& contents, std::string& error) {
-		return getFileDescriptor(contents.c_str(), contents.size(), error);
-	}
-
-	FILE* getFilePointer(const char* contents, size_t length, std::string& error) {
-		FILE* f = _fdopen(getFileDescriptor(contents, length, error), "rb");
-		if (f == 0) {
-			throw ModuleHandleException("couldn't open memory pipe for reading");
-		}
-
-		return f;
-	}
-
-	FILE* getFilePointer(const std::string& contents, std::string& error) {
-		return getFilePointer(contents.c_str(), contents.size(), error);
-	}
-
 public:
 
 	TempFileExtensionHandle(const std::string& modulePath, const std::string& extension) : ExtensionHandle(extension) {
