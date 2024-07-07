@@ -213,6 +213,7 @@
     <ClInclude Include="io\files.h" />
     <ClInclude Include="io\modules\FolderFileExtensionHandle.h" />
     <ClInclude Include="io\modules\FolderFileModuleHandle.h" />
+    <ClInclude Include="io\modules\LibraryStore.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
     <ClInclude Include="io\modules\ModuleManager.h" />
     <ClInclude Include="io\modules\module_utils.h" />
