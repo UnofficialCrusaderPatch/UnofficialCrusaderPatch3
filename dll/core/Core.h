@@ -110,9 +110,9 @@ public:
 	void log(int logLevel, std::string message);
 
 #ifdef COMPILED_MODULES
-	const bool secureMode = true;
+	bool secureMode = true;
 #else
-	const bool secureMode = false;
+	bool secureMode = false;
 #endif
 
 #if defined(_DEBUG)
