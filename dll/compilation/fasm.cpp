@@ -5,7 +5,7 @@
 
 #include "core/Core.h"
 #include "MemoryModule.h"
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 
 constexpr int FASM_BUFFER_SIZE = 1000 * 64;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "io/modules/ModuleHandle.h"
+#include "io/modules/ModuleManager.h"
 
 
 ExtensionHandle* getLoadedExtensionForName(const std::string& name);
