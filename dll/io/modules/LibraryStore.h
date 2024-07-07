@@ -90,7 +90,7 @@ public:
 		std::string name;
 		this->name(path, name);
 
-		Core::getInstance().log(1, "loading library from path: " + path);
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "loading library from path: " + path);
 
 		if (std::filesystem::exists(path)) {
 			std::filesystem::path absolutePath = std::filesystem::absolute(path);
@@ -126,7 +126,7 @@ public:
 		std::string name;
 		this->name(path, name);
 
-		Core::getInstance().log(1, "loading library from zip into memory: " + name);
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "loading library from zip into memory: " + name);
 
 		unsigned char* buf = NULL;
 		size_t bufsize = 0;
@@ -166,6 +166,24 @@ public:
 		this->put(name, true, handle);
 
 		return handle;
+	}
+
+	void* putLibraryFromZipWithFallback(const std::string& path, zip_t* z) {
+		std::string name;
+		this->name(path, name);
+
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "attempting to load library from zip into memory: " + name);
+
+		unsigned char* buf = NULL;
+		size_t bufsize = 0;
+
+		if (zip_entry_open(z, path.c_str()) != 0) {
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "loading library from will not work as it doesn't exist, falling back: " + path);
+			return this->putLibrary(path);
+		}
+
+		zip_entry_close(z);
+		return this->putLibraryFromZip(path, z);
 	}
 
 	FARPROC loadFunction(void* handle, LPCSTR func) {
@@ -215,15 +233,36 @@ inline HCUSTOMMODULE customLoadLibraryFromZipDependencyFunction(LPCSTR path, voi
 	lrh->depth += 1;
 
 	if (lrh->depth <= 1) {
-		handle = LibraryStore::getInstance().putLibraryFromZip(path, (zip_t*)lrh->handler);
-		if (handle != NULL) return handle;
+		zip_t* z = (zip_t*)lrh->handler;
+
+		if (zip_entry_open(z, path) != 0) {
+			// Entry does not exist
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "loading library from the game directory");
+			handle = LibraryStore::getInstance().putLibrary(path);
+		}
+		else {
+			// Entry does exist, close it again
+			Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "loading library from zip");
+			zip_entry_close(z);
+			handle = LibraryStore::getInstance().putLibraryFromZip(path, z);
+		}
+
+		if (handle != NULL) {
+			return handle;
+		}
 	}
 	else {
-		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "max depth for zip loading reached for: " + std::string(path) + " resorting to default LoadLibrary");
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "max depth for zip loading reached for: " + std::string(path) + " resorting to default LoadLibrary");
 	}
 
-	Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "not found in store (not loaded yet?): " + std::string(path));
+	Core::getInstance().log(ucp_NamedVerbosity::Verbosity_2, "DLL not found in store (not loaded yet?): " + std::string(path));
 	// Fail here
-	return MemoryDefaultLoadLibrary(path, userdata);
+	handle = MemoryDefaultLoadLibrary(path, userdata);
+
+	if (handle == NULL) {
+		Core::getInstance().log(ucp_NamedVerbosity::Verbosity_WARNING, "DLL not found: " + std::string(path));
+	}
+
+	return handle;
 }
 

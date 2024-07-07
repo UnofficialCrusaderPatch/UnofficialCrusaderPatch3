@@ -109,3 +109,9 @@
 [submodule "content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1"]
 	path = content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1
 	url = https://github.com/Krarilotus/Vanilla-Retraced
+[submodule "content/ucp/plugins/legends-of-the-orient-ai-3.0.0"]
+	path = content/ucp/plugins/Legends-Of-The-Orient-AI-3.0.0
+	url = https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI
+[submodule "content/ucp/plugins/legends-of-the-orient-3.0.0"]
+	path = content/ucp/plugins/Legends-Of-The-Orient-3.0.0
+	url = https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient
