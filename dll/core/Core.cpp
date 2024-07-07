@@ -288,6 +288,8 @@ void Core::processCommandLineArguments() {
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
+		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
+		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
@@ -302,6 +304,15 @@ void Core::processCommandLineArguments() {
 	this->hasConsole = !consoleNo;
 #endif
 
+	if (optionsResult["ucp-no-security"].as<bool>() && !optionsResult["ucp-security"].as<bool>()) {
+		this->secureMode = false;
+	} else if (!optionsResult["ucp-no-security"].as<bool>() && optionsResult["ucp-security"].as<bool>()) {
+		this->secureMode = true;
+	}
+	else {
+		/* Retain default setting */
+	}
+
 	this->consoleLogLevel = optionsResult["ucp-console-verbosity"].as<int>();
 	this->logLevel = optionsResult["ucp-verbosity"].as<int>();
 }
@@ -314,11 +325,15 @@ void Core::initialize() {
 		return;
 	}
 
+	this->setArgsFromCommandLine();
+	this->processEnvironmentVariables();
+	this->processCommandLineArguments();
+
 	if (!this->secureMode) {
 		int answer = MessageBoxA(
-			NULL, 
-			"Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click YES, you agree you understand fully what this means and wish to proceed. Otherwise, click NO", 
-			"WARNING: NO SECURITY", 
+			NULL,
+			"Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click YES, you agree you understand fully what this means and wish to proceed. Otherwise, click NO",
+			"WARNING: NO SECURITY",
 			MB_YESNO
 		);
 
@@ -326,10 +341,6 @@ void Core::initialize() {
 			exit(0);
 		}
 	}
-
-	this->setArgsFromCommandLine();
-	this->processEnvironmentVariables();
-	this->processCommandLineArguments();
 
 	initializeLogger(this->logLevel, this->consoleLogLevel);
 
