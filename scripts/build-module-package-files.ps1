@@ -104,7 +104,7 @@ if($hasFilesList) {
         }
         
         # create dest if not exist
-        $destinationFolder = $moduleDir + "\" + $t + "\"
+        $destinationFolder = $moduleDir.FullName + "\" + $t + "\"
         if (!(Test-Path -path $destinationFolder)) {
           New-Item $destinationFolder -Type Directory
         }
