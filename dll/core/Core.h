@@ -83,14 +83,6 @@ public:
 
 	lua_State* L = 0;
 
-	bool hasConsole = false;
-
-#if !defined(_DEBUG) && defined(COMPILED_MODULES)
-	const bool interactiveConsole = false;
-#else
-	const bool interactiveConsole = true;
-#endif
-
 	bool sanitizePath(const std::string& path, std::string& result);
 
 	std::map<std::string, std::string> aliasedPaths;
@@ -119,6 +111,14 @@ public:
 	const bool debugMode = true;
 #else
 	const bool debugMode = false;
+#endif
+
+	bool hasConsole = false;
+
+#if !defined(_DEBUG) && defined(COMPILED_MODULES)
+	bool interactiveConsole = false;
+#else
+	bool interactiveConsole = true;
 #endif
 
 };

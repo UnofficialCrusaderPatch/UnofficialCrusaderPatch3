@@ -306,8 +306,10 @@ void Core::processCommandLineArguments() {
 
 	if (optionsResult["ucp-no-security"].as<bool>() && !optionsResult["ucp-security"].as<bool>()) {
 		this->secureMode = false;
+		this->interactiveConsole = true;
 	} else if (!optionsResult["ucp-no-security"].as<bool>() && optionsResult["ucp-security"].as<bool>()) {
 		this->secureMode = true;
+		this->interactiveConsole = false;
 	}
 	else {
 		/* Retain default setting */
