@@ -44,7 +44,7 @@
 	branch = eb78730
 
 [submodule "content/ucp/modules/aicloader-0.1.1"]
-	path = content/ucp/modules/aicloader-1.0.0
+	path = content/ucp/modules/aicloader-1.1.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-aicloader
 
 [submodule "content/ucp/modules/aivloader-0.1.2"]
