@@ -9,7 +9,7 @@ class TempfileManager {
 private:
 	std::random_device rd;
 	std::mt19937 mt;
-	std::uniform_int<int> dist;
+	std::uniform_int_distribution<int> dist;
 
 	std::filesystem::path tempFolder;
 
@@ -47,7 +47,7 @@ public:
 			this->tempFolder = "ucp/.cache";
 		}
 		this->mt = std::mt19937(this->rd());
-		this->dist = std::uniform_int<int>(10000000, 99999999);
+		this->dist = std::uniform_int_distribution<int>(10000000, 99999999);
 		this->session = std::to_string(this->next());
 		this->tempFolder = tempFolder;
 		if (!std::filesystem::exists(this->tempFolder)) {

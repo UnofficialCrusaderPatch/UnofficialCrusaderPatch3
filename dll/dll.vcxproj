@@ -218,7 +218,7 @@
     <ClInclude Include="io\modules\ModuleManager.h" />
     <ClInclude Include="io\modules\module_utils.h" />
     <ClInclude Include="io\modules\TempFileExtensionHandle.h" />
-    <ClInclude Include="io\modules\TempfileManager.h" />
+    <ClInclude Include="io\TempfileManager.h" />
     <ClInclude Include="io\modules\TempFileModuleHandle.h" />
     <ClInclude Include="io\modules\ZipFileModuleHandle.h" />
     <ClInclude Include="io\strings.h" />
