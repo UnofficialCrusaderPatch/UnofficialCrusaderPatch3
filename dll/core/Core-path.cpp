@@ -147,3 +147,20 @@ bool Core::pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::
 
 	return false;
 }
+
+bool Core::pathIsInCacheDirectory(const std::string& sanitizedPath) {
+	std::regex re("^ucp/+.cache/+(.*)$");
+	std::filesystem::path path(sanitizedPath);
+
+	if (sanitizedPath.find("ucp/.cache/") == 0 || sanitizedPath == "ucp/.cache/") {
+		std::smatch m;
+		if (std::regex_search(sanitizedPath, m, re)) {
+
+			return true;
+
+		}
+		return false;
+	}
+
+	return false;
+}

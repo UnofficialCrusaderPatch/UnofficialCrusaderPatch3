@@ -90,6 +90,7 @@ public:
 
 	bool pathIsInPluginDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
 	bool pathIsInModuleDirectory(const std::string& sanitizedPath, std::string& extension, std::string& basePath, std::string& insideExtensionPath);
+	bool pathIsInCacheDirectory(const std::string& sanitizedPath);
 	bool moduleExists(const std::string moduleName, bool& asZip, bool& asFolder);
 
 	bool pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::string& insideCodePath);

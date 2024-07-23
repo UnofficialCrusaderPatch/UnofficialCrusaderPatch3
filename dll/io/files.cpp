@@ -12,11 +12,13 @@ bool getExtensionHandleForFile(
 	bool overridePathSanitization, 
 	ExtensionHandle **eh, 
 	bool &isRegular, 
+	bool &isWriteProtected,
 	std::string& sanitizedPath, 
 	std::string& insidePath, 
 	std::string& errorMsg) {
 
 	isRegular = false;
+	isWriteProtected = true;
 
 	if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
 		if (!overridePathSanitization) {
@@ -37,8 +39,9 @@ bool getExtensionHandleForFile(
 	std::string insideExtensionPath;
 	bool isModule = Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insidePath);
 	bool isPlugin = Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insidePath);
+	bool isCache = Core::getInstance().pathIsInCacheDirectory(sanitizedPath);
 
-	if (isCode || isModule || isPlugin) {
+	if (isCode || isModule || isPlugin || isCache) {
 		if (mode != (O_RDONLY | O_BINARY)) {
 			errorMsg = "invalid file access mode ('" + std::to_string(mode) + "') for file path: " + sanitizedPath;
 			return false;
@@ -59,7 +62,14 @@ bool getExtensionHandleForFile(
 		else if (isPlugin) {
 			*eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
 		}
+		else if (isCache) {
+			isWriteProtected = true;
+			isRegular = true;
+			eh = NULL;
+			return true;
+		}
 		else {
+			isWriteProtected = false;
 			isRegular = true;
 			eh = NULL;
 			return true;
@@ -77,11 +87,26 @@ int getFileDescriptor(const std::string &filename, int mode, int perm, std::stri
 	std::string regularPath;
 	std::string extensionPath;
 	bool isRegular;
+	bool isWriteProtected;
 	ExtensionHandle* eh = 0;
-	if (!getExtensionHandleForFile(filename, mode, perm, overridePathSanitization, &eh, isRegular, regularPath, extensionPath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, mode, perm, overridePathSanitization, &eh, isRegular, isWriteProtected, regularPath, extensionPath, errorMsg)) {
 		return -1;
 	}
 	if (isRegular) {
+
+		if (isWriteProtected) {
+			HANDLE h = TempfileManager::getInstance().openWriteProtectedTempFile(regularPath);
+			if (h == INVALID_HANDLE_VALUE) {
+				errorMsg = "cannot open write protected file (handle): " + regularPath;
+				return -1;
+			}
+			int fd = _open_osfhandle((intptr_t) h, O_RDONLY | O_BINARY);
+			if (fd == -1) {
+				errorMsg = "cannot open write protected file (file descriptor): " + regularPath;
+				return -1;
+			}
+			return fd;
+		}
 
 		int f = _open(regularPath.c_str(), mode, perm);
 		if (f == -1) {
@@ -153,14 +178,28 @@ FILE* getFilePointer(const std::string& filename, const std::string& mode, std::
 int getFileSize(const std::string& filename, std::string& errorMsg) {
 	ExtensionHandle* eh = 0;
 	bool isRegular = false;
+	bool isWriteProtected = true;
 	std::string sanitizedPath;
 	std::string insidePath;
 
-	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, isWriteProtected, sanitizedPath, insidePath, errorMsg)) {
 		return -1;
 	}
 
 	if (isRegular) {
+		if (isWriteProtected) {
+			HANDLE h = TempfileManager::getInstance().openWriteProtectedTempFile(sanitizedPath);
+			if (h == INVALID_HANDLE_VALUE) {
+				errorMsg = "cannot open write protected file (handle): " + sanitizedPath;
+				return -1;
+			}
+			int fd = _open_osfhandle((intptr_t)h, O_RDONLY | O_BINARY);
+			if (fd == -1) {
+				errorMsg = "cannot open write protected file (file descriptor): " + sanitizedPath;
+				return -1;
+			}
+			return getFileSizeOfRegularFile(fd);
+		}
 		int fd = _open(sanitizedPath.c_str(), O_RDONLY | O_BINARY);
 		return getFileSizeOfRegularFile(fd);
 	}
@@ -183,14 +222,28 @@ int getFileSize(const std::string& filename, std::string& errorMsg) {
 int getFileContents(const std::string& filename, void* buffer, int size, std::string& errorMsg) {
 	ExtensionHandle* eh = 0;
 	bool isRegular = false;
+	bool isWriteProtected = true;
 	std::string sanitizedPath;
 	std::string insidePath;
 
-	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, isWriteProtected, sanitizedPath, insidePath, errorMsg)) {
 		return -1;
 	}
 
 	if (isRegular) {
+		if (isWriteProtected) {
+			HANDLE h = TempfileManager::getInstance().openWriteProtectedTempFile(sanitizedPath);
+			if (h == INVALID_HANDLE_VALUE) {
+				errorMsg = "cannot open write protected file (handle): " + sanitizedPath;
+				return -1;
+			}
+			int fd = _open_osfhandle((intptr_t)h, O_RDONLY | O_BINARY);
+			if (fd == -1) {
+				errorMsg = "cannot open write protected file (file descriptor): " + sanitizedPath;
+				return -1;
+			}
+			return getFileContentsOfRegularFile(fd, buffer, size, errorMsg);
+		}
 		int fd = _open(sanitizedPath.c_str(), O_RDONLY | O_BINARY);
 		return getFileContentsOfRegularFile(fd, buffer, size, errorMsg);
 	}
