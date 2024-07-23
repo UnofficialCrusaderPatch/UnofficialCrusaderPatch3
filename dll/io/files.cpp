@@ -5,7 +5,18 @@
 #include "io/modules/ModuleManager.h"
 
 
-bool getExtensionHandleForFile(const std::string& filename, int mode, int perm, bool overridePathSanitization, ExtensionHandle *eh, bool &isRegular, std::string& sanitizedPath, std::string& insidePath, std::string& errorMsg) {
+bool getExtensionHandleForFile(
+	const std::string& filename, 
+	int mode, 
+	int perm, 
+	bool overridePathSanitization, 
+	ExtensionHandle **eh, 
+	bool &isRegular, 
+	std::string& sanitizedPath, 
+	std::string& insidePath, 
+	std::string& errorMsg) {
+
+	isRegular = false;
 
 	if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
 		if (!overridePathSanitization) {
@@ -40,13 +51,13 @@ bool getExtensionHandleForFile(const std::string& filename, int mode, int perm, 
 
 	try {
 		if (isCode) {
-			eh = ModuleHandleManager::getInstance().getLatestCodeHandle();
+			*eh = ModuleHandleManager::getInstance().getLatestCodeHandle();
 		}
 		else if (isModule) {
-			eh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
+			*eh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 		}
 		else if (isPlugin) {
-			eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+			*eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
 		}
 		else {
 			isRegular = true;
@@ -67,7 +78,7 @@ int getFileDescriptor(const std::string &filename, int mode, int perm, std::stri
 	std::string extensionPath;
 	bool isRegular;
 	ExtensionHandle* eh = 0;
-	if (!getExtensionHandleForFile(filename, mode, perm, overridePathSanitization, eh, isRegular, regularPath, extensionPath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, mode, perm, overridePathSanitization, &eh, isRegular, regularPath, extensionPath, errorMsg)) {
 		return -1;
 	}
 	if (isRegular) {
@@ -145,7 +156,7 @@ int getFileSize(const std::string& filename, std::string& errorMsg) {
 	std::string sanitizedPath;
 	std::string insidePath;
 
-	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
 		return -1;
 	}
 
@@ -175,7 +186,7 @@ int getFileContents(const std::string& filename, void* buffer, int size, std::st
 	std::string sanitizedPath;
 	std::string insidePath;
 
-	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
+	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &eh, isRegular, sanitizedPath, insidePath, errorMsg)) {
 		return -1;
 	}
 
