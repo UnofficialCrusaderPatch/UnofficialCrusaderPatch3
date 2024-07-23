@@ -6,6 +6,7 @@
 #include "lua/yaml/LuaYamlParser.h"
 #include "lua/yaml/LuaYamlDumper.h"
 #include "lua/Preload.h"
+#include "lua/LuaTempFile.h"
 
 void addIOFunctions(lua_State* L) {
 	lua_pushglobaltable(L);
@@ -27,6 +28,12 @@ void addIOFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaIO::luaPathExists);
 	lua_setfield(L, -2, "exists");
+
+	lua_pushcfunction(L, LuaIO::luaCreateWriteProtectedTempFile);
+	lua_setfield(L, -2, "createWriteProtectedTempFile");
+
+	lua_pushcfunction(L, LuaIO::luaIOCustomWriteProtectedTempFileOpen);
+	lua_setfield(L, -2, "openWriteProtectedTempFile");
 
 	// Create ucrt subtable
 	lua_newtable(L);

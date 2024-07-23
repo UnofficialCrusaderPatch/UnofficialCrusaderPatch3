@@ -60,6 +60,17 @@ public:
 		return true;
 	}
 
+	HANDLE openWriteProtectedTempFile(const std::string& path) {
+		return CreateFileA(
+			path.c_str(),
+			GENERIC_READ,
+			FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+			NULL,
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL);
+	}
+
 	bool createTempFileDescriptor(const char* contents, size_t length, std::filesystem::path& filename, std::string& error) {
 		if (!this->initialized) {
 			error = "not initialized";

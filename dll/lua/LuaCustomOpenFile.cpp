@@ -120,6 +120,44 @@ namespace LuaIO {
 		// return luaL_error(L, ("Could not get file descriptor to path '" + filename + "'. Error message: '" + errorMsg + "'").c_str());
 	}
 
+	int luaIOCustomWriteProtectedTempFileOpen(lua_State* L) {
+		const std::string filename = luaL_checkstring(L, 1);
+		const std::string mode = luaL_optstring(L, 2, "r");
+
+		if (mode != "r" && mode != "rb") {
+			return luaL_error(L, "write protected temp files cannot be opened in this mode: %s", mode.c_str());
+		}
+
+		std::string sanitizedPath;
+
+		if (!Core::getInstance().sanitizePath(filename, sanitizedPath)) {
+			return luaL_error(L, ("Invalid path: " + filename + "\n reason: " + sanitizedPath).c_str());
+		}
+
+		if (sanitizedPath.find("ucp/.cache/") != 0) {
+			return luaL_error(L, "not a cache path: %s", filename.c_str());
+		}
+
+
+		luaL_Stream* p = newfile(L);
+		const char* md = mode.c_str();  /* to traverse/check mode */
+		luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
+
+		HANDLE h = TempfileManager::getInstance().openWriteProtectedTempFile(sanitizedPath);
+
+		if (h == INVALID_HANDLE_VALUE) {
+			return luaL_error(L, "could not open: %s", sanitizedPath.c_str());
+		}
+
+		int fd = _open_osfhandle((intptr_t) h, O_RDONLY | O_BINARY);
+
+		FILE* f = _fdopen(fd, "rb");
+
+		p->f = f;
+
+		return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+	}
+
 	int luaIOCustomOpen(lua_State* L) {
 		const std::string filename = luaL_checkstring(L, 1);
 		const std::string mode = luaL_optstring(L, 2, "r");
