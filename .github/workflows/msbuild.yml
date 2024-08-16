@@ -189,6 +189,22 @@ jobs:
         files: |
           artifacts/*.zip
           latest.json
+
+    - name: Ping UCP3-extensions-repo (create branch for this release)
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh repo clone UnofficialCrusaderPatch/UCP3-extensions-repo
+        cd UCP3-extensions-repo
+        $branchLatest = git branch -a | 
+          Where-Object {$_ -match "remotes/origin/[0-9]+[.][0-9]+[.][0-9]+"} | 
+          Sort-Object {[semver]( $_.Split("remotes/origin/"))[1]} -Descending | 
+          Select-Object -First 1 | 
+          ForEach-Object {$_.Split("remotes/origin/")[1]}
+
+        git checkout -b ${{ env.UCP_VERSION }} $branchLatest
+        git push --set-upstream origin ${{ env.UCP_VERSION }}
         
     - name: Push release to auto updater
       if: ${{ inputs.pre_release == false }}
