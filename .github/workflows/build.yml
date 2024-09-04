@@ -1,4 +1,4 @@
-name: 'Build & Release UCP3 backend'
+name: 'Build UCP3 for testing'
 
 on:
   workflow_dispatch: {}
