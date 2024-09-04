@@ -79,18 +79,6 @@
 [submodule "content/ucp/plugins/ucp2-vanilla-fixed-aiv-2.15.1"]
 	path = content/ucp/plugins/ucp2-vanilla-fixed-aiv-2.15.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-vanilla-fixed-aiv.git
-[submodule "content/ucp/plugins/ucp2-tatha-aiv-2.15.1"]
-	path = content/ucp/plugins/ucp2-tatha-aiv-2.15.1
-	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-tatha-aiv.git
-[submodule "content/ucp/plugins/ucp2-evrey-aiv-2.15.1"]
-	path = content/ucp/plugins/ucp2-evrey-aiv-2.15.1
-	url = https://github.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv.git
-[submodule "content/ucp/plugins/Apex-AI-Behaviour-1.4.0"]
-	path = content/ucp/plugins/ApeX-AI-Behaviour-1.4.0
-	url = https://github.com/Xander10alpha/extension-ApeX-AI-Behaviour.git
-[submodule "content/ucp/plugins/Apex-AI-Behaviour-Applied-1.4.0"]
-	path = content/ucp/plugins/ApeX-AI-Behaviour-Applied-1.4.0
-	url = https://github.com/Xander10alpha/extension-ApeX-AI-Behaviour-Applied.git
 [submodule "content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2"]
 	path = content/ucp/plugins/Vanilla-Interpretation-Castles-1.0.2
 	url = https://github.com/Krarilotus/extension-Vanilla-Interpretation-Castles.git
@@ -103,15 +91,6 @@
 [submodule "content/ucp/plugins/Aggressive-AI-Behaviour-Applied-1.4.0"]
 	path = content/ucp/plugins/Aggressive-AI-Behaviour-Applied-1.4.0
 	url = https://github.com/Krarilotus/extension-Aggressive-AI-Behaviour-Applied.git
-[submodule "content/ucp/plugins/AI-Tournament-Maps-1.0.0"]
-	path = content/ucp/plugins/AI-Tournament-Maps-1.0.0
-	url = https://github.com/Krarilotus/extension-AI-Tournament-Maps
 [submodule "content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1"]
 	path = content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1
 	url = https://github.com/Krarilotus/Vanilla-Retraced
-[submodule "content/ucp/plugins/legends-of-the-orient-ai-3.0.0"]
-	path = content/ucp/plugins/Legends-Of-The-Orient-AI-3.0.0
-	url = https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI
-[submodule "content/ucp/plugins/legends-of-the-orient-3.0.0"]
-	path = content/ucp/plugins/Legends-Of-The-Orient-3.0.0
-	url = https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient
