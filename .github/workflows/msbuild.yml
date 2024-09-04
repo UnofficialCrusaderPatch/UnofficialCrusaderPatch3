@@ -195,8 +195,8 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh repo clone UnofficialCrusaderPatch/UCP3-extensions-repo
-        cd UCP3-extensions-repo
+        gh repo clone UnofficialCrusaderPatch/UCP3-extensions-store
+        cd UCP3-extensions-store
         $branchLatest = git branch -a | 
           Where-Object {$_ -match "remotes/origin/[0-9]+[.][0-9]+[.][0-9]+"} | 
           Sort-Object {[semver]( $_.Split("remotes/origin/"))[1]} -Descending | 
