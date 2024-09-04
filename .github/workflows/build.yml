@@ -1,0 +1,109 @@
+name: 'Build & Release UCP3 backend'
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_message:
+        description: 'Message to write in the release'
+        required: true
+        type: string
+        default: '[Changelog](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/wiki/Changelog#)'
+      pre_release:
+        description: 'Pre release?'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+  RELEASE_BODY: ''
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.3.1
+
+
+    - name: Prepare signing by exporting secret to file
+      shell: pwsh
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        UCP3_SIGNING_CERTIFICATE_CONTENTS: ${{ secrets.UCP3_SIGNING_CERTIFICATE_CONTENTS }}
+      run: |
+        Set-Content -Value "$env:UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
+
+
+    - name: Run build script dev build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+      shell: pwsh
+      run: |
+        .\scripts\build.ps1 -What all -BuildType Release -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
+
+    - name: Run build script release build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+      shell: pwsh
+      run: |
+        .\scripts\build.ps1 -What all -BuildType ReleaseSecure -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
+
+    - name: Add UCP3 version to the github environment
+      shell: pwsh
+      run: |
+        Import-Module powershell-yaml
+        
+        $f = Get-Content -Path "version.yml" -Raw
+        $vyml = ConvertFrom-Yaml $f
+            
+        $version_string = "$($vyml.major).$($vyml.minor).$($vyml.patch)";
+
+        $env:UCP_VERSION = $version_string
+        echo "UCP_VERSION=$version_string" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Generate a snapshot UCP3 artifact name
+      shell: pwsh
+      run: |
+        $name = "$env:GITHUB_SHA".SubString(0, 10)
+        
+        $type1 = "DevRelease"
+        $type2 = "Release"
+        
+        $version = $env:UCP_VERSION
+        
+        $env:UCP_NAME_RELEASE = "UCP3-$version-$name"
+        $env:UCP_NAME_DEVRELEASE = "UCP3-$version-$name-Developer"
+        $env:UCP_NAME_NUPKG = "UCP3-$version-$name-nupkg"
+        
+        echo "UCP_NAME_RELEASE=$($env:UCP_NAME_RELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "UCP_NAME_DEVRELEASE=$($env:UCP_NAME_DEVRELEASE)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo "UCP_NAME_NUPKG=$($env:UCP_NAME_NUPKG)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+ 
+    - name: Upload UCP3 dev release as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.UCP_NAME_DEVRELEASE }}
+        path: Release/ucp-package/*
+        retention-days: 30
+
+    - name: Upload UCP3 release as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.UCP_NAME_RELEASE }}
+        path: ReleaseSecure/ucp-package/*
+        retention-days: 30
+        
+    - name: Upload UCP3 nupkg for devs as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.UCP_NAME_NUPKG }}
+        path: dll/*.nupkg
+        retention-days: 30
