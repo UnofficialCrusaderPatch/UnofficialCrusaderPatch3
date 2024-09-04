@@ -1,18 +1,7 @@
 name: 'Build & Release UCP3 backend'
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_message:
-        description: 'Message to write in the release'
-        required: true
-        type: string
-        default: '[Changelog](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/wiki/Changelog#)'
-      pre_release:
-        description: 'Pre release?'
-        required: true
-        default: true
-        type: boolean
+  workflow_dispatch: {}
 
 env:
   # Path to the solution file relative to the root of the project.
