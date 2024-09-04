@@ -228,8 +228,8 @@
     <ClInclude Include="lua\LuaCustomOpenFile.h" />
     <ClInclude Include="lua\LuaDirectoriesList.h" />
     <ClInclude Include="lua\LuaFilesList.h" />
-    <ClInclude Include="lua\LuaListDirectories.h" />
-    <ClInclude Include="lua\LuaListFiles.h" />
+    <ClInclude Include="lua\deprecated\LuaListDirectories.h" />
+    <ClInclude Include="lua\deprecated\LuaListFiles.h" />
     <ClInclude Include="lua\LuaPathExists.h" />
     <ClInclude Include="lua\LuaTempFile.h" />
     <ClInclude Include="lua\Preload.h" />
@@ -261,8 +261,8 @@
     <ClCompile Include="lua\LuaCustomOpenFile.cpp" />
     <ClCompile Include="lua\LuaDirectoriesList.cpp" />
     <ClCompile Include="lua\LuaFilesList.cpp" />
-    <ClCompile Include="lua\LuaListDirectories.cpp" />
-    <ClCompile Include="lua\LuaListFiles.cpp" />
+    <ClCompile Include="lua\deprecated\LuaListDirectories.cpp" />
+    <ClCompile Include="lua\deprecated\LuaListFiles.cpp" />
     <ClCompile Include="lua\LuaPathExists.cpp" />
     <ClCompile Include="lua\LuaTempFile.cpp" />
     <ClCompile Include="lua\Preload.cpp" />
