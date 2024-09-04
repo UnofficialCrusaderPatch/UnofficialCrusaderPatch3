@@ -5,7 +5,7 @@ local data = require('data')
 function utils.parseExtensionsFolder(folder)
     
 ---Dynamic extensions discovery
-    local subFolders, err = table.pack(ucp.internal.listDirectories(folder))
+    local subFolders, err = ucp.internal.io.directories(folder)
 
 	if not subFolders then
 		log(ERROR, "[config/utils]: no subfolders detected for path: " .. folder)

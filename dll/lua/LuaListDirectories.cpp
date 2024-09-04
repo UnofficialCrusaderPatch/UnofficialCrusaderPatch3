@@ -50,8 +50,9 @@ namespace LuaIO {
 	}
 
 
-
 	int luaListDirectories(lua_State* L) {
+		Core::getInstance().log(Verbosity_WARNING, "lua function listDirectories() is deprecated in favor of directories()");
+
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 

@@ -12,7 +12,9 @@
 #include "lua/LuaUtil.h"
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaListDirectories.h"
+#include "lua/LuaDirectoriesList.h"
 #include "lua/LuaListFiles.h"
+#include "lua/LuaFilesList.h"
 #include "lua/yaml/LuaYamlParser.h"
 #include "lua/yaml/LuaYamlDumper.h"
 
@@ -42,12 +44,26 @@ void addUtilityFunctions(lua_State* L) {
 	lua_getglobal(L, "ucp"); // [ucp]
 	lua_getfield(L, -1, "internal"); // [ucp, internal]
 
+	// Deprecated
 	lua_pushcfunction(L, LuaIO::luaListDirectories); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listDirectories"); // [ucp, internal]
 
+	// Deprecated
 	lua_pushcfunction(L, LuaIO::luaListFiles); // [ucp, internal, luaListDirectories]
 	lua_setfield(L, -2, "listFiles"); // [ucp, internal]
 
+	{
+		lua_createtable(L, 0, 0);
+
+		lua_pushcfunction(L, LuaIO::luaDirectoriesList); // [ucp, internal, io, directories]
+		lua_setfield(L, -2, "directories"); // [ucp, internal]
+
+		lua_pushcfunction(L, LuaIO::luaFilesList); // [ucp, internal, io, files]
+		lua_setfield(L, -2, "files"); // [ucp, internal]
+
+		lua_setfield(L, -2, "io");
+	}
+	
 	lua_pushcfunction(L, LuaUtil::luaWideCharToMultiByte);
 	lua_setfield(L, -2, "WideCharToMultiByte");
 

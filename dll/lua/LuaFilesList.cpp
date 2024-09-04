@@ -3,39 +3,8 @@
 
 namespace LuaIO {
 
-	// Only for filesystem files: unchecked path!
-	int luaListFileSystemFiles(lua_State* L, bool includeZipFiles) {
-		std::string rawPath = luaL_checkstring(L, 1);
-		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 
-		int count = 0;
-
-		std::filesystem::path targetPath = rawPath;
-		if (rawPath.substr(0, 4) == "ucp/") {
-			targetPath = Core::getInstance().UCP_DIR / rawPath.substr(4);
-		}
-
-		const std::filesystem::path zipExtension(".zip");
-
-		try {
-			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
-				if (entry.is_regular_file() || (entry.is_regular_file() && includeZipFiles && entry.path().extension() == ".zip")) {
-					lua_pushstring(L, (entry.path().string()).c_str());
-					count += 1;
-				}
-			}
-		}
-		catch (std::filesystem::filesystem_error e) {
-			return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
-		}
-
-		return count;
-	}
-
-
-
-	int luaListFiles(lua_State* L) {
-		Core::getInstance().log(Verbosity_WARNING, "lua function listFiles() is deprecated in favor of files()");
+	int luaFilesList(lua_State* L) {
 
 		std::string rawPath = luaL_checkstring(L, 1);
 		if (rawPath.empty()) return luaL_error(L, ("Invalid path: " + rawPath).c_str());
@@ -65,11 +34,17 @@ namespace LuaIO {
 			}
 
 			std::vector<std::string> entries = mh->listFiles(sanitizedPath);
+
+			lua_createtable(L, 0, 0);
+			int count = 0;
+
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
+				lua_seti(L, -2, count + 1);
+				count += 1;
 			}
 
-			return entries.size();
+			return 1;
 		}
 
 		ExtensionHandle* eh;
@@ -83,24 +58,44 @@ namespace LuaIO {
 			}
 
 			std::vector<std::string> entries = eh->listFiles(sanitizedPath);
+
+			lua_createtable(L, 0, 0);
+			int count = 0;
+
 			for (std::string entry : entries) {
 				lua_pushstring(L, entry.c_str());
+				lua_seti(L, -2, count + 1);
+				count += 1;
 			}
 
-			return entries.size();
+			return 1;
 		}
 
-		lua_pushstring(L, sanitizedPath.c_str());
-		lua_replace(L, 1); // Replace the path 
+		const bool includeZipFiles = !(rawPath == "ucp/modules" || rawPath == "ucp/modules/");
 
-		if (rawPath == "ucp/modules" || rawPath == "ucp/modules/") {
-
-
-
-			return luaListFileSystemFiles(L, false);
+		std::filesystem::path targetPath = sanitizedPath;
+		if (sanitizedPath.substr(0, 4) == "ucp/") {
+			targetPath = Core::getInstance().UCP_DIR / sanitizedPath.substr(4);
 		}
 
-		return luaListFileSystemFiles(L, true);
+		const std::filesystem::path zipExtension(".zip");
+
+		lua_createtable(L, 0, 0);
+		int count = 0;
+
+		try {
+			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
+				if (entry.is_regular_file() || (entry.is_regular_file() && includeZipFiles && entry.path().extension() == ".zip")) {
+					lua_pushstring(L, (entry.path().string()).c_str());
+					lua_seti(L, -2, count + 1);
+					count += 1;
+				}
+			}
+		}
+		catch (std::filesystem::filesystem_error e) {
+			return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
+		}
+
+		return 1;
 	}
-
 }
