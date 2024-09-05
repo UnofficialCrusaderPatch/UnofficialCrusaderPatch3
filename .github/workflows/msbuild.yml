@@ -194,6 +194,7 @@ jobs:
       shell: pwsh
       env:
         GH_TOKEN: ${{ github.token }}
+      if: false
       run: |
         gh repo clone UnofficialCrusaderPatch/UCP3-extensions-store
         cd UCP3-extensions-store
