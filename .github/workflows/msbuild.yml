@@ -203,7 +203,7 @@ jobs:
           Select-Object -First 1 | 
           ForEach-Object {$_.Split("remotes/origin/")[1]}
 
-        git checkout -b ${{ env.UCP_VERSION }} $branchLatest
+        git checkout -b ${{ env.UCP_VERSION }} origin/$branchLatest
         git push --set-upstream origin ${{ env.UCP_VERSION }}
         
     - name: Push release to auto updater
