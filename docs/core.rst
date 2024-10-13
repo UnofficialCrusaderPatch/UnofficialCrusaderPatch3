@@ -1,0 +1,5 @@
+Core
+----
+
+
+.. lua:automodule:: core
