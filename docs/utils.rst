@@ -1,5 +1,5 @@
-Core
+Utils
 ----
 
 
-.. lua:automodule:: core
+.. lua:automodule:: utils
