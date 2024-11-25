@@ -54,7 +54,7 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 	std::filesystem::path r = std::filesystem::relative(b, a);
 	if (r.string().find("..") == 0) {
 
-		if (this->debugMode) {
+		if (this->debugMode || !this->secureMode) {
 			// Technically not allowed, but we will let it slip because we are debugging
 			this->log(1, "the path specified is not a proper relative path. Is it escaping the game directory? path: \n" + r.string());
 		}
