@@ -110,8 +110,10 @@ public:
 
 		try {
 			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(targetPath)) {
-				result.push_back((entry.path().string()));
-				count += 1;
+				if (entry.is_regular_file()) {
+					result.push_back((entry.path().string()));
+					count += 1;
+				}
 			}
 		}
 		catch (std::filesystem::filesystem_error e) {
