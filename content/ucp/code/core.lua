@@ -406,7 +406,6 @@ end
 
 ---Creates a lambda function to compute the relative distance to a call in memory (doing the necessary offset of -4 to adjust).
 ---@param dst number the address to compute the relative distance to
----@param offset number an offset that is added to the result
 ---@return function a function that can be used in a code table
 function core.relToCall(dst)
     return core.relTo(dst, -4)
@@ -422,7 +421,6 @@ core.jzTo = jeTo
 
 ---Creates a lambda function to represent in machine code a call to a function.
 ---@param dst number the address to compute the relative distance to
----@param offset number an offset that is added to the result
 ---@return function a function that can be used in a code table
 function core.callTo(dst)
   return core.Lambda:new(function(address, index, labels)
@@ -432,7 +430,6 @@ end
 
 ---Creates a lambda function to represent in machine code a jmp to a function.
 ---@param dst number the address to compute the relative distance to
----@param offset number an offset that is added to the result
 ---@return function a function that can be used in a code table
 function core.jmpTo(dst)
   return core.Lambda:new(function(address, index, labels)
@@ -582,7 +579,7 @@ end
 ---@param patchSize number number of byte code bytes to overwrite
 ---@param code table code to be executed
 ---@param returnTo number|nil optional value indicating the address to return to after `code` has been executed. If omitted, the return location will be address + patchSize
----@param original "before"|"after"|nil optional value indicating the overwritten bytes at `address` should be put before, or at the end of `code` before jumping back. Values: "before","after"
+---@param original string|nil optional value indicating the overwritten bytes at `address` should be put before, or at the end of `code` before jumping back. Values: "before","after"
 ---@return number address of the new memory location where `code` lives.
 function core.insertCode(address, patchSize, code, returnTo, original)
     if original then

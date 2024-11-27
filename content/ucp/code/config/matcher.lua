@@ -3,7 +3,7 @@ local version = require('version')
 local matcher = {}
 
 ---@param extensions table<string, BaseLoader> extensions
----@param requirement string requirement string
+---@param requirementString string requirement string
 function matcher.findMatchForExtensionRequirement(extensions, requirementString)
   local req = version.VersionRequirement:fromString(requirementString)
   local m
@@ -55,7 +55,7 @@ function matcher.findMatchForExtensionRequirement(extensions, requirementString)
 end
 
 
----@param extensions table<string, BaseLoader> extensions
+---@param preExtensions table<string, BaseLoader> extensions
 ---@param requirement string requirement string
 function matcher.findPreMatchForExtensionRequirement(preExtensions, requirement)
 
