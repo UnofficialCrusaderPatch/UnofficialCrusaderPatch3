@@ -28,23 +28,27 @@ namespace LuaIO {
 		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
+
+				std::vector<std::string> entries = mh->listFiles(sanitizedPath);
+
+				lua_createtable(L, 0, 0);
+				int count = 0;
+
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+					lua_seti(L, -2, count + 1);
+					count += 1;
+				}
+
+				return 1;
 			}
 			catch (ModuleHandleException e) {
 				return luaL_error(L, e.what());
 			}
+			catch (...) {
+				return luaL_error(L, "files() unknown exception");
+			}			
 
-			std::vector<std::string> entries = mh->listFiles(sanitizedPath);
-
-			lua_createtable(L, 0, 0);
-			int count = 0;
-
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-				lua_seti(L, -2, count + 1);
-				count += 1;
-			}
-
-			return 1;
 		}
 
 		ExtensionHandle* eh;
@@ -52,23 +56,27 @@ namespace LuaIO {
 		if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+
+				std::vector<std::string> entries = eh->listFiles(sanitizedPath);
+
+				lua_createtable(L, 0, 0);
+				int count = 0;
+
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+					lua_seti(L, -2, count + 1);
+					count += 1;
+				}
+
+				return 1;
 			}
 			catch (ModuleHandleException e) {
 				return luaL_error(L, e.what());
 			}
-
-			std::vector<std::string> entries = eh->listFiles(sanitizedPath);
-
-			lua_createtable(L, 0, 0);
-			int count = 0;
-
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-				lua_seti(L, -2, count + 1);
-				count += 1;
+			catch (...) {
+				return luaL_error(L, "files() unknown exception");
 			}
 
-			return 1;
 		}
 
 		const bool includeZipFiles = !(rawPath == "ucp/modules" || rawPath == "ucp/modules/");
@@ -95,6 +103,7 @@ namespace LuaIO {
 		catch (std::filesystem::filesystem_error e) {
 			return luaL_error(L, ("Cannot find the path: " + e.path1().string()).c_str());
 		}
+
 
 		return 1;
 	}
