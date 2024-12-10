@@ -1,7 +1,7 @@
-# Unofficial Crusader Patch3 ![Github All Releases](https://img.shields.io/github/downloads/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/total.svg) [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/P9dkF38Q2t)
+# Unofficial Crusader Patch 3 ![Github All Releases](https://img.shields.io/github/downloads/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/total.svg) [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/P9dkF38Q2t)
 Development for the new UCP runtime patching approach.
 
-Issues that involve feature requests will be resolved according to feasibility and amount of votes: [`is:issue is:open sort:reactions-+1-desc`](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch2/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
+Issues that involve feature requests should be done in the main repo and will be resolved according to feasibility and amount of votes: [`is:issue is:open sort:reactions-+1-desc`](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch2/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
 
 ## Quick start
 1. Go to Actions and download the latest build (Release or DevRelease)
