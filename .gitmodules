@@ -44,7 +44,7 @@
 	branch = eb78730
 
 [submodule "content/ucp/modules/aicloader-0.1.1"]
-	path = content/ucp/modules/aicloader-1.1.0
+	path = content/ucp/modules/aicloader-1.1.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-aicloader
 
 [submodule "content/ucp/modules/aivloader-0.1.2"]
@@ -56,7 +56,7 @@
 	url = https://github.com/UnofficialCrusaderPatch/extension-aiSwapper
 
 [submodule "content/ucp/modules/files-0.2.2"]
-	path = content/ucp/modules/files-1.1.0
+	path = content/ucp/modules/files-1.2.0
 	url = https://github.com/UnofficialCrusaderPatch/extension-files
 
 [submodule "content/ucp/modules/maploader-0.1.0"]
@@ -92,5 +92,5 @@
 	path = content/ucp/plugins/Aggressive-AI-Behaviour-Applied-1.4.0
 	url = https://github.com/Krarilotus/extension-Aggressive-AI-Behaviour-Applied.git
 [submodule "content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1"]
-	path = content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.1
+	path = content/ucp/plugins/Vanilla-Retraced-Unlocked-1.0.2
 	url = https://github.com/Krarilotus/Vanilla-Retraced
