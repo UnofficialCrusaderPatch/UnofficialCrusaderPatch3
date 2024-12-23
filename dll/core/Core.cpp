@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <sstream>
 #include <fstream>
+#include <process.h>
 
 #include "io/strings.h"
 
@@ -335,6 +336,25 @@ void Core::processCommandLineArguments() {
 	this->logLevel = optionsResult["ucp-verbosity"].as<int>();
 }
 
+/**
+* Create PID file that is automatically destroyed on exit
+* Created in the game folder as the ucp folder location is not yet known
+*/
+HANDLE pidFile = NULL;
+const std::string pidFilePath = "ucp-pid";
+void Core::createPIDFile() {
+	int pid = _getpid();
+	std::string pidString = std::to_string(pid);
+	pidFile = CreateFileA(
+		(pidFilePath + ("-" + pidString)).c_str(),
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_DELETE | FILE_SHARE_READ,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
+		NULL);
+}
+
 void Core::initialize() {
 
 	if (this->isInitialized) {
@@ -346,6 +366,8 @@ void Core::initialize() {
 	this->setArgsFromCommandLine();
 	this->processEnvironmentVariables();
 	this->processCommandLineArguments();
+
+	this->createPIDFile();
 
 	if (!this->secureMode) {
 		int answer = MessageBoxA(

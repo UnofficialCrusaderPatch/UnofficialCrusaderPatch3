@@ -96,7 +96,7 @@ public:
 	bool pathIsInInternalCodeDirectory(const std::string& sanitizedPath, std::string& insideCodePath);
 	bool codeLocationExists(bool& asZip, bool& asFolder);
 
-	
+	void createPIDFile();
 
 	Store* getModuleHashStore();
 
