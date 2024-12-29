@@ -98,6 +98,8 @@ public:
 
 	void createPIDFile();
 
+	bool setProcessDirectory();
+
 	Store* getModuleHashStore();
 
 	void log(int logLevel, std::string message);

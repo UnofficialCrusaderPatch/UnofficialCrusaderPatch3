@@ -355,6 +355,18 @@ void Core::createPIDFile() {
 		NULL);
 }
 
+bool Core::setProcessDirectory() {
+	CHAR path[MAX_PATH];
+	GetModuleFileNameA(NULL, path, MAX_PATH);
+
+	std::filesystem::path p = std::filesystem::path(path);
+	auto folder = p.parent_path();
+
+	SetCurrentDirectoryA(folder.string().c_str());
+
+	return true;
+}
+
 void Core::initialize() {
 
 	if (this->isInitialized) {
@@ -362,12 +374,6 @@ void Core::initialize() {
 		this->log(-3, "UCP3 dll was already initialized");
 		return;
 	}
-
-	this->setArgsFromCommandLine();
-	this->processEnvironmentVariables();
-	this->processCommandLineArguments();
-
-	this->createPIDFile();
 
 	if (!this->secureMode) {
 		int answer = MessageBoxA(
@@ -382,9 +388,22 @@ void Core::initialize() {
 		}
 	}
 
+	bool processDirectorySuccess = setProcessDirectory();
+
+	this->createPIDFile();
+
+	this->setArgsFromCommandLine();
+	this->processEnvironmentVariables();
+	this->processCommandLineArguments();
+
 	initializeLogger(this->logLevel, this->consoleLogLevel);
 
 	this->initializeConsole();
+
+	if (!processDirectorySuccess) {
+		this->log(-1, "Failed to set process directory");
+	}
+	this->log(0, "Current directory: " + std::filesystem::current_path().string());
 
 	this->moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", this->secureMode);
 	
