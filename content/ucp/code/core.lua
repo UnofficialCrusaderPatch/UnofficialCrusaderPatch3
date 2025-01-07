@@ -517,7 +517,7 @@ function core.compile(code, baseAddress)
 
     local address = baseAddress
 
-    for k, v in pairs(code) do
+    for k, v in ipairs(code) do
         if type(v) == "number" then
             if v < 0 or v > 0xFF then
                 for j, w in ipairs(utils.itob(v)) do
@@ -565,7 +565,7 @@ function core.compile(code, baseAddress)
     end
 
     if #result ~= precompiled then
-        error("final size of code (" .. #result .. ") is not equal to the precompilation (" .. precompiled .. ")")
+        error("final size of code (" .. #result .. ") is not equal to the precompilation (" .. precompiled .. ")\n" .. debug.traceback())
     end
 
     return result
@@ -632,7 +632,13 @@ function core.assemble(script, valueMapping, origin)
   script = "org " .. string.format("0x%X", origin) .. "\n" .. script
   script = "use32" .. "\n" .. script
   
-  return table.pack(ucp.internal.assemble(script):byte(1, -1))
+  local assembledString = ucp.internal.assemble(script)
+  local assembledBytes = {}
+  for i=1,assembledString:len() do
+    assembledBytes[i] = assembledString:byte(i, i)
+  end
+
+  return assembledBytes
 end
 
 ---Assembles the string script into assembly and writes it to a new memory location
