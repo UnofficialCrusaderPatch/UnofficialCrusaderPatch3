@@ -154,7 +154,7 @@ try {
     ## Copy all the module information using the xml specifications of each module.
     $modules = Get-ChildItem -Directory "$Path\content\ucp\modules"
     foreach($module in $modules) {
-        & "$($PSScriptRoot)\build-module.ps1" -Path $($module.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
+        & "$($PSScriptRoot)\build-module.ps1" -Path $($module.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders $true -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
     }
 
     Write-Output "Building modules complete"
@@ -167,7 +167,7 @@ try {
     ## Copy all the module information using the xml specifications of each module.
     $plugins = Get-ChildItem -Directory "$Path\content\ucp\plugins"
     foreach($plugin in $plugins) {
-        & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders
+        & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders $true
     }
 
     Write-Output "Building plugins complete"
@@ -187,7 +187,7 @@ try {
     }
 
     ## Copy all content/ucp files to ucp-package/ucp, except the modules and plugins folder
-    & "$($PSScriptRoot)\package-ucp-code.ps1" -Path "$Path" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp" -RemoveZippedFolders
+    & "$($PSScriptRoot)\package-ucp-code.ps1" -Path "$Path" -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp" -RemoveZippedFolders $true
 
     $ExtensionStorePath = "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\extension-store.yml"
     & "$($PSScriptRoot)\append-to-extension-store.ps1" -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\code.zip" -ExtensionStorePath $ExtensionStorePath

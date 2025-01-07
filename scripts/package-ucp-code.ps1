@@ -1,7 +1,7 @@
 param (
     [Parameter(Mandatory=$true)][string]$Path,
     [Parameter(Mandatory=$true)][string]$Destination,
-    [Parameter(Mandatory=$false)][switch]$RemoveZippedFolders = $true
+    [Parameter(Mandatory=$false)][boolean]$RemoveZippedFolders = $true
 )
 
 $mainfiles = Get-ChildItem "$($Path)\content\ucp" | Where({$_.Name -ne "modules"})  | Where({$_.Name -ne "plugins"}) | foreach{$_.FullName}
