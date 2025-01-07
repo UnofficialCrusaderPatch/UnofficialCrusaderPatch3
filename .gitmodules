@@ -17,7 +17,7 @@
 	ignore = dirty
 
 [submodule "content/ucp/modules/graphicsApiReplacer-1.1.0"]
-	path = content/ucp/modules/graphicsApiReplacer-1.2.0
+	path = content/ucp/modules/graphicsApiReplacer-1.3.0
 	url = https://github.com/TheRedDaemon/ucp_graphicsApiReplacer
 	branch = main
 	ignore = dirty
@@ -35,7 +35,7 @@
 	ignore = dirty
 
 [submodule "content/ucp/modules/startResources-0.1.0"]
-	path = content/ucp/modules/startResources-1.0.0
+	path = content/ucp/modules/startResources-1.0.1
 	url = https://github.com/gynt/ucp_startResources
 
 [submodule "dll/vendor/cxxopts"]
@@ -60,7 +60,7 @@
 	url = https://github.com/UnofficialCrusaderPatch/extension-files
 
 [submodule "content/ucp/modules/maploader-0.1.0"]
-	path = content/ucp/modules/maploader-1.0.0
+	path = content/ucp/modules/maploader-1.0.1
 	url = https://github.com/UnofficialCrusaderPatch/extension-maploader
 
 [submodule "content/ucp/modules/ucp2-legacy-2.15.0"]
