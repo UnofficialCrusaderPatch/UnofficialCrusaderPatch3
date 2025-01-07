@@ -64,6 +64,7 @@ end
 ---@param size number the number of bytes to read
 ---@return table Returns the bytes in the form of a table.
 function core.readBytes(address, size)
+  if type(address) ~= "number" then error(debug.traceback(string.format("not a valid address: %s", address))) end
     return ucp.internal.readBytes(address, size)
 end
 
