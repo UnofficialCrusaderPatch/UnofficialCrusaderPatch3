@@ -265,15 +265,16 @@ for k, ext in pairs(allActiveExtensions) do
         log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(moduleEnv)
         local e, p = ext:load(moduleEnv)
-        p = p or { public = {}, }
-        p = p.public or {}
-        modules[ext.name], publicElements[ext.name] = e, p
-        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(p, ', ')))
-        local ep = ExtensionProxy(e)
+        p = p or { public = {}, proxy = {}, }
+        local public = p.public or {}
+        local proxyOptions = p.proxy
+        modules[ext.name], publicElements[ext.name] = e, public
+        log(DEBUG, string.format("extension '%s' has public elements: %s", ext.name, table.concat(public, ', ')))
+        local ep = ExtensionProxy(e, proxyOptions)
         moduleProxies[ext.name] = ep
-        modulePublicProxies[ext.name] = PublicProxy(e, p)
+        modulePublicProxies[ext.name] = PublicProxy(e, public)
     elseif t == "PluginLoader" then
-      log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
+        log(INFO, "[main]: loading extension: " .. ext.name .. " version: " .. ext.version)
         ext:createEnvironment(pluginEnv)
         local e, p = ext:load(pluginEnv)
         p = p or { public = {}, }

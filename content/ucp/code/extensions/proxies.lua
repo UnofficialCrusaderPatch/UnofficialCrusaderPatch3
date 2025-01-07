@@ -116,7 +116,13 @@ TableProxy = function(obj)
 end
 
 
-local ExtensionProxy = function(obj)
+local ExtensionProxy = function(obj, options)
+
+  local options = options or {
+    ignored = {
+
+    },
+  }
 
   local filteredOutFunctions = {
     "enable",
@@ -149,7 +155,7 @@ local ExtensionProxy = function(obj)
           -- Force the self to be obj
           local ret = value(obj, ...)
 					
-          if type(ret) == "table" then
+          if type(ret) == "table" and contains(options.ignored, k) == false then
 
             return TableProxy(ret)
           
