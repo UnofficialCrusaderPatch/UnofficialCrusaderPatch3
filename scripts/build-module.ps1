@@ -4,7 +4,7 @@ param (
   [Parameter(Mandatory=$true)][string]$Destination,
 	[Parameter(Mandatory=$true)][string]$BUILD_CONFIGURATION,
   [Parameter(Mandatory=$false)][string]$UCPNuPkgPath = ".",
-  [Parameter(Mandatory=$false)][switch]$RemoveZippedFolders = $true,
+  [Parameter(Mandatory=$false)][boolean]$RemoveZippedFolders = $true,
   [Parameter(Mandatory=$false)][string]$ExtensionStorePath = ""
 )
 

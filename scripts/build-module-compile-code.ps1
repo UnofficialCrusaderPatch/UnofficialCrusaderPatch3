@@ -34,6 +34,6 @@ if($hasSLN) {
 
     msbuild /m /t:restore /p:RestoreAdditionalProjectSources="$UCP3_NUPKGDIRECTORY" /Verbosity:$Verbosity
 
-    msbuild /m /p:Configuration=$simpleBuildConfiguration /Verbosity:$Verbosity
+    msbuild /m /p:Configuration=$simpleBuildConfiguration /Verbosity:$Verbosity /property:Platform=x86
     popd
 }
