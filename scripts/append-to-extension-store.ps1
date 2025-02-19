@@ -15,9 +15,12 @@ Write-Output "$zip"
 Import-Module powershell-yaml
 
 if ( $false -eq (Test-Path -Path "$ExtensionStorePath") ) {
-  $extensionStore = [ordered]@{
-    extensions = [System.Collections.ArrayList]@();
-  }
+  $arr = [System.Collections.ArrayList]@();
+  $known = Get-Content ".\scripts\data\known_hashes.yml" | ConvertFrom-Yaml
+  $arr.AddRange($known)
+  
+  $extensionStore = [ordered]@{}
+  $extensionStore.extensions = $arr
 } else {
   $extensionStore = Get-Content -Path "$ExtensionStorePath" | ConvertFrom-Yaml
 }
