@@ -77,21 +77,21 @@ jobs:
         echo "UCP_NAME_NUPKG=$($env:UCP_NAME_NUPKG)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
  
     - name: Upload UCP3 dev release as an artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.UCP_NAME_DEVRELEASE }}
         path: Release/ucp-package/*
         retention-days: 30
 
     - name: Upload UCP3 release as an artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.UCP_NAME_RELEASE }}
         path: ReleaseSecure/ucp-package/*
         retention-days: 30
         
     - name: Upload UCP3 nupkg for devs as an artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.UCP_NAME_NUPKG }}
         path: dll/*.nupkg
