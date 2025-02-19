@@ -40,7 +40,7 @@ private:
 			}
 		}
 
-		errorMsg = "hash does not match hash from store: " + name;
+		errorMsg = "Missing security signature or signature mismatch for: " + name;
 		return false;
 	}
 
