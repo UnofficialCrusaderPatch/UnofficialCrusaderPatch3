@@ -73,7 +73,7 @@ if($hasFilesList) {
   if ($hasFilesList) {
     $filesYml = Get-Content -Path $filesYmlPath | ConvertFrom-Yaml
 
-    if (($filesYml.meta -ne $null) -and ($filesYml.meta.version -ne $null) -and ($filesYml.meta.version -ne "1.0.0")) {
+    if (($null -ne $filesYml.meta) -and ($null -ne $filesYml.meta.version) -and ($filesYml.meta.version -ne "1.0.0")) {
       throw "Unsupported files.yml version"
     }
 

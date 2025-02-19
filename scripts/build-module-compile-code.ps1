@@ -20,20 +20,25 @@ $SIMPLE_CONFIG_MAPPING = @{
     "Release" = "Release";
 }
 
-# If the module uses C++ we have to build it first
-$hasSLN = Get-ChildItem -Recurse -Path ($module.FullName + "\*.sln")
-  
 # Modules that should be compiled do not inherit the Secure build configurations for now
 $simpleBuildConfiguration=$SIMPLE_CONFIG_MAPPING[$BUILD_CONFIGURATION]
-  
+
+# If the module uses C++ we have to build it first
+$hasSLN = Get-ChildItem -Recurse -Path ($module.FullName + "\*.sln") -ErrorAction SilentlyContinue
+
+# Find meson.build file (no recursion)
+$hasMeson = Get-ChildItem -Path ($module.FullName + "\meson.build") -ErrorAction SilentlyContinue
+
+# Find build.ps1 for custom build implementations
+$hasBuild = Get-ChildItem -Path ($module.FullName + "\build.ps1") -ErrorAction SilentlyContinue
+
 # Build the module
-if($hasSLN) {
-    pushd $hasSLN.Directory.FullName
-    # This is kept in to keep compatibility with VS2019 style of nuget referencing
-    nuget restore -Source "$UCP3_NUPKGDIRECTORY"
-
-    msbuild /m /t:restore /p:RestoreAdditionalProjectSources="$UCP3_NUPKGDIRECTORY" /Verbosity:$Verbosity
-
-    msbuild /m /p:Configuration=$simpleBuildConfiguration /Verbosity:$Verbosity /property:Platform=x86
-    popd
+if ($hasBuild) {
+  & "$($PSScriptRoot)\compilation\compile-custom.ps1" -Path $Path -BUILD_CONFIGURATION $simpleBuildConfiguration -UCP3_NUPKGDIRECTORY $UCP3_NUPKGDIRECTORY -Verbosity $Verbosity
+}
+elseif ($hasMeson) {
+  & "$($PSScriptRoot)\compilation\compile-meson.ps1" -Path $Path -BUILD_CONFIGURATION $simpleBuildConfiguration -UCP3_NUPKGDIRECTORY $UCP3_NUPKGDIRECTORY -Verbosity $Verbosity
+}
+elseif($hasSLN) {
+  & "$($PSScriptRoot)\compilation\compile-sln.ps1" -Path $Path -BUILD_CONFIGURATION $simpleBuildConfiguration -UCP3_NUPKGDIRECTORY $UCP3_NUPKGDIRECTORY -Verbosity $Verbosity
 }
