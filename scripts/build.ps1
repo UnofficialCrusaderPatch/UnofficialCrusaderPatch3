@@ -196,6 +196,11 @@ try {
 
     if( $Certificate -ne "") {          
       & "$($PSScriptRoot)\sign-extension-store.ps1" -UCPPath "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\" -Certificate $Certificate
+
+      Get-ChildItem -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\*.zip" | ForEach-Object {
+        $p = $_
+        & "$($PSScriptRoot)\sign-file.ps1" -Path $p -Certificate $Certificate
+      }
     }
 
     ### Package ucp folder files
