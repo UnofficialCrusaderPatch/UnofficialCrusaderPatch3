@@ -1,7 +1,7 @@
 ﻿$ErrorActionPreference = "Stop"
 
-$ep = Get-ExecutionPolicy -Scope CurrentUser
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+# $ep = Get-ExecutionPolicy -Scope CurrentUser
+# Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -ErrorAction SilentlyContinue
 
 # Install yaml library
 if(!(Get-Module -ListAvailable -Name powershell-yaml)) {
@@ -10,4 +10,4 @@ if(!(Get-Module -ListAvailable -Name powershell-yaml)) {
 
 Import-Module powershell-yaml
 
-Set-ExecutionPolicy "$ep" -Scope CurrentUser
+# Set-ExecutionPolicy "$ep" -Scope CurrentUser
