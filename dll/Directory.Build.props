@@ -4,7 +4,7 @@
   <!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019 -->
   <PropertyGroup>
     <PackageId>UnofficialCrusaderPatch3</PackageId>
-    <Version>3.0.6</Version>
+    <Version>3.0.7</Version>
     <Authors>gynt</Authors>
     <Company>gynt</Company>
     <TargetFramework>native</TargetFramework>
