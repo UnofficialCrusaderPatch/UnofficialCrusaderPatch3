@@ -173,11 +173,23 @@ namespace LuaYamlParser {
 			YAML::Node root = YAML::Load(fileContents);
 
 			std::string errorMsg;
-			int code = parseTableNode(L, root, errorMsg);
 
-			if (code == -1) {
-				return luaL_error(L, ("parsing yaml content failed: " + errorMsg).c_str());
+			if (root.IsScalar()) {
+				int code = parseScalarNode(L, root, errorMsg);
+
+				if (code == -1) {
+					return luaL_error(L, ("parsing yaml content failed: " + errorMsg).c_str());
+				}
 			}
+			else {
+
+				int code = parseTableNode(L, root, errorMsg);
+
+				if (code == -1) {
+					return luaL_error(L, ("parsing yaml content failed: " + errorMsg).c_str());
+				}
+			}
+
 
 		}
 		catch (YAML::ParserException pe) {
