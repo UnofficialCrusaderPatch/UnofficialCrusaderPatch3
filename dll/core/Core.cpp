@@ -246,7 +246,7 @@ void Core::setArgsAsGlobalVarInLua() {
 	for (int i = 0; i < nArgs; i++) {
 
 		lua_pushstring(this->L, this->argv[i]);
-		lua_seti(this->L, -2, i + 1); // lua is 1-based
+		lua_rawseti(this->L, -2, i + 1); // lua is 1-based
 	}
 
 	lua_setglobal(this->L, "arg");

@@ -33,7 +33,7 @@
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0" PrivateAssets="all" developmentDependency="true" />
 
     <!-- lua is a dependency that should be forwarded upon those that use the nuget package -->
-    <PackageReference Include="lua" Version="5.4.6" PrivateAssets="none" ExcludeAssets="none" IncludeAssets="all" />
+    <PackageReference Include="luajit.native" Version="2.1.1739213504"  PrivateAssets="none" ExcludeAssets="none" IncludeAssets="all" />
     
     <!-- These dependencies are developer dependencies (I am pretty sure developmentDependency=true doesn't do anything). They are not listed in the resulting .nuspec -->
     <PackageReference Include="RPS" Version="1.5.1" PrivateAssets="all" developmentDependency="true" />

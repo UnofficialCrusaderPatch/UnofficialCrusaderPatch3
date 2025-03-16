@@ -19,14 +19,9 @@ namespace LuaYamlDumper {
         int type = lua_type(L, -1);
 
         if (type == LUA_TNUMBER) {
-            if (lua_isinteger(L, -1) != 0) {
-                int rhs = static_cast<int>(lua_tointeger(L, -1));
-                node = YAML::Node(rhs);
-            }
-            else {
-                double rhs = static_cast<double>(lua_tonumber(L, -1));
-                node = YAML::Node(rhs);
-            }
+            // Integers are not really supported
+            double rhs = static_cast<double>(lua_tonumber(L, -1));
+            node = YAML::Node(rhs);
         }
 
         else if (type == LUA_TBOOLEAN) {

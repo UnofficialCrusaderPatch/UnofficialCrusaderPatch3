@@ -15,7 +15,7 @@ namespace LuaUtil {
 	int luaWideCharToMultiByte(lua_State* L)
 	{
 		luaL_checktype(L, 1, LUA_TTABLE); // check if the first argument is a table
-		int size = lua_rawlen(L, 1); // size of the table
+		int size = lua_objlen(L, 1); // size of the table
 		std::string buffer(size, 0);
 
 		for (int i = 0; i < size; i++) {

@@ -154,7 +154,7 @@ namespace LuaYamlParser {
 
 				// Does t[i] = v where arg 2 points to t on the stack
 				// and v is at -1 on the stack.
-				lua_seti(L, -2, key);
+				lua_rawseti(L, -2, key);
 			}
 		}
 

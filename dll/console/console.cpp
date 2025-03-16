@@ -11,6 +11,16 @@
 #include "RuntimePatchingSystem.h"
 #include "console.h"
 
+/* print a string */
+#if !defined(lua_writestring)
+#define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
+#endif
+
+/* print a newline and flush the output */
+#if !defined(lua_writeline)
+#define lua_writeline()        (lua_writestring("\n", 1), fflush(stdout))
+#endif
+
 namespace Console {
 
 	FILE* console;
@@ -49,7 +59,7 @@ namespace Console {
 			if (nreturns > 0) {
 				for (int i = before; i < after; i++) {  /* for each argument */
 					size_t l;
-					const char* s = luaL_tolstring(L, i + 1, &l);  /* convert it to string and push it on the stack */
+					const char* s = lua_tolstring(L, i + 1, &l);  /* convert it to string and push it on the stack */
 					if (i > 0)  /* not the first element? */
 						lua_writestring("\t", 1);  /* add a tab before it */
 					lua_writestring(s, l);  /* print it */
