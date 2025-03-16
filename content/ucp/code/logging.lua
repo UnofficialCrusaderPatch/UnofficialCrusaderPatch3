@@ -26,6 +26,8 @@ LOG_LEVEL_NAME = {
   [3] = "VVERBOSE",
 }
 
+---Log a message to the console and log file
+---@type fun(logLevel: number, msg1: string, ...: string): void
 log = ucp.internal.log
 
 function traceLog(logLevel, ...)
