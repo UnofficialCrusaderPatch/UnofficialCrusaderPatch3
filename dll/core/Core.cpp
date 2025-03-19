@@ -33,6 +33,7 @@
 
 #include "core/initialization/io.h"
 #include "core/initialization/ucp-internal.h"
+#include "core/initialization/ucp-memory.h"
 #include "core/initialization/logging.h"
 #include "core/Core-path.h"
 
@@ -418,7 +419,12 @@ void Core::initialize() {
 	
 	RPS_initializeLuaOpenLibs();
 
+	// Register global ucp table
+	lua_newtable(this->L);
+	lua_setglobal(this->L, "ucp");
+
 	addUCPInternalFunctions(this->L);
+	addUCPMemoryFunctions(this->L);
 	addLoggingFunctions(this->L);
 	addUtilityFunctions(this->L);
 	addIOFunctions(this->L);

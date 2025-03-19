@@ -4,12 +4,18 @@
 #include <RuntimePatchingSystem.h>
 
 void addUCPInternalFunctions(lua_State* L) {
-	lua_newtable(L);
+	// stack:
+	lua_getglobal(L, "ucp");
+
+	// stack: ucp
 	RPS_initializeLuaAPI("");
-	// The namespace is left on the stack. 
+	// stack: ucp  rps
 
 	// Set the namespace to the 'internal' field in our table.
 	lua_setfield(L, -2, "internal");
-	// Our table is left on the stack. Put the table in the global 'ucp' variable.
-	lua_setglobal(L, "ucp");
+
+	// stack: ucp
+	lua_pop(L, 1);
+
+	// stack:
 }

@@ -207,6 +207,7 @@
     <ClInclude Include="core\initialization\logging.h" />
     <ClInclude Include="core\Core-path.h" />
     <ClInclude Include="core\initialization\ucp-internal.h" />
+    <ClInclude Include="core\initialization\ucp-memory.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
@@ -230,6 +231,7 @@
     <ClInclude Include="lua\LuaFilesList.h" />
     <ClInclude Include="lua\deprecated\LuaListDirectories.h" />
     <ClInclude Include="lua\deprecated\LuaListFiles.h" />
+    <ClInclude Include="lua\LuaLoadLibraryRaw.h" />
     <ClInclude Include="lua\LuaPathExists.h" />
     <ClInclude Include="lua\LuaTempFile.h" />
     <ClInclude Include="lua\Preload.h" />
@@ -252,6 +254,7 @@
     <ClCompile Include="core\initialization\logging.cpp" />
     <ClCompile Include="core\Core-path.cpp" />
     <ClCompile Include="core\initialization\ucp-internal.cpp" />
+    <ClCompile Include="core\initialization\ucp-memory.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="io\files.cpp" />
     <ClCompile Include="io\modules\module_utils.cpp" />
@@ -263,6 +266,7 @@
     <ClCompile Include="lua\LuaFilesList.cpp" />
     <ClCompile Include="lua\deprecated\LuaListDirectories.cpp" />
     <ClCompile Include="lua\deprecated\LuaListFiles.cpp" />
+    <ClCompile Include="lua\LuaLoadLibraryRaw.cpp" />
     <ClCompile Include="lua\LuaPathExists.cpp" />
     <ClCompile Include="lua\LuaTempFile.cpp" />
     <ClCompile Include="lua\Preload.cpp" />

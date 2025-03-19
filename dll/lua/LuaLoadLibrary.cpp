@@ -35,6 +35,9 @@ namespace LuaIO {
 		return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 	}
 
+
+
+	// This function both opens and loads a lua library dll
 	int luaLoadLibrary(lua_State* L) {
 		//Read path from the stack (first argument)
 		if (lua_gettop(L) != 2) {
@@ -61,7 +64,7 @@ namespace LuaIO {
 		}
 
 
-
+		Core::getInstance().log(Verbosity_WARNING, "Global function 'loadLibrary' is deprecated, use 'ucp.library.openLibraryHandle' instead");
 
 		std::string insidePath;
 		ModuleHandle* mh;
