@@ -29,7 +29,7 @@ if ( $What.Contains("modules") -or $What.Contains("plugins") ) {
 
 }
 
-& "$($PSScriptRoot)\store\fetch-extensions.ps1"
+. "$($PSScriptRoot)\store\fetch-extensions.ps1"
 
 $Path = Get-Item -Path $Path
 

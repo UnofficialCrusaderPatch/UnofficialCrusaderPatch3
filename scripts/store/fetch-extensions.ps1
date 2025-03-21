@@ -42,12 +42,13 @@ function Get-UCP-Extensions {
         Write-Debug "extension: $id"
         New-Item "$($Destination)\$($type)s" -ItemType Directory -ErrorAction Ignore
         $zipPath = "$($Destination)\$($type)s\$id.zip"
+        $folderPath = "$($Destination)\$($type)s\$id"
 
-        if ($false -eq (Test-Path -Path $zipPath)) {
+        if ((("plugin" -eq $type) -and ($false -eq (Test-Path -Path $folderPath))) -or (("module" -eq $type) -and ($false -eq (Test-Path -Path $zipPath)))) {
           Invoke-WebRequest $url -OutFile $zipPath
       
           if ("plugin" -eq $type) {
-            Expand-Archive -Path $zipPath -DestinationPath "$($Destination)\$($type)s\$id"
+            Expand-Archive -Path $zipPath -DestinationPath $folderPath
             Remove-Item -Path $zipPath
           } else {
             Set-Content -Value $sig -Path "$($Destination)\$($type)s\$id.zip.sig"
