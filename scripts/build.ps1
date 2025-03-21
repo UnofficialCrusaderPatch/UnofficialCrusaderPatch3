@@ -29,6 +29,8 @@ if ( $What.Contains("modules") -or $What.Contains("plugins") ) {
 
 }
 
+& "$($PSScriptRoot)\store\fetch-extensions.ps1"
+
 $Path = Get-Item -Path $Path
 
 try {
@@ -134,46 +136,52 @@ try {
       New-Item -Path "$($Path)\$BUILD_CONFIGURATION" -Name "ucp-package" -ItemType 'directory' | Out-Null
       New-Item -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package" -Name "ucp" -ItemType 'directory' | Out-Null
     }
+
   }
 
-  if ( $What.Contains("modules") ) {
+  if ($What.Contains("modules") -or $What.Contains("plugins")) {
+    $eid = Find-Extension-Identifiers
+    Get-UCP-Extensions -IncludeList $eid -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\"
+  }
 
-    Write-Output "Building modules"
+  # if ( $What.Contains("modules") ) {
+
+  #   Write-Output "Building modules"
         
-    $nupkg_file = Get-Item -Path "$Path\dll\*.nupkg"
-    $NUPKG_DIRECTORY =  $nupkg_file | Select-Object -ExpandProperty Directory
+  #   $nupkg_file = Get-Item -Path "$Path\dll\*.nupkg"
+  #   $NUPKG_DIRECTORY =  $nupkg_file | Select-Object -ExpandProperty Directory
 
-    Write-Output "Using ucp nupkg: $nupkg_file"
+  #   Write-Output "Using ucp nupkg: $nupkg_file"
 
-    if ($NUPKG_DIRECTORY -eq $null) {
-      throw "NUPKG_DIRECTORY is not valid. Was the nupkg built?"
-    }
+  #   if ($NUPKG_DIRECTORY -eq $null) {
+  #     throw "NUPKG_DIRECTORY is not valid. Was the nupkg built?"
+  #   }
 
-    $ExtensionStorePath = "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\extension-store.yml"
+  #   $ExtensionStorePath = "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\extension-store.yml"
 
-    ## Copy all the module information using the xml specifications of each module.
-    $modules = Get-ChildItem -Directory "$Path\content\ucp\modules"
-    foreach($module in $modules) {
-        & "$($PSScriptRoot)\build-module.ps1" -Path $($module.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders $true -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
-    }
+  #   ## Copy all the module information using the xml specifications of each module.
+  #   $modules = Get-ChildItem -Directory "$Path\content\ucp\modules"
+  #   foreach($module in $modules) {
+  #       & "$($PSScriptRoot)\build-module.ps1" -Path $($module.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\" -BUILD_CONFIGURATION $($BUILD_CONFIGURATION) -RemoveZippedFolders $true -UCPNuPkgPath $NUPKG_DIRECTORY -ExtensionStorePath $ExtensionStorePath
+  #   }
 
-    Write-Output "Building modules complete"
+  #   Write-Output "Building modules complete"
 
-    return
-  }
+  #   return
+  # }
 
-  if ( $What.Contains("plugins") ) {
-    Write-Output "Building plugins"
-    ## Copy all the module information using the xml specifications of each module.
-    $plugins = Get-ChildItem -Directory "$Path\content\ucp\plugins"
-    foreach($plugin in $plugins) {
-        & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders $true
-    }
+  # if ( $What.Contains("plugins") ) {
+  #   Write-Output "Building plugins"
+  #   ## Copy all the module information using the xml specifications of each module.
+  #   $plugins = Get-ChildItem -Directory "$Path\content\ucp\plugins"
+  #   foreach($plugin in $plugins) {
+  #       & "$($PSScriptRoot)\build-plugin.ps1" -Path $($plugin.FullName) -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\plugins\" -RemoveZippedFolders $true
+  #   }
 
-    Write-Output "Building plugins complete"
+  #   Write-Output "Building plugins complete"
 
-    return
-  }
+  #   return
+  # }
 
 
   if ( $What.Contains("ucp") ) {
@@ -197,10 +205,10 @@ try {
     if( $Certificate -ne "") {          
       & "$($PSScriptRoot)\sign-extension-store.ps1" -UCPPath "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\" -Certificate $Certificate
 
-      Get-ChildItem -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\*.zip" | ForEach-Object {
-        $p = $_
-        & "$($PSScriptRoot)\sign-file.ps1" -Path $p -Certificate $Certificate
-      }
+      # Get-ChildItem -Path "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\modules\*.zip" | ForEach-Object {
+      #   $p = $_
+      #   & "$($PSScriptRoot)\sign-file.ps1" -Path $p -Certificate $Certificate
+      # }
     }
 
     ### Package ucp folder files
