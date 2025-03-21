@@ -46,9 +46,9 @@ local function restrictedRequireFunction(path, env, allow_binary)
 
                 end
                 -- TODO: This will run in a global env, test that.
-                local value, err = loadLibrary(full_path, sanitized_file_name) --TODO specifically document loadLibrary can only return 1 value?
-                if value == nil then error(err) end
-                return value
+                local handle, err = core.openLibraryHandle(full_path)
+                if handle == nil then error(err) end
+                return handle:require(sanitized_file_name)
             end
             error("binary files are not allowed: " .. full_path)
         elseif has_lua_extension then
@@ -79,7 +79,7 @@ local function restrictedRequireFunction(path, env, allow_binary)
         local status, value = pcall(code)
 
         if not status then
-            error(value)
+            error(debug.traceback(value))
         end
 
         LOADED[sanitized_file] = value

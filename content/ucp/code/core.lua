@@ -650,4 +650,64 @@ function core.allocateAssembly(script, valueMapping)
     return address
 end
 
+---@class LibraryAccessHandle
+---Object representing an interface to the dll library
+---@field require fun(self: LibraryAccessHandle, module: string): any require a module from this library
+---@field getProcAddress fun(self: LibraryAccessHandle, funcName: string): integer get the address of a function from this library
+
+---Open a handle to a dll file. The DLL file must be in ucp/code or in ucp/modules/
+---@param path string path to the dll file relative to the game directory.
+---@return LibraryAccessHandle|nil returnValue may return nil, err if opening failed
+function core.openLibraryHandle(path)
+  return ucp.library.openLibraryHandle(io.resolveAliasedPath(path))
+end
+
+---Register a constant string permanently into memory and get its address
+---Should not be used frequently, for large data, or in loop situations as that causes a memory leak
+---@param str string the string to register
+---@return int address return the address of the string in memory
+function core.registerString(str)
+  return ucp.internal.registerString(str)
+end
+
+---@class GarbageCollectedObject
+---Class that deallocates the memory at the pointer it is given when it goes out of scope in lua
+---@field address integer the address in memory
+local GarbageCollectedObject = {}
+
+
+---@return GarbageCollectedObject obj
+function GarbageCollectedObject:new(addr)
+  local o = setmetatable({
+    address = addr,
+  }, self)
+  self.__index = self
+  return o
+end
+
+function GarbageCollectedObject:free()
+  if self.address ~= nil then
+    log(VERBOSE, string.format("GarbageCollectedObject: free(0x%X)", self.address))
+    core.deallocate(self.address)   
+  end
+  self.address = nil
+end
+
+function GarbageCollectedObject:__gc()
+  self:free() 
+end
+
+
+core.GarbageCollectedObject = GarbageCollectedObject
+
+---Allocate the given string into memory and deallocate it when the returned object goes out of scope in lua
+---@param str string the string to allocate in memory
+---@return GarbageCollectedObject handle a handle to the garbage collected object
+function core.CString(str)
+  local addr = core.allocate(str:len() + 1, true)
+  core.writeString(addr, str)
+
+  return core.GarbageCollectedObject:new(addr)
+end
+
 return core
