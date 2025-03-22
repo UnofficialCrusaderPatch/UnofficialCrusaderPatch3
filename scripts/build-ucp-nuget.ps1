@@ -14,5 +14,5 @@ Write-Output "Compiling ucp dll complete"
 ### Make the nuget package
 
 Write-Output "Creating nuget package"
-msbuild /t:pack dll /Verbosity:quiet
+msbuild /t:pack .\dll\dll.vcxproj /Verbosity:quiet
 Write-Output "Creating nuget package complete"
