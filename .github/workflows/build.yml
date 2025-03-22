@@ -33,6 +33,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+        GH_TOKEN: ${{ github.token }}
       shell: pwsh
       run: |
         .\scripts\build.ps1 -What all -BuildType Release -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
@@ -41,6 +42,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+        GH_TOKEN: ${{ github.token }}
       shell: pwsh
       run: |
         .\scripts\build.ps1 -What all -BuildType ReleaseSecure -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
