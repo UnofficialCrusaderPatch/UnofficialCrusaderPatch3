@@ -3,7 +3,8 @@ param (
   [Parameter(Mandatory = $false)][string]$Path = ".",
   [Parameter(Mandatory = $false)][string]$BuildType = "",
   [Parameter(Mandatory = $false)][string]$NugetToken = "missing",
-  [Parameter(Mandatory = $false)][string]$Certificate = ""
+  [Parameter(Mandatory = $false)][string]$Certificate = "",
+  [Parameter(Mandatory = $false)][bool]$AllowMissingExtensions = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -141,7 +142,7 @@ try {
 
   if ($What.Contains("modules") -or $What.Contains("plugins")) {
     $eid = Find-Extension-Identifiers
-    Get-UCP-Extensions -IncludeList $eid -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\"
+    Get-UCP-Extensions -IncludeList $eid -Destination "$($Path)\$BUILD_CONFIGURATION\ucp-package\ucp\" -AllowMissing $AllowMissingExtensions
   }
 
   # if ( $What.Contains("modules") ) {

@@ -2,7 +2,8 @@
 function Get-UCP-Extensions {
   param (
     [Parameter(Mandatory = $true)][System.Collections.ArrayList]$IncludeList,
-    [Parameter(Mandatory = $true)][string]$Destination
+    [Parameter(Mandatory = $true)][string]$Destination,
+    [Parameter(Mandatory = $false)][bool]$AllowMissing = $false
     
   )
 
@@ -46,6 +47,7 @@ function Get-UCP-Extensions {
 
         if ((("plugin" -eq $type) -and ($false -eq (Test-Path -Path $folderPath))) -or (("module" -eq $type) -and ($false -eq (Test-Path -Path $zipPath)))) {
           Invoke-WebRequest $url -OutFile $zipPath
+          Write-Debug "fetching..."
       
           if ("plugin" -eq $type) {
             Expand-Archive -Path $zipPath -DestinationPath $folderPath
@@ -54,9 +56,11 @@ function Get-UCP-Extensions {
             Set-Content -Value $sig -Path "$($Destination)\$($type)s\$id.zip.sig"
           }
   
-          $DoneList.Add($id)
+        } else {
+          Write-Debug "already exists, skipping"
         }
 
+        $DoneList.Add($id)
 
       } else {
         Write-Debug "ignoring: $id"
@@ -64,6 +68,12 @@ function Get-UCP-Extensions {
 
     }
   
+  }
+
+  $LeftOvers = $IncludeList | Where-Object {$false -eq $DoneList.Contains($_)}
+
+  if ( ( $false -eq $AllowMissing ) -and ($LeftOvers.Count -gt 0)) {
+    Write-Error "The following extensions are missing: $($LeftOvers | Join-String -Separator ", ")"
   }
 
 }
