@@ -22,6 +22,8 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v3
       with:
@@ -36,6 +38,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_SIGNING_CERTIFICATE_CONTENTS: ${{ secrets.UCP3_SIGNING_CERTIFICATE_CONTENTS }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         Set-Content -Value "$env:UCP3_SIGNING_CERTIFICATE_CONTENTS" -Path "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem" -Force
 
@@ -44,6 +47,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+        GH_TOKEN: ${{ github.token }}
       shell: pwsh
       run: |
         .\scripts\build.ps1 -What all -BuildType Release -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
@@ -52,6 +56,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       env:
         UCP3_READ_PACKAGES: ${{ secrets.UCP3_READ_PACKAGES }}
+        GH_TOKEN: ${{ github.token }}
       shell: pwsh
       run: |
         .\scripts\build.ps1 -What all -BuildType ReleaseSecure -NugetToken "$env:UCP3_READ_PACKAGES" -Certificate "$($env:GITHUB_WORKSPACE)\ucp3-module-signing-key.pem"
