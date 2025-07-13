@@ -7,92 +7,152 @@
 #include "MemoryModule.h"
 #include "io/modules/ModuleManager.h"
 
-constexpr int FASM_BUFFER_SIZE = 1000 * 64;
+constexpr int BUFFER_SIZE = 1000 * 64;
 
 int fasmState = 0;
-unsigned char buffer[FASM_BUFFER_SIZE];
+unsigned char buffer[BUFFER_SIZE];
 
-typedef DWORD (__stdcall* func_Assemble)(void* lpSource, void* lpMemory, int cbMemorySize, short nPassesLimit, void* hDisplayPipe);
+typedef int (__stdcall* func_Assemble)(void* lpSource, void* lpMemory, int cbMemorySize, short nPassesLimit, void* hDisplayPipe);
 func_Assemble fasm_Assemble = 0;
 
-struct FASM_STATE {
-	DWORD condition;
-	union {
-		DWORD output_length;
-		DWORD error_code;
-	};
-	union {
-		DWORD output_data;
-		DWORD error_line;
-	};
+enum FasmCondition : int
+{
+	OK = 00,
+	WORKING = 01,
+	FERROR = 02,
+	INVALID_PARAMETER = -1,
+	OUT_OF_MEMORY = -2,
+	STACK_OVERFLOW = -3,
+	SOURCE_NOT_FOUND = -4,
+	UNEXPECTED_END_OF_SOURCE = -5,
+	CANNOT_GENERATE_CODE = -6,
+	FORMAT_LIMITATIONS_EXCEEDED = -7,
+	WRITE_FAILED = -8,
 };
 
-struct LINE_HEADER {
-	DWORD file_path;
-	DWORD line_number;
-	union {
-		DWORD file_offset;
-		DWORD macro_calling_line;
-	};
-	DWORD macro_line;
+enum FasmError : int
+{
+	FILE_NOT_FOUND = -101,
+	ERROR_READING_FILE = -102,
+	INVALID_FILE_FORMAT = -103,
+	INVALID_MACRO_ARGUMENTS = -104,
+	INCOMPLETE_MACRO = -105,
+	UNEXPECTED_CHARACTERS = -106,
+	INVALID_ARGUMENT = -107,
+	ILLEGAL_INSTRUCTION = -108,
+	INVALID_OPERAND = -109,
+	INVALID_OPERAND_SIZE = -110,
+	OPERAND_SIZE_NOT_SPECIFIED = -111,
+	OPERAND_SIZES_DO_NOT_MATCH = -112,
+	INVALID_ADDRESS_SIZE = -113,
+	ADDRESS_SIZES_DO_NOT_AGREE = -114,
+	DISALLOWED_COMBINATION_OF_REGISTERS = -115,
+	LONG_IMMEDIATE_NOT_ENCODABLE = -116,
+	RELATIVE_JUMP_OUT_OF_RANGE = -117,
+	INVALID_EXPRESSION = -118,
+	INVALID_ADDRESS = -119,
+	INVALID_VALUE = -120,
+	VALUE_OUT_OF_RANGE = -121,
+	UNDEFINED_SYMBOL = -122,
+	INVALID_USE_OF_SYMBOL = -123,
+	NAME_TOO_LONG = -124,
+	INVALID_NAME = -125,
+	RESERVED_WORD_USED_AS_SYMBOL = -126,
+	SYMBOL_ALREADY_DEFINED = -127,
+	MISSING_END_QUOTE = -128,
+	MISSING_END_DIRECTIVE = -129,
+	UNEXPECTED_INSTRUCTION = -130,
+	EXTRA_CHARACTERS_ON_LINE = -131,
+	SECTION_NOT_ALIGNED_ENOUGH = -132,
+	SETTING_ALREADY_SPECIFIED = -133,
+	DATA_ALREADY_DEFINED = -134,
+	TOO_MANY_REPEATS = -135,
+	SYMBOL_OUT_OF_SCOPE = -136,
+	USER_ERROR = -140,
+	ASSERTION_FAILED = -141,
 };
 
+typedef struct _FasmLineHeader {
+	char* file_path;
+	int line_number;
+	union {
+		int file_offset;
+		int macro_offset_line;
+	};
+	_FasmLineHeader* macro_line;
+} LINE_HEADER;
 
-/** General errorsand conditions */
+typedef struct _FasmState {
+	FasmCondition condition;
+	union {
+		FasmError error_code;
+		int output_length;
+	};
+	union {
+		__int8* output_data;
+		_FasmLineHeader* error_data;
+	};
+} STATE;
 
-DWORD FASM_OK = 0; // FASM_STATE points to output
-DWORD FASM_WORKING = 1;
-DWORD FASM_ERROR = 2; // FASM_STATE contains error code
-DWORD FASM_INVALID_PARAMETER = -1;
-DWORD FASM_OUT_OF_MEMORY = -2;
-DWORD FASM_STACK_OVERFLOW = -3;
-DWORD FASM_SOURCE_NOT_FOUND = -4;
-DWORD FASM_UNEXPECTED_END_OF_SOURCE = -5;
-DWORD FASM_CANNOT_GENERATE_CODE = -6;
-DWORD FASM_FORMAT_LIMITATIONS_EXCEDDED = -7;
-DWORD FASM_WRITE_FAILED = -8;
-DWORD FASM_INVALID_DEFINITION = -9;
 
-/** Error codes for FASM_ERROR condition */
+std::map<FasmError, const char *> niceErrorNames = {
 
-DWORD FASMERR_FILE_NOT_FOUND = -101;
-DWORD FASMERR_ERROR_READING_FILE = -102;
-DWORD FASMERR_INVALID_FILE_FORMAT = -103;
-DWORD FASMERR_INVALID_MACRO_ARGUMENTS = -104;
-DWORD FASMERR_INCOMPLETE_MACRO = -105;
-DWORD FASMERR_UNEXPECTED_CHARACTERS = -106;
-DWORD FASMERR_INVALID_ARGUMENT = -107;
-DWORD FASMERR_ILLEGAL_INSTRUCTION = -108;
-DWORD FASMERR_INVALID_OPERAND = -109;
-DWORD FASMERR_INVALID_OPERAND_SIZE = -110;
-DWORD FASMERR_OPERAND_SIZE_NOT_SPECIFIED = -111;
-DWORD FASMERR_OPERAND_SIZES_DO_NOT_MATCH = -112;
-DWORD FASMERR_INVALID_ADDRESS_SIZE = -113;
-DWORD FASMERR_ADDRESS_SIZES_DO_NOT_AGREE = -114;
-DWORD FASMERR_DISALLOWED_COMBINATION_OF_REGISTERS = -115;
-DWORD FASMERR_LONG_IMMEDIATE_NOT_ENCODABLE = -116;
-DWORD FASMERR_RELATIVE_JUMP_OUT_OF_RANGE = -117;
-DWORD FASMERR_INVALID_EXPRESSION = -118;
-DWORD FASMERR_INVALID_ADDRESS = -119;
-DWORD FASMERR_INVALID_VALUE = -120;
-DWORD FASMERR_VALUE_OUT_OF_RANGE = -121;
-DWORD FASMERR_UNDEFINED_SYMBOL = -122;
-DWORD FASMERR_INVALID_USE_OF_SYMBOL = -123;
-DWORD FASMERR_NAME_TOO_LONG = -124;
-DWORD FASMERR_INVALID_NAME = -125;
-DWORD FASMERR_RESERVED_WORD_USED_AS_SYMBOL = -126;
-DWORD FASMERR_SYMBOL_ALREADY_DEFINED = -127;
-DWORD FASMERR_MISSING_END_QUOTE = -128;
-DWORD FASMERR_MISSING_END_DIRECTIVE = -129;
-DWORD FASMERR_UNEXPECTED_INSTRUCTION = -130;
-DWORD FASMERR_EXTRA_CHARACTERS_ON_LINE = -131;
-DWORD FASMERR_SECTION_NOT_ALIGNED_ENOUGH = -132;
-DWORD FASMERR_SETTING_ALREADY_SPECIFIED = -133;
-DWORD FASMERR_DATA_ALREADY_DEFINED = -134;
-DWORD FASMERR_TOO_MANY_REPEATS = -135;
-DWORD FASMERR_SYMBOL_OUT_OF_SCOPE = -136;
-DWORD FASMERR_USER_ERROR = -140;
-DWORD FASMERR_ASSERTION_FAILED = -141;
+	/** General errorsand conditions */
+
+	//{0, "OK"}, // STATE points to output
+	//{1, "WORKING"},
+	//{2, "ERROR"}, // STATE contains error code
+	//{-1, "INVALID_PARAMETER"},
+	//{-2, "OUT_OF_MEMORY"},
+	//{-3, "STACK_OVERFLOW"},
+	//{-4, "SOURCE_NOT_FOUND"},
+	//{-5, "UNEXPECTED_END_OF_SOURCE"},
+	//{-6, "CANNOT_GENERATE_CODE"},
+	//{-7, "FORMAT_LIMITATIONS_EXCEDDED"},
+	//{-8, "WRITE_FAILED"},
+	//{-9, "INVALID_DEFINITION"},
+
+	/** Error codes for ERROR condition */
+
+	{FasmError::FILE_NOT_FOUND, "FILE_NOT_FOUND"},
+	{FasmError::ERROR_READING_FILE, "ERROR_READING_FILE"},
+	{FasmError::INVALID_FILE_FORMAT, "INVALID_FILE_FORMAT"},
+	{FasmError::INVALID_MACRO_ARGUMENTS, "INVALID_MACRO_ARGUMENTS"},
+	{FasmError::INCOMPLETE_MACRO, "INCOMPLETE_MACRO"},
+	{FasmError::UNEXPECTED_CHARACTERS, "UNEXPECTED_CHARACTERS"},
+	{FasmError::INVALID_ARGUMENT, "INVALID_ARGUMENT"},
+	{FasmError::ILLEGAL_INSTRUCTION, "ILLEGAL_INSTRUCTION"},
+	{FasmError::INVALID_OPERAND, "INVALID_OPERAND"},
+	{FasmError::INVALID_OPERAND_SIZE, "INVALID_OPERAND_SIZE"},
+	{FasmError::OPERAND_SIZE_NOT_SPECIFIED, "OPERAND_SIZE_NOT_SPECIFIED"},
+	{FasmError::OPERAND_SIZES_DO_NOT_MATCH, "OPERAND_SIZES_DO_NOT_MATCH"},
+	{FasmError::INVALID_ADDRESS_SIZE, "INVALID_ADDRESS_SIZE"},
+	{FasmError::ADDRESS_SIZES_DO_NOT_AGREE, "ADDRESS_SIZES_DO_NOT_AGREE"},
+	{FasmError::DISALLOWED_COMBINATION_OF_REGISTERS, "DISALLOWED_COMBINATION_OF_REGISTERS"},
+	{FasmError::LONG_IMMEDIATE_NOT_ENCODABLE, "LONG_IMMEDIATE_NOT_ENCODABLE"},
+	{FasmError::RELATIVE_JUMP_OUT_OF_RANGE, "RELATIVE_JUMP_OUT_OF_RANGE"},
+	{FasmError::INVALID_EXPRESSION, "INVALID_EXPRESSION"},
+	{FasmError::INVALID_ADDRESS, "INVALID_ADDRESS"},
+	{FasmError::INVALID_VALUE, "INVALID_VALUE"},
+	{FasmError::VALUE_OUT_OF_RANGE, "VALUE_OUT_OF_RANGE"},
+	{FasmError::UNDEFINED_SYMBOL, "UNDEFINED_SYMBOL"},
+	{FasmError::INVALID_USE_OF_SYMBOL, "INVALID_USE_OF_SYMBOL"},
+	{FasmError::NAME_TOO_LONG, "NAME_TOO_LONG"},
+	{FasmError::INVALID_NAME, "INVALID_NAME"},
+	{FasmError::RESERVED_WORD_USED_AS_SYMBOL, "RESERVED_WORD_USED_AS_SYMBOL"},
+	{FasmError::SYMBOL_ALREADY_DEFINED, "SYMBOL_ALREADY_DEFINED"},
+	{FasmError::MISSING_END_QUOTE, "MISSING_END_QUOTE"},
+	{FasmError::MISSING_END_DIRECTIVE, "MISSING_END_DIRECTIVE"},
+	{FasmError::UNEXPECTED_INSTRUCTION, "UNEXPECTED_INSTRUCTION"},
+	{FasmError::EXTRA_CHARACTERS_ON_LINE, "EXTRA_CHARACTERS_ON_LINE"},
+	{FasmError::SECTION_NOT_ALIGNED_ENOUGH, "SECTION_NOT_ALIGNED_ENOUGH"},
+	{FasmError::SETTING_ALREADY_SPECIFIED, "SETTING_ALREADY_SPECIFIED"},
+	{FasmError::DATA_ALREADY_DEFINED, "DATA_ALREADY_DEFINED"},
+	{FasmError::TOO_MANY_REPEATS, "TOO_MANY_REPEATS"},
+	{FasmError::SYMBOL_OUT_OF_SCOPE, "SYMBOL_OUT_OF_SCOPE"},
+	{FasmError::USER_ERROR, "USER_ERROR"},
+	{FasmError::ASSERTION_FAILED, "ASSERTION_FAILED"},
+};
 
 const char * fasmPath = "ucp/code/vendor/fasm/fasm.dll";
 
@@ -129,16 +189,18 @@ int luaAssemble(lua_State* L) {
 
 	}
 
-	DWORD result = fasm_Assemble((void*)luaL_checkstring(L, 1), buffer, FASM_BUFFER_SIZE, 100, NULL);
-	FASM_STATE* state = (struct FASM_STATE*) buffer;
+	const char* script = luaL_checkstring(L, 1);
+	int result = fasm_Assemble((void*) script, buffer, BUFFER_SIZE, 100, NULL);
+	STATE* state = (STATE*) buffer;
 
-	if (result == FASM_OK) {
+	if (result == FasmCondition::OK) {
 		lua_pushlstring(L, (const char*) state->output_data, state->output_length);
 		return 1;
 	}
 	else {
-		if (result == FASM_ERROR) {
-			return luaL_error(L, ("error in script: " + std::to_string((int) state->error_code)).c_str());
+		Core::getInstance().log(Verbosity_INFO, "\n" + std::string(script));
+		if (result == FasmCondition::FERROR) {
+			return luaL_error(L, ("error in script: " + std::string(niceErrorNames.at(state->error_code)) + " (" + std::to_string((int)state->error_code) + ") at line: " + std::to_string((int)state->error_data->line_number)).c_str());
 		}
 		return luaL_error(L, ("assembling script failed: " + std::to_string(result)).c_str());
 	}
