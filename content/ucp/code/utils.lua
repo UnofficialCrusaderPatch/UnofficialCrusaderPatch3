@@ -453,7 +453,7 @@ end
 ---@param start number the starting address of the memory to start searching from
 ---@param stop number the last address of the memory to stop searching at
 ---@param unpacked boolean|nil optional whether to return result in unpacked form (default) or not
----@return ...number the address of target in memory, and the result of capture groups
+---@return ...number results the address of target in memory, and the result of capture groups
 function utils.AOBExtract(target, start, stop, unpacked)
     return AOBExtractor.extract(target, start, stop, unpacked)
 end
