@@ -40,6 +40,9 @@
 // Option parsing
 #include <vendor/cxxopts/include/cxxopts.hpp>
 
+// Debugging
+#include "debugging/DebugMemoryAllocation.h"
+
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
@@ -308,6 +311,7 @@ void Core::processCommandLineArguments() {
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
 		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
+		("ucp-debugging-memory-allocator", "Enable memory allocation logger", cxxopts::value<bool>()->default_value("false"))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
@@ -416,6 +420,10 @@ void Core::initialize() {
 	// Start of lua related initialization
 	RPS_initializeLua();
 	this->L = RPS_getLuaState();
+
+	if (optionsResult["ucp-debugging-memory-allocator"].as<bool>()) {
+		debugging::registerDebuggingMemoryAllocator(this->L);
+	}
 	
 	RPS_initializeLuaOpenLibs();
 
