@@ -40,7 +40,7 @@ namespace.AOB.retrieve = function(aob)
     error(debug.traceback("[data/cache]: AOB could not be found: " .. aob))
   end
   
-  log(VERBOSE, string.format("cache.AOB.retrieve: found: %X (%s)", aobs[aob], aob))
+  log(VERBOSE, string.format("cache.AOB.retrieve: found: 0x%X (for: %s)", aobs[aob], aob))
   return aobs[aob]
 end
 
