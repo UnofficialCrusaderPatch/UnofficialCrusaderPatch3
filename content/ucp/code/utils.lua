@@ -410,6 +410,7 @@ function AOBExtractor.parse(target)
 end
 
 function AOBExtractor.extract(target, start, stop, unpacked)
+	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, target: %s", unpacked, target))
     if unpacked == nil or unpacked == true then
         unpacked = true
     else
@@ -417,8 +418,10 @@ function AOBExtractor.extract(target, start, stop, unpacked)
     end
 
     local parsed = AOBExtractor.parse(target)
+	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, parsed: %s", unpacked, parsed.aob))
 
     local address = core.AOBScan(parsed.aob, start, stop)
+	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, found: 0x%X for parsed: %s", unpacked, address, parsed.aob))
 
     local results = {}
 
@@ -428,11 +431,13 @@ function AOBExtractor.extract(target, start, stop, unpacked)
         elseif group.type == "bytes" then
             table.insert(results, core.readBytes(address + (group.start - 1), group.size))
         elseif group.type == "relative_address" then
-            table.insert(results, 5 + address + core.readInteger(address + (group.start - 1) + 1))
+            table.insert(results, 5 + address + (group.start - 1) + core.readInteger(address + (group.start - 1) + 1))
         else
             error(string.format("Invalid group type: %s", group.type))
         end
     end
+	
+	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, first result: 0x%X", unpacked, results[1] or "nil|0"))
 
     if unpacked then
         return table.unpack({ address, table.unpack(results) })
