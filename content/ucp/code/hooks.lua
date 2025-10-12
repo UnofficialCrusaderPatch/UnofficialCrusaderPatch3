@@ -9,8 +9,11 @@ end
 
 ---In what environment is f executed?
 local function fireCallbacksForHook(hook)
-    for k, f in pairs(HOOKS[hook]) do
-        f()
+    for _, f in ipairs(HOOKS[hook]) do
+        local status, err = pcall(f)
+        if not status then
+            log(ERROR, string.format("error in 'afterInit' hook: %s", err))
+        end
     end
 end
 
