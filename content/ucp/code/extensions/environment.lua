@@ -192,6 +192,7 @@ local function createRestrictedEnvironment(name, path, forbidsGlobalAssignment, 
     env.log = prefixedLogFunction(name)
     env.print = prefixedPrintFunction(name)
     env.require = restrictedRequireFunction(path, env, allowBinary)
+	env.userdata = userdataInterface(path)
 
     if forbidsGlobalAssignment then
         env = setmetatable(env, {
