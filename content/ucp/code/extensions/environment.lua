@@ -71,7 +71,7 @@ local function restrictedRequireFunction(path, env, allow_binary)
 
 		local data = handle:read("*all")
 
-        local code, message = load(data, full_path:sub(-25), 't', env)
+        local code, message = load(data, "@" .. full_path, 't', env)
         if not code then
             error(message)
         end
