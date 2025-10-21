@@ -700,6 +700,10 @@ end
 
 core.GarbageCollectedObject = GarbageCollectedObject
 
+function core.allocateGarbageCollectedObject(size, zero)
+	return core.GarbageCollectedObject:new(core.allocate(size, zero))
+end
+
 ---Allocate the given string into memory and deallocate it when the returned object goes out of scope in lua
 ---@param str string the string to allocate in memory
 ---@return GarbageCollectedObject handle a handle to the garbage collected object
