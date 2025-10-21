@@ -329,7 +329,7 @@ end
   
   log(INFO, "loading " .. CONST_DEVCODE_PATH)
   
-  local f, err = load(f:read("*all"), CONST_DEVCODE_PATH)
+  local f, err = load(f:read("*all"), "@" .. CONST_DEVCODE_PATH, 't')
   if not f then
     log(INFO, "\t" .. err)
   end
