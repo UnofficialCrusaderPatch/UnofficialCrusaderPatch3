@@ -129,7 +129,7 @@ void Core::executeLuaMain() {
 				this->log(-3, "Could not execute main.lua: empty file");
 			}
 			else {
-				if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "ucp/code/main.lua", "t") != LUA_OK) {
+				if (luaL_loadbufferx(this->L, code.c_str(), code.size(), "@ucp/code/main.lua", "t") != LUA_OK) {
 					std::string errorMsg = std::string(lua_tostring(this->L, -1));
 					lua_pop(this->L, 1);
 					MessageBoxA(0, ("Failed to load main.lua: " + errorMsg).c_str(), "FATAL", MB_OK);

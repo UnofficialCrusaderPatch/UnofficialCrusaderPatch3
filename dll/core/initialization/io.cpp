@@ -88,7 +88,7 @@ void addIOFunctions(lua_State* L) {
 	lua_setfield(L, -2, "require"); //Overriding the global require
 
 	* But we can also do this: */
-	if (luaL_loadbufferx(L, ucp_code_pre.c_str(), ucp_code_pre.size(), "ucp/code/pre.lua", "t") != LUA_OK) {
+	if (luaL_loadbufferx(L, ucp_code_pre.c_str(), ucp_code_pre.size(), "@ucp/code/pre.lua", "t") != LUA_OK) {
 		std::cout << "ERROR in loading pre.lua" << lua_tostring(L, -1) << std::endl;
 		lua_pop(L, 1);
 	}
