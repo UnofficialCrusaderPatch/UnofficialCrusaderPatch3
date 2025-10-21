@@ -40,7 +40,7 @@ function BaseLoader:load()
 
 	local initData = handle:read("*all")
 
-    local initCode, message = load(initData, init_file_path, 't', self.env)
+    local initCode, message = load(initData, "@" .. init_file_path, 't', self.env)
     if not initCode then
         error(message)
     end
