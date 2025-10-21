@@ -43,6 +43,7 @@ if io.registerPathAlias == nil then
 end
 core = require('core')
 utils = require('utils')
+userdata = require("userdata")
 data = require('data')
 json = require('vendor.json.json')
 extensions = require('extensions')
