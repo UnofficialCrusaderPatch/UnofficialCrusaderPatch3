@@ -2,6 +2,8 @@
 
 #include "lua/LuaPathExists.h"
 #include "lua/LuaCustomOpenFile.h"
+#include "lua/LuaDirectories.h"
+#include "lua/LuaRemove.h"
 #include "lua/LuaLoadLibrary.h"
 #include "lua/yaml/LuaYamlParser.h"
 #include "lua/yaml/LuaYamlDumper.h"
@@ -17,8 +19,11 @@ void addIOFunctions(lua_State* L) {
 
 	lua_getfield(L, -1, "io");
 
+	lua_getfield(L, -1, "open");
+	lua_setfield(L, -2, "_open"); // Store the original function
+
 	lua_pushcfunction(L, LuaIO::luaIOCustomOpen);
-	lua_setfield(L, -2, "open");
+	lua_setfield(L, -2, "open"); // Override original open function
 
 	lua_pushcfunction(L, LuaIO::luaIOCustomOpenFilePointer);
 	lua_setfield(L, -2, "openFilePointer");
@@ -34,6 +39,12 @@ void addIOFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaIO::luaIOCustomWriteProtectedTempFileOpen);
 	lua_setfield(L, -2, "openWriteProtectedTempFile");
+
+	lua_pushcfunction(L, LuaIO::luaMakeDirectory);
+	lua_setfield(L, -2, "mkdir");
+
+	lua_pushcfunction(L, LuaIO::luaRemove);
+	lua_setfield(L, -2, "remove");
 
 	// Create ucrt subtable
 	lua_newtable(L);

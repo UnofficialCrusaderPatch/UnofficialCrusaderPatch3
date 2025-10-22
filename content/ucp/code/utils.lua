@@ -5,7 +5,7 @@ core = require('core')
 
 -- Creates a new memory allocation and returns its address.
 function utils.createLuaFunctionWrapper(callback)
-    newMemoryAllocation = core.allocate(6)
+    local newMemoryAllocation = core.allocate(6)
     core.writeInteger(newMemoryAllocation, 0x90909090) -- we will yoink this
     core.writeByte(newMemoryAllocation + 4, 0x90)
     core.writeByte(newMemoryAllocation + 5, 0xC3)
