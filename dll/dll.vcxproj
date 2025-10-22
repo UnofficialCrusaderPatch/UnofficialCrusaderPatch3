@@ -208,6 +208,9 @@
     <ClInclude Include="core\Core-path.h" />
     <ClInclude Include="core\initialization\ucp-internal.h" />
     <ClInclude Include="core\initialization\ucp-memory.h" />
+    <ClInclude Include="debugging\DebugExecutionLogger.h" />
+    <ClInclude Include="debugging\DebugMemoryAllocation.h" />
+    <ClInclude Include="debugging\DebugSettings.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="exceptions\MessageException.h" />
     <ClInclude Include="framework.h" />
@@ -255,6 +258,8 @@
     <ClCompile Include="core\Core-path.cpp" />
     <ClCompile Include="core\initialization\ucp-internal.cpp" />
     <ClCompile Include="core\initialization\ucp-memory.cpp" />
+    <ClCompile Include="debugging\DebugExecutiongLogger.cpp" />
+    <ClCompile Include="debugging\DebugMemoryAllocation.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="io\files.cpp" />
     <ClCompile Include="io\modules\module_utils.cpp" />
@@ -279,6 +284,7 @@
     <ClCompile Include="vendor\MemoryModule\MemoryModule.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="debugging\README.md" />
     <None Include="Directory.Build.props" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

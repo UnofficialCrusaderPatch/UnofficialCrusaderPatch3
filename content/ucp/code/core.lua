@@ -248,14 +248,17 @@ function core.AOBScan(target, start, stop)
     if start == nil and stop ~= nil then
         error("start value cannot be nil")
     end
+	
+	log(VERBOSE, string.format("core.AOBScan: %s, %s, %s", target, start, stop))
     
     if start == nil and stop == nil then
       -- Consider using the cache
       return data.cache.AOB.retrieve(target)
     end
     
+	log(VERBOSE, string.format("core.AOBScan: nocache: %s, %s, %s", target, start, stop))
     result = core.scanForAOB(target, start, stop)
-
+	log(VERBOSE, string.format("core.AOBScan: nocache: result: %X, %s, %s, %s", result, target, start, stop))
     if not result then
         error(debug.traceback("AOB not found: " .. target))
     end
