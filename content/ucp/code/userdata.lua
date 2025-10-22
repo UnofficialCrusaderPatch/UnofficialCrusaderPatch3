@@ -1,3 +1,7 @@
+---@type ucpiolib
+local io = io
+
+local _open = io._open
 local USERDATA_SUBFOLDER = "ucp/userdata"
 
 local _, pResourceManager = utils.AOBExtract("A1 I( ? ? ? ? ) 89 46 74 33 C0 39 ? ? ? ? ? 7E 16")
@@ -11,7 +15,32 @@ local _getDocumentsFolderString = core.exposeCode(pGetDocumentsFolderString, 3, 
 local addr = core.AOBScan("8D 44 24 ? 50 B9 ? ? ? ? E8 ? ? ? ? BE 10 00 00 00 39 70 18 72 05 8b 48 04 eb 03 8d 48 04 8d 94 24 ? ? ? ? 8b ff")
 local StringSize = core.readByte(addr + 3) + 4
 
-local function getDocumentsFolderPath()
+local ENSURED = false
+
+local CONFIG = {
+	location = "user", -- alternative is "ucp"
+}
+
+---@param key string
+---@param value string?
+local function configure(key, value)
+	if value == nil then
+		return CONFIG[key]
+	end
+	CONFIG[key] = value
+end
+
+local function cleanup(path)
+	path = path:gsub("\\", "/")
+	while path:sub(-1) == "/" do
+		path = path:sub(1, -2)
+	end
+	return path
+end
+
+local function getCrusaderUserPath()
+	if CONFIG.location == "ucp" then return "." end
+
 	local StackString = core.allocateGarbageCollectedObject(StringSize)
 	local pStackString = StackString.address
 	local str = _getDocumentsFolderString(pResourceManager, pStackString, 1)
@@ -21,16 +50,23 @@ local function getDocumentsFolderPath()
 		pString = core.readInteger(pString)
 		result = core.readString(pString)
 		free(pString)
-		return result
+		return cleanup(result)
 	end
 	
-	result = core.readString(pString):gsub("\\", "/")
+	result = core.readString(pString)
 	
-	return result
+	return cleanup(result)
 end
 
 local function getUserDataPath()
-	return string.format("%s/%s", getDocumentsFolderPath(), USERDATA_SUBFOLDER)
+	local path = string.format("%s/%s", getCrusaderUserPath(), USERDATA_SUBFOLDER)
+
+	if not ENSURED then
+		ENSURED = true
+		io.mkdir(path, true)
+	end
+
+	return path
 end
 
 ---@param path string the to be sanitized path
@@ -38,7 +74,7 @@ end
 local function sanitizePath(path)
 	local parts = {}
 	for match in string.gmatch(path, "([^/]+)") do 
-		sanitized = match:match("^([a-zA-Z0-9.~-]+)$")
+		local sanitized = match:match("^([a-zA-Z0-9.~-]+)$")
 		if (not sanitized) or (sanitized:find("%.%.") ~= nil) then 
 			error(string.format("malformed path: %s => '%s'", path, match))
 		end
@@ -56,42 +92,70 @@ local function getPathInUserDataFolder(path)
 	return string.format("%s/%s", getUserDataPath(), sanitized)
 end
 
-local function createExtensionInterface(extensionName)
-	local versionPath = getPathInUserDataFolder(string.format("%s/meta.json", extensionName))
-	local handle, err = io.open(versionPath, "r")
-	if not handle then -- doesn't exist
-		local writeHandle, err = io.open(versionPath, "w")
-		if not writeHandle then error(err) end
-		writeHandle:write(json:encode({ version = "1.0.0" }))
-		writeHandle:close()
+local INITIALIZED = false
 
-		handle, err = io.open(versionPath, "r")
-		if not handle then error(err) end
-	end
-	local contents = handle:read("*all")
-	local meta = json:decode(contents)
+hooks.registerHookCallback("afterInit", function()
+	INITIALIZED = true
+end)
 
-	return {
-		version = meta.version, -- contains the last known file format version for all the data in this extension folder
-		setVersion = function(self, newVersion)
-			local writeHandle, err = io.open(versionPath, "w")
+---@param extensionName string
+---@return fun():UserDataInterface
+local function prepareExtensionInterface(extensionName)
+	if type(extensionName) ~= "string" then error("invalid extension name") end
+
+	return function() 
+
+		if INITIALIZED == false then return nil end
+
+		local base = getPathInUserDataFolder(extensionName)
+
+		local status, err = io.mkdir(base, true)
+		if not status then error(err) end
+
+		local versionPath = getPathInUserDataFolder(string.format("%s/meta.json", extensionName))
+		local handle, err = _open(versionPath, "r")
+		if not handle then -- doesn't exist
+			local writeHandle, err = _open(versionPath, "w")
 			if not writeHandle then error(err) end
-			meta.version = newVersion
-			writeHandle:write(json:encode(meta))
+			writeHandle:write(json:encode({ version = "1.0.0", meta = { version = "1.0.0", } }))
 			writeHandle:close()
-		end,
-		open = function(self, path, ...)
-			local sanitizedPath = getPathInUserDataFolder(string.format("%s/%s", extensionName, path))
-			return io.open(sanitizedPath, ...)
-		end,
-		mkdir = function(self, path)
-			error("not yet implemented")
-		end,
-	}
+
+			handle, err = _open(versionPath, "r")
+			if not handle then error(err) end
+		end
+		local contents = handle:read("*all")
+		local meta = json:decode(contents)
+
+
+		---@type UserDataInterface
+		local interface = {
+			version = meta.version, -- contains the last known file format version for all the data in this extension folder
+			setVersion = function(self, newVersion)
+				local writeHandle, err = _open(versionPath, "w")
+				if not writeHandle then error(err) end
+				meta.version = newVersion
+				writeHandle:write(json:encode(meta))
+				writeHandle:close()
+			end,
+			open = function(self, path, ...)
+				local sanitizedPath = getPathInUserDataFolder(string.format("%s/%s", extensionName, path))
+				return _open(sanitizedPath, ...)
+			end,
+			mkdir = function(self, path, parents)
+				return io.mkdir(getPathInUserDataFolder(string.format("%s/%s", extensionName, path)), parents)
+			end,
+			remove = function(self, path, recurse)
+				return io.remove(getPathInUserDataFolder(string.format("%s/%s", extensionName, path)), recurse)
+			end,
+		}
+
+		return interface
+	end
 end
 
 return {
-	getDocumentsFolderPath = getDocumentsFolderPath,
+	getCrusaderUserPath = getCrusaderUserPath,
 	getPathInUserDataFolder = getPathInUserDataFolder,
-	createExtensionInterface = createExtensionInterface,
+	prepareExtensionInterface = prepareExtensionInterface,
+	configure = configure,
 }

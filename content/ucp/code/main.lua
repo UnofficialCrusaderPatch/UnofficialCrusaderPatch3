@@ -2,13 +2,8 @@
 LUA_API_VERSION = "1.0.0"
 UCP_VERSION = "3.0.0"
 
---- @deprecated
----Variable to indicate to show debug information
--- DEBUG = true
-
----Change the ucp working directory based on an environment variable
----@extrecated UCP_DIR is now handled in the dll part
----@param UCP_DIR string path to the ucp directory
+---UCP_DIR is set in the dll part
+---@type string path to the ucp directory
 UCP_DIR = os.getenv("UCP_DIR")
 if UCP_DIR then
   print("[main]: Using UCP_DIR: " .. UCP_DIR)
@@ -22,7 +17,7 @@ require("constants")
 CONFIG_FILE = CONST_DEFAULT_CONFIG_FILE
 
 ---Change the config path based on an environment variable
----@param UCP_CONFIG string full path to the config file
+---@type string full path to the config file
 UCP_CONFIG = os.getenv(CONST_ENV_UCP_CONFIG)
 
 if UCP_CONFIG then
@@ -41,18 +36,21 @@ if io.registerPathAlias == nil then
     io.registerPathAlias = ucp.internal.registerPathAlias
   end
 end
+require("logging")
+data = require('data')
 core = require('core')
 utils = require('utils')
+hooks = require('hooks')
 userdata = require("userdata")
-data = require('data')
+
 json = require('vendor.json.json')
 extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
-hooks = require('hooks')
+
 config = require('config')
 version = require('version')
 
-require("logging")
+
 
 -- Arg parsing
 if #arg > 0 then
