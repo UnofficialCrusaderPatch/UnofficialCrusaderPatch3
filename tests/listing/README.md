@@ -38,7 +38,17 @@ ZIP files, missing/file paths, invalid paths, and subsequent ZIP reads. CI runs
 on Windows and Linux; Windows includes the same Windows headers before the
 helpers as the DLL does.
 
-These standalone tests do not build the complete UCP DLL or execute its Lua
-bridge in the game. A full backend build and an in-game traversal smoke test
+Another suite compiles the four production Lua listing function bodies and both
+production Core path routers against real Lua 5.4.6, with controlled Core and
+mount services. Its 104 Lua assertions cover modules and plugins stored as folders
+or ZIPs, relocated physical roots, virtual roots with/without a slash, subfolders,
+aliases, both deprecated APIs, and error messages containing percent characters.
+The CMake harness removes only the production include directives; it does not
+rewrite the tested function bodies. The mount service delegates to the production
+listing helpers; extension discovery, security checks and other backend services
+are outside this test boundary.
+
+These tests do not build the complete UCP DLL or execute its Lua bridge in the
+game. A full backend build and an in-game traversal smoke test
 remain required before deploying this runtime change. The recorder must not
 treat an old backend's empty ZIP listing as proof of matching extension contents.
