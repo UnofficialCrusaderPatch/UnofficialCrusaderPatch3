@@ -9,7 +9,7 @@ namespace ExtensionListing {
 inline std::vector<std::string> zip(zip_t* archive, const std::string& path, bool directories) {
 	Children children(path, directories);
 	const auto count = zip_entries_total(archive);
-	if (count < 0 || count > std::numeric_limits<int>::max()) throw std::runtime_error("Cannot list extension ZIP entries");
+	if (count < 0 || count > (std::numeric_limits<int>::max)()) throw std::runtime_error("Cannot list extension ZIP entries");
 	for (int i = 0; i < count; ++i) {
 		if (zip_entry_openbyindex(archive, i) != 0) throw std::runtime_error("Cannot open extension ZIP entry");
 		try {

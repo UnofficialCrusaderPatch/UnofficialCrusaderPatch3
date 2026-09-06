@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <windows.h> // Match the DLL's include order, including its min/max macros.
+#endif
 #include "io/modules/ZipDirectoryListing.h"
 #include <fstream>
 #include <iostream>
