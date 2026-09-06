@@ -216,6 +216,8 @@
     <ClInclude Include="io\modules\FolderFileModuleHandle.h" />
     <ClInclude Include="io\modules\LibraryStore.h" />
     <ClInclude Include="io\modules\ModuleHandle.h" />
+    <ClInclude Include="io\modules\DirectoryListing.h" />
+    <ClInclude Include="io\modules\ZipDirectoryListing.h" />
     <ClInclude Include="io\modules\ModuleManager.h" />
     <ClInclude Include="io\modules\module_utils.h" />
     <ClInclude Include="io\modules\TempFileExtensionHandle.h" />

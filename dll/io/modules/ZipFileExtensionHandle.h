@@ -1,5 +1,7 @@
 #pragma once
 
+#include "io/modules/ZipDirectoryListing.h"
+
 #include "io/modules/ModuleHandle.h"
 
 class ZipFileExtensionHandle : public virtual ExtensionHandle {
@@ -175,74 +177,22 @@ public:
 	}
 
 	std::vector<std::string> listDirectories(const std::string& path) {
-		std::vector<std::string> result;
-
-		//Not sure sanitization is necessary, because zip files cannot really handle weird path names anyway...
-		std::string sanitizedPath;
-		if (!sanitizeRelativePath(path, sanitizedPath)) {
-			throw ModuleHandleException("invalid path: " + path);
+		try {
+			return ExtensionListing::zip(z, path, true);
 		}
-
-		int count = 0;
-
-		std::filesystem::path haystack = std::filesystem::path(path);
-
-		int i, n = zip_entries_total(z);
-		for (i = 0; i < n; ++i) {
-			zip_entry_openbyindex(z, i);
-			{
-				const char* name = zip_entry_name(z);
-				int isdir = zip_entry_isdir(z);
-				// Only directories
-				if (isdir) {
-					// Only subdirectories of the directly requested path
-					std::filesystem::path needle = std::filesystem::path(name);
-					std::filesystem::path optionA = haystack.lexically_relative(needle);
-					if (optionA.string() == "..") {
-						result.push_back(name);
-					}
-				}
-			}
-			zip_entry_close(z);
+		catch (const std::exception& e) {
+			throw ModuleHandleException(e.what());
 		}
-
-		return result;
 	}
-
 
 	std::vector<std::string> listFiles(const std::string& path) {
-		std::vector<std::string> result;
-
-		//Not sure sanitization is necessary, because zip files cannot really handle weird path names anyway...
-		std::string sanitizedPath;
-		if (!sanitizeRelativePath(path, sanitizedPath)) {
-			throw ModuleHandleException("invalid path: " + path);
+		try {
+			return ExtensionListing::zip(z, path, false);
 		}
-
-		int count = 0;
-
-		std::filesystem::path haystack = std::filesystem::path(path);
-
-		int i, n = zip_entries_total(z);
-		for (i = 0; i < n; ++i) {
-			zip_entry_openbyindex(z, i);
-			{
-				const char* name = zip_entry_name(z);
-				int isdir = zip_entry_isdir(z);
-				// Only non-directories
-				if (!isdir) {
-					// Only subfiles of the directly requested path
-					std::filesystem::path needle = std::filesystem::path(name);
-					std::filesystem::path optionA = haystack.lexically_relative(needle);
-					if (optionA.string() == "..") {
-						result.push_back(name);
-					}
-				}
-			}
-			zip_entry_close(z);
+		catch (const std::exception& e) {
+			throw ModuleHandleException(e.what());
 		}
-
-		return result;
 	}
+
 
 };
