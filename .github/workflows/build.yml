@@ -1,7 +1,12 @@
 name: 'Build UCP3 for testing'
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      rps_preview:
+        description: Use the pinned RPS 1.5.3 CI artifact for the unique-AOB integration preview
+        type: boolean
+        default: false
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -19,6 +24,28 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.3.1
 
+
+    - name: Use the tested RPS candidate without publishing NuGet
+      if: inputs.rps_preview
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $run = gh api repos/Krarilotus/RuntimePatchingSystem/actions/runs/34712589318 | ConvertFrom-Json
+        if ($LASTEXITCODE -ne 0 -or $run.conclusion -ne 'success' -or
+            $run.head_sha -ne 'e958409eeda646b8b518d2b858933f543838c449') {
+          throw 'The pinned RPS source build is unavailable or did not pass'
+        }
+        gh run download 34712589318 --repo Krarilotus/RuntimePatchingSystem --name NuGet --dir rps-preview-feed
+        if ($LASTEXITCODE -ne 0) { throw 'Could not download the RPS CI package' }
+        $package = './rps-preview-feed/RPS.1.5.3.nupkg'
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $package).Hash.ToLower() -ne
+            '1054223d0d21e257309500b74a57bdada50a7f9e8ee90811c78fba9f2ee4e6de') {
+          throw 'RPS candidate package identity differs from the tested artifact'
+        }
+        nuget sources add -Name rps-integration-preview -Source (Get-Item ./rps-preview-feed).FullName
+        if ($LASTEXITCODE -ne 0) { throw 'Could not register the runner-local RPS feed' }
 
     - name: Prepare signing by exporting secret to file
       shell: pwsh
