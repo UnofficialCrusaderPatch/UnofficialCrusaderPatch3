@@ -40,6 +40,24 @@ namespace.AOB.retrieve = function(aob)
   return aobs[aob]
 end
 
+-- Unique code bindings must be rechecked even when their cached bytes still
+-- match. Only publish a verified result into the existing shared AOB cache.
+namespace.AOB.retrieveUnique = function(aob, name)
+  local label = name or aob
+  if type(ucp.internal.scanForAOBInMainModule) ~= "function" then
+    error("Unique AOB resolution requires the RPS main-module scanner: " .. label)
+  end
+  local first, second = ucp.internal.scanForAOBInMainModule(aob)
+  if second and second ~= 0 then
+    error(string.format("Ambiguous executable AOB for %s: 0x%X and 0x%X", label, first, second))
+  end
+  if not first or first == 0 then
+    error("Executable AOB not found for " .. label .. ": " .. aob)
+  end
+  aobs[aob] = first
+  return first
+end
+
 namespace.AOB.dumpToFile = function()
   log(DEBUG, "[data/cache]: dumping cache to file")
   local handle, err = io.open(AOB_CACHE_FILENAME, "w")

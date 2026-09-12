@@ -262,6 +262,16 @@ function core.AOBScan(target, start, stop)
     return result
 end
 
+---Resolve an unambiguous instruction pattern in the main executable's code.
+---The ordinary AOB cache is retained, but a cache hit does not establish uniqueness.
+---Run during module preparation, before any owner patches the identifying bytes.
+---@param target string AOB pattern (same syntax as AOBScan)
+---@param name string|nil binding name included in initialization diagnostics
+---@return number address
+function core.AOBScanUnique(target, name)
+    return data.cache.AOB.retrieveUnique(target, name)
+end
+
 ---Hook game code execution to a lua function, and expose the original game code with a function (returned).
 ---The hooked function will be called with `argCount` arguments, all numbers (integers).
 ---The lua function that allows calling the original function is returned

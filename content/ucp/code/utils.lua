@@ -409,7 +409,7 @@ function AOBExtractor.parse(target)
     }
 end
 
-function AOBExtractor.extract(target, start, stop, unpacked)
+function AOBExtractor.extract(target, start, stop, unpacked, resolver)
 	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, target: %s", unpacked, target))
     if unpacked == nil or unpacked == true then
         unpacked = true
@@ -420,7 +420,7 @@ function AOBExtractor.extract(target, start, stop, unpacked)
     local parsed = AOBExtractor.parse(target)
 	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, parsed: %s", unpacked, parsed.aob))
 
-    local address = core.AOBScan(parsed.aob, start, stop)
+    local address = (resolver or core.AOBScan)(parsed.aob, start, stop)
 	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, found: 0x%X for parsed: %s", unpacked, address, parsed.aob))
 
     local results = {}
@@ -461,6 +461,18 @@ end
 ---@return ...number results the address of target in memory, and the result of capture groups
 function utils.AOBExtract(target, start, stop, unpacked)
     return AOBExtractor.extract(target, start, stop, unpacked)
+end
+
+---AOBExtract with uniqueness verified in the main executable's code before decoding.
+---Capture syntax and packed/unpacked results are identical to AOBExtract.
+---@param target string instruction pattern with capture groups
+---@param name string|nil binding name for initialization diagnostics
+---@param unpacked boolean|nil defaults to true
+---@return ...number results
+function utils.AOBExtractUnique(target, name, unpacked)
+    return AOBExtractor.extract(target, nil, nil, unpacked, function(pattern)
+        return core.AOBScanUnique(pattern, name)
+    end)
 end
 
 return utils
