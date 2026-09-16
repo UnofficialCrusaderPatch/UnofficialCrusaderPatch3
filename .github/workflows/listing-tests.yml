@@ -1,0 +1,19 @@
+name: Extension directory listing tests
+on:
+  pull_request:
+  push:
+    branches: [fix/zip-directory-listing]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S tests/listing -B build-listing
+      - run: cmake --build build-listing --config Release
+      - run: ctest --test-dir build-listing -C Release --output-on-failure

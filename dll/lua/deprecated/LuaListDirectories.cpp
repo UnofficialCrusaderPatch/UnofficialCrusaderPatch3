@@ -67,43 +67,50 @@ namespace LuaIO {
 			Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
 		}
 
+		// Include extension roots without a trailing slash in virtual path routing.
+		const std::string listingPath = sanitizedPath.back() == '/' ? sanitizedPath : sanitizedPath + "/";
+
 		std::string extension;
 		std::string insideExtensionPath;
 		std::string basePath;
 		ModuleHandle* mh;
 
-		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInModuleDirectory(listingPath, extension, basePath, insideExtensionPath)) {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
+
+				std::vector<std::string> entries = mh->listDirectories(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/modules/" + extension + "/" + entry;
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+				}
+
+				return entries.size();
 			}
-			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+			catch (const std::exception& e) {
+				return luaL_error(L, "%s", e.what());
 			}
 
-			std::vector<std::string> entries = mh->listDirectories(rawPath);
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-			}
-
-			return entries.size();
 		}
 
 		ExtensionHandle* eh;
 
-		if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInPluginDirectory(listingPath, extension, basePath, insideExtensionPath)) {
 			try {
 				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+
+				std::vector<std::string> entries = eh->listDirectories(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/plugins/" + extension + "/" + entry;
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+				}
+
+				return entries.size();
 			}
-			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+			catch (const std::exception& e) {
+				return luaL_error(L, "%s", e.what());
 			}
 
-			std::vector<std::string> entries = eh->listDirectories(rawPath);
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-			}
-
-			return entries.size();
 		}
 
 		lua_pushstring(L, sanitizedPath.c_str());
