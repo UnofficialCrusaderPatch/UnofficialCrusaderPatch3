@@ -40,6 +40,11 @@
 // Option parsing
 #include <vendor/cxxopts/include/cxxopts.hpp>
 
+// Debugging
+#include "debugging/DebugMemoryAllocation.h"
+#include "debugging/DebugExecutionLogger.h"
+#include "debugging/DebugSettings.h"
+
 
 void addUtilityFunctions(lua_State* L) {
 	// Put the 'ucp.internal' on the stack
@@ -308,6 +313,9 @@ void Core::processCommandLineArguments() {
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
 		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
+		("ucp-debugging-memory-allocator", "Enable memory allocation logger", cxxopts::value<bool>()->default_value("false"))
+		("ucp-debugging-execution-logger", "Enable lua_sethook to log every lua line", cxxopts::value<bool>()->default_value("false"))
+		("ucp-debugging-aggressive-gc", "Enable lua_sethook aggressive gc (must be used with other lua_sethook option)", cxxopts::value<bool>()->default_value("false"))
 		;
 
 	// For wstring, see https://github.com/jarro2783/cxxopts/issues/299
@@ -368,6 +376,8 @@ bool Core::setProcessDirectory() {
 	return true;
 }
 
+
+
 void Core::initialize() {
 
 	if (this->isInitialized) {
@@ -416,6 +426,19 @@ void Core::initialize() {
 	// Start of lua related initialization
 	RPS_initializeLua();
 	this->L = RPS_getLuaState();
+
+	if (optionsResult["ucp-debugging-memory-allocator"].as<bool>()) {
+		debugging::registerDebuggingMemoryAllocator(this->L);
+	}
+
+	if (optionsResult["ucp-debugging-execution-logger"].as<bool>()) {
+		lua_sethook(L, debugging::logExecution, LUA_MASKLINE, NULL);
+	}
+
+	if (optionsResult["ucp-debugging-aggressive-gc"].as<bool>()) {
+		debugging::DebugSettings::getInstance().aggressiveGC = true;
+		lua_gc(L, LUA_GCSETPAUSE, 0);
+	}
 	
 	RPS_initializeLuaOpenLibs();
 

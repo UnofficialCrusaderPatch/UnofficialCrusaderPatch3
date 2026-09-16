@@ -21,6 +21,7 @@ namespace.AOB.loadFromFile = function()
 end
 
 namespace.AOB.retrieve = function(aob)
+  log(VERBOSE, string.format("cache.AOB.retrieve: %s", aob))
   local addr = aobs[aob]
   
   if addr ~= nil then
@@ -28,15 +29,18 @@ namespace.AOB.retrieve = function(aob)
     if checkaddr ~= addr then
       aobs = {} -- invalidate the cache
     else
+		log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
       return addr
     end
   end
   
+  log(VERBOSE, string.format("cache.AOB.retrieve: searching for: %s", aob))
   aobs[aob] = core.scanForAOB(aob)
   if aobs[aob] == nil then
     error(debug.traceback("[data/cache]: AOB could not be found: " .. aob))
   end
   
+  log(VERBOSE, string.format("cache.AOB.retrieve: found: 0x%X (for: %s)", aobs[aob], aob))
   return aobs[aob]
 end
 

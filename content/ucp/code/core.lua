@@ -248,6 +248,8 @@ function core.AOBScan(target, start, stop)
     if start == nil and stop ~= nil then
         error("start value cannot be nil if stop is specified")
     end
+	
+	log(VERBOSE, string.format("core.AOBScan: %s, %s, %s", target, start, stop))
     
     -- This test against nil is here because of module load ordering in main.lua
     if data ~= nil then
@@ -264,8 +266,9 @@ function core.AOBScan(target, start, stop)
         if result ~= nil then return result end
     end
     
+	log(VERBOSE, string.format("core.AOBScan: nocache: %s, %s, %s", target, start, stop))
     result = core.scanForAOB(target, start, stop)
-
+	log(VERBOSE, string.format("core.AOBScan: nocache: result: %X, %s, %s, %s", result, target, start, stop))
     if not result then
         error(debug.traceback("AOB not found: " .. target))
     end
