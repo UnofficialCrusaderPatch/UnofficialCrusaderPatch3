@@ -38,6 +38,8 @@ end
 -- end
 
 local function contains(t, obj)
+  if t == nil then return false end
+
 	for k, v in pairs(t) do
 		if v == obj then return true end
 	end
@@ -118,11 +120,7 @@ end
 
 local ExtensionProxy = function(obj, options)
 
-  local options = options or {
-    ignored = {
-
-    },
-  }
+  local options = options or {}
 
   local filteredOutFunctions = {
     "enable",
