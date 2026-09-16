@@ -100,7 +100,7 @@ local SPECIAL_DIRECTORIES = {
 ---
 ---@param path string path to the file to be opened
 ---@param specialDirectories table table of directories that should receive special treatment
----@return table
+---@return fun(filename: string, mode: string):file
 local function ucpRestrictedOpenFileFunction(path, specialDirectories)
     local specialDirectories = specialDirectories or SPECIAL_DIRECTORIES
 
@@ -194,7 +194,7 @@ local function createRestrictedEnvironment(name, path, forbidsGlobalAssignment, 
     env.require = restrictedRequireFunction(path, env, allowBinary)
     ---@type PreUserDataInterface
 	env.userdata = {
-        interface = userdata.prepareExtensionInterface(name),
+        interface = data.userdata.prepareExtensionInterface(name),
     }
 
     if forbidsGlobalAssignment then

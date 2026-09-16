@@ -20,3 +20,7 @@ function UserDataInterface:setVersion(version) end
 
 ---@class PreUserDataInterface
 ---@field interface fun():UserDataInterface
+
+---@type PreUserDataInterface
+ ---@diagnostic disable-next-line: return-type-mismatch
+userdata = {interface = function() return {} end,}

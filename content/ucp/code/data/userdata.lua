@@ -1,8 +1,10 @@
+local utils = require('utils')
+
 ---@type ucpiolib
 local io = io
 
 ---@module "userdatalib"
-local userdata
+local userdata = {}
 
 local _open = io._open
 local USERDATA_SUBFOLDER = "ucp/userdata"

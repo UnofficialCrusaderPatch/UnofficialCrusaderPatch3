@@ -36,22 +36,20 @@ if io.registerPathAlias == nil then
     io.registerPathAlias = ucp.internal.registerPathAlias
   end
 end
+
 require("logging")
-data = require('data')
-core = require('core')
-utils = require('utils')
-hooks = require('hooks')
-
----@type userdatalib
-userdata = require("userdata")
-
 json = require('vendor.json.json')
-extensions = require('extensions')
 sha = require("vendor.pure_lua_SHA.sha2")
+
+core = require('core')
+hooks = require('hooks')
+data = require('data')
+utils = require('utils')
+
+extensions = require('extensions')
 
 config = require('config')
 version = require('version')
-
 
 
 -- Arg parsing
