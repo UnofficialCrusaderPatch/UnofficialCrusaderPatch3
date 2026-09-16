@@ -41,6 +41,8 @@ data = require('data')
 core = require('core')
 utils = require('utils')
 hooks = require('hooks')
+
+---@type userdatalib
 userdata = require("userdata")
 
 json = require('vendor.json.json')
