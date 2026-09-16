@@ -41,6 +41,9 @@ if io.registerPathAlias == nil then
     io.registerPathAlias = ucp.internal.registerPathAlias
   end
 end
+
+require("logging")
+
 core = require('core')
 utils = require('utils')
 data = require('data')
@@ -51,7 +54,7 @@ hooks = require('hooks')
 config = require('config')
 version = require('version')
 
-require("logging")
+
 
 -- Arg parsing
 if #arg > 0 then
