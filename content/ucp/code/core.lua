@@ -246,14 +246,24 @@ end
 function core.AOBScan(target, start, stop)
     local result
     if start == nil and stop ~= nil then
-        error("start value cannot be nil")
+        error("start value cannot be nil if stop is specified")
     end
 	
 	log(VERBOSE, string.format("core.AOBScan: %s, %s, %s", target, start, stop))
     
-    if start == nil and stop == nil then
-      -- Consider using the cache
-      return data.cache.AOB.retrieve(target)
+    -- This test against nil is here because of module load ordering in main.lua
+    if data ~= nil then
+        -- Consider using the cache
+        result = data.cache.AOB.retrieve(target)
+        if result ~= nil then
+            if start ~= nil and result < start then
+                result = nil
+            elseif stop ~= nil and result > stop then
+                result = nil
+            end   
+        end
+        -- return cached result
+        if result ~= nil then return result end
     end
     
 	log(VERBOSE, string.format("core.AOBScan: nocache: %s, %s, %s", target, start, stop))

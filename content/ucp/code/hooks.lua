@@ -1,6 +1,10 @@
 local HOOKS = {}
 HOOKS.afterInit = {}
 
+---@alias Hooks "afterInit"
+
+---@param hook Hooks
+---@param f fun():void
 local function registerHookCallback(hook, f)
     if hook == "afterInit" then
         table.insert(HOOKS.afterInit, f)
