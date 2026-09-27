@@ -43,6 +43,11 @@ for _,kind in ipairs({'modules','plugins'}) do
   assert(table.concat(directories(root..suffix),',')==root..'/code/')
   assert(oldFiles(root..suffix)==root..'/definition.yml')
   assert(oldDirectories(root..suffix)==root..'/code/')
+  local alias='ucp/'..kind..'/sample'..suffix
+  assert(table.concat(files(alias),',')==root..'/definition.yml')
+  assert(table.concat(directories(alias),',')==root..'/code/')
+  assert(oldFiles(alias)==root..'/definition.yml')
+  assert(oldDirectories(alias)==root..'/code/')
  end
  for _,suffix in ipairs({'code','code/'}) do
   assert(table.concat(files(root..'/'..suffix),',')==root..'/code/main.lua')

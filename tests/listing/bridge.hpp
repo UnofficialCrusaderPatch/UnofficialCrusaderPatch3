@@ -28,6 +28,13 @@ public:
 		std::replace(path.begin(), path.end(), '\\', '/'); result = path; return !path.empty();
 	}
 	bool resolveAliasedPath(std::string& path) {
+		for (const std::string kind : {"modules", "plugins"}) {
+			const std::string alias = "ucp/" + kind + "/sample/";
+			if (path.rfind(alias, 0) == 0) {
+				path = "ucp/" + kind + "/sample-1.0.0/" + path.substr(alias.size());
+				return true;
+			}
+		}
 		if (path.rfind("test-alias/", 0) != 0) return false;
 		path = "ucp/modules/sample-1.0.0/" + path.substr(11); return true;
 	}

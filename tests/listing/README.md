@@ -5,7 +5,8 @@ for both folder and ZIP extensions. For example, listing
 `ucp/modules/example-1.0.0/code/` returns
 `ucp/modules/example-1.0.0/code/main.lua` and/or
 `ucp/modules/example-1.0.0/code/nested/`, as appropriate. Root paths work with
-or without a trailing slash. Returned directories end in `/`.
+or without a trailing slash, including versionless aliases such as
+`ucp/modules/winProcHandler`. Returned directories end in `/`.
 
 The old Lua bridge supplied a full virtual path to ZIP handlers that compared it
 with archive-relative entry names. Those handlers also required explicit folder

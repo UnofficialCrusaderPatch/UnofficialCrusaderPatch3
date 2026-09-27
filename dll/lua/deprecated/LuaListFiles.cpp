@@ -46,20 +46,19 @@ namespace LuaIO {
 		if (!Core::getInstance().sanitizePath(rawPath, sanitizedPath)) {
 			return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 		}
+		// Listing paths denote directories; aliases and extension routing expect a trailing slash.
+		if (sanitizedPath.back() != '/') sanitizedPath += '/';
 
 		if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
 			Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
 		}
-
-		// Include extension roots without a trailing slash in virtual path routing.
-		const std::string listingPath = sanitizedPath.back() == '/' ? sanitizedPath : sanitizedPath + "/";
 
 		std::string extension;
 		std::string insideExtensionPath;
 		std::string basePath;
 		ModuleHandle* mh;
 
-		if (Core::getInstance().pathIsInModuleDirectory(listingPath, extension, basePath, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 
@@ -79,7 +78,7 @@ namespace LuaIO {
 
 		ExtensionHandle* eh;
 
-		if (Core::getInstance().pathIsInPluginDirectory(listingPath, extension, basePath, insideExtensionPath)) {
+		if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
 
