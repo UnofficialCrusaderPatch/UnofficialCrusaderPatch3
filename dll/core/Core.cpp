@@ -387,6 +387,9 @@ void Core::initialize() {
 	}
 
 	if (!this->secureMode) {
+#if !defined(COMPILED_MODULES)
+		this->log(-1, "Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click continue, you agree you understand fully what this means and wish to proceed. Otherwise, abort.")
+#else
 		int answer = MessageBoxA(
 			NULL,
 			"Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click YES, you agree you understand fully what this means and wish to proceed. Otherwise, click NO",
@@ -397,6 +400,7 @@ void Core::initialize() {
 		if (answer != IDYES) {
 			exit(0);
 		}
+#endif
 	}
 
 	bool processDirectorySuccess = setProcessDirectory();
