@@ -46,6 +46,8 @@ namespace LuaIO {
 		if (!Core::getInstance().sanitizePath(rawPath, sanitizedPath)) {
 			return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 		}
+		// Listing paths denote directories; aliases and extension routing expect a trailing slash.
+		if (sanitizedPath.back() != '/') sanitizedPath += '/';
 
 		if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
 			Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
@@ -59,17 +61,19 @@ namespace LuaIO {
 		if (Core::getInstance().pathIsInModuleDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
+
+				std::vector<std::string> entries = mh->listFiles(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/modules/" + extension + "/" + entry;
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+				}
+
+				return entries.size();
 			}
-			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+			catch (const std::exception& e) {
+				return luaL_error(L, "%s", e.what());
 			}
 
-			std::vector<std::string> entries = mh->listFiles(sanitizedPath);
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-			}
-
-			return entries.size();
 		}
 
 		ExtensionHandle* eh;
@@ -77,17 +81,19 @@ namespace LuaIO {
 		if (Core::getInstance().pathIsInPluginDirectory(sanitizedPath, extension, basePath, insideExtensionPath)) {
 			try {
 				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
+
+				std::vector<std::string> entries = eh->listFiles(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/plugins/" + extension + "/" + entry;
+				for (std::string entry : entries) {
+					lua_pushstring(L, entry.c_str());
+				}
+
+				return entries.size();
 			}
-			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+			catch (const std::exception& e) {
+				return luaL_error(L, "%s", e.what());
 			}
 
-			std::vector<std::string> entries = eh->listFiles(sanitizedPath);
-			for (std::string entry : entries) {
-				lua_pushstring(L, entry.c_str());
-			}
-
-			return entries.size();
 		}
 
 		lua_pushstring(L, sanitizedPath.c_str());

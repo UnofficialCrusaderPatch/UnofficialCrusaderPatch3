@@ -15,6 +15,8 @@ namespace LuaIO {
 		if (!Core::getInstance().sanitizePath(rawPath, sanitizedPath)) {
 			return luaL_error(L, ("Invalid path: " + rawPath).c_str());
 		}
+		// Listing paths denote directories; aliases and extension routing expect a trailing slash.
+		if (sanitizedPath.back() != '/') sanitizedPath += '/';
 
 		if (Core::getInstance().resolveAliasedPath(sanitizedPath)) {
 			Core::getInstance().log(1, "path contained an alias, new path: " + sanitizedPath);
@@ -29,7 +31,8 @@ namespace LuaIO {
 			try {
 				mh = ModuleHandleManager::getInstance().getModuleHandle(basePath, extension);
 
-				std::vector<std::string> entries = mh->listFiles(sanitizedPath);
+				std::vector<std::string> entries = mh->listFiles(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/modules/" + extension + "/" + entry;
 
 				lua_createtable(L, 0, 0);
 				int count = 0;
@@ -43,7 +46,7 @@ namespace LuaIO {
 				return 1;
 			}
 			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+				return luaL_error(L, "%s", e.what());
 			}
 			catch (...) {
 				return luaL_error(L, "files() unknown exception");
@@ -57,7 +60,8 @@ namespace LuaIO {
 			try {
 				eh = ModuleHandleManager::getInstance().getExtensionHandle(basePath, extension, false);
 
-				std::vector<std::string> entries = eh->listFiles(sanitizedPath);
+				std::vector<std::string> entries = eh->listFiles(insideExtensionPath);
+				for (std::string& entry : entries) entry = "ucp/plugins/" + extension + "/" + entry;
 
 				lua_createtable(L, 0, 0);
 				int count = 0;
@@ -71,7 +75,7 @@ namespace LuaIO {
 				return 1;
 			}
 			catch (ModuleHandleException e) {
-				return luaL_error(L, e.what());
+				return luaL_error(L, "%s", e.what());
 			}
 			catch (...) {
 				return luaL_error(L, "files() unknown exception");

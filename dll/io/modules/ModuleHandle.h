@@ -39,6 +39,8 @@ public:
 	virtual int openFileDescriptor(const std::string& path, std::string& error) = 0;
 	virtual int getFileSize(const std::string& path, std::string& error) = 0;
 	virtual int getFileContents(const std::string& path, void * buffer, int size, std::string& error) = 0;
+	// Paths in these two methods are relative to the extension root; an empty path lists its root.
+	// Results are relative too, with a trailing slash for directories.
 	virtual std::vector<std::string> listDirectories(const std::string& path) = 0;
 	virtual std::vector<std::string> listFiles(const std::string& path) = 0;
 
