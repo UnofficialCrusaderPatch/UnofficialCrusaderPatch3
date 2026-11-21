@@ -3,6 +3,7 @@
 #include <framework.h>
 #include <lua.hpp>
 #include <sstream>
+#include <process.h>
 #include <console/console.h>
 
 #define LOGURU_WITH_STREAMS 1
@@ -25,15 +26,16 @@ const char* verbosityToName(loguru::Verbosity verbosity) {
 	return nullptr;
 }
 
-void initializeLogger(int logLevel, int consoleLogLevel) {
+void initializeLogger(int logLevel, int consoleLogLevel, bool separateLogs) {
 
 	loguru::set_verbosity_to_name_callback(verbosityToName);
 
 	// Put every log message of at least logLevel in ucp3.log
-	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
+	const std::string suffix = separateLogs ? "-" + std::to_string(_getpid()) + ".log" : ".log";
+	loguru::add_file(("ucp3" + suffix).c_str(), loguru::Truncate, logLevel);
 
 	// Only log WARNING, ERROR and FATAL to "error.log":
-	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
+	loguru::add_file(("ucp3-error-log" + suffix).c_str(), loguru::Truncate, loguru::Verbosity_WARNING);
 
 	// Also log logLevel and higher to the console
 	loguru::add_callback("stdout", logToStdOut, NULL, consoleLogLevel);

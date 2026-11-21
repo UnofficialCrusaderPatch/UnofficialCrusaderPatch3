@@ -310,6 +310,7 @@ void Core::processCommandLineArguments() {
 		("ucp-verbosity", "Set verbosity level", cxxopts::value<int>()->default_value("0"))
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
+		("ucp-allow-multiple-instances", "Allow a second game process with a separate game data directory", cxxopts::value<bool>()->default_value("false"))
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
 		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
@@ -411,7 +412,12 @@ void Core::initialize() {
 	this->processEnvironmentVariables();
 	this->processCommandLineArguments();
 
-	initializeLogger(this->logLevel, this->consoleLogLevel);
+	const bool allowMultipleInstances = optionsResult["ucp-allow-multiple-instances"].as<bool>();
+	if (allowMultipleInstances && optionsResult["ucp-game-data-path"].as<std::string>().empty()) {
+		throw std::runtime_error("--ucp-allow-multiple-instances requires --ucp-game-data-path pointing to a separate directory");
+	}
+
+	initializeLogger(this->logLevel, this->consoleLogLevel, allowMultipleInstances);
 
 	this->initializeConsole();
 

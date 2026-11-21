@@ -68,3 +68,17 @@ You can customize `UCP_DIR` to point to your git version tracked `content\ucp` f
 To start the game with these preferences, run launcher.bat (you can setup dxwnd to use launcher.bat).
 
 
+
+### Running a second game instance
+
+To opt in, launch the additional game with `--ucp-allow-multiple-instances` and
+`--ucp-game-data-path` pointing to an existing data directory dedicated to that
+instance. Give each simultaneous game its own data directory to keep saves,
+maps and game profiles separate. The default launch retains the game's
+single-instance check.
+
+The framework writes PID-suffixed logs for opted-in launches. If the games need
+different extension selections, pass a separate `--ucp-config-file` to each.
+Some extensions store files beside the game executable regardless of the data
+directory. Use separate installations if those extensions write profiles,
+autosaves or other shared files without coordinating access.

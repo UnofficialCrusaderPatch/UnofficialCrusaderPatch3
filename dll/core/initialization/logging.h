@@ -4,7 +4,7 @@
 #include <string>
 
 
-void initializeLogger(int logLevel, int consoleLogLevel);
+void initializeLogger(int logLevel, int consoleLogLevel, bool separateLogs);
 
 void deinitializeLogger();
 
