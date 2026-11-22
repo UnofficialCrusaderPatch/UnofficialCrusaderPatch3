@@ -270,6 +270,17 @@ function utils.pack(fmt, data)
 end
 
 local AOBExtractor = {}
+
+-- Formats a capture result for the log: integers and addresses as hex, byte captures by length.
+local function describeCapture(value)
+    if math.type(value) == "integer" then
+        return string.format("0x%X", value)
+    elseif type(value) == "table" then
+        return string.format("%d bytes", #value)
+    end
+    return tostring(value)
+end
+
 function AOBExtractor.parse(target)
     local contains = function(t, value)
         for k, v in pairs(t) do if v == value then return true end end
@@ -437,7 +448,7 @@ function AOBExtractor.extract(target, start, stop, unpacked)
         end
     end
 	
-	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, first result: 0x%X", unpacked, results[1] or "nil|0"))
+	log(VERBOSE, string.format("AOBExtractor.extract: unpacked: %s, first result: %s", unpacked, describeCapture(results[1])))
 
     if unpacked then
         return table.unpack({ address, table.unpack(results) })
