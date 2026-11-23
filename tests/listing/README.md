@@ -31,8 +31,8 @@ cmake --build build-listing --config Release
 ctest --test-dir build-listing -C Release --output-on-failure
 ```
 
-The suite compiles the production listing helpers against pinned upstream zip
-0.2.0, creates real ZIP archives with and without explicit directories, and
+The suite compiles the production listing helpers against the pinned gynt/zip
+v0.2.0, creates real ZIP archives with and without explicit directories, and
 compares 40 listings with real filesystem folders. It also checks direct-child
 boundaries, stable ordering, duplicate parents, empty folders, ordinary nested
 ZIP files, missing/file paths, invalid paths, and subsequent ZIP reads. CI runs
