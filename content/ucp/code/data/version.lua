@@ -14,43 +14,76 @@ local scanForString = function(s)
     return core.AOBScan(targetString, 0x00400000, 0x00600000)
 end
 
-local computeVersionString = function(config)
+-- The digest is compared between PCs, so it must not depend on the locale: strings are compared
+-- byte by byte (Lua's `<` uses strcoll) and numbers are not formatted as decimals.
+local function lessBytes(a, b)
+    for i = 1, math.min(#a, #b) do
+        local x, y = a:byte(i), b:byte(i)
+        if x ~= y then return x < y end
+    end
+    return #a < #b
+end
 
-    local function dumpTableToDeterministicString(o)
-        local res = ""
+-- Keys sort by type name, then by value.
+local function compareKeys(a, b)
+    local ta, tb = type(a), type(b)
+    if ta ~= tb then return ta < tb end
+    if ta == "boolean" then return (not a) and b end
+    if ta == "string" then return lessBytes(a, b) end
+    return a < b
+end
+
+-- Equal Lua numbers (90, 90.0) encode alike; other floats encode all 64 bits.
+local function canonicalNumber(n)
+    local integer = math.tointeger(n)
+    if integer ~= nil then
+        return "i" .. string.format("%d", integer)
+    end
+    return "f" .. (string.pack("<d", n):gsub(".", function(c) return string.format("%02x", c:byte()) end))
+end
+
+local function canonicalString(value)
+    local t = type(value)
+    if t == "table" then
         local keys = {}
-        for k, v in pairs(o) do
+        for k in pairs(value) do
             table.insert(keys, k)
         end
-        table.sort(keys)
+        table.sort(keys, compareKeys)
 
-        for k, key in pairs(keys) do
-            local v = o[key]
-            res = res .. key
-            if type(v) == "table" then
-                res = res .. dumpTableToDeterministicString(v)
-            elseif type(v) == "function" then
-                error()
-            else
-                res = res .. string.format("%s", v)
-            end
+        local parts = {}
+        for _, k in ipairs(keys) do
+            table.insert(parts, canonicalString(k) .. "=" .. canonicalString(value[k]))
         end
-        return res
+        return "{" .. table.concat(parts, ",") .. "}"
+    elseif t == "string" then
+        return string.format("%q", value)
+    elseif t == "number" then
+        return canonicalNumber(value)
+    elseif t == "boolean" then
+        return tostring(value)
+    end
+    error(string.format("cannot include a value of type %s", t))
+end
+
+-- Framework release and full commit from ucp/ucp-version.yml.
+local function frameworkIdentity()
+    local v = namespace.known_version
+    if type(v) ~= "table" then return "" end
+    return string.format("%s.%s.%s-%s", v.major, v.minor, v.patch, v.sha)
+end
+
+-- Digest of the framework version, the extensions in load order (name and version) and their
+-- effective options. File contents are not included.
+local computeSetupDigest = function(config, extensionsInOrder)
+    local extensions = {}
+    for i, ext in ipairs(extensionsInOrder) do
+        local id = ext.name .. "-" .. ext.version
+        -- ext:enable receives {} for an extension without a config entry
+        extensions[i] = { id = id, options = config[id] or {} }
     end
 
-    -- TODO check!
-    local mset = {}
-    for k, v in pairs(config) do
-        if v.active then
-          mset[k] = v
-        end
-    end
-    local s = dumpTableToDeterministicString(mset)
-
-    -- an indicator that shows the user a digest of the config for easy verification for multiplayer.
-    local digest = sha.sha1(s)
-
-    return digest
+    return sha.sha1(canonicalString({ framework = frameworkIdentity(), extensions = extensions }))
 end
 
 local UCP_VERSION_FILE_PATH = "ucp/ucp-version.yml"
@@ -123,11 +156,20 @@ namespace.initialize = function()
 
 end
 
-namespace.overwriteVersion = function(config)
+---@param config table the final configuration, per extension
+---@param extensionsInOrder table the active extensions in load order
+namespace.overwriteVersion = function(config, extensionsInOrder)
     core.writeCode(namespace.push_vf_address, { 0x68, table.unpack(utils.itob(namespace.custom_menu_version_space)) })
 
-    namespace.digest = computeVersionString(config)
-    namespace.setMenuVersion(namespace.original_version_string .. " UCP " .. namespace.known_version_string .. " (" .. namespace.digest:sub(1, 6) .. ")")
+    local success, digest = pcall(computeSetupDigest, config, extensionsInOrder)
+    if success then
+        namespace.digest = digest
+    else
+        log(WARNING, "[data/version]: could not compute the setup digest: " .. tostring(digest))
+        namespace.digest = nil
+    end
+    local shownDigest = namespace.digest and namespace.digest:sub(1, 6) or "??????"
+    namespace.setMenuVersion(namespace.original_version_string .. " UCP " .. namespace.known_version_string .. " (" .. shownDigest .. ")")
 
     namespace.game_language = core.readInteger(core.AOBScan("83 c4 20 83 3d ? ? ? ? 04 be 10 00 00 00 ? ? be 11 00 00 00") + 5)
     namespace.afterGameInit = false
@@ -192,6 +234,8 @@ namespace.setMenuVersion = function(fstring)
     core.writeBytes(namespace.custom_menu_version_space, d)
 end
 
+---The setup digest (40 hexadecimal digits) shown shortened in the main menu, or nil if it could not be computed.
+---@return string|nil
 namespace.getDigest = function()
     return namespace.digest
 end
