@@ -313,6 +313,7 @@ void Core::processCommandLineArguments() {
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
+		("ucp-allow-multiple-instances", "Allow this game to start while another game is running", cxxopts::value<bool>()->default_value("false"))
 		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-debugging-memory-allocator", "Enable memory allocation logger", cxxopts::value<bool>()->default_value("false"))
