@@ -1,1 +1,2 @@
 sphinx-lua
+setuptools<81
