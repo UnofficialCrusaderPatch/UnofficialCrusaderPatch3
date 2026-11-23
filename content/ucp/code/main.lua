@@ -206,7 +206,7 @@ handle:write(yaml.dump(configFinal))
 handle:close()
 
 ---Overwrite game menu version
-data.version.overwriteVersion(configFinal)
+data.version.overwriteVersion(configFinal, extensionsInLoadOrder)
 
 ---Table to hold all the modules
 ---@type table<string, Module>
