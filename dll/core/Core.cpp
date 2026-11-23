@@ -5,6 +5,8 @@
 #include <sstream>
 #include <fstream>
 #include <process.h>
+#include <cwctype>
+#include <cstdint>
 
 #include "io/strings.h"
 
@@ -364,6 +366,46 @@ void Core::createPIDFile() {
 		NULL);
 }
 
+/**
+* Reserve the lowest free log slot among the games started from this folder: slot 1 keeps
+* ucp3.log and ucp3-error-log.log, slot n writes ucp3-n.log and ucp3-error-log-n.log.
+* A slot is a named mutex, released by Windows when the process ends. The folder path is
+* compared case-insensitively as written. Returns the suffix for the log file names.
+*/
+HANDLE instanceSlotMutex = NULL;
+const int maxInstanceSlots = 16;
+std::string Core::reserveInstanceSlot() {
+	// wstring: string() can throw for folder names outside the ANSI code page
+	std::wstring folder = std::filesystem::current_path().wstring();
+	uint32_t folderHash = 2166136261u; // FNV-1a over the lower-case folder path
+	for (wchar_t c : folder) {
+		const uint16_t lower = (uint16_t) std::towlower(c);
+		folderHash ^= (uint8_t) (lower & 0xFF);
+		folderHash *= 16777619u;
+		folderHash ^= (uint8_t) (lower >> 8);
+		folderHash *= 16777619u;
+	}
+
+	for (int slot = 1; slot <= maxInstanceSlots; slot++) {
+		std::string name = "Local\\UCP3-game-folder-" + std::to_string(folderHash) + "-slot-" + std::to_string(slot);
+		HANDLE handle = CreateMutexA(NULL, FALSE, name.c_str());
+		if (handle == NULL) {
+			// Named mutexes unavailable: keep the usual names
+			this->instanceSlot = 1;
+			return "";
+		}
+		if (GetLastError() != ERROR_ALREADY_EXISTS) {
+			instanceSlotMutex = handle;
+			this->instanceSlot = slot;
+			return slot == 1 ? "" : "-" + std::to_string(slot);
+		}
+		CloseHandle(handle);
+	}
+
+	this->instanceSlot = 0;
+	return "-pid" + std::to_string(_getpid());
+}
+
 bool Core::setProcessDirectory() {
 	CHAR path[MAX_PATH];
 	GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -394,7 +436,9 @@ void Core::initialize() {
 	this->processEnvironmentVariables();
 	this->processCommandLineArguments();
 
-	initializeLogger(this->logLevel, this->consoleLogLevel);
+	const std::string logFileSuffix = this->reserveInstanceSlot();
+
+	initializeLogger(this->logLevel, this->consoleLogLevel, logFileSuffix);
 
 	this->initializeConsole();
 
@@ -419,6 +463,9 @@ void Core::initialize() {
 		this->log(-1, "Failed to set process directory");
 	}
 	this->log(0, "Current directory: " + std::filesystem::current_path().string());
+	if (this->instanceSlot != 1) {
+		this->log(0, "Another game from this folder is running. This game writes ucp3" + logFileSuffix + ".log and ucp3-error-log" + logFileSuffix + ".log");
+	}
 
 	this->moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", this->secureMode);
 	
