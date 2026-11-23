@@ -386,6 +386,18 @@ void Core::initialize() {
 		return;
 	}
 
+	bool processDirectorySuccess = setProcessDirectory();
+
+	this->createPIDFile();
+
+	this->setArgsFromCommandLine();
+	this->processEnvironmentVariables();
+	this->processCommandLineArguments();
+
+	initializeLogger(this->logLevel, this->consoleLogLevel);
+
+	this->initializeConsole();
+
 	if (!this->secureMode) {
 #if !defined(COMPILED_MODULES)
 		this->log(-1, "Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click continue, you agree you understand fully what this means and wish to proceed. Otherwise, abort.");
@@ -402,18 +414,6 @@ void Core::initialize() {
 		}
 #endif
 	}
-
-	bool processDirectorySuccess = setProcessDirectory();
-
-	this->createPIDFile();
-
-	this->setArgsFromCommandLine();
-	this->processEnvironmentVariables();
-	this->processCommandLineArguments();
-
-	initializeLogger(this->logLevel, this->consoleLogLevel);
-
-	this->initializeConsole();
 
 	if (!processDirectorySuccess) {
 		this->log(-1, "Failed to set process directory");
