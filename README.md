@@ -67,10 +67,4 @@ exit
 You can customize `UCP_DIR` to point to your git version tracked `content\ucp` folder.
 To start the game with these preferences, run launcher.bat (you can setup dxwnd to use launcher.bat).
 
-### Running two games at the same time
-Add `--ucp-allow-multiple-instances` to start a game while another one is running, for example to test a LAN match on one PC. Games started without it keep the normal check.
-Each game started from the same folder writes its own log: `ucp3.log`, `ucp3-2.log`, and so on.
-Saves, maps and `crusader.cfg` are shared; the game that writes last wins.
-To separate them, give a game its own `--ucp-game-data-path` folder; `--ucp-config-file` selects another setup.
-
 

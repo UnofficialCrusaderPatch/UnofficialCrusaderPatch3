@@ -25,15 +25,15 @@ const char* verbosityToName(loguru::Verbosity verbosity) {
 	return nullptr;
 }
 
-void initializeLogger(int logLevel, int consoleLogLevel, const std::string& logFileSuffix) {
+void initializeLogger(int logLevel, int consoleLogLevel) {
 
 	loguru::set_verbosity_to_name_callback(verbosityToName);
 
 	// Put every log message of at least logLevel in ucp3.log
-	loguru::add_file(("ucp3" + logFileSuffix + ".log").c_str(), loguru::Truncate, logLevel);
+	loguru::add_file("ucp3.log", loguru::Truncate, logLevel);
 
 	// Only log WARNING, ERROR and FATAL to "error.log":
-	loguru::add_file(("ucp3-error-log" + logFileSuffix + ".log").c_str(), loguru::Truncate, loguru::Verbosity_WARNING);
+	loguru::add_file("ucp3-error-log.log", loguru::Truncate, loguru::Verbosity_WARNING);
 
 	// Also log logLevel and higher to the console
 	loguru::add_callback("stdout", logToStdOut, NULL, consoleLogLevel);

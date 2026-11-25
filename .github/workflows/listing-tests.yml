@@ -1,7 +1,9 @@
 name: Extension directory listing tests
 on:
-  workflow_dispatch: {}
-
+  pull_request:
+  push:
+    branches: [fix/zip-directory-listing]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

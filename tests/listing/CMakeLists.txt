@@ -3,8 +3,7 @@ project(extension_listing_tests LANGUAGES C CXX)
 include(CTest)
 include(FetchContent)
 FetchContent_Declare(zip_source
-    GIT_REPOSITORY https://github.com/gynt/zip.git
-    # v0.2.0 in this fork points to the commit used by the framework package.
+    GIT_REPOSITORY https://github.com/kuba--/zip.git
     GIT_TAG ffd2d395f843c81dc82648c56e3889d539fc3f71
     SOURCE_SUBDIR no-cmake-project)
 FetchContent_MakeAvailable(zip_source)

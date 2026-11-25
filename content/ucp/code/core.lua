@@ -268,7 +268,7 @@ function core.AOBScan(target, start, stop)
     
 	log(VERBOSE, string.format("core.AOBScan: nocache: %s, %s, %s", target, start, stop))
     result = core.scanForAOB(target, start, stop)
-	log(VERBOSE, string.format("core.AOBScan: nocache: result: %s, %s, %s, %s", result and string.format("%X", result) or "nil", target, start, stop))
+	log(VERBOSE, string.format("core.AOBScan: nocache: result: %X, %s, %s, %s", result, target, start, stop))
     if not result then
         error(debug.traceback("AOB not found: " .. target))
     end
