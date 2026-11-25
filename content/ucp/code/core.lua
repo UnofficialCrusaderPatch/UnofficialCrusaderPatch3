@@ -247,6 +247,33 @@ function core.scanForAOB(target, min, max)
     end
 end
 
+---Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
+---as in core.scanForAOB: two hex digits are a byte, a single `?` any byte and a longer run of `?` a 00 byte.
+---@param target string the hex string to compare
+---@param address number the first address to compare; false when the pattern does not lie in the game executable's image
+---@return boolean
+function core.matchesAOB(target, address)
+    local bytes, i = {}, 1
+    while i <= #target do
+        local wildcard = target:match("^%?+", i)
+        if wildcard ~= nil then
+            if #wildcard == 1 then bytes[#bytes + 1] = false else bytes[#bytes + 1] = 0 end
+            i = i + #wildcard
+        elseif target:find("^%x%x", i) then
+            bytes[#bytes + 1] = tonumber(target:sub(i, i + 1), 16)
+            i = i + 2
+        else
+            i = i + 1
+        end
+    end
+    if address < 0x400000 or address + #bytes - 1 > mainImageEnd() then return false end
+    local memory = core.readBytes(address, #bytes)
+    for index, byte in ipairs(bytes) do
+        if byte and memory[index] ~= byte then return false end
+    end
+    return true
+end
+
 ---Search through the memory for an array of bytes expressed as a hex string (where `?` can be used as wildcards: "FF 00 ? AA").
 ---If the target is not found in memory, an error will be raised.
 ---@param target string the hex string to search for

@@ -25,7 +25,7 @@ namespace.AOB.retrieve = function(aob)
   local addr = aobs[aob]
   
   if addr ~= nil then
-    if core.scanForAOB(aob, addr) == addr then
+    if core.matchesAOB(aob, addr) then
       log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
       return addr
     end
