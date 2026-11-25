@@ -220,18 +220,28 @@ function core.setMemory(dst, value, length)
   return ucp.internal.setMemory(dst, value, length)
 end
 
+local mainImageLast
+---The last byte of the game executable's image: 0x400000 + OptionalHeader.SizeOfImage - 1.
+local function mainImageEnd()
+    if mainImageLast == nil then
+        local header = 0x400000 + core.readInteger(0x400000 + 0x3C)
+        mainImageLast = 0x400000 + core.readInteger(header + 0x50) - 1
+    end
+    return mainImageLast
+end
+
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
 ---@param min number|nil The minimal address of the memory to start searching from
----@param max number|nil The maximum address of the memory to stop searching
+---@param max number|nil The maximum address of the memory to stop searching, defaults to the last byte of the game executable's image
 ---@return number The first address of the memory where `target` matches, 0 if `target` could not be found.
 function core.scanForAOB(target, min, max)
     if type(target) ~= "string" then error("invalid argument: " .. target) end
     if target:len() < 2 then error("target AOB too short: " .. target) end
     if min == nil and max == nil then
-        return ucp.internal.scanForAOB(target, 0x400000, 0x7FFFFFFF)
+        return ucp.internal.scanForAOB(target, 0x400000, mainImageEnd())
     elseif max == nil then
-        return ucp.internal.scanForAOB(target, min, 0x7FFFFFFF)
+        return ucp.internal.scanForAOB(target, min, mainImageEnd())
     else
         return ucp.internal.scanForAOB(target, min, max)
     end
