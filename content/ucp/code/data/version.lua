@@ -179,15 +179,47 @@ namespace.overwriteVersion = function(config, extensionsInOrder)
                                 end)
 end
 
----cr.tex is loaded later
+-- The game's language index is the 0-based position of cr.tex group 6 text 0 in this list
+-- (compared case-insensitively); any other name gets 0.
+local GAME_LANGUAGES = { "english", "american", "german", "french", "italian", "spanish", "polish" }
+
+-- cr.tex group 6 text 0 of editions whose name is not in English, and its language
+local NATIVE_LANGUAGE_NAMES = { ["Русский"] = "russian" }
+
+---Group 6 text 0 of cr.tex (UTF-16LE: 260 group offsets in characters, then the texts), as UTF-8.
+local function readCrTexLanguageName()
+    local f = io.open("cr.tex", "rb")
+    if f == nil then return nil end
+    local data = f:read("a")
+    f:close()
+    if #data < 1040 then return nil end
+
+    local chars = {}
+    for i = 1041 + 2 * string.unpack("<i4", data, 1 + 6 * 4), #data - 1, 2 do
+        local c = string.unpack("<I2", data, i)
+        if c == 0 then break end
+        chars[#chars + 1] = utf8.char(c)
+    end
+    return table.concat(chars)
+end
+
+local otherLanguage
+
+---The game language in lowercase: one of GAME_LANGUAGES, "russian", or cr.tex's own name for its language.
+---Nil before afterInit (cr.tex is loaded later).
 namespace.getGameLanguage = function()
-    if namespace.afterGameInit then
-        local index = 1 + core.readInteger(namespace.game_language)
-        local langs = { "english", "american", "german", "french", "italian", "SPANISH", "polish" }
-        return langs[index]
-    else
+    if not namespace.afterGameInit then
         return nil
     end
+    local index = core.readInteger(namespace.game_language)
+    if index ~= 0 then
+        return GAME_LANGUAGES[1 + index]
+    end
+    if otherLanguage == nil then
+        local name = readCrTexLanguageName() or "english"
+        otherLanguage = NATIVE_LANGUAGE_NAMES[name] or name:lower()
+    end
+    return otherLanguage
 end
 
 ---Checks if the .exe registers a custom font. Or uses gdi32.dll to get custom size of a font.
