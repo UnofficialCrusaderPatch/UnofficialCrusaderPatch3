@@ -25,11 +25,8 @@ namespace.AOB.retrieve = function(aob)
   local addr = aobs[aob]
   
   if addr ~= nil then
-    local checkaddr = core.scanForAOB(aob, addr)
-    if checkaddr ~= addr then
-      aobs = {} -- invalidate the cache
-    else
-		log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
+    if core.scanForAOB(aob, addr) == addr then
+      log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
       return addr
     end
   end
