@@ -348,16 +348,6 @@ function core.AOBScanUnique(target)
     return first
 end
 
----The SHA-256 of a file as lowercase hex, read in chunks. The path is resolved exactly like io.open's,
----including path aliases, so files inside module and plugin folders or zips can be hashed.
----A file inside a zip is extracted into memory first.
----@param path string path of the file
----@return string|nil the hash, nil when the file cannot be read
----@return string|nil the reason when the hash is nil
-function core.sha256File(path)
-    return ucp.internal.sha256File(path)
-end
-
 ---Hook game code execution to a lua function, and expose the original game code with a function (returned).
 ---The hooked function will be called with `argCount` arguments, all numbers (integers).
 ---The lua function that allows calling the original function is returned

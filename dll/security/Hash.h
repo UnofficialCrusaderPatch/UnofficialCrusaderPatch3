@@ -3,7 +3,6 @@
 
 #include <wincrypt.h>
 
-#include <functional>
 #include <iomanip>
 #include <sstream>
 
@@ -60,61 +59,59 @@ public:
 		return ss.str();
 	}
 
-	// SHA-256 of the data that `feed` passes to CryptHashData.
-	bool hash(const std::function<bool(HCRYPTHASH, std::string&)>& feed, std::string& result, std::string& error) {
+	bool hash(unsigned char* data, size_t dataLen, std::string& result, std::string& error) {
+
 		HCRYPTPROV hProv = NULL;
 		HCRYPTHASH hHash = NULL;
+
 		BYTE hash[32];
 		DWORD hashLength = 32;
+
 		bool status = false;
 
-		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
+		{
 			error = cryptError("CryptAcquireContext");
-		}
-		else if (!CryptCreateHash(hProv, CALG_SHA_256, NULL, 0, &hHash)) {
-			error = cryptError("CryptCreateHash");
-		}
-		else if (feed(hHash, error)) {
-			if (CryptGetHashParam(hHash, HP_HASHVAL, hash, &hashLength, 0)) {
-				result = hexStr(hash, hashLength);
-				status = true;
-			}
-			else {
-				error = cryptError("CryptGetHashParam");
-			}
+			goto main_exit;
 		}
 
+		// Hash the data
+		if (!CryptCreateHash(hProv, CALG_SHA_256, NULL, 0, &hHash))
+		{
+			error = cryptError("CryptCreateHash");
+			goto main_exit;
+		}
+
+		if (!CryptHashData(hHash, (LPCBYTE)data, dataLen, 0))
+		{
+			error = cryptError("CryptHashData");
+			goto main_exit;
+		}
+
+
+		if (CryptGetHashParam(
+			hHash,
+			HP_HASHVAL,
+			hash,
+			&hashLength,
+			0))
+		{
+			result = hexStr(hash, hashLength);
+			status = true;
+		}
+		else
+		{
+			error = ("Error during reading hash value.");
+			goto main_exit;
+		}
+
+	main_exit:
 		if (hHash) CryptDestroyHash(hHash);
 		if (hProv) CryptReleaseContext(hProv, 0);
 
+
+
 		return status;
-	}
-
-	bool hash(unsigned char* data, size_t dataLen, std::string& result, std::string& error) {
-		return hash([&](HCRYPTHASH hHash, std::string& message) {
-			if (CryptHashData(hHash, (const BYTE*)data, dataLen, 0)) return true;
-			message = cryptError("CryptHashData");
-			return false;
-		}, result, error);
-	}
-
-	// Reads `file` to its end in chunks.
-	bool hash(FILE* file, std::string& result, std::string& error) {
-		return hash([&](HCRYPTHASH hHash, std::string& message) {
-			BYTE buffer[65536];
-			size_t read;
-			while ((read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-				if (!CryptHashData(hHash, buffer, (DWORD)read, 0)) {
-					message = cryptError("CryptHashData");
-					return false;
-				}
-			}
-			if (ferror(file)) {
-				message = "cannot read the file";
-				return false;
-			}
-			return true;
-		}, result, error);
 	}
 
 	bool hashFile(const std::string path, std::string& hash, std::string& errorMsg) {
