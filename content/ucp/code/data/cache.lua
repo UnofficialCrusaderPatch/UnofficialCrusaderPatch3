@@ -20,10 +20,9 @@ namespace.AOB.loadFromFile = function()
   return true
 end
 
----@param key string|nil the cache key, defaults to `aob`
 ---@return number|nil the cached address of `aob` if the bytes there still match, else nil
-namespace.AOB.lookup = function(aob, key)
-  local addr = aobs[key or aob]
+namespace.AOB.lookup = function(aob)
+  local addr = aobs[aob]
   if addr ~= nil and core.matchesAOB(aob, addr) then
     log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
     return addr
@@ -44,33 +43,6 @@ namespace.AOB.retrieve = function(aob)
   
   log(VERBOSE, string.format("cache.AOB.retrieve: found: 0x%X (for: %s)", aobs[aob], aob))
   return aobs[aob]
-end
-
--- The game executables in a folder share the cache file. A unique result is keyed with the executable's
--- PE TimeDateStamp, because it is only proven for the executable that was scanned.
-local uniqueKeySuffix
-local function uniqueKey(aob)
-  if uniqueKeySuffix == nil then
-    local base = ucp.internal.getMainImageRange()
-    uniqueKeySuffix = string.format(" unique %08X", core.readInteger(base + core.readInteger(base + 0x3C) + 8) & 0xFFFFFFFF)
-  end
-  return aob .. uniqueKeySuffix
-end
-
----@return number|nil the address of `aob` if it occurs exactly once in the executable sections of the game executable
----@return string|nil "not found" or "found more than once" when the address is nil
-namespace.AOB.retrieveUnique = function(aob)
-  local key = uniqueKey(aob)
-  local addr = namespace.AOB.lookup(aob, key)
-  if addr ~= nil then return addr end
-
-  local first, second = ucp.internal.scanForAOBInMainModule(aob)
-  if first == nil then return nil, "not found" end
-  if second ~= nil then return nil, "found more than once" end
-
-  log(VERBOSE, string.format("cache.AOB.retrieveUnique: found: 0x%X (for: %s)", first, aob))
-  aobs[key] = first
-  return first
 end
 
 namespace.AOB.dumpToFile = function()
