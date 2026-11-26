@@ -229,6 +229,15 @@ local function mainImage()
     return mainImageFirst, mainImageLast
 end
 
+---Raises an error unless `target` is an AOB that the scanner accepts: spaces, hex digits and `?`,
+---with at least one byte or wildcard.
+local function checkAOB(target)
+    if type(target) ~= "string" then error("invalid argument: " .. tostring(target)) end
+    if target:len() < 2 then error("target AOB too short: " .. target) end
+    if target:find("[^ %x%?]") then error("invalid AOB, only spaces, 0-9, A-F and ? are allowed: " .. target) end
+    if not target:find("%x%x") and not target:find("%?") then error("target AOB has no bytes: " .. target) end
+end
+
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
 ---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
@@ -236,8 +245,7 @@ end
 ---The scanner applies `max` per memory region: the region that contains `max` is searched to its end.
 ---@return number The first address of the memory where `target` matches, 0 if `target` could not be found.
 function core.scanForAOB(target, min, max)
-    if type(target) ~= "string" then error("invalid argument: " .. target) end
-    if target:len() < 2 then error("target AOB too short: " .. target) end
+    checkAOB(target)
     local first, last = mainImage()
     if min == nil and max == nil then
         return ucp.internal.scanForAOB(target, first, last)
@@ -250,10 +258,12 @@ end
 
 ---Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
 ---as in core.scanForAOB: two hex digits are a byte, a single `?` any byte and a longer run of `?` a 00 byte.
----@param target string the hex string to compare
----@param address number the first address to compare; false when the pattern does not lie in the game executable's image
+---@param target string the hex string to compare, checked like the target of core.scanForAOB
+---@param address number the first address to compare; false when it is not an integer or the pattern does not lie in the game executable's image
 ---@return boolean
 function core.matchesAOB(target, address)
+    checkAOB(target)
+    if math.type(address) ~= "integer" then return false end
     local bytes, i = {}, 1
     while i <= #target do
         local wildcard = target:match("^%?+", i)
