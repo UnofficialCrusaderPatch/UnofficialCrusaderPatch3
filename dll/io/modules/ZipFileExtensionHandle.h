@@ -85,8 +85,14 @@ public:
 			return -1;
 		}
 
-		zip_entry_read(z, (void**)&buf, &bufsize);
+		const ssize_t read = zip_entry_read(z, (void**)&buf, &bufsize);
 		zip_entry_close(z);
+
+		if (read < 0 || buf == NULL) {
+			free(buf);
+			error = "cannot extract file '" + path + "' from extension zip: " + this->name;
+			return -1;
+		}
 
 		std::string fileError;
 
@@ -109,8 +115,14 @@ public:
 			return NULL;
 		}
 
-		zip_entry_read(z, (void**)&buf, &bufsize);
+		const ssize_t read = zip_entry_read(z, (void**)&buf, &bufsize);
 		zip_entry_close(z);
+
+		if (read < 0 || buf == NULL) {
+			free(buf);
+			error = "cannot extract file '" + path + "' from extension zip: " + this->name;
+			return NULL;
+		}
 
 		std::string fileError;
 
