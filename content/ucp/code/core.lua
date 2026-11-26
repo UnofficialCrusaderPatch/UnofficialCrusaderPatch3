@@ -346,8 +346,9 @@ function core.AOBScanUnique(target)
     return first
 end
 
----The SHA-256 of a file as lowercase hex. The path is checked and resolved like io.open's,
----so files inside module and plugin folders or zips can be hashed.
+---The SHA-256 of a file as lowercase hex, read in chunks. The path is resolved exactly like io.open's,
+---including path aliases, so files inside module and plugin folders or zips can be hashed.
+---A file inside a zip is extracted into memory first.
 ---@param path string path of the file
 ---@return string|nil the hash, nil when the file cannot be read
 ---@return string|nil the reason when the hash is nil

@@ -5,7 +5,7 @@
 
 #include "framework.h"
 #include <psapi.h>
-#include <vector>
+#include <memory>
 
 #include "core/Core.h"
 #include "io/files.h"
@@ -23,29 +23,31 @@ static int luaGetMainImageRange(lua_State* L) {
 	return 2;
 }
 
-// Returns the SHA-256 of a file as lowercase hex, or nil and a message. The path is checked and resolved like io.open's.
+// The SHA-256 of a file as lowercase hex. The path is resolved like io.open's, including aliases.
+static bool sha256File(const std::string& path, std::string& hash, std::string& error) {
+	try {
+		std::unique_ptr<FILE, decltype(&fclose)> file(getFilePointer(path, "rb", error), &fclose);
+		if (!file) {
+			if (error.empty()) error = "cannot open file: " + path;
+			return false;
+		}
+		return Hasher::getInstance().hash(file.get(), hash, error);
+	}
+	catch (const std::exception& e) {
+		error = e.what();
+	}
+	catch (...) {
+		error = "cannot hash the file";
+	}
+	return false;
+}
+
+// Returns the SHA-256 of a file as lowercase hex, or nil and a message.
 static int luaSha256File(lua_State* L) {
 	const std::string path = luaL_checkstring(L, 1);
-	std::string error;
-	FILE* file = getFilePointer(path, "rb", error);
-	if (file == NULL) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.c_str());
-		return 2;
-	}
-	std::vector<unsigned char> contents;
-	unsigned char buffer[65536];
-	size_t read;
-	while ((read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-		contents.insert(contents.end(), buffer, buffer + read);
-	}
-	const bool failed = ferror(file) != 0;
-	fclose(file);
 	std::string hash;
-	if (failed) {
-		error = "cannot read file: " + path;
-	}
-	else if (Hasher::getInstance().hash(contents.data(), contents.size(), hash, error)) {
+	std::string error;
+	if (sha256File(path, hash, error)) {
 		lua_pushstring(L, hash.c_str());
 		return 1;
 	}
