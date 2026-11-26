@@ -275,7 +275,7 @@ function core.matchesAOB(target, address)
         end
     end
     local first, last = mainImage()
-    if address < first or address + #bytes - 1 > last then return false end
+    if address < first or address > last or #bytes - 1 > last - address then return false end
     local memory = core.readBytes(address, #bytes)
     for index, byte in ipairs(bytes) do
         if byte and memory[index] ~= byte then return false end
