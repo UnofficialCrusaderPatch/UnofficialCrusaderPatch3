@@ -220,28 +220,29 @@ function core.setMemory(dst, value, length)
   return ucp.internal.setMemory(dst, value, length)
 end
 
-local mainImageLast
----The last byte of the game executable's image: 0x400000 + OptionalHeader.SizeOfImage - 1.
-local function mainImageEnd()
-    if mainImageLast == nil then
-        local header = 0x400000 + core.readInteger(0x400000 + 0x3C)
-        mainImageLast = 0x400000 + core.readInteger(header + 0x50) - 1
+local mainImageFirst, mainImageLast
+---The first and the last address of the game executable's image.
+local function mainImage()
+    if mainImageFirst == nil then
+        mainImageFirst, mainImageLast = ucp.internal.getMainImageRange()
     end
-    return mainImageLast
+    return mainImageFirst, mainImageLast
 end
 
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
----@param min number|nil The minimal address of the memory to start searching from
----@param max number|nil The maximum address of the memory to stop searching, defaults to the last byte of the game executable's image
+---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
+---@param max number|nil The maximum address of the memory to stop searching, defaults to the last byte of the game executable's image.
+---The scanner applies `max` per memory region: the region that contains `max` is searched to its end.
 ---@return number The first address of the memory where `target` matches, 0 if `target` could not be found.
 function core.scanForAOB(target, min, max)
     if type(target) ~= "string" then error("invalid argument: " .. target) end
     if target:len() < 2 then error("target AOB too short: " .. target) end
+    local first, last = mainImage()
     if min == nil and max == nil then
-        return ucp.internal.scanForAOB(target, 0x400000, mainImageEnd())
+        return ucp.internal.scanForAOB(target, first, last)
     elseif max == nil then
-        return ucp.internal.scanForAOB(target, min, mainImageEnd())
+        return ucp.internal.scanForAOB(target, min, last)
     else
         return ucp.internal.scanForAOB(target, min, max)
     end
@@ -266,7 +267,8 @@ function core.matchesAOB(target, address)
             i = i + 1
         end
     end
-    if address < 0x400000 or address + #bytes - 1 > mainImageEnd() then return false end
+    local first, last = mainImage()
+    if address < first or address + #bytes - 1 > last then return false end
     local memory = core.readBytes(address, #bytes)
     for index, byte in ipairs(bytes) do
         if byte and memory[index] ~= byte then return false end
