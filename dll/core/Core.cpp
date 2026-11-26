@@ -371,14 +371,20 @@ void Core::createPIDFile() {
 * Reserve the lowest free log slot among the games started from this folder: slot 1 keeps
 * ucp3.log and ucp3-error-log.log, slot n writes ucp3-n.log and ucp3-error-log-n.log.
 * A slot is a named mutex, released by Windows when the process ends. The folder path is
-* compared case-insensitively after resolving links. Returns the suffix for the log file names.
+* compared case-insensitively after resolving links. When the folder cannot be resolved or a
+* slot cannot be created, the log file names carry the process ID instead. Returns the suffix
+* for the log file names.
 */
 HANDLE instanceSlotMutex = NULL;
 const int maxInstanceSlots = 16;
 std::string Core::reserveInstanceSlot() {
 	std::error_code error;
 	std::filesystem::path folderPath = std::filesystem::canonical(std::filesystem::current_path(), error);
-	if (error) folderPath = std::filesystem::current_path();
+	if (error) {
+		this->instanceSlotError = error.value();
+		this->instanceSlot = 0;
+		return "-pid" + std::to_string(_getpid());
+	}
 	// wstring: string() can throw for folder names outside the ANSI code page
 	std::wstring folder = folderPath.wstring();
 	uint32_t folderHash = 2166136261u; // FNV-1a over the lower-case folder path
