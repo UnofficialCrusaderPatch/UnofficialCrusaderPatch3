@@ -241,8 +241,7 @@ end
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
 ---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
----@param max number|nil The maximum address of the memory to stop searching, defaults to the last byte of the game executable's image.
----The scanner applies `max` per memory region: the region that contains `max` is searched to its end.
+---@param max number|nil The last address of the search, a match ends at or before it. Defaults to the last byte of the game executable's image.
 ---@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
 function core.scanForAOB(target, min, max)
     checkAOB(target)
@@ -324,6 +323,16 @@ function core.AOBScan(target, start, stop)
         error(debug.traceback("AOB not found: " .. target))
     end
     return result
+end
+
+---The address of `target` if it occurs exactly once in the executable sections of the game executable.
+---Results are cached like the results of core.AOBScan.
+---@param target string the hex string to search for, as in core.scanForAOB
+---@return number|nil the address of `target`, nil when it is not found or found more than once
+---@return string|nil "not found" or "found more than once" when the address is nil
+function core.AOBScanUnique(target)
+    checkAOB(target)
+    return data.cache.AOB.retrieveUnique(target)
 end
 
 ---Hook game code execution to a lua function, and expose the original game code with a function (returned).

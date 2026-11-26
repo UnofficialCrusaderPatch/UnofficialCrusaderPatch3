@@ -28,21 +28,13 @@ local function shortBranchTarget(address)
   return address + 2 + displacement
 end
 
-local function found(address)
-  return address ~= nil and address ~= 0
-end
-
 ---Locate and verify the single-instance check.
 ---@return number|nil address of the "mutex already existed" branch, or nil
 ---@return string|nil reason when the check was not found or did not verify
 function namespace.locate()
-  local match = core.scanForAOB(CHECK_AOB)
-  if not found(match) then
-    return nil, "the check was not found"
-  end
-
-  if found(core.scanForAOB(CHECK_AOB, match + 1)) then
-    return nil, "the check was found more than once"
+  local match, reason = core.AOBScanUnique(CHECK_AOB)
+  if match == nil then
+    return nil, "the check was " .. reason
   end
 
   local name = core.readString(core.readInteger(match + OFFSET_NAME_POINTER))
