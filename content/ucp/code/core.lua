@@ -238,20 +238,6 @@ local function checkAOB(target)
     if not target:find("%x%x") and not target:find("%?") then error("target AOB has no bytes: " .. target) end
 end
 
----Scan memory for an Array of Bytes (AOB)
----@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
----@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
----@param max number|nil The last address of the search, a match ends at or before it. Defaults to the last byte of the game executable's image.
----@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
-function core.scanForAOB(target, min, max)
-    checkAOB(target)
-    if min == nil or max == nil then
-        local first, last = mainImage()
-        min, max = min or first, max or last
-    end
-    return ucp.internal.scanForAOB(target, min, max)
-end
-
 ---The bytes of `target`, read as in core.scanForAOB: two hex digits are a byte, a single `?` any byte
 ---(false) and a longer run of `?` a 00 byte.
 local function aobBytes(target)
@@ -269,6 +255,22 @@ local function aobBytes(target)
         end
     end
     return bytes
+end
+
+---Scan memory for an Array of Bytes (AOB)
+---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
+---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
+---@param max number|nil The last address at which a match may start; the match may extend past it. Defaults to the last byte of the game executable's image, which then also ends the match.
+---@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
+function core.scanForAOB(target, min, max)
+    checkAOB(target)
+    if min == nil or max == nil then
+        local first, last = mainImage()
+        min = min or first
+        if max == nil then return ucp.internal.scanForAOB(target, min, last) end
+    end
+    -- RPS takes the last address of the match.
+    return ucp.internal.scanForAOB(target, min, math.min(max + #aobBytes(target) - 1, 0xFFFFFFFF))
 end
 
 ---Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
@@ -293,7 +295,7 @@ end
 ---If the target is not found in memory, an error will be raised.
 ---@param target string the hex string to search for
 ---@param start number the starting address of the memory to start searching from
----@param stop number the last address of the memory to stop searching at
+---@param stop number the last address at which a match may start
 ---@result number the address of target in memory
 function core.AOBScan(target, start, stop)
     local result
@@ -306,7 +308,7 @@ function core.AOBScan(target, start, stop)
     -- This test against nil is here because of module load ordering in main.lua
     if data ~= nil then
         -- Consider using the cache. It holds default range results, so an explicit range only
-        -- reuses a cached match that lies wholly inside it and otherwise scans the range below.
+        -- reuses a cached address inside it and otherwise scans the range below.
         if stop == nil then
             result = data.cache.AOB.retrieve(target)
         else
@@ -315,7 +317,7 @@ function core.AOBScan(target, start, stop)
         if result ~= nil then
             if start ~= nil and result < start then
                 result = nil
-            elseif stop ~= nil and #aobBytes(target) - 1 > stop - result then
+            elseif stop ~= nil and result > stop then
                 result = nil
             end   
         end
