@@ -14,7 +14,7 @@ function UserDataInterface:mkdir(path, parents) end
 ---@return string? err
 function UserDataInterface:remove(path, recurse) end
 
----Rename a file or folder, replacing an existing target file. Both paths must resolve inside the extension's folder.
+---Rename a file or folder, replacing an existing target file. The folders holding both paths must resolve inside the extension's folder.
 ---@return boolean? status
 ---@return string? err
 function UserDataInterface:rename(from, to) end
