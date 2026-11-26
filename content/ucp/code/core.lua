@@ -243,17 +243,14 @@ end
 ---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
 ---@param max number|nil The maximum address of the memory to stop searching, defaults to the last byte of the game executable's image.
 ---The scanner applies `max` per memory region: the region that contains `max` is searched to its end.
----@return number The first address of the memory where `target` matches, 0 if `target` could not be found.
+---@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
 function core.scanForAOB(target, min, max)
     checkAOB(target)
-    local first, last = mainImage()
-    if min == nil and max == nil then
-        return ucp.internal.scanForAOB(target, first, last)
-    elseif max == nil then
-        return ucp.internal.scanForAOB(target, min, last)
-    else
-        return ucp.internal.scanForAOB(target, min, max)
+    if min == nil or max == nil then
+        local first, last = mainImage()
+        min, max = min or first, max or last
     end
+    return ucp.internal.scanForAOB(target, min, max)
 end
 
 ---Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
@@ -302,8 +299,13 @@ function core.AOBScan(target, start, stop)
     
     -- This test against nil is here because of module load ordering in main.lua
     if data ~= nil then
-        -- Consider using the cache
-        result = data.cache.AOB.retrieve(target)
+        -- Consider using the cache. It holds default range results, so an explicit range only
+        -- reuses a cached address and otherwise scans the range below.
+        if stop == nil then
+            result = data.cache.AOB.retrieve(target)
+        else
+            result = data.cache.AOB.lookup(target)
+        end
         if result ~= nil then
             if start ~= nil and result < start then
                 result = nil

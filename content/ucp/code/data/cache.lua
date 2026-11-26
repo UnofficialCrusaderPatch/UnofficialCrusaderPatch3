@@ -20,16 +20,20 @@ namespace.AOB.loadFromFile = function()
   return true
 end
 
+---@return number|nil the cached address of `aob` if the bytes there still match, else nil
+namespace.AOB.lookup = function(aob)
+  local addr = aobs[aob]
+  if addr ~= nil and core.matchesAOB(aob, addr) then
+    log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
+    return addr
+  end
+  return nil
+end
+
 namespace.AOB.retrieve = function(aob)
   log(VERBOSE, string.format("cache.AOB.retrieve: %s", aob))
-  local addr = aobs[aob]
-  
-  if addr ~= nil then
-    if core.matchesAOB(aob, addr) then
-      log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
-      return addr
-    end
-  end
+  local addr = namespace.AOB.lookup(aob)
+  if addr ~= nil then return addr end
   
   log(VERBOSE, string.format("cache.AOB.retrieve: searching for: %s", aob))
   aobs[aob] = core.scanForAOB(aob)
