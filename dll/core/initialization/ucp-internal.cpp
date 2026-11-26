@@ -7,7 +7,6 @@
 #include <psapi.h>
 #include <memory>
 
-#include "core/Core.h"
 #include "io/files.h"
 #include "security/Hash.h"
 
