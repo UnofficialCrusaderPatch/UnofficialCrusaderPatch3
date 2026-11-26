@@ -177,7 +177,7 @@ function userdata.prepareExtensionInterface(extensionName)
 				if type(self) ~= "table" then error(string.format("function should be called with ':' (e.g. interface:func(args) )")) end
 				if type(from) ~= "string" then error("'from' should be a string") end
 				if type(to) ~= "string" then error("'to' should be a string") end
-				return _rename(userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, from)), userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, to)))
+				return _rename(base, userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, from)), userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, to)))
 			end,
 		}
 
