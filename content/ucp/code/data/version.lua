@@ -187,20 +187,26 @@ local GAME_LANGUAGES = { "english", "american", "german", "french", "italian", "
 local NATIVE_LANGUAGE_NAMES = { ["Русский"] = "russian" }
 
 ---Group 6 text 0 of cr.tex (UTF-16LE: 260 group offsets in characters, then the texts), as UTF-8.
+---Nil when cr.tex cannot be read or the text is empty, outside the file or not terminated.
 local function readCrTexLanguageName()
     local f = io.open("cr.tex", "rb")
     if f == nil then return nil end
     local data = f:read("a")
     f:close()
-    if #data < 1040 then return nil end
+    if data == nil or #data < 1040 then return nil end
 
+    local offset = string.unpack("<i4", data, 1 + 6 * 4)
+    if offset < 0 then return nil end
     local chars = {}
-    for i = 1041 + 2 * string.unpack("<i4", data, 1 + 6 * 4), #data - 1, 2 do
+    for i = 1041 + 2 * offset, #data - 1, 2 do
         local c = string.unpack("<I2", data, i)
-        if c == 0 then break end
+        if c == 0 then
+            if #chars == 0 then return nil end
+            return table.concat(chars)
+        end
         chars[#chars + 1] = utf8.char(c)
     end
-    return table.concat(chars)
+    return nil
 end
 
 local otherLanguage
