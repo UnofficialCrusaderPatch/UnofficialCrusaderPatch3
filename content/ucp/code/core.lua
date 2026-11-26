@@ -252,14 +252,9 @@ function core.scanForAOB(target, min, max)
     return ucp.internal.scanForAOB(target, min, max)
 end
 
----Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
----as in core.scanForAOB: two hex digits are a byte, a single `?` any byte and a longer run of `?` a 00 byte.
----@param target string the hex string to compare, checked like the target of core.scanForAOB
----@param address number the first address to compare; false when it is not an integer or the pattern does not lie in the game executable's image
----@return boolean
-function core.matchesAOB(target, address)
-    checkAOB(target)
-    if math.type(address) ~= "integer" then return false end
+---The bytes of `target`, read as in core.scanForAOB: two hex digits are a byte, a single `?` any byte
+---(false) and a longer run of `?` a 00 byte.
+local function aobBytes(target)
     local bytes, i = {}, 1
     while i <= #target do
         local wildcard = target:match("^%?+", i)
@@ -273,6 +268,18 @@ function core.matchesAOB(target, address)
             i = i + 1
         end
     end
+    return bytes
+end
+
+---Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
+---as in core.scanForAOB: two hex digits are a byte, a single `?` any byte and a longer run of `?` a 00 byte.
+---@param target string the hex string to compare, checked like the target of core.scanForAOB
+---@param address number the first address to compare; false when it is not an integer or the pattern does not lie in the game executable's image
+---@return boolean
+function core.matchesAOB(target, address)
+    checkAOB(target)
+    if math.type(address) ~= "integer" then return false end
+    local bytes = aobBytes(target)
     local first, last = mainImage()
     if address < first or address > last or #bytes - 1 > last - address then return false end
     local memory = core.readBytes(address, #bytes)
@@ -299,7 +306,7 @@ function core.AOBScan(target, start, stop)
     -- This test against nil is here because of module load ordering in main.lua
     if data ~= nil then
         -- Consider using the cache. It holds default range results, so an explicit range only
-        -- reuses a cached address and otherwise scans the range below.
+        -- reuses a cached match that lies wholly inside it and otherwise scans the range below.
         if stop == nil then
             result = data.cache.AOB.retrieve(target)
         else
@@ -308,7 +315,7 @@ function core.AOBScan(target, start, stop)
         if result ~= nil then
             if start ~= nil and result < start then
                 result = nil
-            elseif stop ~= nil and result > stop then
+            elseif stop ~= nil and #aobBytes(target) - 1 > stop - result then
                 result = nil
             end   
         end
