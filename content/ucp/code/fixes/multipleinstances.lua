@@ -17,13 +17,9 @@ local OFFSET_FAILED_BRANCH = 17 -- 74 rel8
 local OFFSET_EXISTS_BRANCH = 30 -- 75 rel8
 local JMP_SHORT = 0xEB
 
--- cxxopts' truthy_pattern; cxxopts rejects values that are neither true nor false.
-local TRUE_VALUES = { ["true"] = true, ["True"] = true, ["t"] = true, ["T"] = true, ["1"] = true }
-
 ---@return boolean true when the flag was passed with a true value
 function namespace.isRequested()
-  local value = processedArg[FLAG]
-  return value ~= nil and TRUE_VALUES[value] == true
+  return processedArg[FLAG] == true
 end
 
 local function shortBranchTarget(address)

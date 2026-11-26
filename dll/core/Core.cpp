@@ -265,6 +265,9 @@ void Core::setArgsAsGlobalVarInLua() {
 		lua_pushstring(this->L, kv.value().c_str());
 		lua_setfield(this->L, -2, kv.key().c_str());
 	}
+	// A boolean, unlike the other values, which stay strings
+	lua_pushboolean(this->L, optionsResult["ucp-allow-multiple-instances"].as<bool>());
+	lua_setfield(this->L, -2, "ucp-allow-multiple-instances");
 
 	lua_setglobal(this->L, "processedArg");
 }
