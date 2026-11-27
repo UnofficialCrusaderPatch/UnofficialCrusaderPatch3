@@ -160,32 +160,41 @@ namespace LuaIO {
 		return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
 	}
 
+	static int pathFailure(lua_State* L, const char* reason) {
+		lua_pushnil(L);
+		lua_pushstring(L, reason);
+		return 2;
+	}
+
 	int luaFileLastWriteTime(lua_State* L) {
 		size_t length;
 		const char* path = luaL_checklstring(L, 1, &length);
-		const auto time = std::strlen(path) == length ? getFileLastWriteTime(path) : std::nullopt;
-		if (time) lua_pushinteger(L, *time);
-		else lua_pushnil(L);
+		if (std::strlen(path) != length) return pathFailure(L, "path contains a NUL byte");
+		std::string error;
+		const auto time = getFileLastWriteTime(path, error);
+		if (!time) return pathFailure(L, error.c_str());
+		lua_pushinteger(L, *time);
 		return 1;
 	}
 
-	int luaGameRelativePath(lua_State* L) {
+	int luaGameRelativePath(lua_State* L) try {
 		size_t length;
 		const char* path = luaL_checklstring(L, 1, &length);
-		if (std::strlen(path) != length) return 0;
-
-		std::error_code error;
-		const auto root = std::filesystem::current_path(error);
-		if (error) return 0;
+		if (std::strlen(path) != length) return pathFailure(L, "path contains a NUL byte");
 		const std::filesystem::path absolute(path);
-		if (!absolute.is_absolute()) return 0;
-		const auto relative = std::filesystem::relative(absolute, root, error);
-		if (error || relative.empty() || *relative.begin() == "..") return 0;
+		if (!absolute.is_absolute()) return pathFailure(L, "expected an absolute path");
+		const auto relative = std::filesystem::relative(absolute, std::filesystem::current_path());
+		if (relative.empty() || *relative.begin() == "..") {
+			return pathFailure(L, "path is outside the game directory");
+		}
 
 		std::string sanitized;
-		if (!Core::getInstance().sanitizePath(relative.string(), sanitized)) return 0;
+		if (!Core::getInstance().sanitizePath(relative.string(), sanitized)) return pathFailure(L, sanitized.c_str());
 		lua_pushlstring(L, sanitized.data(), sanitized.size());
 		return 1;
+	}
+	catch (const std::system_error& error) {
+		return pathFailure(L, error.what());
 	}
 
 	int luaIOCustomOpen(lua_State* L) {
