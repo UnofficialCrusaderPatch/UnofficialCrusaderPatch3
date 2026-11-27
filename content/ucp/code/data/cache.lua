@@ -30,6 +30,10 @@ namespace.AOB.lookup = function(aob)
   return nil
 end
 
+namespace.AOB.store = function(aob, addr)
+  aobs[aob] = addr
+end
+
 namespace.AOB.retrieve = function(aob)
   log(VERBOSE, string.format("cache.AOB.retrieve: %s", aob))
   local addr = namespace.AOB.lookup(aob)
