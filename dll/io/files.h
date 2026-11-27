@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <optional>
 #include <string>
 
 FILE* getFilePointer(const std::string &filename, const std::string &mode, std::string& errorMsg);
@@ -8,4 +9,5 @@ FILE* getFilePointer(const std::string &filename, const std::string &mode, std::
 int getFileDescriptor(const std::string &filename, const int mode, const int perm, std::string& errorMsg);
 int getFileDescriptor(const std::string &filename, const int mode, const int perm, std::string& errorMsg, const bool overridePathSanitization);
 int getFileSize(const std::string& filename, std::string& errorMsg);
+std::optional<long long> getFileLastWriteTime(const std::string& filename);
 int getFileContents(const std::string& filename, void* buffer, int size, std::string& errorMsg);

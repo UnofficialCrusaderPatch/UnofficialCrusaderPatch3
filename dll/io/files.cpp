@@ -175,6 +175,20 @@ FILE* getFilePointer(const std::string& filename, const std::string& mode, std::
 	return getFilePointer(filename, mode, errorMsg, false);
 }
 
+std::optional<long long> getFileLastWriteTime(const std::string& filename) {
+	ExtensionHandle* extension = nullptr;
+	bool isRegular, isWriteProtected;
+	std::string resolvedPath, insidePath, error;
+	if (!getExtensionHandleForFile(filename, O_RDONLY | O_BINARY, 0, false, &extension,
+		isRegular, isWriteProtected, resolvedPath, insidePath, error)) {
+		return std::nullopt;
+	}
+	if (isRegular) {
+		return isWriteProtected ? std::nullopt : getLastWriteTimeOfRegularFile(resolvedPath);
+	}
+	return extension->getFileLastWriteTime(insidePath);
+}
+
 int getFileSize(const std::string& filename, std::string& errorMsg) {
 	ExtensionHandle* eh = 0;
 	bool isRegular = false;

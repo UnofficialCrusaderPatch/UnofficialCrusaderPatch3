@@ -35,6 +35,12 @@ void addIOFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaPathExists);
 	lua_setfield(L, -2, "exists");
 
+	lua_pushcfunction(L, LuaIO::luaFileLastWriteTime);
+	lua_setfield(L, -2, "lastWriteTime");
+
+	lua_pushcfunction(L, LuaIO::luaGameRelativePath);
+	lua_setfield(L, -2, "gameRelativePath");
+
 	lua_pushcfunction(L, LuaIO::luaCreateWriteProtectedTempFile);
 	lua_setfield(L, -2, "createWriteProtectedTempFile");
 

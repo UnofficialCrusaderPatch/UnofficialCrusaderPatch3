@@ -3,6 +3,8 @@
 #include "io/modules/ModuleManager.h"
 #include "io/files.h"
 
+#include <cstring>
+
 namespace LuaIO {
 
 	/**
@@ -156,6 +158,34 @@ namespace LuaIO {
 		p->f = f;
 
 		return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+	}
+
+	int luaFileLastWriteTime(lua_State* L) {
+		size_t length;
+		const char* path = luaL_checklstring(L, 1, &length);
+		const auto time = std::strlen(path) == length ? getFileLastWriteTime(path) : std::nullopt;
+		if (time) lua_pushinteger(L, *time);
+		else lua_pushnil(L);
+		return 1;
+	}
+
+	int luaGameRelativePath(lua_State* L) {
+		size_t length;
+		const char* path = luaL_checklstring(L, 1, &length);
+		if (std::strlen(path) != length) return 0;
+
+		std::error_code error;
+		const auto root = std::filesystem::current_path(error);
+		if (error) return 0;
+		const std::filesystem::path absolute(path);
+		if (!absolute.is_absolute()) return 0;
+		const auto relative = std::filesystem::relative(absolute, root, error);
+		if (error || relative.empty() || *relative.begin() == "..") return 0;
+
+		std::string sanitized;
+		if (!Core::getInstance().sanitizePath(relative.string(), sanitized)) return 0;
+		lua_pushlstring(L, sanitized.data(), sanitized.size());
+		return 1;
 	}
 
 	int luaIOCustomOpen(lua_State* L) {

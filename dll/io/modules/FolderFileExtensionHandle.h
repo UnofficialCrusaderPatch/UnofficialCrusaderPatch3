@@ -44,6 +44,10 @@ public:
 		return getFileSizeOfRegularFile(fd);
 	}
 
+	std::optional<long long> getFileLastWriteTime(const std::string& path) override {
+		return getLastWriteTimeOfRegularFile(modulePath / path);
+	}
+
 	int getFileContents(const std::string& path, void* buffer, int size, std::string& error) {
 
 		int fd = this->openFileDescriptor(path, error);
