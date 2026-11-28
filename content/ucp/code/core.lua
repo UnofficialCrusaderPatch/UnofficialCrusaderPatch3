@@ -259,13 +259,16 @@ end
 
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
----@param min number|nil The minimal address of the memory to start searching from, defaults to 0x400000
----@param max number|nil The last address at which a match may start, defaults to 0x7FFFFFFF
+---@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
+---@param max number|nil The last address at which a match may start. Defaults to the last byte of the game executable's image, which then also ends the match; an explicit max may lie outside the image.
 ---@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
 function core.scanForAOB(target, min, max)
     checkAOB(target)
-    min = min or 0x400000
-    if max == nil then return ucp.internal.scanForAOB(target, min, 0x7FFFFFFF) end
+    if min == nil or max == nil then
+        local first, last = mainImage()
+        min = min or first
+        if max == nil then return ucp.internal.scanForAOB(target, min, last) end
+    end
     -- RPS takes the last address of the match.
     return ucp.internal.scanForAOB(target, min, math.min(max + #aobBytes(target) - 1, 0xFFFFFFFF))
 end
