@@ -5,6 +5,8 @@
 #include <sstream>
 #include <fstream>
 #include <process.h>
+#include <cwctype>
+#include <cstdint>
 
 #include "io/strings.h"
 
@@ -263,6 +265,9 @@ void Core::setArgsAsGlobalVarInLua() {
 		lua_pushstring(this->L, kv.value().c_str());
 		lua_setfield(this->L, -2, kv.key().c_str());
 	}
+	// A boolean, unlike the other values, which stay strings
+	lua_pushboolean(this->L, optionsResult["ucp-allow-multiple-instances"].as<bool>());
+	lua_setfield(this->L, -2, "ucp-allow-multiple-instances");
 
 	lua_setglobal(this->L, "processedArg");
 }
@@ -311,6 +316,7 @@ void Core::processCommandLineArguments() {
 		("ucp-console-verbosity", "Set verbosity level for the console", cxxopts::value<int>()->default_value("0"))
 		("ucp-config-file", "Override the default config file: 'ucp-config.yml'", cxxopts::value<std::string>()->default_value("ucp-config.yml"))
 		("ucp-game-data-path", "Override the path game data is loaded from", cxxopts::value<std::string>()->default_value(""))
+		("ucp-allow-multiple-instances", "Allow this game to start while another game is running", cxxopts::value<bool>()->default_value("false"))
 		("ucp-no-security", "Disable security (permit modules from non official sources)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-security", "Enable security (permit modules from official sources only)", cxxopts::value<bool>()->default_value("false"))
 		("ucp-debugging-memory-allocator", "Enable memory allocation logger", cxxopts::value<bool>()->default_value("false"))
@@ -364,6 +370,54 @@ void Core::createPIDFile() {
 		NULL);
 }
 
+/**
+* Reserve the lowest free log slot among the games started from this folder: slot 1 keeps
+* ucp3.log and ucp3-error-log.log, slot n writes ucp3-n.log and ucp3-error-log-n.log.
+* A slot is a named mutex, released by Windows when the process ends. The folder path is
+* compared case-insensitively after resolving links. When the folder cannot be resolved or a
+* slot cannot be created, the log file names carry the process ID instead. Returns the suffix
+* for the log file names.
+*/
+HANDLE instanceSlotMutex = NULL;
+const int maxInstanceSlots = 16;
+std::string Core::reserveInstanceSlot() {
+	std::error_code error;
+	std::filesystem::path folderPath = std::filesystem::canonical(std::filesystem::current_path(), error);
+	if (error) {
+		this->instanceSlotError = error.value();
+		this->instanceSlot = 0;
+		return "-pid" + std::to_string(_getpid());
+	}
+	// wstring: string() can throw for folder names outside the ANSI code page
+	std::wstring folder = folderPath.wstring();
+	uint32_t folderHash = 2166136261u; // FNV-1a over the lower-case folder path
+	for (wchar_t c : folder) {
+		const uint16_t lower = (uint16_t) std::towlower(c);
+		folderHash ^= (uint8_t) (lower & 0xFF);
+		folderHash *= 16777619u;
+		folderHash ^= (uint8_t) (lower >> 8);
+		folderHash *= 16777619u;
+	}
+
+	for (int slot = 1; slot <= maxInstanceSlots; slot++) {
+		std::string name = "Local\\UCP3-game-folder-" + std::to_string(folderHash) + "-slot-" + std::to_string(slot);
+		HANDLE handle = CreateMutexA(NULL, FALSE, name.c_str());
+		if (handle == NULL) {
+			this->instanceSlotError = GetLastError();
+			break;
+		}
+		if (GetLastError() != ERROR_ALREADY_EXISTS) {
+			instanceSlotMutex = handle;
+			this->instanceSlot = slot;
+			return slot == 1 ? "" : "-" + std::to_string(slot);
+		}
+		CloseHandle(handle);
+	}
+
+	this->instanceSlot = 0;
+	return "-pid" + std::to_string(_getpid());
+}
+
 bool Core::setProcessDirectory() {
 	CHAR path[MAX_PATH];
 	GetModuleFileNameA(NULL, path, MAX_PATH);
@@ -386,6 +440,20 @@ void Core::initialize() {
 		return;
 	}
 
+	bool processDirectorySuccess = setProcessDirectory();
+
+	this->createPIDFile();
+
+	this->setArgsFromCommandLine();
+	this->processEnvironmentVariables();
+	this->processCommandLineArguments();
+
+	const std::string logFileSuffix = this->reserveInstanceSlot();
+
+	initializeLogger(this->logLevel, this->consoleLogLevel, logFileSuffix);
+
+	this->initializeConsole();
+
 	if (!this->secureMode) {
 #if !defined(COMPILED_MODULES)
 		this->log(-1, "Warning: you are running the UCP modding framework in DEVELOPER mode, which means NO SECURITY MEASURES are being applied.\n\nContinuing with modules from untrusted sources leads to execution of software from untrusted sources.\n\nIf you click continue, you agree you understand fully what this means and wish to proceed. Otherwise, abort.");
@@ -403,22 +471,16 @@ void Core::initialize() {
 #endif
 	}
 
-	bool processDirectorySuccess = setProcessDirectory();
-
-	this->createPIDFile();
-
-	this->setArgsFromCommandLine();
-	this->processEnvironmentVariables();
-	this->processCommandLineArguments();
-
-	initializeLogger(this->logLevel, this->consoleLogLevel);
-
-	this->initializeConsole();
-
 	if (!processDirectorySuccess) {
 		this->log(-1, "Failed to set process directory");
 	}
 	this->log(0, "Current directory: " + std::filesystem::current_path().string());
+	if (this->instanceSlotError != 0) {
+		this->log(-1, "No log slot could be reserved (error " + std::to_string(this->instanceSlotError) + "). This game writes ucp3" + logFileSuffix + ".log and ucp3-error-log" + logFileSuffix + ".log");
+	}
+	else if (this->instanceSlot != 1) {
+		this->log(0, "Another game from this folder is running. This game writes ucp3" + logFileSuffix + ".log and ucp3-error-log" + logFileSuffix + ".log");
+	}
 
 	this->moduleHashStore = new Store(this->UCP_DIR / "extension-store.yml", this->secureMode);
 	

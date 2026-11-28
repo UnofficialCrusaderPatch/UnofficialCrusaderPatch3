@@ -240,6 +240,7 @@
     <ClInclude Include="lua\LuaLoadLibraryRaw.h" />
     <ClInclude Include="lua\LuaPathExists.h" />
     <ClInclude Include="lua\LuaRemove.h" />
+    <ClInclude Include="lua\LuaRename.h" />
     <ClInclude Include="lua\LuaTempFile.h" />
     <ClInclude Include="lua\Preload.h" />
     <ClInclude Include="lua\yaml\LuaYamlDumper.h" />
@@ -279,6 +280,7 @@
     <ClCompile Include="lua\LuaLoadLibraryRaw.cpp" />
     <ClCompile Include="lua\LuaPathExists.cpp" />
     <ClCompile Include="lua\LuaRemove.cpp" />
+    <ClCompile Include="lua\LuaRename.cpp" />
     <ClCompile Include="lua\LuaTempFile.cpp" />
     <ClCompile Include="lua\Preload.cpp" />
     <ClCompile Include="lua\LuaLoadLibrary.cpp" />

@@ -4,6 +4,7 @@
 #include "lua/LuaCustomOpenFile.h"
 #include "lua/LuaDirectories.h"
 #include "lua/LuaRemove.h"
+#include "lua/LuaRename.h"
 #include "lua/LuaLoadLibrary.h"
 #include "lua/yaml/LuaYamlParser.h"
 #include "lua/yaml/LuaYamlDumper.h"
@@ -34,6 +35,12 @@ void addIOFunctions(lua_State* L) {
 	lua_pushcfunction(L, LuaIO::luaPathExists);
 	lua_setfield(L, -2, "exists");
 
+	lua_pushcfunction(L, LuaIO::luaFileLastWriteTime);
+	lua_setfield(L, -2, "lastWriteTime");
+
+	lua_pushcfunction(L, LuaIO::luaGameRelativePath);
+	lua_setfield(L, -2, "gameRelativePath");
+
 	lua_pushcfunction(L, LuaIO::luaCreateWriteProtectedTempFile);
 	lua_setfield(L, -2, "createWriteProtectedTempFile");
 
@@ -45,6 +52,9 @@ void addIOFunctions(lua_State* L) {
 
 	lua_pushcfunction(L, LuaIO::luaRemove);
 	lua_setfield(L, -2, "remove");
+
+	lua_pushcfunction(L, LuaIO::luaRename);
+	lua_setfield(L, -2, "rename");
 
 	// Create ucrt subtable
 	lua_newtable(L);

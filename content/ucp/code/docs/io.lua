@@ -9,6 +9,18 @@ local ucpiolib = {}
 ---@return string? err
 function ucpiolib.open(filename, mode) end
 
+--- Returns a comparable filesystem timestamp for a regular file, including folder extensions.
+---@param path string
+---@return integer? time
+---@return string? reason
+function ucpiolib.lastWriteTime(path) end
+
+--- Converts an absolute path in the game directory for use with UCP file APIs.
+---@param path string
+---@return string? relative
+---@return string? reason
+function ucpiolib.gameRelativePath(path) end
+
 --- Same signature but can escape game directory, use with caution
 ucpiolib._open = ucpiolib.open
 

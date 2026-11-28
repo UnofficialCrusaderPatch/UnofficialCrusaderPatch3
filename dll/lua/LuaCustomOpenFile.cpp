@@ -3,6 +3,8 @@
 #include "io/modules/ModuleManager.h"
 #include "io/files.h"
 
+#include <cstring>
+
 namespace LuaIO {
 
 	/**
@@ -156,6 +158,43 @@ namespace LuaIO {
 		p->f = f;
 
 		return (p->f == NULL) ? luaL_fileresult(L, 0, sanitizedPath.c_str()) : 1;
+	}
+
+	static int pathFailure(lua_State* L, const char* reason) {
+		lua_pushnil(L);
+		lua_pushstring(L, reason);
+		return 2;
+	}
+
+	int luaFileLastWriteTime(lua_State* L) {
+		size_t length;
+		const char* path = luaL_checklstring(L, 1, &length);
+		if (std::strlen(path) != length) return pathFailure(L, "path contains a NUL byte");
+		std::string error;
+		const auto time = getFileLastWriteTime(path, error);
+		if (!time) return pathFailure(L, error.c_str());
+		lua_pushinteger(L, *time);
+		return 1;
+	}
+
+	int luaGameRelativePath(lua_State* L) try {
+		size_t length;
+		const char* path = luaL_checklstring(L, 1, &length);
+		if (std::strlen(path) != length) return pathFailure(L, "path contains a NUL byte");
+		const std::filesystem::path absolute(path);
+		if (!absolute.is_absolute()) return pathFailure(L, "expected an absolute path");
+		const auto relative = std::filesystem::relative(absolute, std::filesystem::current_path());
+		if (relative.empty() || *relative.begin() == "..") {
+			return pathFailure(L, "path is outside the game directory");
+		}
+
+		std::string sanitized;
+		if (!Core::getInstance().sanitizePath(relative.string(), sanitized)) return pathFailure(L, sanitized.c_str());
+		lua_pushlstring(L, sanitized.data(), sanitized.size());
+		return 1;
+	}
+	catch (const std::system_error& error) {
+		return pathFailure(L, error.what());
 	}
 
 	int luaIOCustomOpen(lua_State* L) {

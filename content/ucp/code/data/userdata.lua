@@ -7,6 +7,9 @@ local io = io
 local userdata = {}
 
 local _open = io._open
+-- rename is only offered through the user data interface, inside an extension's own folder
+local _rename = io.rename
+io.rename = nil
 local USERDATA_SUBFOLDER = "ucp/userdata"
 
 local _, pResourceManager = utils.AOBExtract("A1 I( ? ? ? ? ) 89 46 74 33 C0 39 ? ? ? ? ? 7E 16")
@@ -92,7 +95,7 @@ end
 local function sanitizePath(path)
 	local parts = {}
 	for match in string.gmatch(path, "([^/]+)") do 
-		local sanitized = match:match("^([a-zA-Z0-9.~-]+)$")
+		local sanitized = match:match("^([a-zA-Z0-9._~-]+)$")
 		if (not sanitized) or (sanitized:find("%.%.") ~= nil) then 
 			error(string.format("malformed relative path (use forward slash '/'): %s => '%s'", path, match))
 		end
@@ -169,6 +172,12 @@ function userdata.prepareExtensionInterface(extensionName)
 				if type(self) ~= "table" then error(string.format("function should be called with ':' (e.g. interface:func(args) )")) end
 				if type(path) ~= "string" then error("'path' should be a string") end
 				return io.remove(userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, path)), recurse)
+			end,
+			rename = function(self, from, to)
+				if type(self) ~= "table" then error(string.format("function should be called with ':' (e.g. interface:func(args) )")) end
+				if type(from) ~= "string" then error("'from' should be a string") end
+				if type(to) ~= "string" then error("'to' should be a string") end
+				return _rename(base, userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, from)), userdata.getPathInUserDataFolder(string.format("%s/%s", extensionName, to)))
 			end,
 		}
 

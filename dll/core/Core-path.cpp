@@ -28,7 +28,7 @@ int luaRegisterPathAlias(lua_State* L) {
 	return 0;
 }
 
-bool Core::sanitizePath(const std::string& path, std::string& result) {
+bool Core::sanitizePath(const std::string& path, std::string& result) try {
 	std::string rawPath = path;
 
 	//Assert non empty path
@@ -71,8 +71,10 @@ bool Core::sanitizePath(const std::string& path, std::string& result) {
 
 	return true;
 }
-
-
+catch (const std::system_error& error) {
+	result = error.what();
+	return false;
+}
 
 bool Core::resolveAliasedPath(std::string& path) {
 

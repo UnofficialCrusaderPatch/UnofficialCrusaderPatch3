@@ -98,6 +98,13 @@ public:
 
 	void createPIDFile();
 
+	// Lowest free log slot among the games started from this folder; 0 if all slots were taken
+	// or a slot could not be reserved
+	int instanceSlot = 1;
+	// Windows error code when a slot could not be reserved, else 0
+	unsigned long instanceSlotError = 0;
+	std::string reserveInstanceSlot();
+
 	bool setProcessDirectory();
 
 	Store* getModuleHashStore();

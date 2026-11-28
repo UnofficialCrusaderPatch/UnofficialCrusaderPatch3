@@ -3,6 +3,7 @@
 
 #include <wincrypt.h>
 
+#include <iomanip>
 #include <sstream>
 
 #include <filesystem>
@@ -51,6 +52,13 @@ public:
 	void operator=(Hasher const&) = delete;
 
 
+	static std::string cryptError(const char* function) {
+		const DWORD code = GetLastError();
+		std::stringstream ss;
+		ss << function << " failed with error 0x" << std::hex << std::setw(8) << std::setfill('0') << code;
+		return ss.str();
+	}
+
 	bool hash(unsigned char* data, size_t dataLen, std::string& result, std::string& error) {
 
 		HCRYPTPROV hProv = NULL;
@@ -63,20 +71,20 @@ public:
 
 		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
 		{
-			error = ("CryptAcquireContext failed with error 0x%.8X\n" + GetLastError());
+			error = cryptError("CryptAcquireContext");
 			goto main_exit;
 		}
 
 		// Hash the data
 		if (!CryptCreateHash(hProv, CALG_SHA_256, NULL, 0, &hHash))
 		{
-			error = ("CryptCreateHash failed with error 0x%.8X\n" + GetLastError());
+			error = cryptError("CryptCreateHash");
 			goto main_exit;
 		}
 
 		if (!CryptHashData(hHash, (LPCBYTE)data, dataLen, 0))
 		{
-			error = printf("CryptHashData failed with error 0x%.8X\n" + GetLastError());
+			error = cryptError("CryptHashData");
 			goto main_exit;
 		}
 

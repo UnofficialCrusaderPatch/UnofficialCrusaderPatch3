@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include <exception>
+#include <optional>
 #include <regex>
 
 #include <string>
@@ -39,12 +40,21 @@ public:
 	virtual int openFileDescriptor(const std::string& path, std::string& error) = 0;
 	virtual int getFileSize(const std::string& path, std::string& error) = 0;
 	virtual int getFileContents(const std::string& path, void * buffer, int size, std::string& error) = 0;
+	virtual std::optional<long long> getFileLastWriteTime(const std::string&) { return std::nullopt; }
 	// Paths in these two methods are relative to the extension root; an empty path lists its root.
 	// Results are relative too, with a trailing slash for directories.
 	virtual std::vector<std::string> listDirectories(const std::string& path) = 0;
 	virtual std::vector<std::string> listFiles(const std::string& path) = 0;
 
 };
+
+inline std::optional<long long> getLastWriteTimeOfRegularFile(const std::filesystem::path& path) {
+	std::error_code error;
+	if (!std::filesystem::is_regular_file(path, error)) return std::nullopt;
+	const auto time = std::filesystem::last_write_time(path, error);
+	if (error) return std::nullopt;
+	return time.time_since_epoch().count();
+}
 
 inline int getFileSizeOfRegularFile(int fd) {
 	_lseek(fd, 0L, SEEK_END);
