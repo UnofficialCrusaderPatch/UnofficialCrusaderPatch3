@@ -319,23 +319,6 @@ function core.AOBScan(target, start, stop)
     return result
 end
 
----The address of `target` if it occurs exactly once in the executable sections of the game executable.
----A cached address whose bytes still match is returned without a scan; a scanned unique address is cached.
----@param target string the hex string to search for, as in core.scanForAOB
----@return number|nil the address of `target`, nil when it is not found, found more than once or not searched completely
----@return string|nil "not found", "found more than once" or "not searched completely" (a section could not be read) when the address is nil
-function core.AOBScanUnique(target)
-    checkAOB(target)
-    local cached = data ~= nil and data.cache.AOB.lookup(target)
-    if cached then return cached end
-    local first, second, incomplete = ucp.internal.scanForAOBsInMainModule(target)
-    if incomplete ~= nil then return nil, "not searched completely" end
-    if first == nil then return nil, "not found" end
-    if second ~= nil then return nil, "found more than once" end
-    if data ~= nil then data.cache.AOB.store(target, first) end
-    return first
-end
-
 ---Hook game code execution to a lua function, and expose the original game code with a function (returned).
 ---The hooked function will be called with `argCount` arguments, all numbers (integers).
 ---The lua function that allows calling the original function is returned

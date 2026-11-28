@@ -32,9 +32,9 @@ end
 ---@return number|nil address of the "mutex already existed" branch, or nil
 ---@return string|nil reason when the check was not found or did not verify
 function namespace.locate()
-  local match, reason = core.AOBScanUnique(CHECK_AOB)
-  if match == nil then
-    return nil, "the check was " .. reason
+  local found, match = pcall(core.AOBScan, CHECK_AOB)
+  if not found then
+    return nil, "the check was not found"
   end
 
   local name = core.readString(core.readInteger(match + OFFSET_NAME_POINTER))
