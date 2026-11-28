@@ -307,18 +307,39 @@ configInfoForExtensions = TableProxy({
   },
 })
 
-for k, ext in pairs(allActiveExtensions) do
+-- An error while an extension enables is logged as one ERROR naming it, and the
+-- extensions after it that depend on it are skipped. Changes it made before the
+-- error stay. The other extensions still enable.
+local failedExtensions = {}
+
+local function failedDependencyOf(ext)
+    ext:loadDefinition()
+    local dependencies = ext.definition and ext.definition.dependencies
+    if type(dependencies) ~= "table" then return nil end
+    for name in pairs(dependencies) do
+        if failedExtensions[name] then return name end
+    end
+end
+
+for k, ext in ipairs(allActiveExtensions) do
     local t = ext:type()
-    if t == "ModuleLoader" then
-      log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
-        local o = configFinal[ext.name .. "-" .. ext.version] or {}
-        ext:enable(o, configInfoForExtensions)
-    elseif t == "PluginLoader" then
-      log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
-        local o = configFinal[ext.name .. "-" .. ext.version] or {}
-        ext:enable(o, configInfoForExtensions)
-    else
+    if t ~= "ModuleLoader" and t ~= "PluginLoader" then
         error("[main]: unknown extension type for: " .. ext.name)
+    end
+    -- Definitions are read only after a failure. An unreadable definition counts as no dependencies.
+    local read, failedDependency = false, nil
+    if next(failedExtensions) ~= nil then read, failedDependency = pcall(failedDependencyOf, ext) end
+    if read and failedDependency then
+        failedExtensions[ext.name] = true
+        log(ERROR, "[main]: " .. ext.name .. " is off: its dependency " .. failedDependency .. " failed to enable")
+    else
+        log(INFO, "[main]: enabling extension: " .. ext.name .. " version: " .. ext.version)
+        local o = configFinal[ext.name .. "-" .. ext.version] or {}
+        local ok, err = pcall(ext.enable, ext, o, configInfoForExtensions)
+        if not ok then
+            failedExtensions[ext.name] = true
+            log(ERROR, "[main]: " .. ext.name .. " failed to enable: " .. tostring(err))
+        end
     end
 end
 
