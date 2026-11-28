@@ -49,7 +49,7 @@ void deinitializeLogger() {
 }
 
 void loguruVLOG_F(int logLevel, std::string message) {
-	VLOG_F(logLevel, message.c_str());
+	VLOG_F(logLevel, "%s", message.c_str());
 }
 
 static int luaPrint(lua_State* L) {
@@ -99,7 +99,7 @@ int luaLog(lua_State* L) {
 		MessageBoxA(0, output.str().c_str(), "Error", MB_OK);
 	}
 
-	VLOG_F(logLevel, output.str().c_str());
+	VLOG_F(logLevel, "%s", output.str().c_str());
 
 	return 0;
 }
