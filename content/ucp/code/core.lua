@@ -343,7 +343,7 @@ function core.AOBScanUnique(target)
     checkAOB(target)
     local cached = data ~= nil and data.cache.AOB.lookup(target)
     if cached then return cached end
-    local first, second, incomplete = ucp.internal.scanForAOBInMainModule(target)
+    local first, second, incomplete = ucp.internal.scanForAOBsInMainModule(target)
     if incomplete ~= nil then return nil, "not searched completely" end
     if first == nil then return nil, "not found" end
     if second ~= nil then return nil, "found more than once" end
