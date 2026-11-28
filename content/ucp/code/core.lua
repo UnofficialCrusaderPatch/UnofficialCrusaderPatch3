@@ -238,8 +238,8 @@ local function checkAOB(target)
     if not target:find("%x%x") and not target:find("%?") then error("target AOB has no bytes: " .. target) end
 end
 
----The bytes of `target`, read as in core.scanForAOB: two hex digits are a byte, a single `?` any byte
----(false) and a longer run of `?` a 00 byte.
+---The bytes of `target` as RPS reads them: two hex digits are a byte and a single `?` any byte (false).
+---RPS reads a longer run of `?` as a 00 byte.
 local function aobBytes(target)
     local bytes, i = {}, 1
     while i <= #target do
@@ -259,24 +259,21 @@ end
 
 ---Scan memory for an Array of Bytes (AOB)
 ---@param target string A string of hex representations of bytes, `?` can be used as wildcards. Example: "FF 00 ? AA BB"
----@param min number|nil The minimal address of the memory to start searching from, defaults to the start of the game executable's image
----@param max number|nil The last address at which a match may start; the match may extend past it. Defaults to the last byte of the game executable's image, which then also ends the match.
+---@param min number|nil The minimal address of the memory to start searching from, defaults to 0x400000
+---@param max number|nil The last address at which a match may start, defaults to 0x7FFFFFFF
 ---@return number|nil The first address of the memory where `target` matches, nil if `target` could not be found.
 function core.scanForAOB(target, min, max)
     checkAOB(target)
-    if min == nil or max == nil then
-        local first, last = mainImage()
-        min = min or first
-        if max == nil then return ucp.internal.scanForAOB(target, min, last) end
-    end
+    min = min or 0x400000
+    if max == nil then return ucp.internal.scanForAOB(target, min, 0x7FFFFFFF) end
     -- RPS takes the last address of the match.
     return ucp.internal.scanForAOB(target, min, math.min(max + #aobBytes(target) - 1, 0xFFFFFFFF))
 end
 
----Whether `target` matches the memory at `address`, reading only the pattern's bytes. `target` reads
----as in core.scanForAOB: two hex digits are a byte, a single `?` any byte and a longer run of `?` a 00 byte.
+---Whether `target` matches the memory at `address`, reading only the pattern's bytes. It is false when
+---`address` is not an integer or the pattern does not lie in the game executable's image.
 ---@param target string the hex string to compare, checked like the target of core.scanForAOB
----@param address number the first address to compare; false when it is not an integer or the pattern does not lie in the game executable's image
+---@param address number the first address to compare
 ---@return boolean
 function core.matchesAOB(target, address)
     checkAOB(target)
@@ -293,44 +290,29 @@ end
 
 ---Search through the memory for an array of bytes expressed as a hex string (where `?` can be used as wildcards: "FF 00 ? AA").
 ---If the target is not found in memory, an error will be raised.
+---A cached address of `target` that still matches and starts in the range is returned without a scan; a found address is cached.
 ---@param target string the hex string to search for
 ---@param start number the starting address of the memory to start searching from
 ---@param stop number the last address at which a match may start
 ---@result number the address of target in memory
 function core.AOBScan(target, start, stop)
-    local result
     if start == nil and stop ~= nil then
         error("start value cannot be nil if stop is specified")
     end
-	
+
 	log(VERBOSE, string.format("core.AOBScan: %s, %s, %s", target, start, stop))
-    
+
     -- This test against nil is here because of module load ordering in main.lua
-    if data ~= nil then
-        -- Consider using the cache. It holds default range results, so an explicit range only
-        -- reuses a cached address inside it and otherwise scans the range below.
-        if stop == nil then
-            result = data.cache.AOB.retrieve(target)
-        else
-            result = data.cache.AOB.lookup(target)
-        end
-        if result ~= nil then
-            if start ~= nil and result < start then
-                result = nil
-            elseif stop ~= nil and result > stop then
-                result = nil
-            end   
-        end
-        -- return cached result
-        if result ~= nil then return result end
-    end
-    
+    local result = data ~= nil and data.cache.AOB.lookup(target)
+    if result and (start == nil or result >= start) and (stop == nil or result <= stop) then return result end
+
 	log(VERBOSE, string.format("core.AOBScan: nocache: %s, %s, %s", target, start, stop))
     result = core.scanForAOB(target, start, stop)
 	log(VERBOSE, string.format("core.AOBScan: nocache: result: %s, %s, %s, %s", result and string.format("%X", result) or "nil", target, start, stop))
     if not result then
         error(debug.traceback("AOB not found: " .. target))
     end
+    if data ~= nil then data.cache.AOB.store(target, result) end
     return result
 end
 

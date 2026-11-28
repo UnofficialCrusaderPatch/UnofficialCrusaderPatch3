@@ -24,7 +24,7 @@ end
 namespace.AOB.lookup = function(aob)
   local addr = aobs[aob]
   if addr ~= nil and core.matchesAOB(aob, addr) then
-    log(VERBOSE, string.format("cache.AOB.retrieve: cache hit for: %s", aob))
+    log(VERBOSE, string.format("cache.AOB.lookup: cache hit for: %s", aob))
     return addr
   end
   return nil
@@ -32,21 +32,6 @@ end
 
 namespace.AOB.store = function(aob, addr)
   aobs[aob] = addr
-end
-
-namespace.AOB.retrieve = function(aob)
-  log(VERBOSE, string.format("cache.AOB.retrieve: %s", aob))
-  local addr = namespace.AOB.lookup(aob)
-  if addr ~= nil then return addr end
-  
-  log(VERBOSE, string.format("cache.AOB.retrieve: searching for: %s", aob))
-  aobs[aob] = core.scanForAOB(aob)
-  if aobs[aob] == nil then
-    error(debug.traceback("[data/cache]: AOB could not be found: " .. aob))
-  end
-  
-  log(VERBOSE, string.format("cache.AOB.retrieve: found: 0x%X (for: %s)", aobs[aob], aob))
-  return aobs[aob]
 end
 
 namespace.AOB.dumpToFile = function()
